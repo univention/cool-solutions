@@ -1,0 +1,48 @@
+univention-shalla-list-downloader (1.0.0-7) unstable; urgency=low
+
+  * fix error in testing for downloading blacklists. Ticket #2013062621001224
+
+ -- Jan Christoph Ebersbach <ebersbach@univention.de>  Tue, 16 Jul 2013 20:06:46 +0200
+
+univention-shalla-list-downloader (1.0.0-6) unstable; urgency=low
+
+  * download lists during installation. Ticket #2013062621001224
+
+ -- Jan Christoph Ebersbach <ebersbach@univention.de>  Tue, 16 Jul 2013 19:59:44 +0200
+
+univention-shalla-list-downloader (1.0.0-5) unstable; urgency=low
+
+  * move downloader script to /usr/sbin. Ticket #2013062621001224
+  * move UCR variable description to ucs-school-webproxy
+
+ -- Jan Christoph Ebersbach <ebersbach@univention.de>  Tue, 16 Jul 2013 19:33:36 +0200
+
+univention-shalla-list-downloader (1.0.0-4) unstable; urgency=low
+
+  * Added delayed execution with jitter 
+
+ -- Daniel Orrego <dorrego@univention.de>  Tue, 16 Jul 2013 18:40:24 +0200
+
+univention-shalla-list-downloader (1.0.0-3) unstable; urgency=low
+
+  * Some blacklists are set by default, the cron variable is set in a new way, the process is done in a temporary directory within /tmp 
+
+ -- Daniel Orrego <dorrego@univention.de>  Tue, 16 Jul 2013 17:47:26 +0200
+
+univention-shalla-list-downloader (1.0.0-2) unstable; urgency=low
+
+  * Creates the blacklists DB directory if it doesn't exist
+
+ -- Daniel Orrego <dorrego@univention.de>  Tue, 16 Jul 2013 13:05:09 +0200
+
+univention-shalla-list-downloader (1.0.0-1) unstable; urgency=low
+
+  * Initial release (Closes: #Ticket#2013062621001224) 
+
+ -- Daniel Orrego <orrego@univention.de>  Mon, 15 Jul 2013 10:09:08 +0200
+
+univention-shalla-list-downloader (1.0.0-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Univention GmbH <packages@univention.de>  Fri, 05 Jul 2013 10:50:01 +0200

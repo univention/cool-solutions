@@ -1,0 +1,15 @@
+Source: univention-shalla-list-downloader
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Build-Depends: debhelper (>= 8.0.0), ucslint, quilt, univention-config-dev
+Standards-Version: 3.9.4
+Homepage: http://www.univention.de/
+#Vcs-Git: git://git.debian.org/collab-maint/univention-shalla-list-downloader.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/univention-shalla-list-downloader.git;a=summary
+
+Package: univention-shalla-list-downloader
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: # Shalla list downloader for paedML Linux. 
+ Shalla list downloader for paedML Linux. Downloads/updates shallalists and triggers the initialization of squidGuard databases
