@@ -1,3 +1,9 @@
+univention-shalla-list-downloader (1.1.0-1) unstable; urgency=low
+
+  * bump version. Ticket #2013102221003669
+
+ -- Jan Christoph Ebersbach <ebersbach@univention.de>  Mon, 11 Nov 2013 10:13:13 +0100
+
 univention-shalla-list-downloader (1.0.0-7) unstable; urgency=low
 
   * fix error in testing for downloading blacklists. Ticket #2013062621001224
