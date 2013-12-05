@@ -100,7 +100,9 @@ chown -R root:proxy $DBHOME/$BL_DIR
 chmod -R g+rw $DBHOME/$BL_DIR
 
 #call webproxy to reload
-ucr set proxy/filter/blacklists="$(ucr get proxy/filter/blacklists)"
+if [[ -n "$(ucr get proxy/filter/blacklists)" ]]; then
+	ucr set proxy/filter/blacklists="$(ucr get proxy/filter/blacklists)"
+fi
 
 #clean up tar.gz and md5 files
 CLEAN

@@ -1,3 +1,9 @@
+univention-shalla-list-downloader (1.1.0-3) unstable; urgency=low
+
+  * fix initial definition of UCR variables. Ticket #2013102221003669
+
+ -- Jan Christoph Ebersbach <ebersbach@univention.de>  Thu, 05 Dec 2013 18:54:04 +0100
+
 univention-shalla-list-downloader (1.1.0-2) unstable; urgency=low
 
   * delete shalla lists when removing or purging package. Ticket #2013102221003669
