@@ -60,7 +60,7 @@ FAIL () { # log error message to log file and std-err, then fail
     CLEAN
 	echo "List download/update interrupted ($(date)): See log files" >&3
 	echo "--------------------* * *--------------------" >&3
-   
+
     exit 1
 }
 ##
