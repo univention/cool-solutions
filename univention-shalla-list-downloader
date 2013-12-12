@@ -71,37 +71,45 @@ eval "$(ucr shell proxy/filter/blacklists)"
 
 # clean up...
 CLEAN () {
-	rm -rf $TMP_DIR
+	rm -rf "${TMP_DIR}"
 }
 
+if [ -z "${proxy_filter_blacklists}" ]; then
+	# no lists configured, don't download anything
+	if [ -e "${DBHOME}/${BL_DIR}" ]; then
+		rm -rf "${DBHOME}/${BL_DIR}"
+	fi
+	exit 0
+fi
+
 TMP_DIR=$(mktemp -d)
-cd $TMP_DIR
+cd "${TMP_DIR}"
 
 echo "Downloading lists..." >&3
-wget $URL $URL.md5
+wget "${URL}" "${URL}.md5"
 if [ $? -ne 0 ]; then
 	FAIL "Failed to download the lists: Check the connection and try again"
 fi
-md5sum -c ${BL_PKG}.md5
+md5sum -c "${BL_PKG}.md5"
 if [ $? -ne 0 ]; then
 	FAIL "Failed to verify the checksum: try again"
 fi
 #Extract and update
-tar zxf $BL_PKG
+tar zxf "${BL_PKG}"
 
-if [ ! -d $DBHOME/$BL_DIR ]; then
-	mkdir $DBHOME/$BL_DIR
+if [ ! -d "${DBHOME}/${BL_DIR}" ]; then
+	mkdir "${DBHOME}/${BL_DIR}"
 fi
-cp -rf BL/* $DBHOME/$BL_DIR
+cp -rf BL/* "${DBHOME}/${BL_DIR}"
 echo "...OK!" >&3
 
 #echo "Setting lists permissions" >&3
-chown -R root:proxy $DBHOME/$BL_DIR
-chmod -R g+rw $DBHOME/$BL_DIR
+chown -R root:proxy "${DBHOME}/${BL_DIR}"
+chmod -R g+rw "${DBHOME}/${BL_DIR}"
 
 #call webproxy to reload
-if [[ -n "$(ucr get proxy/filter/blacklists)" ]]; then
-	ucr set proxy/filter/blacklists="$(ucr get proxy/filter/blacklists)"
+if [[ -n "${proxy_filter_blacklists}" ]]; then
+	ucr set proxy/filter/blacklists="${proxy_filter_blacklists}"
 fi
 
 #clean up tar.gz and md5 files
