@@ -25,7 +25,9 @@ case "$1" in
 		rm -rf /var/lib/ucs-school-webproxy/blacklists
 		ucr unset cron/shalla-list-downloader/command \
 			cron/shalla-list-downloader/time \
-			cron/shalla-list-downloader/description
+			cron/shalla-list-downloader/description || true
+		;;
+	upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
 		;;
 
 	*)
