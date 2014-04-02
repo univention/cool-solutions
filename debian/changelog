@@ -1,3 +1,9 @@
+univention-shalla-list-downloader (1.1.0-7) unstable; urgency=low
+
+  * silent output.  Ticket #2013121121002071
+
+ -- Jan Christoph Ebersbach <ebersbach@univention.de>  Wed, 02 Apr 2014 12:05:07 +0200
+
 univention-shalla-list-downloader (1.1.0-6) unstable; urgency=low
 
   * add ucslint.  Ticket #2013121121002071
