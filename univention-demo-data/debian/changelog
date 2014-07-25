@@ -1,0 +1,6 @@
+univention-demo-data (1.0.0-1) unstable; urgency=medium
+
+  * Initial release
+  * Issue #151
+
+ -- Timo Denissen <denissen@univention.de>  Fri, 25 Jul 2014 12:15:34 +0200
