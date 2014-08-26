@@ -1,0 +1,25 @@
+multi-master-setup (1.0.3-1) unstable; urgency=low
+
+  * Use symbolic UID instead of numeric UID (Ticket #2012050221003422)
+
+ -- Philipp Hahn <hahn@univention.de>  Mon, 20 Aug 2012 08:06:13 +0200
+
+multi-master-setup (1.0.2-1) unstable; urgency=low
+
+  * Handle group membership (Ticket #2012050221003422)
+
+ -- Philipp Hahn <hahn@univention.de>  Mon, 23 Jul 2012 09:04:33 +0200
+
+multi-master-setup (1.0.1-1) unstable; urgency=low
+
+  * Fix bugs from QA (Ticket #2012050221003422)
+    - Use Kerberos realm of general master.
+    - Remove 'd' from 'multi-master-setup/remote/bindpw'd'
+
+ -- Philipp Hahn <hahn@univention.de>  Mon, 18 Jun 2012 14:20:09 +0200
+
+multi-master-setup (1.0.0-1) unstable; urgency=low
+
+  * Initial release. (Ticket #2012050221003422)
+
+ -- Philipp Hahn <hahn@univention.de>  Tue, 05 Jun 2012 09:21:11 +0200

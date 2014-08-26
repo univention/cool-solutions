@@ -1,0 +1,19 @@
+Source: multi-master-setup
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Standards-Version: 3.5.5
+Build-Depends: debhelper (>> 7),
+ univention-config-dev,
+ ucslint
+
+Package: multi-master-setup
+Architecture: all
+Depends: univention-directory-listener
+Description: Multi master setup - user aggregation
+ Push local LDAP users to remote UCS master.
+ .
+ It is part of Univention Corporate Server (UCS), an
+ integrated, directory driven solution for managing
+ corporate environments. For more information about UCS,
+ refer to: http://www.univention.de/
