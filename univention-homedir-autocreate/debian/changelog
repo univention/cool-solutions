@@ -1,0 +1,37 @@
+univention-homedir-autocreate (3.0.0-3) unstable; urgency=low
+
+  * Corrected retrieving the uid from listener Bug #17093
+
+ -- Kevin Dominik Korte <korte@univention.de>  Wed, 10 Jul 2013 13:42:33 +0200
+
+univention-homedir-autocreate (3.0.0-2) unstable; urgency=low
+
+  * Additional Code for homedirserver Bug #17093
+
+ -- Kevin Dominik Korte <korte@univention.de>  Wed, 10 Jul 2013 12:00:07 +0200
+
+univention-homedir-autocreate (3.0.0-1) unstable; urgency=low
+
+  * Update to UCS 3.1 cool-solutions
+  * Honor homedirserver
+  * Bug #17093
+
+ -- Kevin Dominik Korte <korte@univention.de>  Tue, 09 Jul 2013 14:50:28 +0200
+
+univention-homedir-autocreate (2.0.0-1) unstable; urgency=low
+
+  * ported to UCS 2.3
+
+ -- Andreas Büsching <buesching@univention.de>  Tue, 29 Dec 2009 12:03:28 +0100
+
+univention-homedir-autocreate (1.0.0-1) unstable; urgency=low
+
+  * added missing files (Bug #17093)
+
+ -- Sönke Schwardt <schwardt@univention.de>  Thu, 17 Dec 2009 14:10:17 +0100
+
+univention-homedir-autocreate (1.0.0-0) unstable; urgency=low
+
+  * initial release
+
+ -- Sönke Schwardt <schwardt@univention.de>  Thu, 17 Dec 2009 10:17:17 +0100
