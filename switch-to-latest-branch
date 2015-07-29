@@ -1,4 +1,6 @@
 #!/bin/sh
 # switches to latest branch
 
-git checkout "$(git branch | sed -e 's/^\* //' | sed -e '/^\* master$/d' | sort -n | tail -n 1)"
+new_origin_branch="$(git branch -r | grep -v 'origin/master$' | sed -e 's/^ *//'| sort -n | tail -n 1)"
+new_branch="$(echo "${new_origin_branch}" | sed -e 's/origin\///')"
+git checkout -b "${new_branch}" "${new_origin_branch}"
