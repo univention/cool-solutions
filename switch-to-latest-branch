@@ -3,4 +3,8 @@
 
 new_origin_branch="$(git branch -r | grep -v 'origin/master$' | sed -e 's/^ *//'| sort -n | tail -n 1)"
 new_branch="$(echo "${new_origin_branch}" | sed -e 's/origin\///')"
-git checkout -b "${new_branch}" "${new_origin_branch}"
+if git branch | grep -q -e "^\s*${new_branch}\$"; then
+    git checkout "${new_branch}"
+else
+    git checkout -b "${new_branch}" "${new_origin_branch}"
+fi
