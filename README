@@ -1,0 +1,10 @@
+Leider kann der Default-Branch in Plan.io nicht festgelegt werden, deshalb wird
+immer "master" ausgecheckt.
+
+Um zu einem richtigen Branch mit Inhalt zu kommen, führe folgende Befehle aus:
+
+Alle verfügbaren Branches anzeigen:
+git branch
+
+Gewünschten Branch auschecken:
+git checkout BRANCH

@@ -1,0 +1,4 @@
+#!/bin/sh
+# switches to latest branch
+
+git checkout "$(git branch | sed -e 's/^\* //' | sed -e '/^\* master$/d' | sort -n | tail -n 1)"
