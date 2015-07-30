@@ -1,7 +1,7 @@
 #!/bin/sh
 # switches to latest branch
 
-new_origin_branch="$(git branch -r | grep -v 'origin/master$' | sed -e 's/^ *//'| sort -n | tail -n 1)"
+new_origin_branch="$(git branch -r | grep -v 'git-svn$' | grep -v 'origin/master$' | sed -e 's/^ *//'| sort -n | tail -n 1)"
 new_branch="$(echo "${new_origin_branch}" | sed -e 's/origin\///')"
 if git branch | grep -q -e "^\s*${new_branch}\$"; then
     git checkout "${new_branch}"
