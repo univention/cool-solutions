@@ -4,7 +4,10 @@ immer "master" ausgecheckt.
 Um zu einem richtigen Branch mit Inhalt zu kommen, führe folgende Befehle aus:
 
 Alle verfügbaren Branches anzeigen:
-git branch
+git branch -a
 
-Gewünschten Branch auschecken:
-git checkout BRANCH
+Gewünschten Branch auschecken, dabei muss "origin/" vor dem neuen Branchnamen
+entfernt werden:
+git checkout -b BRANCH origin/BRANCH
+
+Alternativ kann das Script ./switch-to-latest-branch ausgeführt werden.
