@@ -1,0 +1,265 @@
+#!/bin/bash
+#
+# Univention SSL
+#  openssl wrapper
+#
+# Copyright 2004-2015 Univention GmbH
+#
+# http://www.univention.de/
+#
+# All rights reserved.
+#
+# The source code of this program is made available
+# under the terms of the GNU Affero General Public License version 3
+# (GNU AGPL V3) as published by the Free Software Foundation.
+#
+# Binary versions of this program provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention and not subject to the GNU AGPL V3.
+#
+# In the case you use this program under the terms of the GNU AGPL V3,
+# the program is provided in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License with the Debian GNU/Linux or Univention distribution in file
+# /usr/share/common-licenses/AGPL-3; if not, see
+# <http://www.gnu.org/licenses/>.
+
+
+script=${0/\/*\//} 
+if [ "univention-certificate-user" = "$script" ]; then
+	user=1
+fi
+
+usage ()
+{
+	if [ -n "$1" ]; then
+		echo ""
+		echo "$1"
+		echo ""
+	fi
+
+	echo ""
+	echo "Usage: $script command [options] "
+	echo ""
+	echo "Commands:"
+	echo "        new"
+	echo "        revoke"
+	echo "        renew"
+	echo "        check"
+	echo "        dump"
+	echo "        list"
+	echo ""
+	echo "Options"
+	echo "        -name <uid>"
+	echo "        -days <int>"
+	echo "        -email <emailAddress>"
+	echo "        -cn   <string>"
+	echo "        -organizationalunit <string>"
+	echo "        -certpath <path>"
+	echo "        -sslbase <path>"
+	echo "        -ca <path>"
+	echo "        -admingroup <groupName>"
+	echo "        -country <twoLetterCountryCode>"
+	echo "        -state <string>"
+	echo "        -locality <string>"
+	echo "        -organization <string>"
+	echo "        -extfile <filename>"
+	echo ""
+
+	exit 1
+}
+
+command="$1"
+shift
+
+if [ "$command" != "new" -a "$command" != "revoke" -a "$command" != "renew" -a "$command" != "check" -a "$command" != "list" -a "$command" != "dump" ]; then
+	if [ -n "$command" ]; then
+		usage "unknown command: $command"
+	else
+		usage
+	fi
+fi
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+	"-path")
+		shift
+		path="$1"
+		shift
+		;;
+	"-name")
+		shift
+		name="$1"
+		shift
+		;;
+	"-days")
+		shift
+		days="$1"
+		shift
+		;;
+	"-sslbase")
+		shift
+		sslbase="$1"
+		test -d $sslbase || usage "$sslbase is not a valid directory"
+		shift
+		;;
+	"-ca")
+		shift
+		ca="$1"
+		shift
+		;;
+	"-certpath")
+		shift
+		certpath="$1"
+		test -d $certpath || usage "$certpath is not a valid directory"
+		shift
+		;;
+	"-extfile")
+		shift
+		extfile="$1"
+		test -f $extfile || usage "$extfile is not a valid file"
+		shift
+		;;
+	"-cn")
+		shift
+		cn="$1"
+		shift
+		;;
+	"-organizationalunit")
+		shift
+		organizationalunit="$1"
+		shift
+		;;
+	"-email")
+		shift
+		email="$1"
+		shift
+		;;
+	"-admingroup")
+		shift
+		admingroup="$1"
+		shift
+		;;
+	"-country")
+		shift
+		country="$1"
+		shift
+		;;
+	"-state")
+		shift
+		state="$1"
+		shift
+		;;
+	"-locality")
+		shift
+		locality="$1"
+		shift
+		;;
+	"-organization")
+		shift
+		organization="$1"
+		shift
+		;;
+	*)
+		usage "unknown option $1"
+		shift
+		;;
+	esac
+done
+
+# tests
+if [ "$command" != "list" -a -z "$name" ]; then
+	usage "missing -name"
+fi
+
+if [ -n "$ca" ]; then
+	test -n "$sslbase" || usage "missing -sslbase for -ca"
+	test -d "$sslbase/$ca" || usage "$sslbase/$ca is not a valid directory"
+fi
+
+if [ -z "$certpath" ]; then
+	certpath="/etc/univention/ssl"
+fi
+
+if [ -n "$user" -a -z "$cn" ]; then
+	usage "user certificate needs cn option"
+fi
+
+if [ -z "$admingroup" -a -z "$user" ]; then
+	admingroup="DC Backup Hosts"
+elif [ -z "$admingroup" ]; then
+	admingroup="Domain Admins"
+fi
+
+
+if [ -z "$user" ]; then
+	cn="$name"
+	owner="root"
+else
+	owner="$name"
+fi
+
+
+
+source /usr/share/univention-ssl/make-certificates-user.sh
+path="$certpath/$name"
+
+case "$command" in
+	"new")
+		echo "Creating certificate: $name"
+
+		# 1. path to cert, 2. cn, 3. days, 4. email, 5. organizationalunit, 6. country, 
+		# 7. state, 8. locality, 9. organization, 10. owner (uid), 11. extensions file
+		gencert "$path" "$cn" "$days" "$email" "$organizationalunit" "$country" "$state" "$locality" "$organization" "$owner" "$extfile"
+		if [ $? -ne 0 ]; then
+			usage "failed to generate certificate"
+		fi
+		getent group "$admingroup" 2>&1 >/dev/null
+		if [ $? = 0 ]; then
+			chgrp -R "$admingroup" "$path"
+		fi
+		getent passwd "$owner" 2>&1 >/dev/null
+		if [ $? = 0 ]; then
+			chown -R "$owner" "$path"
+		fi
+		chmod -R g+rx "$path"
+		;;
+	"revoke")
+		echo "Revoke certificate: $name"
+		revoke_cert "$cn"
+		;;
+	"renew")
+		if [ -z "$days" ]; then
+			usage "missing -days"
+		fi
+		echo "Renew certificate: $name"
+		# 1. path to cert, 2. cn, 3. days, 4. owner (uid), 5. extensions file
+		renew_cert "$path" "$cn" "$days" "$owner" "$extfile"
+		;;
+	"check")
+		echo -n "Certificate \"$cn\" is "
+		has_valid_cert "$cn"
+		retval=$?
+		if [ $retval -eq 0 ]; then
+			echo "valid"
+		else
+			echo "invalid"
+		fi
+		exit $retval
+		;;
+	"list")
+		echo "List all certificates"
+		list_cert_names
+		;;
+	"dump")
+		echo "Dump certificate: $cn"
+		openssl x509 -in "$path/cert.pem" -noout -text
+		;;
+esac
+

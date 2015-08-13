@@ -1,0 +1,39 @@
+prefix = $(DESTDIR)/usr
+srcdir = .
+INSTALL = /usr/bin/install -c
+
+all: libvirtwol.py
+
+install: all 
+	mkdir -p ${prefix}/share/libvirt-wakeonlan/testing
+	${INSTALL} ${srcdir}/*.py ${prefix}/share/libvirt-wakeonlan/
+	${INSTALL} ${srcdir}/testing/* ${prefix}/share/libvirt-wakeonlan/testing/
+	
+	# gentoo
+	if [ -f /etc/gentoo-release ] ; then \
+                  mkdir -p $(DESTDIR)/etc/init.d $(DESTDIR)/etc/conf.d; \
+                  ${INSTALL} ${srcdir}/init/gentoo/init.d/libvirt-wakeonlan $(DESTDIR)/etc/init.d/libvirt-wakeonlan; \
+                  ${INSTALL} ${srcdir}/init/gentoo/conf.d/libvirt-wakeonlan $(DESTDIR)/etc/conf.d/libvirt-wakeonlan; \
+        fi
+
+        # redhat
+	if [ -f /etc/redhat-release ] ; then \
+                  mkdir -p $(DESTDIR)/etc/init.d $(DESTDIR)/etc/sysconfig; \
+                  ${INSTALL} ${srcdir}/init/redhat/init.d/libvirt-wakeonlan $(DESTDIR)/etc/init.d/libvirt-wakeonlan; \
+                  ${INSTALL} ${srcdir}/init/redhat/sysconfig/libvirt-wakeonlan $(DESTDIR)/etc/sysconfig/libvirt-wakeonlan; \
+        fi
+
+        # debian
+	if [ -f /etc/debian_version ] ; then \
+                  mkdir -p $(DESTDIR)/etc/init $(DESTDIR)/etc/default; \
+                  find $(DESTDIR) -type d; \
+                  ${INSTALL} ${srcdir}/init/debian/init/libvirt-wakeonlan.conf $(DESTDIR)/etc/init/libvirt-wakeonlan.conf; \
+                  ${INSTALL} ${srcdir}/init/debian/default/libvirt-wakeonlan $(DESTDIR)/etc/default/libvirt-wakeonlan; \
+        fi
+
+        # arch
+	if [ -f /etc/arch-release ] ; then \
+                  mkdir -p ${prefix}/lib/systemd/system $(DESTDIR)/etc/systemd; \
+                  ${INSTALL} ${srcdir}/init/arch/systemd/system/libvirt-wakeonlan.service ${prefix}/lib/systemd/system/libvirt-wakeonlan.service; \
+                  ${INSTALL} ${srcdir}/init/arch/systemd/libvirt-wakeonlan.conf $(DESTDIR)/etc/systemd/libvirt-wakeonlan.conf; \
+        fi

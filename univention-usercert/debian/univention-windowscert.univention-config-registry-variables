@@ -1,0 +1,95 @@
+[ssl/windowscert/certpath]
+Description[de]=Verzeichnis für die Speicherung der Windows-Zertifikate
+Description[en]=The directory where to windows certificates will be saved (default: /etc/univention/ssl/windows-hosts)
+Type=str
+Categories=SSL
+
+[ssl/windowscert/admingroup]
+Description[de]=Wurzel CA für Windows-Zertifikate (default: "Domain Admins")
+Description[en]=Root CA for windows certificates (default: "Domain Admins")
+Type=str
+Categories=SSL
+
+[ssl/windowscert/days]
+Description[de]=Anzahl an Tagen die das Windows-Zertifikat gültig ist (default: 1825)
+Description[en]=Number of days which the windows certificate is valid (default: 1825)
+Type=str
+Categories=SSL
+
+[ssl/windowscert/ca]
+Description[de]=Wurzel CA für Windows-Zertifikate (default: ucsCA)
+Description[en]=Root CA for user certificates (default: ucsCA)
+Type=str
+Categories=SSL
+
+[ssl/windowscert/sslbase]
+Description[de]=SSL Basisverzeichnis (default: /etc/univention/ssl)
+Description[en]=SSL base directory (default: /etc/univention/ssl)
+Type=str
+Categories=SSL
+
+[ssl/windowscert/lpapimport]
+Description[de]=Windows-Zertifikate am Objekt im LDAP speichern (default: yes)
+Description[en]=Save windows certificates in ldap object (default: yes)
+Type=str
+Categories=SSL
+
+[ssl/windowscert/certldapmapping/cn]
+Description[de]=Mapping des cn Feld des Zertifikat auf ein LDAP Attribut (default: cn)
+Description[en]=Certificate cn value to ldap attribut mapping (default: cn)
+Type=str
+Categories=SSL
+
+[ssl/windowscert/certldapmapping/email]
+Description[de]=Mapping des email Feld des Zertifikat auf ein LDAP Attribut
+Description[en]=Certificate email value to ldap attribut mapping
+Type=str
+Categories=SSL
+
+[ssl/windowscert/certldapmapping/organizationalunit]
+Description[de]=Mapping des organizationalunit Feld des Zertifikat auf ein LDAP Attribut
+Description[en]=Certificate organizationalunit value to ldap attribut mapping
+Type=str
+Categories=SSL
+
+[ssl/windowscert/certldapmapping/organization]
+Description[de]=Mapping des organization Feld des Zertifikat auf ein LDAP Attribut
+Description[en]=Certificate organization value to ldap attribut mapping
+Type=str
+Categories=SSL
+
+[ssl/windowscert/certldapmapping/state]
+Description[de]=Mapping des state Feld des Zertifikat auf ein LDAP Attribut
+Description[en]=Certificate state value to ldap attribut mapping
+Type=str
+Categories=SSL
+
+[ssl/windowscert/certldapmapping/locality]
+Description[de]=Mapping des locality Feld des Zertifikat auf ein LDAP Attribut
+Description[en]=Certificate locality value to ldap attribut mapping
+Type=str
+Categories=SSL
+
+[ssl/windowscert/extensionsfile]
+Description[de]=Datei mit Zertifikats-Erweiertungen für Windows-Zertifikate
+Description[en]=File with extensions for windows certificates
+Type=str
+Categories=SSL
+
+[ssl/windowscert/UID/extensionsfile]
+Description[de]=Per Windows-Host Konfiguration von ssl/windowscert/extensionsfile
+Description[en]=Per windows host configuration for ssl/windowscert/extensionsfile
+Type=str
+Categories=SSL
+
+[ssl/windowscert/passwordchars]
+Description[de]=Anzahl der Zeichen für das Import-Passwort der PKCS12 Datei
+Description[en]=Number of characters for the PKCS12 password
+Type=str
+Categories=SSL
+
+[ssl/windowscert/pkcs12/chain]
+Description[de]=Zertifikats-Kette in die PKCS12 Datei aufnehmen (default: yes)
+Description[en]=Include certificate chain in PKCS12 file (default: yes)
+Type=str
+Categories=SSL

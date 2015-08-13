@@ -1,0 +1,6 @@
+31univention-usercert.inst usr/lib/univention-install/
+manageusercertificate.py usr/lib/univention-directory-listener/system/
+univention-usercert-expiry usr/share/univention-directory-manager-tools/
+make-certificates-user.sh usr/share/univention-ssl/
+univention-certificate-user usr/sbin/
+admin/hooks.d/WindowsCertificateHook.py usr/share/pyshared/univention/admin/hooks.d/

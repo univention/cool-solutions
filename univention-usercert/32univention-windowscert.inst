@@ -1,0 +1,219 @@
+#!/bin/sh
+#
+# Univention usercert
+#  join script
+#
+# Copyright 2009-2015 Univention GmbH
+#
+# http://www.univention.de/
+#
+# All rights reserved.
+#
+# The source code of this program is made available
+# under the terms of the GNU Affero General Public License version 3
+# (GNU AGPL V3) as published by the Free Software Foundation.
+#
+# Binary versions of this program provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention and not subject to the GNU AGPL V3.
+#
+# In the case you use this program under the terms of the GNU AGPL V3,
+# the program is provided in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License with the Debian GNU/Linux or Univention distribution in file
+# /usr/share/common-licenses/AGPL-3; if not, see
+# <http://www.gnu.org/licenses/>.
+
+VERSION=1
+. /usr/share/univention-join/joinscripthelper.lib
+joinscript_init
+
+eval "$(univention-config-registry shell)"
+
+# create custom attributes
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+	--position "cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="createRevokeCertificateWindows" \
+	--set shortDescription="Create/Revoke Certificate" \
+	--set longDescription="Activate to create, deactivate to revoke certificate" \
+	--set 'translationShortDescription="de_DE" "Zertifikat erstellen/zurückziehen"' \
+	--set 'translationLongDescription="de_DE" "Aktivieren um Zertifikat zu erstellen, deaktivieren um Zertifikat zurückzuziehen"' \
+	--set tabName="Certificate" \
+	--set 'translationTabName="de_DE" "Zertifikat"' \
+	--set tabPosition=1 \
+	--set module="computers/windows" \
+	--set syntax="boolean" \
+	--set multivalue=0 \
+	--set valueRequired=0 \
+	--set mayChange=1 \
+	--set doNotSearch=1 \
+	--set objectClass="univentionManageCertificates" \
+	--set ldapMapping="univentionCreateRevokeCertificate" \
+	--set groupName="General" \
+	--set 'translationGroupName="de_DE" "Allgemein"'
+
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+	--position "cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="renewCertificateWindows" \
+	--set shortDescription="Renew Certificate" \
+	--set longDescription="Activate to renew the certificate" \
+	--set 'translationShortDescription="de_DE" "Zertifikat erneuern"' \
+	--set 'translationLongDescription="de_DE" "Aktivieren um Zertifikat zu erneuern"' \
+	--set tabName="Certificate" \
+	--set 'translationTabName="de_DE" "Zertifikat"' \
+	--set tabPosition=2 \
+	--set module="computers/windows" \
+	--set syntax="boolean" \
+	--set multivalue=0 \
+	--set valueRequired=0 \
+	--set mayChange=1 \
+	--set doNotSearch=1 \
+	--set objectClass="univentionManageCertificates" \
+	--set ldapMapping="univentionRenewCertificate" \
+	--set groupName="General" \
+	--set 'translationGroupName="de_DE" "Allgemein"'
+
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+	--position "cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="certificateDaysWindows" \
+	--set shortDescription="certificate valid time in days" \
+	--set longDescription="Number of days a new created certificate is valid" \
+	--set 'translationShortDescription="de_DE" "Gültigkeitsdauer des Zertifikat in Tagen"' \
+	--set 'translationLongDescription="de_DE" "Anzahl der Tage, die ein neu erstelltes Zertifikat gültig ist"' \
+	--set tabName="Certificate" \
+	--set 'translationTabName="de_DE" "Zertifikat"' \
+	--set tabPosition=3 \
+	--set module="computers/windows" \
+	--set syntax="integer" \
+	--set multivalue=0 \
+	--set valueRequired=0 \
+	--set mayChange=1 \
+	--set doNotSearch=1 \
+	--set objectClass="univentionManageCertificates" \
+	--set ldapMapping="univentionCertificateDays" \
+	--set fullWidth=1 \
+	--set groupName="General" \
+	--set 'translationGroupName="de_DE" "Allgemein"'
+
+
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+	--position "cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="windowsCertificate" \
+	--set shortDescription="Host Certificate" \
+	--set longDescription="The host certificate" \
+	--set 'translationShortDescription="de_DE" "Rechner-Zertifikat"' \
+	--set 'translationLongDescription="de_DE" "Das Rechner-Zertifikat"' \
+	--set tabName="Certificate" \
+	--set 'translationTabName="de_DE" "Zertifikat"' \
+	--set tabPosition=5 \
+	--set module="computers/windows" \
+	--set syntax="Base64Upload" \
+	--set multivalue=0 \
+	--set valueRequired=0 \
+	--set mayChange=1 \
+	--set doNotSearch=1 \
+	--set objectClass="univentionManageCertificates" \
+	--set ldapMapping="userCertificate;binary" \
+	--set hook="WindowsCertificateHook" \
+	--set fullWidth=1 \
+	--set groupName="General" \
+	--set 'translationGroupName="de_DE" "Allgemein"'
+
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+	--position "cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="certificateSubjectCommonNameWindows" \
+	--set shortDescription="Subject Common Name" \
+	--set longDescription="Certificate Subject Common Name" \
+	--set 'translationShortDescription="de_DE" "Inhaber Allgemeiner Name"' \
+	--set 'translationLongDescription="de_DE" "Allgemeiner Name des Zertifikat-Inhaber"' \
+	--set tabName="Certificate" \
+	--set 'translationTabName="de_DE" "Zertifikat"' \
+	--set tabPosition=7 \
+	--set module=computers/windows \
+	--set syntax="string" \
+	--set multivalue=0 \
+	--set valueRequired=0 \
+	--set mayChange=0 \
+	--set doNotSearch=1 \
+	--set objectClass="univentionManageCertificates" \
+	--set ldapMapping="dummy2" \
+	--set notEditable=1 \
+	--set groupName="Certificate data" \
+	--set 'translationGroupName="de_DE" "Zertifikats-Daten"'
+
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+	--position "cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="certificateIssuerCommonNameWindows" \
+	--set shortDescription="Issuer Common Name" \
+	--set longDescription="Certificate Issuer Common Name" \
+	--set 'translationShortDescription="de_DE" "Herausgeber Allgemeiner Name"' \
+	--set 'translationLongDescription="de_DE" "Allgemeiner Name des Zertifikat-Herausgebers"' \
+	--set tabName="Certificate" \
+	--set 'translationTabName="de_DE" "Zertifikat"' \
+	--set tabPosition=8 \
+	--set module=computers/windows \
+	--set syntax="string" \
+	--set multivalue=0 \
+	--set valueRequired=0 \
+	--set mayChange=0 \
+	--set doNotSearch=1 \
+	--set objectClass="univentionManageCertificates" \
+	--set ldapMapping="dummy2" \
+	--set notEditable=1 \
+	--set groupName="Certificate data" \
+	--set 'translationGroupName="de_DE" "Zertifikats-Daten"'
+
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+	--position "cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="certificateDateNotBeforeWindows" \
+	--set shortDescription="Valid from" \
+	--set longDescription="Certificate valid from" \
+	--set 'translationShortDescription="de_DE" "Gültig ab"' \
+	--set 'translationLongDescription="de_DE" "Das Zertifikat ist gültig ab dem Zeitpunkt"' \
+	--set tabName="Certificate" \
+	--set 'translationTabName="de_DE" "Zertifikat"' \
+	--set tabPosition=9 \
+	--set module=computers/windows \
+	--set syntax="string" \
+	--set multivalue=0 \
+	--set valueRequired=0 \
+	--set mayChange=0 \
+	--set doNotSearch=1 \
+	--set objectClass="univentionManageCertificates" \
+	--set ldapMapping="dummy2" \
+	--set notEditable=1 \
+	--set groupName="Certificate data" \
+	--set 'translationGroupName="de_DE" "Zertifikats-Daten"'
+
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+	--position "cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="certificateDateNotAfterWindows" \
+	--set shortDescription="Valid until" \
+	--set longDescription="Certificate valid until" \
+	--set 'translationShortDescription="de_DE" "Gültig bis"' \
+	--set 'translationLongDescription="de_DE" "Das Zertifikat ist gültig bis zu dem Zeitpunkt"' \
+	--set tabName="Certificate" \
+	--set 'translationTabName="de_DE" "Zertifikat"' \
+	--set tabPosition=10 \
+	--set module=computers/windows \
+	--set syntax="string" \
+	--set multivalue=0 \
+	--set valueRequired=0 \
+	--set mayChange=0 \
+	--set doNotSearch=1 \
+	--set objectClass="univentionManageCertificates" \
+	--set ldapMapping="dummy2" \
+	--set notEditable=1 \
+	--set groupName="Certificate data" \
+	--set 'translationGroupName="de_DE" "Zertifikats-Daten"'
+
+joinscript_save_current_version
+
+exit 0
+

@@ -1,0 +1,36 @@
+# Copyright (C) 2004-2015 Univention GmbH
+
+# schema definition for managing certificates
+
+# namespace 1.3.6.1.4.1.10176.3000.1
+
+attributetype ( 1.3.6.1.4.1.10176.3000.1.2
+	NAME 'univentionCreateRevokeCertificate'
+	DESC 'Public key infrastructure - create/revoke certificate'
+	EQUALITY caseIgnoreIA5Match
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 
+	SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.10176.3000.1.3
+	NAME 'univentionRenewCertificate'
+	DESC 'Public key infrastructure - renew certificate'
+	EQUALITY caseIgnoreIA5Match
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 
+	SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.10176.3000.1.4
+	NAME 'univentionCertificateDays'
+	DESC 'Public key infrastructure - number of days a certificate is valid'
+	EQUALITY integerMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+	SINGLE-VALUE )
+
+objectclass ( 1.3.6.1.4.1.10176.3000.1.1
+	NAME 'univentionManageCertificates'
+	DESC 'Public key infrastructure - manage certificates'
+	SUP pkiUser AUXILIARY
+	MAY (univentionRenewCertificate $ univentionCreateRevokeCertificate $ univentionCertificateDays $ userCertificate))
+
+
+
+

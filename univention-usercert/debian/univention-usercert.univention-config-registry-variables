@@ -1,0 +1,95 @@
+[ssl/usercert/certpath]
+Description[de]=Verzeichnis für die Speicherung der Benutzerzertifikate
+Description[en]=The directory where to user certificates will be saved
+Type=str
+Categories=SSL
+
+[ssl/usercert/admingroup]
+Description[de]=Diese Gruppe hat Zugriff auf die Benutzerzertifikate (default: "Domain Admins")
+Description[en]=This group has access to the user certificates (default: "Domain Admins")
+Type=str
+Categories=SSL
+
+[ssl/usercert/days]
+Description[de]=Anzahl an Tagen die das Benutzerzertifikat gültig ist (default: 1825)
+Description[en]=Number of days which the user certificate is valid (default: 1825)
+Type=str
+Categories=SSL
+
+[ssl/usercert/ca]
+Description[de]=Wurzel CA für Benutzerzertifikate (default: ucsCA)
+Description[en]=Root CA for user certificates (default: ucsCA)
+Type=str
+Categories=SSL
+
+[ssl/usercert/sslbase]
+Description[de]=SSL Basisverzeichnis (default: /etc/univention/ssl)
+Description[en]=SSL base directory (default: /etc/univention/ssl)
+Type=str
+Categories=SSL
+
+[ssl/usercert/ldapimport]
+Description[de]=Benutzerzertifikate am Benutzerobjekt im LDAP speichern (default: yes)
+Description[en]=Save user certificates in ldap user object (default: yes)
+Type=str
+Categories=SSL
+
+[ssl/usercert/certldapmapping/cn]
+Description[de]=Mapping des cn Feld des Zertifikat auf ein LDAP Attribut
+Description[en]=Certificate cn value to ldap attribut mapping
+Type=str
+Categories=SSL
+
+[ssl/usercert/certldapmapping/email]
+Description[de]=Mapping des email Feld des Zertifikat auf ein LDAP Attribut
+Description[en]=Certificate email value to ldap attribut mapping
+Type=str
+Categories=SSL
+
+[ssl/usercert/certldapmapping/organizationalunit]
+Description[de]=Mapping des organizationalunit Feld des Zertifikat auf ein LDAP Attribut
+Description[en]=Certificate organizationalunit value to ldap attribut mapping
+Type=str
+Categories=SSL
+
+[ssl/usercert/certldapmapping/organization]
+Description[de]=Mapping des organization Feld des Zertifikat auf ein LDAP Attribut
+Description[en]=Certificate organization value to ldap attribut mapping
+Type=str
+Categories=SSL
+
+[ssl/usercert/certldapmapping/state]
+Description[de]=Mapping des state Feld des Zertifikat auf ein LDAP Attribut
+Description[en]=Certificate state value to ldap attribut mapping
+Type=str
+Categories=SSL
+
+[ssl/usercert/certldapmapping/locality]
+Description[de]=Mapping des locality Feld des Zertifikat auf ein LDAP Attribut
+Description[en]=Certificate locality value to ldap attribut mapping
+Type=str
+Categories=SSL
+
+[ssl/usercert/extensionsfile]
+Description[de]=Datei mit Zertifikats-Erweiertungen für Benutzer-Zertifikate (openssl -> -extfile)
+Description[en]=File with extensions for user certificates (openssl -> -extfile)
+Type=str
+Categories=SSL
+
+[ssl/usercert/UID/extensionsfile]
+Description[de]=Per Benutzer Konfiguration von ssl/usercert/extensionsfile
+Description[en]=Per user configuration for ssl/usercert/extensionsfile
+Type=str
+Categories=SSL
+
+[ssl/usercert/passwordchars]
+Description[de]=Anzahl der Zeichen für das Import-Passwort der PKCS12 Datei
+Description[en]=Number of characters for the PKCS12 password
+Type=str
+Categories=SSL
+
+[ssl/usercert/pkcs12/chain]
+Description[de]=Zertifikats-Kette in die PKCS12 Datei aufnehmen (default: yes)
+Description[en]=Include certificate chain in PKCS12 file (default: yes)
+Type=str
+Categories=SSL

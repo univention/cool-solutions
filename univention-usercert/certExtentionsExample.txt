@@ -1,0 +1,14 @@
+extensions = myx509v3
+
+[ myx509v3 ]
+extendedKeyUsage       = clientAuth
+nsCertType             = client,email,objsign
+nsComment              = "signed by EXAMPLE with EXAMPLE-CA"
+
+# default
+basicConstraints       = CA:FALSE
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid,issuer:always
+
+#crlDistributionPoints = URI:http://ucsmaster.domain/ucsCA.crl
+

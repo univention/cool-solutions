@@ -1,0 +1,55 @@
+Source: univention-usercert
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Standards-Version: 3.5.5
+Build-Depends: debhelper (>> 7),
+ univention-config-dev,
+ ucslint,
+ python-support,
+ python-all,
+ python-support (>= 0.90)
+XS-Python-Version: 2.6, 2.7
+
+Package: univention-usercert
+Architecture: all
+Depends: univention-ldap-usercert (= ${binary:Version}),
+ univention-config,
+ univention-directory-manager-tools,
+ univention-ssl,
+ python-univention-directory-manager,
+ ${python:Depends},
+ ${misc:Depends}
+Description: UCS - usercert extension
+ This package contains the configuration for the UCS
+ usercert extension.
+ .
+ It is part of Univention Corporate Server (UCS), an
+ integrated, directory driven solution for managing
+ corporate environments. For more information about UCS,
+ refer to: http://www.univention.de/
+
+Package: univention-windowscert
+Architecture: all
+Depends: univention-usercert (= ${binary:Version}),
+ ${misc:Depends}
+Description: UCS - windowscert extension
+ This package contains the join script for the UCS
+ usercert extension.
+ .
+ It is part of Univention Corporate Server (UCS), an
+ integrated, directory driven solution for managing
+ corporate environments. For more information about UCS,
+ refer to: http://www.univention.de/
+
+Package: univention-ldap-usercert
+Architecture: all
+Depends: univention-ldap-config, univention-config
+Description: UCS - LDAP usercert configuration
+ This package contains the configuration for the OpenLDAP
+ server.
+ .
+ It is part of Univention Corporate Server (UCS), an
+ integrated, directory driven solution for managing
+ corporate environments. For more information about UCS,
+ refer to: http://www.univention.de/ 
