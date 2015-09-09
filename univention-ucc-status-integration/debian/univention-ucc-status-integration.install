@@ -1,0 +1,7 @@
+schema/univention-ucc-status.schema usr/share/univention-corporate-client-schema/
+etc/apache2/sites-available/univention-ucc-status etc/apache2/sites-available/
+var/www/univention-ucc-status/updateuccstatus.py var/www/univention-ucc-status/
+univention-ucc-status-update usr/sbin
+univention-ucc-status-log-parser usr/sbin
+31univention-corporate-client-status-schema.inst usr/lib/univention-install
+etc/logrotate.d/univention-ucc-status-update-log etc/logrotate.d

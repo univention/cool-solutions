@@ -1,0 +1,106 @@
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
+#
+# Univention UCC status update script
+#
+# Copyright 2013-2015 Univention GmbH
+#
+# http://www.univention.de/
+#
+# All rights reserved.
+#
+# The source code of this program is made available
+# under the terms of the GNU Affero General Public License version 3
+# (GNU AGPL V3) as published by the Free Software Foundation.
+#
+# Binary versions of this program provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention and not subject to the GNU AGPL V3.
+#
+# In the case you use this program under the terms of the GNU AGPL V3,
+# the program is provided in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License with the Debian GNU/Linux or Univention distribution in file
+# /usr/share/common-licenses/AGPL-3; if not, see
+# <http://www.gnu.org/licenses/>.
+
+import os
+import sys
+import tempfile
+import csv
+import time
+import ldap
+import univention.admin.objects 
+import univention.admin.modules as modules
+import univention.admin.uldap as uldap
+import univention.admin.config as config
+from univention.config_registry import ConfigRegistry
+ 
+ucr = ConfigRegistry()
+ucr.load()
+
+LOGFILE="/var/log/univention/ucc-clients/ucc-status.log"
+
+conf = config.config()
+access, position = uldap.getAdminConnection()
+modules.update()
+uccModule = modules.get("computers/ucc")
+modules.init(access, position, uccModule)
+
+def getStatusData():
+
+	data = {}
+
+	osLevel, tmpFile = tempfile.mkstemp()
+	format = "hostname,ip,local_image,last_local_image_update,last_software_update,time"
+	os.system('univention-ucc-status-log-parser -o "%s" -i %s -f %s' % (tmpFile, LOGFILE, format))
+
+	FH = open(tmpFile, "rb")
+	reader = csv.reader(FH, delimiter='\t', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+	for row in reader:
+		# hostname,ip,local_image,last_local_image_update,last_software_update,time
+		if len(row) > 0 and row[0] == "hostname":
+			continue
+	
+		if len(row) >= 6:
+			data[row[0]] = {}
+			data[row[0]]["ip"] = row[1]
+			data[row[0]]["local_image"] = row[2]
+			data[row[0]]["last_local_image_update"] = row[3]
+			data[row[0]]["last_software_update"] = row[4]
+			data[row[0]]["time"] = row[5]
+	FH.close()
+	os.unlink(tmpFile)
+
+	return data
+
+def updateUCCStatusInfo(data):
+
+	for ucc_hostname in data:
+		ucc_object = uccModule.lookup(config, access, "cn=%s" % ucc_hostname)
+		if ucc_object and len(ucc_object) == 1:
+			ucc = ucc_object[0]
+			try:
+				ucc.open()
+				ucc["ucc-status-LastReportTime"] = data[ucc_hostname].get("time", "error: no value")
+				ucc["ucc-status-LastReportedIPAddress"] = data[ucc_hostname].get("ip", "error: no value")
+				ucc["ucc-status-LocalImageName"] = data[ucc_hostname].get("local_image", "error: no value")
+				ucc["ucc-status-LastImageUpdate"] = data[ucc_hostname].get("last_local_image_update", "error: no value")
+				sw_update_time = data[ucc_hostname].get("last_software_update", "error: no value")
+				if not sw_update_time == "donotupdate":
+					ucc["ucc-status-LastSoftwareUpdate"] = data[ucc_hostname].get("last_software_update", "no value")
+				ucc.modify()
+			except Exception, e:
+				sys.stderr.write("failed to update status for client %s (%s)\n" % (ucc_hostname, e))
+		else:
+			sys.stderr.write("failed to find ucc object with hostname %s" % ucc_hostname)
+
+if __name__ == '__main__':
+	data = getStatusData()
+	updateUCCStatusInfo(data)

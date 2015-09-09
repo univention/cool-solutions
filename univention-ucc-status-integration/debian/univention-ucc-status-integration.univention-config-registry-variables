@@ -1,0 +1,11 @@
+[ucc/status/cron/update]
+Description[de]=Aktivierung des cronjobs zum Aktualisieren der UCC Statusinformationen
+Description[en]=Activate the cronjob to update ucc status information
+Type=bool
+Categories=ucc
+
+[ucc/status/cron]
+Description[de]=Ausführungszeiten des Cronjob (default */30 * * * *)
+Description[en]=Cronjob execution schedule (default */30 * * * *) 
+Type=str
+Categories=ucc

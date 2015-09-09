@@ -1,0 +1,7 @@
+/var/log/univention/ucc-clients/ucc-status.log {
+	daily	
+	rotate 12
+	create 640 www-data adm
+	compress
+	missingok
+}

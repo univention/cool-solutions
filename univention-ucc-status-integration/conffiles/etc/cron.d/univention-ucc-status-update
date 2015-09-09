@@ -1,0 +1,12 @@
+@%@UCRWARNING=# @%@
+
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+
+@!@
+if configRegistry.is_true("ucc/status/cron/update"):
+	file = "/usr/sbin/univention-ucc-status-update"
+	cron = configRegistry.get("ucc/status/cron", "*/30 * * * *")
+	print "%s root %s >/dev/null" % (cron, file)
+else:
+	print "# not enabled, see thinclient/status/udm/update"
+@!@
