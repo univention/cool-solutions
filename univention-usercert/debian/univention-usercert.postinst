@@ -44,7 +44,7 @@ univention-config-registry set \
 	ssl/usercert/default/organizationalunit?"$ssl_organizationalunit" \
 	ssl/usercert/default/state?"$ssl_state" \
 	ssl/usercert/certpath?"/etc/univention/ssl/user" \
-	ssl/usercert/admingroup?"Domain Admins" \
+	ssl/usercert/admingroup?"DC Backup Hosts" \
 	ssl/usercert/days?"1825" \
 	ssl/usercert/ca?"ucsCA" \
 	ssl/usercert/sslbase?"/etc/univention/ssl/" \

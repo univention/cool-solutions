@@ -38,7 +38,7 @@ eval "$(univention-config-registry shell)"
 
 univention-config-registry set \
 	ssl/windowscert/certpath?"/etc/univention/ssl/windows-hosts" \
-	ssl/windowscert/admingroup?"Domain Admins" \
+	ssl/windowscert/admingroup?"DC Backup Hosts" \
 	ssl/windowscert/days?"1825" \
 	ssl/windowscert/ca?"ucsCA" \
 	ssl/windowscert/sslbase?"/etc/univention/ssl/" \

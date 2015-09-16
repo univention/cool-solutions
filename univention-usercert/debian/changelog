@@ -1,3 +1,11 @@
+univention-usercert (4.0.1-2) unstable; urgency=medium
+
+  * Fixed ssl/usercert/admingroup in univention-usercert.postinst to "DC Backup Hosts"
+  * Fixed ssl/windowscert/admingroup in univention-windowscert.postinst to "DC Backup Hosts"
+  * Issue #3176
+
+ -- Timo Denissen <denissen@univention.de>  Wed, 16 Sep 2015 14:03:19 +0200
+
 univention-usercert (4.0.1-1) unstable; urgency=low
 
   * fix default_bits and default_md in make-certificate-user.sh from upstream
