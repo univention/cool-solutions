@@ -393,7 +393,7 @@ renew_cert () {
 	
 	# extensions?
 	if [ -f "$extfile" ]; then
-		local ext="-extfile $extfile"
+		local ext="-extfile $(bash ${extfile})"
 	fi
 
 	# makepasswd chars
@@ -479,7 +479,7 @@ gencert () {
 
 	# extensions?
 	if [ -f "$extfile" ]; then
-		local ext="-extfile $extfile"
+		local ext="-extfile $(bash ${extfile})"
 	fi
 
 	# makepasswd chars

@@ -1,3 +1,10 @@
+univention-usercert (4.0.2-1) unstable; urgency=medium
+
+  * Fixed handling of extension files
+  * Issue #3273
+
+ -- Timo Denissen <denissen@univention.de>  Mon, 05 Oct 2015 12:39:34 +0200
+
 univention-usercert (4.0.1-2) unstable; urgency=medium
 
   * Fixed ssl/usercert/admingroup in univention-usercert.postinst to "DC Backup Hosts"
