@@ -1,3 +1,10 @@
+univention-ucc-status (2.0.0-1) unstable; urgency=medium
+
+  * Pushed to UCC 2.1
+  * Issue #3141
+
+ -- Timo Denissen <denissen@univention.de>  Wed, 07 Oct 2015 13:40:22 +0200
+
 univention-ucc-status (1.0.0-3) unstable; urgency=low
 
   * Changed date/time format (Ticket#: 2013050321002858) 
