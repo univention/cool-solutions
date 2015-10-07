@@ -1,0 +1,126 @@
+#!/usr/bin/python2.7
+#
+# Univention Corporate Client send status
+#
+# Copyright 2012-2013 Univention GmbH
+#
+# http://www.univention.de/
+#
+# All rights reserved.
+#
+# The source code of this program is made available
+# under the terms of the GNU Affero General Public License version 3
+# (GNU AGPL V3) as published by the Free Software Foundation.
+#
+# Binary versions of this program provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention and not subject to the GNU AGPL V3.
+#
+# In the case you use this program under the terms of the GNU AGPL V3,
+# the program is provided in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License with the Debian GNU/Linux or Univention distribution in file
+# /usr/share/common-licenses/AGPL-3; if not, see
+# <http://www.gnu.org/licenses/>.
+
+import os
+import sys
+import re
+import stat
+import urllib
+import urllib2
+from datetime import datetime
+import univention.config_registry
+from optparse import OptionParser
+
+
+def get_host_policy_var(policy_var, policy_file):
+	if options.debug:
+		print "Checking for host policy variable %s" % policy_var
+
+	try:
+		file = open(policy_file, "r")
+		for line in file:
+			if re.search(policy_var, line):
+				policy_value = line.split("=", 1)[1].strip().strip("\"")
+				if options.debug:
+					print "Found value %s" % policy_value
+				return policy_value
+	except Exception, e:
+		sys.stderr.write("Could not open %s" % policy_file)
+		sys.exit(1)
+	finally:
+		file.close()
+	
+	# No policy found
+	return None
+
+if __name__ == '__main__':
+	ucr = univention.config_registry.ConfigRegistry()
+	ucr.load()
+
+	status_update_timestamp = datetime.now().replace(microsecond = 0)
+
+	parser = OptionParser()
+	parser.add_option("-d", "--debug", dest="debug", action="store_true", default=False, help="Enable debug output")
+
+	(options, args) = parser.parse_args()
+
+	options.url = ucr.get("ucc/status/url", "http://%s/univention-ucc-status/updateuccstatus.py" % ucr.get("ldap/master"))
+
+	# get required information to send to server:
+	# hostname 
+	hostname = ucr.get("hostname", "")
+	if not hostname:
+		sys.exit(1)
+	if options.debug:
+		print "Using hostname %s" % hostname
+
+	policy_file = "/var/cache/ucc/client-policy-%s.txt" % hostname 
+	
+	# local used image
+	# time of last image update. /ucc_root/local_image is modified on image updates
+	try:
+		f = open("/ucc_root/local_image", "r")
+	except Exception, e:
+		sys.stderr.write("Error: %s" % e.strerror)
+		sys.exit(1)
+	else:
+		local_image = f.readline().strip()
+		f.close()
+		last_local_image_update = datetime.fromtimestamp(os.stat("/ucc_root/local_image").st_mtime).replace(microsecond = 0)
+		if options.debug:
+			print "Local image is %s" % local_image
+			print "Local image was updated on %s" % last_local_image_update
+
+	# time of last software update 
+	# check if ldap update flag is set, else send a "do not update this field" flag
+	update_policy_value = get_host_policy_var("univentionCorporateClientSoftwareUpdateActivate", policy_file)
+	if update_policy_value == "1":
+		last_software_update = status_update_timestamp.isoformat(" ")
+		if options.debug:
+			print "Last software update is now: %s" % last_software_update
+	else:
+		last_software_update = "donotupdate"
+		if options.debug:
+			print "No software update configured"
+		
+	get_url="%(url)s?hostname=%(hostname)s&local_image=%(local_image)s&last_local_image_update=%(last_local_image_update)s&last_software_update=%(last_software_update)s" % {'url': options.url, 'hostname': urllib.quote(hostname), 'local_image': urllib.quote(local_image), 'last_local_image_update': urllib.quote(last_local_image_update.isoformat(" ")), 'last_software_update': urllib.quote(last_software_update)}
+	if options.debug:
+		print ""
+		print "Sending update information:"
+		print get_url	
+		
+	try:
+		urllib2.urlopen(get_url,timeout = 2)
+	except urllib2.URLError, e:
+		sys.stderr.write("Error while sending information %s" % e.reason)
+
+	
+	sys.exit(0)

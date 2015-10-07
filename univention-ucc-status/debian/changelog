@@ -1,0 +1,17 @@
+univention-ucc-status (1.0.0-3) unstable; urgency=low
+
+  * Changed date/time format (Ticket#: 2013050321002858) 
+
+ -- Erik Damrose <damrose@univention.de>  Mon, 13 May 2013 14:17:09 +0200
+
+univention-ucc-status (1.0.0-2) unstable; urgency=low
+
+  * Updated status URL (Ticket#: 2013050321002858)
+
+ -- Erik Damrose <damrose@univention.de>  Mon, 13 May 2013 13:06:56 +0200
+
+univention-ucc-status (1.0.0-1) unstable; urgency=low
+
+  * Initial release (Ticket#: 2013050321002858)
+
+ -- Erik Damrose <damrose@univention.de>  Wed, 08 May 2013 12:25:15 +0200

@@ -1,0 +1,6 @@
+[ucc/status/url]
+Description[de]=URL die vom Script univention-ucc-send-status zum übermitteln der Informationen benutzt wird
+Description[en]=URL the script univention-ucc-send-status uses to transmit information
+Type=String
+Categories=ucc
+

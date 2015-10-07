@@ -1,0 +1,2 @@
+univention-ucc-send-status usr/sbin
+ucc-send-status.conf etc/init

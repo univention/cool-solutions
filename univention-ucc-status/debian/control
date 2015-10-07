@@ -1,0 +1,23 @@
+Source: univention-ucc-status
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Standards-Version: 3.8.2
+Build-Depends: debhelper,
+ ucslint,
+ univention-config-dev
+
+Package: univention-ucc-status
+Architecture: all
+Depends: python-univention-lib,
+ shell-univention-lib,
+ univention-config,
+ ${misc:Depends}
+Description: UCC Status 
+ univention-ucc-status updates the ldap master with status information about 
+ the UCC client such as the current IP address and installed ucc-image.
+ .
+ This package is part of Univention Corporate Server (UCS),
+ an integrated, directory driven solution for managing
+ corporate environments. For more information about UCS,
+ refer to: http://www.univention.de/
