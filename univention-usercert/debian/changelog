@@ -1,3 +1,10 @@
+univention-usercert (4.0.3-1) unstable; urgency=medium
+
+  * Added hint for DER encoded certificate for uploading a certificate
+  * Issue #3197
+
+ -- Timo Denissen <denissen@univention.de>  Thu, 08 Oct 2015 09:49:20 +0200
+
 univention-usercert (4.0.2-1) unstable; urgency=medium
 
   * Fixed handling of extension files
