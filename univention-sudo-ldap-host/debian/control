@@ -1,0 +1,21 @@
+Source: univention-sudo-ldap-host
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Build-Depends: debhelper (>= 7.0.50~),
+ univention-config-dev,
+ ucslint
+Standards-Version: 3.7.2
+
+Package: univention-sudo-ldap-host
+Architecture: all
+Depends: sudo-ldap,
+ univention-config,
+ univention-pam (>= 6.1.0-1) | univention-ucc-pam (>= 1.1-0-1)
+Description: UCS - sudo-ldap integration - host integration
+ This package integrates sudo-ldap on this host into the domain.
+ .
+ It is part of Univention Corporate Server (UCS), an
+ integrated, directory driven solution for managing
+ corporate environments. For more information about UCS,
+ refer to: http://www.univention.de/

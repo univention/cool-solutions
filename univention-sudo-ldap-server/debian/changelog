@@ -1,0 +1,11 @@
+univention-sudo-ldap-server (3.0.0-1) unstable; urgency=medium
+
+  * Build for UCS 4.0.  Issue #2040
+
+ -- Ingo Sieverdingbeck <sieverdingbeck@univention.de>  Fri, 16 Oct 2015 11:44:24 +0200
+
+univention-sudo-ldap-server (1.0.0-2) unstable; urgency=low
+
+  * Initial Release (Ticket: #2013050721003135)
+
+ -- Janek Walkenhorst <walkenhorst@univention.de>  Tue, 30 Jul 2013 12:22:31 +0200

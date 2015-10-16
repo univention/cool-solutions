@@ -1,0 +1,7 @@
+Type: file
+File: etc/sudo-ldap.conf
+Variables: ldap/server/port
+Variables: ldap/server/name
+Variables: ldap/server/addition
+Variables: ldap/hostdn
+Mode: 640

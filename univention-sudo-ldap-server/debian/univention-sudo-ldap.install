@@ -1,0 +1,2 @@
+modules/univention usr/share/pyshared/
+76univention-sudo-ldap.inst usr/lib/univention-install/

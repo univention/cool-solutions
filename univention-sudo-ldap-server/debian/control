@@ -1,0 +1,30 @@
+Source: univention-sudo-ldap-server
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Build-Depends: debhelper (>= 7.0.50~),
+ univention-config-dev,
+ ucslint
+Standards-Version: 3.7.2
+
+Package: univention-sudo-ldap
+Architecture: all
+Depends: univention-directory-manager-tools,
+ shell-univention-lib (>> 1.0.1-1),
+ univention-sudo-ldap-schema (= ${source:Version}),
+ ${misc:Depends},
+ ${python:Depends}
+Description: UCS - sudo-ldap integration - domain integration
+ This package contains an Univention Directory Manager module to
+ manage sudo-ldap rule LDAP objects.
+
+Package: univention-sudo-ldap-schema
+Architecture: all
+Depends: univention-config-registry,
+ ${misc:Depends}
+Description: UCS - sudo-ldap integration - domain integration
+ This package integrates the sudo-ldap schema into the domain.
+ .
+ It needs to be installed on the DC Master to be available for LDAP operations,
+ and is strongly recommended to be installed in the DC Backup to be available
+ in case the DC Backup has to replace the DC Master (univention-backup2master).

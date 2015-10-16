@@ -1,0 +1,311 @@
+[nscd/passwd/enabled]
+Description[de]=Aktiviert den NSCD-Cache für die Benutzerdaten. Ist die Variable nicht gesetzt, wird der Cache aktiviert.
+Description[en]=Enables the NSCD cache for the user data. If the variable is not set, the cache is activated.
+Type=bool
+Categories=system-base
+
+[nscd/group/enabled]
+Description[de]=Aktiviert den NSCD-Cache für die Gruppendaten. Ist die Variable nicht gesetzt, wird der Cache aktiviert.
+Description[en]=Enables the NSCD cache for the group data. If the variable is not set, the cache is activated.
+Type=bool
+Categories=system-base
+
+[nscd/hosts/enabled]
+Description[de]=Aktiviert den NSCD-Cache für die Rechnerkonten. Ist die Variable nicht gesetzt, wird der Cache aktiviert.
+Description[en]=Enables the NSCD cache for the host accounts. If the variable is not set, the cache is activated.
+Type=bool
+Categories=system-base
+
+[nscd/hosts/size]
+Description[de]=Die Größe des NSCD-Caches für die Rechnerkonten. Der Wert sollte größer oder gleich der Anzahl aller im DNS registrieren Hosts sein.
+Description[en]=The size of the NSCD cache for the host accounts. The value should be greater or equal as the number of all hosts registered in DNS.
+Type=int
+Categories=system-base
+
+[nscd/passwd/size]
+Description[de]=Die Größe des NSCD-Caches für die Benutzerkonten. Der Wert sollte größer oder gleich der Anzahl aller Benutzer sein.
+Description[en]=The size of the NSCD cache for the user accounts. The value should be greater or equal as the number of all users.
+Type=int
+Categories=system-base
+
+[nscd/group/size]
+Description[de]=Die Größe des NSCD-Caches für die Gruppenkonten. Der empfohlene Wert ist (Anzahl aller  Gruppen * 2 + Anzahl aller Gruppenmitglieder) * 2.
+Description[en]=The size of the NSCD cache for the group data. The recommended value is (number of all groups * 2 + number of all groupmembers) * 2.
+Type=int
+Categories=system-base
+
+[nscd/hosts/maxdbsize]
+Description[de]=Die Datenbankgröße des NSCD-Rechnerkonten-Caches in Byte. Wird die Variable nscd/hosts/size auf einen hohen Wert gesetzt, muss diese Variable ggf. erhöht werden.
+Description[en]=The size in bytes of the database of the NSCD host account cache. If the variable nscd/hosts/size is set to a high value, this variable may need to be expanded.
+Type=int
+Categories=system-base
+
+[nscd/passwd/maxdbsize]
+Description[de]=Die Datenbankgröße des NSCD-Benutzer-Caches in Byte. Wird die Variable nscd/passwd/size auf einen hohen Wert gesetzt, muss diese Variable ggf. erhöht werden.
+Description[en]=The size in bytes of the database of the NSCD user cache. If the variable nscd/passwd/size is set to a high value, this variable may need to be expanded.
+Type=int
+Categories=system-base
+
+[nscd/group/maxdbsize]
+Description[de]=Die Datenbankgröße des NSCD-Gruppen-Caches in Byte. Wird die Variable nscd/group/size auf einen hohen Wert gesetzt, muss diese Variable ggf. erhöht werden.
+Description[en]=The size in bytes of the database of the NSCD group cache. If the variable nscd/group/size is set to a high value, this variable may need to be expanded.
+Type=int
+Categories=system-base
+
+[nscd/debug/level]
+Description[de]=Diese Variable konfiguriert den Detailgrad der NSCD-Logmeldungen. Ist die Variable auf einen Wert grösser als 0 gesetzt, werden Debugausgaben nach /var/log/nscd.log protokolliert.
+Description[en]=This variable configures the verbosity of the NSCD log messages. If the variable is set to a value higher than 0, debug messages are logged to /var/log/nscd.log.
+Type=int
+Categories=system-base
+
+[nscd/.*/negative_time_to_live]
+Description[de]=Auch NSS-Fragen ohne Ergebnis werden im Cache vorgehalten (der gesuchte Eintrag wird dann als nicht existierend vermerkt). Diese Variable legt fest, wie viele Sekunden vergangen sein müssen, bis nach einem nicht gefundenen Eintrag erneut gesucht wird.
+Description[en]=NSS requests without a search result are caches as well (the entry, which was searched is marked as non-existant). This variable configures how many seconds need to have passed until the entry can be searched again.
+Type=int
+Categories=system-base
+
+[nscd/.*/positive_time_to_live]
+Description[de]=Wird ein Eintrag bei einer NSS-Anfrage gefunden, wird er vom NSCD-Cache für die hier konfigurierte Anzahl von Sekunden im Cache vorgehalten.
+Description[en]=If an entry has been found during a NSS request, it is kept in the NSCD cache for the configured time frame in seconds.
+Type=int
+Categories=system-base
+
+[nscd/logfile]
+Description[de]=Mit dieser Variable wird der Dateiname für die NSCD-Logdatei konfiguriert. Ist die Variable nicht gesetzt, wird /var/log/nscd.log verwendet.
+Description[en]=This variable configures the name of the NSCD logfile. If the variable isn't set, /var/log/nscd.log is used.
+Type=str
+Categories=system-base
+
+[nscd/threads]
+Description[de]=Konfiguriert die Anzahl der zu startenden Programm-Threads für die Verarbeitung von NSCD-Anfragen. Ist kein Wert gesetzt, werden fünf Threads gestartet.
+Description[en]=Specifies the number of programs for processing NSCD requests. If no value is set, five threads are started.
+Type=int
+Categories=system-base
+
+[nscd/.*/persistent]
+Description[de]=Konfiguriert, ob die Cache-Daten bei einem NSCD-Neustart erhalten bleiben sollen. Dies ist nötig, wenn nscd/restart aktiviert wurde. Mögliche Werte: (yes/no).
+Description[en]=Configures, whether the NSCD cache data of the should be retained across NSCD restarts. This is needed, if nscd/restart is activated. Possible values: (yes/no).
+Type=bool
+Categories=system-base
+
+[nscd/restart]
+Description[de]=Wenn diese Variable aktiviert ist (mögliche Werte: yes/no) startet sich der NSCD in festen Intervallen neu (konfigurierbar mit der Variable nscd/restart/interval. Diese Option kann zur Umgehung von Speicherlecks verwendet werden.
+Description[en]=If this variable is activated (possible values: yes/no) NSCD is restarted in fixed intervals (configurable through the variable nscd/restart/interval). This option can be used to address memory leaks.
+Type=bool
+Categories=system-base
+
+[nscd/restart/interval]
+Description[de]=Wenn der automatische NSCD-Neustart mit der Variable nscd/restart aktiviert wurde, kann hier das Intervall in Sekunden festgelegt werden. Wird kein Wert konfiguriert, erfolgt der Neustart stündlich.
+Description[en]=If the automatic NSCD restart has been activated through the variable nscd/restart, the restart interval in seconds can be configured here. If no value is set, the restart occurs hourly.
+Type=int
+Categories=system-base
+
+[nscd/group/invalidate_cache_on_changes]
+Description[de]=Ist diese Option aktiviert, wird bei jeder Änderung an einer Gruppe im UCS-Managementsystem durch ein Univention Directory Listener-Modul der NSCD-Gruppencache invalidiert.
+Description[en]=If this option is enabled, the NSCD group cache is invalidated through a Univention Directory Listener module every time a group is modified in the UCS management system.
+Type=bool
+Categories=system-base
+
+[auth/methods]
+Description[de]=Diese Variable legt fest, welche Authentifizierungsmethoden neben pam_unix in der PAM-Konfiguration verwendet werden. Die Liste muss durch Leerzeichen getrennt werden. Mögliche Werte sind 'ldap' (pam_ldap) , 'krb5' (pam_krb5.so), 'winbind' (pam_winbind.so) und 'cache' (pam_passwdcache.so aus dem Paket univention-passwd-cache).
+Description[en]=This variable configures which authentication methods should be used in the PAM configuration besides pam_unix. The list must be space-separated. Possible values are 'ldap' (pam_ldap), 'krb5' (pam_krb5.so), 'winbind' (pam_winbind.so) and 'cache' (pam_passwdcache.so from the package univention-passwd-cache).
+Type=bool
+Categories=system-base
+
+[nsswitch/ldap]
+Description[de]=Aktiviert oder deaktiviert den Zugriff auf das LDAP in der Namensauflösung. Die Option kann verwendet werden, wenn ein System ausschließlich mit lokalen Benutzern verwendet werden soll.
+Description[en]=Activates or deactivates the LDAP access during name resolution. This option can be used if a system should be operated exclusively with local users.
+Type=bool
+Categories=system-base
+
+[nsswitch/sudoers]
+Description[de]=Leerzeichen-getrennte Liste von Regelquellen, die sudo-ldap verwenden soll. Sinnvolle Werte sind "ldap" für die Nutzung des LDAP Verzeichnisses und "files" für die Nutzung der Datei /etc/sudoers.
+Description[en]=Space separated list of sources for sudo-ldap rules. Reasonable values are "ldap" for using the LDAP directory and "files" for using the file /etc/sudoers.
+Type=str
+Categories=system-base
+
+[nssldap/tls/checkpeer]
+Description[de]=Diese Einstellung legt fest, ob bei LDAP-Zugriffen im Rahmen der NSS-Namensauflösung das SSL-Zertifikat des LDAP-Servers validiert wird (mögliche Werte: yes/no).
+Description[en]=This setting configures, whether the SSL certificate of the LDAP server is validated when performing LDAP accesses during NSS name resolution (possible values: yes/no).
+Type=str
+Categories=system-base
+
+[nssldap/nss_initgroups_ignoreusers]
+Description[de]=Diese Option konfiguriert, ob die Auflösung der Gruppenmitgliedschaften aus dem LDAP-Verzeichnis für bestimmte Benutzer deaktiviert wird (die betroffenen Benutzer werden mit der Variable nssldap/nss_initgroups_ignoreusers/users konfiguriert). Ist die Variable nicht gesetzt, ist die Option aktiviert.
+Description[en]=This option configures whether the resolution of group memberships from the LDAP directory should be disabled for some users (the affected users are configured through the variable nssldap/nss_initgroups_ignoreusers/users). If this variable isn't set, the option is activated.
+Type=bool
+Categories=system-base
+
+[nssldap/nss_initgroups_ignoreusers/users]
+Description[de]=Ist die LDAP-Gruppenauflösung für einzelne Benutzer deaktiviert (konfiguriert über die Variable nssldap/nss_initgroups_ignoreusers), wird mit dieser Variable eine Komma-separierte Liste von Benutzernamen angegeben, deren Gruppenmitgliedschaften nicht über LDAP aufgelöst werden. Ist die Variable nicht gesetzt, gilt die Einstellung für den Benutzer 'root'.
+Description[en]=If the LDAP group resolution has been disabled for some users (configurable through the variable nssldap/nss_initgroups_ignoreusers), this variable specifies a comma-separated list of user names, for which group memberships should not be resolved from the LDAP directory. If the variable isn't set, it applies to the user 'root'.
+Type=str
+Categories=system-base
+
+[nssldap/auth]
+Description[de]=Konfiguriert, ob am für die NSS-Namensauflösung verwendeten LDAP-Server eine Authentifizierung durchgeführt wird. In der Grundeinstellung aktiviert.
+Description[en]=Specifies whether authentication should be performed on the LDAP server used during NSS name resolution. Activated in the default setting.
+Type=bool
+Categories=system-base
+
+[nssldap/nss_srv]
+Description[de]=Konfiguriert, ob das NSS-LDAP-Modul zur Lokalisierung des LDAP-Server auf DNS-Service-Records zugreift. Ist die Variable nicht gesetzt, werden DNS-Service-Records abgefragt.
+Description[en]=Configures whether the NSS LDAP module looks up DNS service records to locate its LDAP server. If this variable isn't set, DNS service records are queried.
+Type=bool
+Categories=system-base
+
+[pamldap/auth]
+Description[de]=Konfiguriert, ob das LDAP-PAM-Modul eine Authentifizierung gegenüber dem LDAP-Server durchführt. Ist die Variable nicht gesetzt, erfolgt eine Authentifizierung.
+Description[en]=Configures whether the LDAP PAM module authenticates against the LDAP server. If the variable isn't set, an authentication is performed.
+Type=bool
+Categories=system-base
+
+[pamaccess/maxent]
+Description[de]=Konfiguriert die maximale Hauptspeichergröße, die in pam_access für die Prüfung der Gruppenzugehörigkeit herangezogen wird. Der Standardgröße beträgt 0x40001 Byte.
+Description[en]=Specifies the maximum memory available for pam_access when checking group membership. The default value is 0x40001 byte.
+Type=int
+Categories=system-base
+
+[pam/krb5/minimum_uid]
+Description[de]=Diese Option führt dazu, dass einige PAM Module Benutzer ignoriert, deren numerische Benutzer-ID unter diesem spezifizierten Wert ist. Dies kann dazu benutzt werden, dass Passwortänderungen für lokale System-Benutzer nicht mittels Kerberos durchgeführt werden. Der Standardwert ist 1000.
+Description[en]=This option causes some PAM modules to ignore the user if the users numerical id is lower than the specified value. This can be used to bypass password changes using the Kerberos module for local system accounts. The default value is 1000.
+Type=int
+Categories=system-base
+
+[security/limits/user/.*/hard/.*]
+Description[de]=Erlaubt die Konfiguration von Systemlimits für Benutzer (z.B. die maximale Anzahl offener Dateien). Der erste Platzhalter ist ein Benutzername, der zweite der Name des Systemlimits. Eine Übersicht der konfigurierbaren Limits kann mit 'man limits.conf' abgerufen werden. Das Hard-Limit definiert die Obergrenze, die ein Benutzer maximal einem Prozess zuweisen kann.
+Description[en]=Allow the configuration of system limits for users (e.g. the maximum number of open files). The first placeholder is a user name, the second the name of a system limit. An overview of configurable limits can be retrieved with 'man limits.conf'. The hard limit defines the upper limit a user can assign to a process.
+Type=str
+Categories=system-base
+
+[security/limits/user/.*/soft/.*]
+Description[de]=Erlaubt die Konfiguration von Systemlimits für Benutzer (z.B. die maximale Anzahl offener Dateien). Der erste Platzhalter ist ein Benutzername, der zweite der Name des Systemlimits. Eine Übersicht der konfigurierbaren Limits kann mit 'man limits.conf' abgerufen werden. Das Soft-Limit definiert den Standardwert, der für die Prozesse des Benutzer gilt.
+Description[en]=Allow the configuration of system limits for users (e.g. the maximum number of open files). The first placeholder is a user name, the second the name of a system limit. An overview of configurable limits can be retrieved with 'man limits.conf'. The soft limit defines the default setting for the processes of the user.
+Type=int
+Categories=system-base
+
+[security/limits/group/.*/hard/.*]
+Description[de]=Erlaubt die Konfiguration von Systemlimits für Gruppen (z.B. die maximale Anzahl offener Dateien). Der erste Platzhalter ist ein Gruppenname, der zweite der Name des Systemlimits. Eine Übersicht der konfigurierbaren Limits kann mit 'man limits.conf' abgerufen werden. Das Hard-Limit definiert die Obergrenze, die ein Gruppenmitglied maximal einem Prozess zuweisen kann.
+Description[en]=Allow the configuration of system limits for groups (e.g. the maximum number of open files). The first placeholder is a group name, the second the name of a system limit. An overview of configurable limits can be retrieved with 'man limits.conf'. The hard limit defines the upper limit a group member can assign to a process.
+Type=int
+Categories=system-base
+
+[security/limits/group/.*/soft/.*]
+Description[de]=Erlaubt die Konfiguration von Systemlimits für Gruppen (z.B. die maximale Anzahl offener Dateien). Der erste Platzhalter ist ein Gruppenname, der zweite der Name des Systemlimits. Eine Übersicht der konfigurierbaren Limits kann mit 'man limits.conf' abgerufen werden. Das Soft-Limit definiert den Standardwert, der für die Prozesse der Gruppenmitglieder gilt.
+Description[en]=Allow the configuration of system limits for groups (e.g. the maximum number of open files). The first placeholder is a group name, the second the name of a system limit. An overview of configurable limits can be retrieved with 'man limits.conf'. The soft limit defines the default setting for processes of the group members.
+Type=int
+Categories=system-base
+
+[security/limits/default/user/hard/.*]
+Description[de]=Erlaubt die Konfiguration von Standard-Systemlimits für Benutzer (z.B. die maximale Anzahl offener Dateien). Der Platzhalter ist der Name des Systemlimits. Eine Übersicht der konfigurierbaren Limits kann mit 'man limits.conf' abgerufen werden. Das Hard-Limit definiert die Obergrenze, die ein Benutzer maximal einem Prozess zuweisen kann.
+Description[en]=Allow the configuration of default system limits for users (e.g. the maximum number of open files). The placeholder is the second the name of a system limit. An overview of configurable limits can be retrieved with 'man limits.conf'. The hard limit defines the upper limit a user can assign to a process.
+Type=str
+Categories=system-base
+
+[security/limits/default/user/soft/.*]
+Description[de]=Erlaubt die Konfiguration von Standard-Systemlimits für Benutzer (z.B. die maximale Anzahl offener Dateien). Der Platzhalter ist der Name des Systemlimits. Eine Übersicht der konfigurierbaren Limits kann mit 'man limits.conf' abgerufen werden. Das Soft-Limit definiert den Standardwert, der für die Prozesse des Benutzer gilt.
+Description[en]=Allow the configuration of default system limits for users (e.g. the maximum number of open files). The placeholder is the name of a system limit. An overview of configurable limits can be retrieved with 'man limits.conf'. The soft limit defines the default setting for the processes of the user.
+Type=int
+Categories=system-base
+
+[auth/faillog]
+Description[de]=Aktiviert das automatische Sperren von Benutzerkonten falls die Anmeldung zu häufig fehlschlägt. Ist die Variable nicht gesetzt, ist die Funktion deaktiviert.
+Description[en]=Activates automatic user account locking if too many login attempts fail. If the variable isn't set, the function is deactivated.
+Type=bool
+Categories=system-base
+
+[auth/faillog/limit]
+Description[de]=Wenn automatische Anmeldesperren über die Variable auth/faillog aktiviert wurde, kann mit dieser Variable konfiguriert werden, ab wie vielen fehlerhaften Passworteingaben die Sperre in Kraft tritt. Ist die Variable nicht gesetzt, beträgt der Wert 5.
+Description[en]=If automatic user lockouts have been activated via the variable auth/faillog, this variable configures the number of failed password inputs, after which the lockout is activated. If the variable isn't set, the value 5 applies.
+Type=int
+Categories=system-base
+
+[auth/faillog/root]
+Description[de]=In der Grundeinstellung ist das root-Konto von den automatischen Anmeldesperren ausgenommen. Wird diese Option aktiviert, gilt sie auch für root.
+Description[en]=By default the root user is exempted from automatic user lockouts. If this option is activated, it also applies to root.
+Type=bool
+Categories=system-base
+
+[auth/faillog/unlock_time]
+Description[de]=Wird in dieser Variable ein Wert in Sekunden eingetragen, wird das Benutzerkonto nach Ablauf der angegebenen Zeit automatisch entsperrt. Ist die Variable nicht gesetzt oder auf 0 gesetzt, erfolgt keine automatische Entsperrung und das Benutzerkonto muss vom Administrator in der Univention Management Console entsperrt werden.
+Description[en]=If this variable is set to a time in seconds, the user account is automatically unlocked after the time interval has passed. If the variable isn't set or set to 0 no automatic unlocking occurs and the user account needs to be unlocked by an administrator in the Univention Management Console.
+Type=int
+Categories=system-base
+
+[auth/faillog/lock_global]
+Description[de]=Wird die Option aktiviert, erfolgt die Speicherung der Anmeldesperren nicht lokal pro Server, sondern global im LDAP-Verzeichnisdienst. Ist die Variable nicht gesetzt, erfolgt die Speicherung lokal. Weitere Hinweise zum Einsatz der globalen Anmeldesperre finden sich im UCS-Handbuch.
+Description[en]=If this option is activated, the status of the user lockouts isn't stored per server, but instead in the LDAP directory. If the variable isn't set, the status is stored locally. Further information on global user lockouts can be found in the UCS manual.
+Type=bool
+Categories=system-base
+
+[auth/.*/restrict]
+Description[de]=Die Option aktiviert über das PAM-Modul pam_access Anmeldebeschränkungen für den angegebenen Dienst. Ist die Variable auth/SERVICE/restrict aktiviert,  können sich nur Benutzer anmelden,  die über weitere Variablen in der Form auth/SERVICE/user/BENUTZERNAME=yes oder auth/SERVICE/group/GRUPPENNAME=yes zugelassen sind. Mögliche Werte als Service sind: chfn, chsh, cron, ftp, gdm, kdm, kcheckpass, kde, kscreensaver, login, other, passwd, ppp, rlogin, rsh, screen, sshd, su und sudo.
+Description[en]=This option activates login restrictions for the given service using pam_access. If the variable auth/SERVICE/restrict is activated,  only users can login,  which are allows using variables in the form auth/SERVICE/user/USERNAME=yes or auth/SERVICE/group/GROUPNAME=yes. Possible values for the service are: chfn, chsh, cron, ftp, gdm, kdm, kcheckpass, kde, kscreensaver, login, other, passwd, ppp, rlogin, rsh, screen, sshd, su and sudo.
+Type=bool
+Categories=system-base
+
+[auth/.*/accessfile]
+Description[de]=Mit den Daten der Variablen auth/SERVICE/group/GRUPPENNAME und auth/SERVICE/user/BENUTZERNAME wird eine Konfigurationsdatei /etc/security/access-SERVICE.conf generiert und verwendet. Mit dieser Variable kann eine abweichende Zugriffsdatei konfiguriert werden.
+Description[en]=Based on the data of the variables auth/SERVICE/group/GROUPNAME und auth/SERVICE/user/USERNAME, a configuration file /etc/security/access-SERVICE.conf is generated and used. With this variable a different access file can be configured.
+Type=str
+Categories=system-base
+
+[auth/.*/group/.*]
+Description[de]=Existiert eine Anmeldebeschränkung mittels auth/SERVICE/restrict=yes, ist die Anmeldung nur Gruppen erlaubt, die mit auth/SERVICE/group/GRUPPENNAME=yes aktiviert wurden, z.B. "auth/sshd/group/Domain Admins=yes".
+Description[en]=If a login restriction is enabled using auth/SERVICE/restrict=yes, the login is limited to groups, which were activated using auth/SERVICE/group/GROUPNAME=yes, e.g. "auth/sshd/group/Domain Admins=yes".
+Type=str
+Categories=system-base
+
+[auth/.*/user/.*]
+Description[de]=Existiert eine Anmeldebeschränkung mittels auth/SERVICE/restrict=yes, ist die Anmeldung nur Benutzern erlaubt, die mit auth/SERVICE/group/BENUTZERNAME=yes aktiviert wurden, z.B. "auth/sshd/user/Administrator=yes".
+Description[en]=If a login restriction is enabled using auth/SERVICE/restrict=yes, the login is limited to groups, which were activated using auth/SERVICE/group/GROUPNAME=yes, e.g. "auth/sshd/user/Administrator=yes".
+Type=str
+Categories=system-base
+
+[nss/group/cachefile]
+Description[de]=Ist diese Option aktiviert, werden alle Gruppeninformationen in eine Cachedatei exportiert und durch das NSS-Modul extrausers eingebunden. Dies führt in grossen Umgebungen zu erheblichen Performanceverbesserungen bei der Gruppenauflösung. Ist die Variable nicht gesetzt, wird die Zwischenspeicherung aktiviert.
+Description[en]=If this option is activated, all group data is exported to a cache file and included using the NSS module extrausers. This results to significant performance improvements in large environments. If the variable isn't set, the cache file is activated.
+Type=bool
+Categories=system-base
+
+[nss/group/cachefile/invalidate_on_changes]
+Description[de]=Wenn diese Variable aktiviert ist und die Gruppen-Cachedatei (Variable: nss/group/cachefile) verwendet wird, wird bei jeder Gruppenänderung im UCS-Managementsystem die Cachedatei automatisch neu geschrieben. Ist die Variable nicht gesetzt, ist die Option aktiviert.
+Description[en]=If this variable is activated and the group cache file has been enabled (variable: nss/group/cachefile), the cache file is automatically regenerated whenever a group is edited in the UCS management system. If this variable isn't set, the option is enabled.
+Type=bool
+Categories=system-base
+
+[nss/group/cachefile/invalidate_interval]
+Description[de]=Wird die Gruppen-Cachedatei verwendet (Variable: nss/group/cachefile), werden die Gruppeninformationen in dem hier konfigurierten Intervall in die Cachedatei exportiert. Die Angabe erfolgt im Cron-Format, siehe "man 5 crontab".
+Description[en]=If the group cache file is used (variable: nss/group/cachefile), the group data is exported to the cache file in the interval specified here. The interval is specified in Cron format, see "man 5 crontab".
+Type=str
+Categories=system-base
+
+[nss/group/cachefile/check_member]
+Description[de]=Wenn die Option aktiviert ist, wird während des Exports der Gruppencachedatei geprüft, ob alle exportierten Gruppenmitglieder noch im LDAP vorhanden sind. Wenn für die Verwaltung der Gruppen- und Benutzerdaten ausschließlich die Univention Management Console zum Einsatz kommt, kann diese zusätzliche Prüfung deaktiviert werden.
+Description[en]=If this option is activated, the group cache export verifies whether the exported group members are still present in the LDAP directory. If only the Univention Management Console is used for the management of the LDAP directory, this additional check is not necessary and can be disabled.
+Type=bool
+Categories=system-base
+
+[homedir/create]
+Description[de]=Definiert, ob für Benutzer beim Login ein Heimatverzeichnis erstellt werden soll. Ist die Variable nicht gesetzt, wird ein Heimatverzeichnis erstellt.
+Description[en]=Defines whether a users home directory should be created (if necessary) during login. If the variable isn't set, a home directory is created.
+Type=bool
+Categories=system-base
+
+[homedir/mount]
+Description[de]=Ist diese Option aktiviert, wird das für den Benutzer im UCS-Managementsystem konfigurierte Heimatverzeichnis bei der Anmeldung eingebunden.
+Description[en]=If this option is enabled, the home directory configured for the user in the UCS management system is mounted during login.
+Type=bool
+Categories=system-base
+
+[homedir/mount/required]
+Description[de]=Definiert, ob das Einbinden von Heimatverzeichnissen von Benutzern Voraussetzung für ein erfolgreichen Login ist.
+Description[en]=Defines whether a successful mount of the users home directory is required for the login.
+Type=bool
+Categories=system-base
+
+[listener/module/wellknownsidnamemapping]
+Description[de]=Aktiviert bzw. deaktiviert das Listener-Modul well-known-sid-name-mapping.
+Description[en]=Enables or disables the listener module well-known-sid-name-mapping.
+Type=bool
+Categories=system-base
