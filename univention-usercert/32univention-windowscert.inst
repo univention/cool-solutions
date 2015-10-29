@@ -224,7 +224,7 @@ if joinscript_check_specific_version_executed "1"; then
     	hochgeladen werden."'
 fi
 
-if joinscript_check_version_in_range_executed "1..2"; then
+if joinscript_check_version_in_range_executed "1" "2"; then
     univention-directory-manager settings/extended_attribute modify "$@" \
 	--dn "cn=renewCertificateWindows,cn=custom attributes,cn=univention,$ldap_base" \
 	--set tabPosition=3

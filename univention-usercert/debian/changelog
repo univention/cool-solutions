@@ -1,3 +1,10 @@
+univention-usercert (4.0.5-1) unstable; urgency=medium
+
+  * Fixed joinscript 32univention-windowscert.inst
+  * Issue #3197
+
+ -- Timo Denissen <denissen@univention.de>  Thu, 29 Oct 2015 15:10:37 +0100
+
 univention-usercert (4.0.4-1) unstable; urgency=medium
 
   * Moved extended attribute "certificateDays" further down
