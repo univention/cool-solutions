@@ -30,7 +30,7 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-VERSION=2
+VERSION=3
 . /usr/share/univention-join/joinscripthelper.lib
 joinscript_init
 
@@ -66,7 +66,7 @@ univention-directory-manager settings/extended_attribute create "$@" --ignore_ex
  --set 'translationLongDescription="de_DE" "Anzahl der Tage, die ein neu erstelltes Zertifikat gültig ist"' \
  --set tabName="User Certificate" \
  --set 'translationTabName="de_DE" "Benutzerzertifikat"' \
- --set tabPosition=2 \
+ --set tabPosition=5 \
  --set options="pki" \
  --set module="users/user" \
  --set syntax="integer" \
@@ -96,6 +96,12 @@ univention-directory-manager settings/extended_attribute create "$@" --ignore_ex
  --set doNotSearch=1 \
  --set objectClass="univentionManageCertificates" \
  --set ldapMapping="univentionRenewCertificate"
+
+if joinscript_check_specific_version_executed "2"; then
+    univention-directory-manager settings/extended_attribute modify "$@" \
+	--dn "cn=certificateDays,cn=custom attributes,cn=univention,$ldap_base" \
+	--set tabPosition=5
+fi
 
 joinscript_save_current_version
 

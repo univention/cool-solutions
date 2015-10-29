@@ -1,3 +1,13 @@
+univention-usercert (4.0.4-1) unstable; urgency=medium
+
+  * Moved extended attribute "certificateDays" further down
+  * Moved extended attribute "renewCertificateWindows" further down
+  * Moved extended attribute "certificateDaysWindows" further down
+  * Moved extended attribute "windowsCertificate" further down
+  * Issue #3197
+
+ -- Timo Denissen <denissen@univention.de>  Thu, 29 Oct 2015 14:37:42 +0100
+
 univention-usercert (4.0.3-1) unstable; urgency=medium
 
   * Added hint for DER encoded certificate for uploading a certificate
