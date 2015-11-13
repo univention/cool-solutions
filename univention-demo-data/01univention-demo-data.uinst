@@ -148,11 +148,15 @@ for SERVER in Berlin Bremen Muenchen Stuttgart; do
 done
 
 if "${CITY_EMPTY}" && "${DEPARTMENT_EMPTY}"; then
-	/usr/sbin/udm container/ou remove --dn ou=People,"ou=univention-demo-data,${ldap_base}" > /dev/null
+	/usr/sbin/udm container/ou remove --dn "ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
 fi
 
 if "${SERVER_EMPTY}"; then
-	/usr/sbin/udm container/ou remove --dn ou=Departments,"ou=univention-demo-data,${ldap_base}" > /dev/null
+	/usr/sbin/udm container/ou remove --dn "ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+fi
+
+if "${CITY_EMPTY}" && "${DEPARTMENT_EMPTY}" && "${SERVER_EMPTY}"; then
+    /usr/sbin/udm container/ou remove --dn "ou=univention-demo-data,ou=univention-demo-data,${ldap_base}" > /dev/null
 fi
 
 joinscript_remove_script_from_status_file univention-cool-solutions-demo-data
