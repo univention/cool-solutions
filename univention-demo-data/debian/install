@@ -1,5 +1,5 @@
-99univention-cool-solutions-demo-data.inst usr/lib/univention-install
-01univention-cool-solutions-demo-data.uninst usr/lib/univention-uninstall
+99univention-demo-data.inst usr/lib/univention-install
+01univention-demo-data.uinst usr/lib/univention-uninstall
 images/anna.alster.jpg usr/share/demo-daten/images
 images/anton.aktie.jpg usr/share/demo-daten/images
 images/bärbel.bitte.jpg usr/share/demo-daten/images
