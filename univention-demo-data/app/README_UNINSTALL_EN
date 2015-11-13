@@ -1,0 +1,8 @@
+<p>During uninstallation, all created objects from this app will be removed. This includes
+<ul>
+<li>Computers</li>
+<li>Groups</li>
+<li>Users</li>
+</ul>
+If any object created by this app is moved to another location, eg. a user is moved to <b>cn=users</b>, that object is not removed.</p>
+<p>If any objects are created manually inside the LDAP directory created by this app, the corresponding directory path will <b>not</b> removed.</p>
