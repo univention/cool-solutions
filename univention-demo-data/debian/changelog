@@ -1,3 +1,10 @@
+univention-demo-data (2.0.2-1) unstable; urgency=medium
+
+  * Added check to remove parent ou "univention-demo-data" from LDAP
+  * Issue #2115
+
+ -- Timo Denissen <denissen@univention.de>  Fri, 13 Nov 2015 11:30:55 +0100
+
 univention-demo-data (2.0.1-1) unstable; urgency=medium
 
   * Renamed joinscript
