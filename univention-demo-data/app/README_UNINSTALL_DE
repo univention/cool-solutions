@@ -1,0 +1,8 @@
+<p>Während der Deinstallation werde alle Objekte, die durch diese App erstellt wurde, entfernt. Dabei werden folgende Objekte entfernt:</p>
+<ul>
+<li>Benutzer</li>
+<li>Computer</li>
+<li>Gruppen</li>
+</ul>
+Wenn ein Objekt, welches von dieser App erstellt wurde, in einen anderen Ordner, zB. <b>cn=users</b> verschoben wird, wird das Objekt nicht entfernt.</p>
+<p>Wenn ein Objekt innerhalb der LDAP-Struktur erstellt wird, die von dieser App erstellt wurde, wird der entsprechende Ordnerpfad <b>nicht</b> entfernt.</p>
