@@ -1,5 +1,6 @@
 univention-demo-data (2.0.3-1) unstable; urgency=medium
 
+  * Fixed unjoinscript to remove the correct parent ou (was given twice)
   * Fixed unjoinscript to remove the correct joinscript
   * Issue #2115
 
