@@ -1,0 +1,160 @@
+#!/bin/sh
+
+VERSION=1
+. /usr/share/univention-join/joinscripthelper.lib
+joinscript_init
+
+eval $(ucr shell)
+/usr/sbin/udm users/user remove --dn "uid=karl,ou=Berlin,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=peter,ou=Berlin,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=claudi,ou=Berlin,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=hilde,ou=Muenchen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=veit,ou=Bremen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=bernd,ou=Berlin,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=toni,ou=Stuttgart,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=olli,ou=Berlin,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=uwe,ou=Bremen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=sarah,ou=Berlin,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=lars,ou=Muenchen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=wine,ou=Berlin,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=baerbel,ou=Bremen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=zanna,ou=Stuttgart,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=xavier,ou=Bremen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=hans,ou=Stuttgart,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=rachel,ou=Bremen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=susi,ou=Bremen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=ingo,ou=Bremen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=zoltan,ou=Berlin,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=petra,ou=Stuttgart,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=fritz,ou=Berlin,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=willi,ou=Stuttgart,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=yvonne,ou=Muenchen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=lisa,ou=Bremen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=anton,ou=Stuttgart,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=nick,ou=Bremen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=heinz,ou=Berlin,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=gustav,ou=Muenchen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=erich,ou=Stuttgart,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=vera,ou=Muenchen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=ute,ou=Berlin,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=nora,ou=Berlin,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=janine,ou=Muenchen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=dagi,ou=Berlin,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=max,ou=Stuttgart,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=justus,ou=Berlin,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=chris,ou=Stuttgart,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=anna,ou=Berlin,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=robbi,ou=Stuttgart,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=keila,ou=Stuttgart,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=stefan,ou=Muenchen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=marti,ou=Bremen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=olga,ou=Muenchen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=gabi,ou=Bremen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=quentin,ou=Muenchen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=ina,ou=Berlin,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=moni,ou=Muenchen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=fiona,ou=Stuttgart,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=tamara,ou=Stuttgart,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=erika,ou=Muenchen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=xena,ou=Berlin,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm users/user remove --dn "uid=dom,ou=Bremen,ou=People,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation0815,ou=Berlin,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation0815,ou=Berlin,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation0815,ou=Berlin,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5022,ou=Berlin,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5024,ou=Berlin,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5026,ou=Berlin,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5028,ou=Berlin,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5036,ou=Berlin,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5038,ou=Berlin,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5044,ou=Berlin,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5048,ou=Berlin,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5049,ou=Berlin,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5051,ou=Berlin,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5053,ou=Berlin,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5055,ou=Berlin,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5063,ou=Berlin,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5068,ou=Berlin,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5021,ou=Bremen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5025,ou=Bremen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5029,ou=Bremen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5031,ou=Bremen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5033,ou=Bremen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5034,ou=Bremen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5035,ou=Bremen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5041,ou=Bremen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5043,ou=Bremen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5059,ou=Bremen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5061,ou=Bremen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5069,ou=Bremen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5020,ou=Muenchen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5027,ou=Muenchen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5040,ou=Muenchen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5045,ou=Muenchen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5047,ou=Muenchen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5050,ou=Muenchen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5058,ou=Muenchen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5060,ou=Muenchen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5062,ou=Muenchen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5064,ou=Muenchen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5067,ou=Muenchen,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5023,ou=Stuttgart,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5030,ou=Stuttgart,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5032,ou=Stuttgart,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5037,ou=Stuttgart,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5039,ou=Stuttgart,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5042,ou=Stuttgart,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5046,ou=Stuttgart,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5052,ou=Stuttgart,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5054,ou=Stuttgart,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5056,ou=Stuttgart,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5057,ou=Stuttgart,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5065,ou=Stuttgart,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+/usr/sbin/udm computers/windows remove  --dn "cn=workstation5066,ou=Stuttgart,ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+
+CITY_EMPTY=true
+DEPARTMENT_EMPTY=true
+SERVER_EMPTY=true
+
+for CITY in Berlin Bremen Muenchen Stuttgart; do
+	USER_NULL="$(/usr/sbin/udm users/user list --superordinate ou="${CITY}",ou=People,${ldap_base} | grep -c "^DN: ")"
+	if [ "${USER_NULL}" -eq 0 ]; then
+		/usr/sbin/udm container/ou remove --dn ou="${CITY}",ou=People,"ou=univention-demo-data,${ldap_base}" > /dev/null
+	else
+		echo "OU 'ou=${CITY},ou=People' has users left, therefore it is not removed."
+		CITY_EMPTY=false
+	fi
+done
+
+for DEPARTMENT in Berlin Bremen Hardware KM Muenchen OSS Stuttgart Vertrieb Verwaltung; do
+	USER_NULL="$(/usr/sbin/udm groups/group list --filter cn="users office ${DEPARTMENT}" | grep -c "^  users: ")"
+	if [ "${USER_NULL}" -eq 0 ]; then
+		/usr/sbin/udm groups/group remove --dn cn=users\ office\ "${DEPARTMENT}",ou=People,"ou=univention-demo-data,${ldap_base}" > /dev/null
+	else
+		echo "Group 'cn=users office ${DEPARTMENT}' has users left, therefore it is not removed."
+		DEPARTMENT_EMPTY=false
+	fi
+done
+
+for SERVER in Berlin Bremen Muenchen Stuttgart; do
+	COMPUTER_NULL="$(/usr/sbin/udm computers/windows list --superordinate ou=${SERVER},ou=Departments,${ldap_base} | grep -c "^DN: ")"
+	if [ "${COMPUTER_NULL}" -eq 0 ]; then
+		/usr/sbin/udm computers/memberserver remove --dn "cn=server-${SERVER},ou=Departments,ou=univention-demo-data,${ldap_base}" > /dev/null
+		/usr/sbin/udm container/ou remove --dn ou="${SERVER}",ou=Departments,"ou=univention-demo-data,${ldap_base}" > /dev/null
+	else
+		echo "OU 'ou=${SERVER},ou=Departments' has computers left, therefore it is not removed."
+		SERVER_EMPTY=false
+	fi
+done
+
+if "${CITY_EMPTY}" && "${DEPARTMENT_EMPTY}"; then
+	/usr/sbin/udm container/ou remove --dn ou=People,"ou=univention-demo-data,${ldap_base}" > /dev/null
+fi
+
+if "${SERVER_EMPTY}"; then
+	/usr/sbin/udm container/ou remove --dn ou=Departments,"ou=univention-demo-data,${ldap_base}" > /dev/null
+fi
+
+joinscript_remove_script_from_status_file univention-cool-solutions-demo-data
+
+exit 0
