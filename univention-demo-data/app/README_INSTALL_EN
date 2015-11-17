@@ -1,0 +1,8 @@
+<p>This app will now install demo data in the following categories:</p>
+<ul>
+<li>Computers</li>
+<li>Groups</li>
+<li>Users</li>
+</ul>
+<p>The objects will be created in the new container <b>ou=univention-demo-data</ou>.</p>
+<p>Existing objects with the same name pattern will <b>not</b> be overwritten.</p>
