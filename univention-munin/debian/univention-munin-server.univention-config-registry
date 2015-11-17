@@ -14,4 +14,3 @@ Variables: auth/munin/group/.*
 Variables: auth/munin/user/.*
 Variables: users/default/.*
 Variables: groups/default/.*
-

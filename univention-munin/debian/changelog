@@ -1,12 +1,22 @@
+univention-munin (1.0.0-3) unstable; urgency=medium
+
+  * fix ucrlint erors
+  * register variables for munin-node.conf
+  * remove empty lines in debian/*.univention-config-registry files
+  * Issue #2722
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Tue, 17 Nov 2015 14:35:22 +0100
+
 univention-munin (1.0.0-2) unstable; urgency=medium
 
-  * fix ucr-lint warnings
+  * fix ucrlint warnings
   * Issue #2722
 
  -- Tobias Birkefeld <birkefeld@univention.de>  Tue, 17 Nov 2015 14:21:01 +0100
 
 univention-munin (1.0.0-1) unstable; urgency=low
 
-  * Initial release (Issue: #2722)
+  * Initial release
+  * Issue #2722
 
  -- Tobias Birkefeld <packages@univention.de>  Mon, 14 Sep 2015 16:05:15 +0200
