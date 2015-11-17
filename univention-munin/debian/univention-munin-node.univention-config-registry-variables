@@ -1,0 +1,4 @@
+[munin/server/allowedhosts]
+Description[de]=Eine univention-munin-Einstellung
+Description[en]=A univention-munin setting
+Type=str

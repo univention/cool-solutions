@@ -1,0 +1,4 @@
+Type: file
+File: etc/munin/munin-node.conf
+Variables: munin/server/allowedhosts
+

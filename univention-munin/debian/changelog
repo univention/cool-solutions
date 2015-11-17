@@ -1,0 +1,5 @@
+univention-munin (1.0.0-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Tobias Birkefeld <packages@univention.de>  Mon, 14 Sep 2015 16:05:15 +0200
