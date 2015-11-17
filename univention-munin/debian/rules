@@ -29,8 +29,8 @@
 # <http://www.gnu.org/licenses/>.
 
 # install UCR templates
-override_dh_auto_install:
-	dh_auto_install
+override_dh_install:
+	dh_install
 	univention-install-config-registry
 	univention-install-config-registry-info
 
