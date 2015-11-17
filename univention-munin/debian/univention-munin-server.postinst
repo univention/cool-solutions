@@ -49,4 +49,7 @@ univention-config-registry set \
 	ucs/web/overview/entries/admin/munin/link?'/munin/' \
 	ucs/web/overview/entries/admin/munin/priority?'50'
 
+# restart apache
+[ -x "/etc/init.d/apache2" ] && /etc/init.d/apache2 restart
+
 exit 0

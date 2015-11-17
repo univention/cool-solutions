@@ -1,3 +1,12 @@
+univention-munin (1.0.0-4) unstable; urgency=medium
+
+  * fix apache2 restart in postinst
+  * fix munin-node.conf to allow cidr notation for allowed hosts
+  * add libnet-cidr-perl to dependencies for univention-munin-node
+  * Issue #2722
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Tue, 17 Nov 2015 16:47:52 +0100
+
 univention-munin (1.0.0-3) unstable; urgency=medium
 
   * fix ucrlint erors

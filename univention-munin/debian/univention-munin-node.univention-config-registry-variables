@@ -1,5 +1,5 @@
 [munin/node/allowedhosts]
-Description[de]=Diese Variable beschränkt den Kreis der Rechner, die auf den Munin-Node zugreifen dürfen. Die Angabe der erlaubten Rechner erfolgt über ihren Rechnernamen oder ihre IP-Adresse. Ist die Variable nicht gesetzt, wird der Domänencontroller Master zugelassen. Mehrfache Einträge müssen durch Kommata getrennt werden.
-Description[en]=This variable limits the hosts which can access the Munin-Node service. The hosts need to be specified through their hostname or with an IP address. If the variable is unset, the master domain controller is used. Multiple entries need to be separated by commas.
+Description[de]=Diese Variable beschränkt den Kreis der Rechner, die auf den Munin-Node zugreifen dürfen. Die Angabe der erlaubten Rechner erfolgt über ihre IP-Adresse in CIDR Notation (192.0.2.42/32). Ist die Variable nicht gesetzt, wird der Domänencontroller Master zugelassen. Mehrfache Einträge müssen durch Kommata getrennt werden.
+Description[en]=This variable limits the hosts which can access the Munin-Node service. The hosts need to be specified with an IP address in CIDR notation (192.0.2.42/32). If the variable is unset, the master domain controller is used. Multiple entries need to be separated by commas.
 Type=str
 Categories=service-munin
