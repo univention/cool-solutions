@@ -1,0 +1,8 @@
+<p>Diese App fügt Demodaten, bestehend aus den folgenden Objekten, hinzu:</p>
+<ul>
+<li>Benutzer</li>
+<li>Computer</li>
+<li>Gruppen</li>
+</ul>
+<p>Die Objekte werden in dem neuen Container <b>ou=univention-demo-data</b> erstellt.</p>
+<p>Bestehende Objekte gleichen Namens werden <b>nicht</b> überschrieben.</p>
