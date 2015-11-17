@@ -4,5 +4,5 @@
 <li>Computer</li>
 <li>Gruppen</li>
 </ul>
-Sollte ein Objekt, welches von dieser App erstellt wurde, in einen anderen Ordner, beispielsweise <b>cn=users</b> verschoben worden sein, wird dieses Objekt nicht entfernt.</p>
+Sollte ein Objekt, welches von dieser App erstellt wurde, in einen anderen Ordner, beispielsweise <u>cn=users</u> verschoben worden sein, wird dieses Objekt <b>nicht</b> entfernt.</p>
 <p>Wenn ein Objekt unterhalb der <b>ou=univention-demo-data</b> erstellt wurde, wird der entsprechende Ordnerpfad <b>nicht</b> entfernt.</p>
