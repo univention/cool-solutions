@@ -1,3 +1,10 @@
+univention-munin (1.0.0-6) unstable; urgency=medium
+
+  * revert removed icon and fix links
+  * Issue #2722
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Wed, 18 Nov 2015 10:34:25 +0100
+
 univention-munin (1.0.0-5) unstable; urgency=medium
 
   * remove icon and set ucrv to the icon of the munin package

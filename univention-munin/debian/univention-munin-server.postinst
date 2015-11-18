@@ -43,7 +43,7 @@ univention-config-registry set \
 univention-config-registry set \
 	ucs/web/overview/entries/admin/munin/description/de?'Netzwerk-, Host- und Serviceüberwachung' \
 	ucs/web/overview/entries/admin/munin/description?'A networked resource monitoring tool' \
-	ucs/web/overview/entries/admin/munin/icon?'/munin/static/logo.png' \
+	ucs/web/overview/entries/admin/munin/icon?'/icon/munin.png' \
 	ucs/web/overview/entries/admin/munin/label?'Munin' \
 	ucs/web/overview/entries/admin/munin/label/de?'Munin' \
 	ucs/web/overview/entries/admin/munin/link?'/munin/' \
