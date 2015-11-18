@@ -1,4 +1,7 @@
 Type: file
+File: etc/munin/munin.conf
+
+Type: file
 File: etc/munin/apache.conf
 Variables: munin/server/authenticate
 

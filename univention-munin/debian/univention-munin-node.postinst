@@ -32,6 +32,9 @@
 
 #DEBHELPER#
 
+# restart munin node
+[ -x "/etc/init.d/munin-node" ] && /etc/init.d/munin-node restart
+
 # configure firewall
 univention-config-registry set \
 	security/packetfilter/package/univention-munin-node/tcp/4949/all="ACCEPT" \

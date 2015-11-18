@@ -32,10 +32,7 @@
 
 #DEBHELPER#
 
-# configure firewall
-univention-config-registry unset \
-	security/packetfilter/package/univention-munin-node/tcp/4949/all \
-	security/packetfilter/package/univention-munin-node/tcp/4949/all/en
+# reload firewall config
 [ -x "/etc/init.d/univention-firewall" ] && invoke-rc.d univention-firewall restart
 
 exit 0
