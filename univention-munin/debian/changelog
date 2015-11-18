@@ -1,3 +1,10 @@
+univention-munin (1.0.0-8) unstable; urgency=medium
+
+  * fix order of restarts in postinst
+  * Issue #2722
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Wed, 18 Nov 2015 12:53:05 +0100
+
 univention-munin (1.0.0-7) unstable; urgency=medium
 
   * fix postrm
