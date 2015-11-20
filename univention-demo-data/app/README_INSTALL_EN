@@ -4,5 +4,5 @@
 <li>Groups</li>
 <li>Users</li>
 </ul>
-<p>The objects will be created in the new container <b>ou=univention-demo-data</ou>.</p>
+<p>The objects will be created in the new container <b>ou=univention-demo-data</b>.</p>
 <p>Existing objects with the same name pattern will <b>not</b> be overwritten.</p>
