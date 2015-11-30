@@ -1,3 +1,11 @@
+univention-demo-data (2.0.4-1) unstable; urgency=medium
+
+  * Removed mailPrimaryAddress from joinscript
+  * Fixed wrong image folder
+  * Issue #2115
+
+ -- Timo Denissen <denissen@univention.de>  Mon, 30 Nov 2015 10:11:01 +0100
+
 univention-demo-data (2.0.3-1) unstable; urgency=medium
 
   * Fixed unjoinscript to remove the correct parent ou (was given twice)
