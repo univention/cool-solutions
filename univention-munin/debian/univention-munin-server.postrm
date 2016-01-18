@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# univention munin node
+# univention munin server
 #  postrm script
 #
 # Copyright 2015 Univention GmbH
@@ -32,11 +32,21 @@
 
 #DEBHELPER#
 
-# unsett firewall settings
+# unset baseconfig settings
 univention-config-registry unset \
-	security/packetfilter/package/univention-munin-node/tcp/4949/all \
-	security/packetfilter/package/univention-munin-node/tcp/4949/all/en
-# reload firewall config
-[ -x "/etc/init.d/univention-firewall" ] && invoke-rc.d univention-firewall restart
+	munin/server/authenticate \
+	auth/munin/restrict \
+	auth/munin/group/Domain Admins \
+	auth/munin/user/Administrator
+
+# umc overview
+univention-config-registry unset \
+	ucs/web/overview/entries/admin/munin/description/de \
+	ucs/web/overview/entries/admin/munin/description \
+	ucs/web/overview/entries/admin/munin/icon \
+	ucs/web/overview/entries/admin/munin/label \
+	ucs/web/overview/entries/admin/munin/label/de \
+	ucs/web/overview/entries/admin/munin/link \
+	ucs/web/overview/entries/admin/munin/priority
 
 exit 0
