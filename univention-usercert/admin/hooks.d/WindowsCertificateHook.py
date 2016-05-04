@@ -3,6 +3,7 @@ from univention.admin.hook import simpleHook
 import M2Crypto
 import re
 import string
+import base64
 
 class WindowsCertificateHook(simpleHook):
 
