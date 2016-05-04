@@ -1,3 +1,9 @@
+univention-usercert (4.0.6-1) unstable; urgency=medium
+
+  * Fixed import of base64 in WindowsCertificateHook.py - Issue #5109
+
+ -- Michael Grandjean <grandjean@univention.de>  Wed, 04 May 2016 13:31:54 +0200
+
 univention-usercert (4.0.5-1) unstable; urgency=medium
 
   * Fixed joinscript 32univention-windowscert.inst
