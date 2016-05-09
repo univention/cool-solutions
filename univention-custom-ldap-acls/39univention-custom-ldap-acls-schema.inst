@@ -1,0 +1,68 @@
+#! /bin/sh
+#
+# Univention Custom LDAP ACLs
+#  join script
+#
+# Copyright (C) 2008-2016 Univention GmbH
+#
+# http://www.univention.de/
+#
+# All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# Binary versions of this file provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+VERSION=1
+
+touch /usr/lib/univention-install/.index.txt
+
+if ! test -e "/usr/share/univention-join/.joined"; then
+	echo "The server has not joined yet"
+	exit 1
+fi
+
+test -n "`grep "univention-custom-ldap-acls-schema v${VERSION} successful" /usr/lib/univention-install/.index.txt`" && exit 1
+
+eval $(univention-config-registry shell)
+
+univention-directory-manager container/cn create $@ --ignore_exists \
+	--position "cn=custom attributes,cn=univention,$ldap_base" --set name="LDAP ACLs"
+
+# Custom Attributes already exist in LDAP, no need to port them
+#univention-directory-manager settings/customattribute create $@ --ignore_exists \
+#	--position "cn=LDAP ACLs,cn=custom attributes,cn=univention,$ldap_base" \
+#	--set name=users-create --append module=container/cn --append module=container/ou \
+#	--set tabName=Berechtigungen --set tabPosition=1 \
+#	--set shortDescription="Anlegen von Benutzern" \
+#	--set objectClass=univentionCustomACLReferences --set deleteObjectClass=1 \
+#	--set syntax=userDn --set ldapMapping=univentionCustomACLReferenceUserCreate \
+#	--set multivalue=1
+#
+#univention-directory-manager settings/customattribute create $@ --ignore_exists \
+#	--position "cn=LDAP ACLs,cn=custom attributes,cn=univention,$ldap_base" \
+#	--set name=groups-modify --append module=container/cn --append module=container/ou \
+#	--set tabName=Berechtigungen --set tabPosition=7 \
+#	--set shortDescription="Bearbeiten von Gruppen" \
+#	--set objectClass=univentionCustomACLReferences --set deleteObjectClass=1 \
+#	--set syntax=userDn --set ldapMapping=univentionCustomACLReferenceGroupModify \
+#	--set multivalue=1
+
+test -n "`grep "univention-custom-ldap-acls-schema v${VERSION} successful" /usr/lib/univention-install/.index.txt`" || echo "univention-custom-ldap-acls-schema v${VERSION} successful" >>/usr/lib/univention-install/.index.txt
+
+exit 0
