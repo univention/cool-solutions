@@ -1,0 +1,10 @@
+Type: multifile
+Multifile: etc/ldap/slapd.conf
+Variables: ldap/acls/temporary_objects/groups
+Variables: ldap/acls/custom/.*
+
+Type: subfile
+Multifile: etc/ldap/slapd.conf
+Subfile: etc/ldap/slapd.conf.d/65univention-custom-ldap-acls
+Variables: ldap/acls/temporary_objects/groups
+Variables: ldap/acls/custom/.*

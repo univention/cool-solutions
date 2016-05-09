@@ -1,0 +1,4 @@
+@!@
+if configRegistry[ 'ldap/server/type' ] == 'master':
+        print 'include         /usr/share/univention-custom-ldap-acls-schema/univention-custom-acl-attributes.schema'
+@!@
