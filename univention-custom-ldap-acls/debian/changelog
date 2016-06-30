@@ -1,3 +1,10 @@
+univention-custom-ldap-acls (2.0.0-2) unstable; urgency=medium
+
+  * Changed language for ucr variables 
+  * Issue #3938
+
+ -- Marcel Rehberg <rehberg@univention.de>  Thu, 30 Jun 2016 10:50:25 +0200
+
 univention-custom-ldap-acls (2.0.0-1) unstable; urgency=medium
 
   * Bumped to UCS 4.0

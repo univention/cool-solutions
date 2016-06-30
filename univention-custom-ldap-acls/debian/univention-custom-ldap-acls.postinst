@@ -35,12 +35,12 @@ eval $(univention-config-registry shell server/role)
 if [ "$server_role" = "domaincontroller_master" -o "$server_role" = "domaincontroller_backup" ]; then
 	univention-config-registry set ldap/acls/custom/univentionCustomACLReferenceUserCreate/create=yes \
 		ldap/acls/custom/univentionCustomACLReferenceUserCreate/filter="objectClass=posixAccount" \
-		ldap/acls/custom/univentionCustomACLReferenceUserCreate/description="Anlegen von Benutzern" \
+		ldap/acls/custom/univentionCustomACLReferenceUserCreate/description="Edit users" \
 		\
 		ldap/acls/custom/univentionCustomACLReferenceGroupModify/create=no \
 		ldap/acls/custom/univentionCustomACLReferenceGroupModify/filter="objectClass=univentionGroup" \
 		ldap/acls/custom/univentionCustomACLReferenceGroupModify/attrs="uniqueMember,memberUid" \
-		ldap/acls/custom/univentionCustomACLReferenceGroupModify/description="Bearbeiten von Gruppen"
+		ldap/acls/custom/univentionCustomACLReferenceGroupModify/description="Edit groups"
 
 	/etc/init.d/slapd restart
 fi
