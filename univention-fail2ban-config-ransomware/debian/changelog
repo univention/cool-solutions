@@ -1,0 +1,47 @@
+univention-fail2ban-config-ransomware (1.0.3-1) unstable; urgency=medium
+
+  * fix in debian folder. Issue #5416
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Fri, 10 Jun 2016 13:12:01 +0200
+
+univention-fail2ban-config-ransomware (1.0.3-0) unstable; urgency=medium
+
+  * fix package structure. Issue #5416
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Fri, 10 Jun 2016 12:54:38 +0200
+
+univention-fail2ban-config-ransomware (1.0.2-2) unstable; urgency=medium
+
+  * fix debian/rules. Issue #5416
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Fri, 10 Jun 2016 12:12:47 +0200
+
+univention-fail2ban-config-ransomware (1.0.2-1) unstable; urgency=medium
+
+  * fix package structure to conffiles. Issue #5416
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Fri, 10 Jun 2016 12:09:23 +0200
+
+univention-fail2ban-config-ransomware (1.0.2-0) unstable; urgency=medium
+
+  * fix package structure to conffiles. Issue #5416
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Fri, 10 Jun 2016 11:44:15 +0200
+
+univention-fail2ban-config-ransomware (1.0.1-1) unstable; urgency=medium
+
+  * fix jail.local, mail-lines.conf action and regex filters. Issue #5416
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Fri, 10 Jun 2016 11:09:25 +0200
+
+univention-fail2ban-config-ransomware (1.0.1-0) unstable; urgency=medium
+
+  * fix names and config. Issue #5416
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Thu, 09 Jun 2016 12:53:24 +0200
+
+univention-fail2ban-config-ransomware (1.0.0-0) unstable; urgency=medium
+
+  * Initial commit Issue #5416
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 08 Jun 2016 15:49:55 +0200
