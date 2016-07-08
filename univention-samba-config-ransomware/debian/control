@@ -1,0 +1,12 @@
+Source: univention-samba-config-ransomware
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Build-Depends: debhelper (>=7)
+Standards-Version: 3.9.6
+Homepage: http://www.univention.de/
+
+Package: univention-samba-config-ransomware
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Configuration for Samba to implement full_audit logging for shares
