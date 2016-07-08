@@ -1,0 +1,12 @@
+Source: univention-fail2ban-config-ransomware
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Build-Depends: debhelper (>=7)
+Standards-Version: 3.9.6
+Homepage: http://www.univention.de/
+
+Package: univention-fail2ban-config-ransomware
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, fail2ban
+Description: Configuration for fail2ban to detect Samba full_audit log messages
