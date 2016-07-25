@@ -1,3 +1,10 @@
+univention-custom-ldap-acls (2.0.1-1) unstable; urgency=medium
+
+  * removed '#' in front of the udm command
+  * Issue #3938
+
+ -- Marcel Rehberg <rehberg@univention.de>  Mon, 25 Jul 2016 08:47:39 +0200
+
 univention-custom-ldap-acls (2.0.0-2) unstable; urgency=medium
 
   * Changed language for ucr variables 
