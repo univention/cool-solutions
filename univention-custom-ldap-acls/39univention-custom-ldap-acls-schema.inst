@@ -46,20 +46,20 @@ univention-directory-manager container/cn create $@ --ignore_exists \
 
 # Custom Attributes already exist in LDAP, no need to port them
 
-univention-directory-manager settings/extended_attribute $@ --ignore_exists \
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
 	--position "cn=LDAP ACLs,cn=custom attributes,cn=univention,$ldap_base" \
 	--set name=users-create --append module=container/cn --append module=container/ou \
-	--set tabName=Berechtigungen --set tabPosition=1 \
-	--set shortDescription="Anlegen von Benutzern" \
+	--set tabName=authorization --set tabPosition=1 \
+	--set shortDescription="Editing users" \
 	--set objectClass=univentionCustomACLReferences --set deleteObjectClass=1 \
 	--set syntax=userDn --set ldapMapping=univentionCustomACLReferenceUserCreate \
 	--set multivalue=1
 
-univention-directory-manager settings/extended_attribute create $@ --ignore_exists \
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
 	--position "cn=LDAP ACLs,cn=custom attributes,cn=univention,$ldap_base" \
 	--set name=groups-modify --append module=container/cn --append module=container/ou \
-	--set tabName=Berechtigungen --set tabPosition=7 \
-	--set shortDescription="Bearbeiten von Gruppen" \
+	--set tabName=authorization --set tabPosition=7 \
+	--set shortDescription="Editing groups" \
 	--set objectClass=univentionCustomACLReferences --set deleteObjectClass=1 \
 	--set syntax=userDn --set ldapMapping=univentionCustomACLReferenceGroupModify \
 	--set multivalue=1
