@@ -73,31 +73,33 @@ def parse_certificate(certificate):
 	else:
 		x509 = M2Crypto.X509.load_cert_string(certificate)
 
-	not_after = "%s" % x509.get_not_after()
-	subject = "%s" % x509.get_subject()
+	subject = x509.get_subject()
 	serial = x509.get_serial_number()
-	epoch_not_after = time.mktime(time.strptime(not_after, "%b %d %H:%M:%S %Y %Z"))
-	epoch_now = time.time()
-	valid = "invalid per date"
+	not_after = x509.get_not_after()
 
-	date_not_after = datetime.datetime.fromtimestamp(epoch_not_after)
+	date_not_after = not_after.get_datetime().replace(tzinfo=None)
 	date_now = datetime.datetime.now()
 	delta = date_not_after - date_now
-	delta = delta.days
-	date_not_after = date_not_after.isoformat()
-
-	cn = subject
-	for i in subject.split('/'):
-		key, value = i.split('=', 1)
-		if key == 'CN':
-			cn = value
-	if epoch_now < epoch_not_after:
-		valid = "valid"
 
 	if serial in revoked:
 		valid = "invalid per crl"
+	elif date_not_after < date_now:
+		valid = "invalid per date"
+	else:
+		valid = "valid"
 
-	return (valid, cn, date_not_after, delta, serial)
+	try:
+		cn = subject.CN
+	except:
+		cn = str(subject)
+
+	return (cn, {
+		'valid': valid,
+		'cn_cert': cn,
+		'not_after': date_not_after.isoformat(),
+		'delta': delta.days,
+		'serial': serial,
+	})
 
 
 # ldap certificates
@@ -107,21 +109,14 @@ except Exception, e:
 	print 'ERROR: authentication error: %s' % str(e)
 	sys.exit(1)
 
-results = lo.search(filter='userCertificate;binary=*', attr=['userCertificate;binary', 'uid', 'cn'])
-
-for result in results:
-	dn = result[0]
-	attrs = result[1]
-
-	if 'uid' in attrs and 'userCertificate;binary' in attrs and 'cn' in attrs:
-		uid = attrs['uid'][0]
-		cert = attrs['userCertificate;binary'][0]
-		cn_ldap = attrs['cn'][0]
-		if uid and cert:
-			cert = '-----BEGIN CERTIFICATE-----\n%s-----END CERTIFICATE-----\n' % base64.encodestring(cert)
-			(valid, cn_cert, not_after, delta, serial) = parse_certificate(cert)
-
-			certificates.update({ cn_cert : { "not_after" : not_after, "valid" : valid, "cn_cert" : cn_cert, "delta" : delta, "cn_ldap" : cn_ldap, "uid_ldap" : uid , "serial" : serial} })
+results = lo.search(filter='(&(userCertificate;binary=*)(uid=*)(cn=*))', attr=['userCertificate;binary', 'uid', 'cn'])
+for dn, attrs in results:
+	cert = attrs['userCertificate;binary'][0]
+	cert = '-----BEGIN CERTIFICATE-----\n%s-----END CERTIFICATE-----\n' % base64.encodestring(cert)
+	(cn_cert, rec) = parse_certificate(cert)
+	rec['cn_ldap'] = attrs['cn'][0]
+	rec['uid_ldap'] = attrs['uid'][0]
+	certificates[cn_cert] = rec
 
 # pem files in usercert directory
 for path in [certpath, hostCertPath]:
@@ -130,20 +125,12 @@ for path in [certpath, hostCertPath]:
 			for file in files:
 				if file != "cert.pem":
 					continue
-				file = root + "/" + file
-				(valid, cn_cert, not_after, delta, serial) = parse_certificate(file)
+				file = os.path.join(root, file)
+				(cn_cert, rec) = parse_certificate(file)
 				if cn_cert not in certificates:
-					certificates.update(
-						{cn_cert : {
-							"not_after" : not_after,
-							"valid" : valid,
-							"cn_cert" : cn_cert,
-							"delta" : delta,
-							"cn_ldap" : "",
-							"uid_ldap" : "" ,
-							"serial" : serial
-						}}
-					)
+					rec['cn_ldap'] = ""
+					rec['uid_ldap'] = ""
+					certificates[cn_cert] = rec
 
 FMT = '{cn_cert:20}{cn_ldap:20}{uid_ldap:20}{not_after:20}{delta:>23}{serial:>7} {valid:8}'
 print FMT.format(
