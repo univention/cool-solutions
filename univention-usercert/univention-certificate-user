@@ -88,89 +88,33 @@ fi
 
 while [ $# -gt 0 ]; do
 	case "$1" in
-	"-path")
-		shift
-		path="$1"
-		shift
-		;;
-	"-name")
-		shift
-		name="$1"
-		shift
-		;;
-	"-days")
-		shift
-		days="$1"
-		shift
-		;;
+	"-path") path="$2" ;;
+	"-name") name="$2" ;;
+	"-days") days="$2" ;;
 	"-sslbase")
-		shift
-		sslbase="$1"
-		test -d $sslbase || usage "$sslbase is not a valid directory"
-		shift
+		sslbase="$2"
+		test -d "$sslbase" || usage "$sslbase is not a valid directory"
 		;;
-	"-ca")
-		shift
-		ca="$1"
-		shift
-		;;
+	"-ca") ca="$2" ;;
 	"-certpath")
-		shift
-		certpath="$1"
-		test -d $certpath || usage "$certpath is not a valid directory"
-		shift
+		certpath="$2"
+		test -d "$certpath" || usage "$certpath is not a valid directory"
 		;;
 	"-extfile")
-		shift
-		extfile="$1"
-		test -f $extfile || usage "$extfile is not a valid file"
-		shift
+		extfile="$2"
+		test -f "$extfile" || usage "$extfile is not a valid file"
 		;;
-	"-cn")
-		shift
-		cn="$1"
-		shift
-		;;
-	"-organizationalunit")
-		shift
-		organizationalunit="$1"
-		shift
-		;;
-	"-email")
-		shift
-		email="$1"
-		shift
-		;;
-	"-admingroup")
-		shift
-		admingroup="$1"
-		shift
-		;;
-	"-country")
-		shift
-		country="$1"
-		shift
-		;;
-	"-state")
-		shift
-		state="$1"
-		shift
-		;;
-	"-locality")
-		shift
-		locality="$1"
-		shift
-		;;
-	"-organization")
-		shift
-		organization="$1"
-		shift
-		;;
-	*)
-		usage "unknown option $1"
-		shift
-		;;
+	"-cn") cn="$2" ;;
+	"-organizationalunit") organizationalunit="$2" ;;
+	"-email") email="$2" ;;
+	"-admingroup") admingroup="$2" ;;
+	"-country") country="$2" ;;
+	"-state") state="$2" ;;
+	"-locality") locality="$2" ;;
+	"-organization") organization="$2" ;;
+	*) usage "unknown option $1" ;;
 	esac
+	shift 2 || usage "Missing argument to $1"
 done
 
 # tests
