@@ -311,7 +311,7 @@ def doit(action, object, dn, cr):
 			"-sslbase", cfg["sslbase"],
 			"-ca", cfg["ca"],
 		]
-		if run_cmd(cmd, 1):
+		if run_cmd(cmd, 1, 2, 3):
 			ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: a certificate for cn \"%s\" already exists" % cfg["cn"])
 			return 1
 
@@ -439,7 +439,7 @@ def doit(action, object, dn, cr):
 
 
 # run a given command as root and return the exit code
-def run_cmd(command, expected_retval):
+def run_cmd(command, *expected_retvals):
 	cmd = ' '.join(quote(arg) for arg in command)
 	ud.debug(ud.LISTENER, ud.INFO, "manageusercertificate: run %s" % cmd)
 	listener.setuid(0)
@@ -452,7 +452,7 @@ def run_cmd(command, expected_retval):
 	finally:
 		listener.unsetuid()
 
-	if proc.returncode != expected_retval:
+	if proc.returncode not in expected_retvals:
 		retval = 1
 		ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: run %s" % cmd)
 		ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: command failed with exit code: %s" % proc.returncode)
