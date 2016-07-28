@@ -261,7 +261,7 @@ def create_config(object, dn, cr):
 
 
 def saveCert(dn, cfg, ldapObject, delete=False):
-	if cfg["ldapimport"].lower() == "true" or cfg["ldapimport"].lower() == "yes":
+	if cfg["ldapimport"].lower() in ("true", "yes"):
 		listener.setuid(0)
 		try:
 			cert = ""
@@ -421,7 +421,7 @@ def doit(action, object, dn, cr):
 
 	# run additional scripts with the following arguments
 	# action dn uid certpath
-	if cfg["scripts"].lower() == "true" or cfg["scripts"].lower() == "yes":
+	if cfg["scripts"].lower() in ("true", "yes"):
 		if os.path.isdir(cfg["runparts"]):
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, 'manageusercertificate: running scripts in %s' % cfg["runparts"])
 			cmd = "run-parts %s -a %s -a %s -a %s -a %s" % (cfg["runparts"], action, cfg["dn"], cfg["uid"], cfg["certpath"])
