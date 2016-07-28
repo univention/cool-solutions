@@ -1,8 +1,2 @@
-usr/lib/univention-install
-usr/lib/univention-directory-listener/system
-usr/share/univention-directory-manager-tools
-usr/share/univention-ssl
-usr/sbin
 etc/univention/ssl/user
-usr/share/pyshared/univention/admin/hooks.d
 var/cache/univention-usercert
