@@ -39,7 +39,7 @@ import univention.uldap
 import univention.config_registry
 import itertools
 
-configRegistry=univention.config_registry.ConfigRegistry()
+configRegistry = univention.config_registry.ConfigRegistry()
 configRegistry.load()
 
 ldap_base = configRegistry.get('ldap/base', False)
@@ -59,7 +59,7 @@ revoked = {}
 sslBase = configRegistry.get('ssl/usercert/sslbase', '/etc/univention/ssl/')
 ca = configRegistry.get('ssl/usercert/ca', 'ucsCA')
 crlFile = os.path.join(sslBase, ca, "crl", "crl.pem")
-crl = M2Crypto.X509.load_crl(crlFile) 
+crl = M2Crypto.X509.load_crl(crlFile)
 for i in crl.as_text().split('\n'):
 	i = i.strip()
 	if i.startswith("Serial Number: "):
@@ -67,10 +67,10 @@ for i in crl.as_text().split('\n'):
 		if s:
 			revoked[int(s, 16)] = 1
 
+
 # get pem file or certificate string
 # return "valid/invalid", cn and not_after date
 def parse_certificate(certificate):
-
 	if os.path.isfile(certificate):
 		x509 = M2Crypto.X509.load_cert(certificate)
 	else:
@@ -101,6 +101,7 @@ def parse_certificate(certificate):
 
 	return (valid, cn, date_not_after, delta, serial)
 
+
 # ldap certificates
 try:
 	lo = univention.uldap.getMachineConnection()
@@ -111,7 +112,7 @@ except Exception, e:
 results = lo.search(filter='userCertificate;binary=*', attr=['userCertificate;binary', 'uid', 'cn'])
 
 for result in results:
-	dn = result[0] 
+	dn = result[0]
 	attrs = result[1]
 
 	if 'uid' in attrs and 'userCertificate;binary' in attrs and 'cn' in attrs:
@@ -135,7 +136,7 @@ for path in [certpath, hostCertPath]:
 				(valid, cn_cert, not_after, delta, serial) = parse_certificate(file)
 				if not cn_cert in certificates:
 					certificates.update(
-						{cn_cert : { 
+						{cn_cert : {
 							"not_after" : not_after,
 							"valid" : valid,
 							"cn_cert" : cn_cert,
