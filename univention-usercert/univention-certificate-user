@@ -31,7 +31,7 @@
 # <http://www.gnu.org/licenses/>.
 
 
-script=${0/\/*\//} 
+script=${0/\/*\//}
 if [ "univention-certificate-user" = "$script" ]; then
 	user=1
 fi
@@ -206,15 +206,13 @@ else
 fi
 
 
-
 . /usr/share/univention-ssl/make-certificates-user.sh
 path="$certpath/$name"
 
 case "$command" in
 	"new")
 		echo "Creating certificate: $name"
-
-		# 1. path to cert, 2. cn, 3. days, 4. email, 5. organizationalunit, 6. country, 
+		# 1. path to cert, 2. cn, 3. days, 4. email, 5. organizationalunit, 6. country,
 		# 7. state, 8. locality, 9. organization, 10. owner (uid), 11. extensions file
 		gencert "$path" "$cn" "$days" "$email" "$organizationalunit" "$country" "$state" "$locality" "$organization" "$owner" "$extfile"
 		if [ $? -ne 0 ]; then
@@ -262,4 +260,3 @@ case "$command" in
 		openssl x509 -in "$path/cert.pem" -noout -text
 		;;
 esac
-
