@@ -270,9 +270,7 @@ def saveCert(dn, cfg, ldapObject, delete=False):
 				cert = "".join(fh.readlines())
 				fh.close()
 			lo = univention.uldap.getAdminConnection()
-			oldValue = ""
-			if "userCertificate;binary" in ldapObject:
-				oldValue = ldapObject['userCertificate;binary'][0]
+			oldValue = ldapObject.get('userCertificate;binary', [""])[0]
 			modlist = [('userCertificate;binary', oldValue, cert)]
 			try:
 				lo.modify(dn, modlist)
