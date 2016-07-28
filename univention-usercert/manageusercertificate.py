@@ -124,18 +124,18 @@ def handler(dn, new, old, command):
 	if old and not new:
 		retval = doit("revoke", old, dn, cr)
 	# pki option deleted
-	elif old and new and "pkiUser" in old.get('objectClass', []) and not "pkiUser" in new.get("objectClass", []):
+	elif old and new and "pkiUser" in old.get('objectClass', []) and "pkiUser" not in new.get("objectClass", []):
 		retval = doit("revoke", new, dn, cr)
 	# object created/changed
 	else:
 		# create cert
 		if 'univentionCreateRevokeCertificate' in new and new['univentionCreateRevokeCertificate'][0] == "1":
-			if not 'univentionCreateRevokeCertificate' in old:
+			if 'univentionCreateRevokeCertificate' not in old:
 				retval = doit("create", new, dn, cr)
 
 		# revoke cert
 		if 'univentionCreateRevokeCertificate' in old and old['univentionCreateRevokeCertificate'][0] == "1":
-			if not 'univentionCreateRevokeCertificate' in new:
+			if 'univentionCreateRevokeCertificate' not in new:
 				retval = doit("revoke", new, dn, cr)
 			if 'univentionCreateRevokeCertificate' in new and new['univentionCreateRevokeCertificate'][0] == "0":
 				retval = doit("revoke", new, dn, cr)
@@ -450,7 +450,7 @@ def run_cmd(command, expected_retval):
 	finally:
 		listener.unsetuid()
 
-	if not proc.returncode == expected_retval:
+	if proc.returncode != expected_retval:
 		retval = 1
 		univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, "manageusercertificate: run %s" % command)
 		univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, "manageusercertificate: command failed with exit code: %s" % proc.returncode)
