@@ -128,11 +128,11 @@ for path in [certpath, hostCertPath]:
 	if path and os.path.isdir(path):
 		for root, dirs, files in os.walk(path):
 			for file in files:
-				if not file == "cert.pem":
+				if file != "cert.pem":
 					continue
 				file = root + "/" + file
 				(valid, cn_cert, not_after, delta, serial) = parse_certificate(file)
-				if not cn_cert in certificates:
+				if cn_cert not in certificates:
 					certificates.update(
 						{cn_cert : {
 							"not_after" : not_after,
