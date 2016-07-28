@@ -56,7 +56,6 @@ modrdn = '1'
 
 def initialize():
 	univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, 'manageusercertificate: Initialize')
-	return
 
 
 def handler(dn, new, old, command):
@@ -149,8 +148,6 @@ def handler(dn, new, old, command):
 		univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, "manageusercertificate: handler unsuccessfully finished")
 	else:
 		univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, "manageusercertificate: handler successfully finished")
-
-	return
 
 
 # create config config
