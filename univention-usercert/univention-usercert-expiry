@@ -30,7 +30,6 @@
 import os
 import sys
 import base64
-import string
 import time
 import datetime
 import M2Crypto
@@ -89,8 +88,9 @@ def parse_certificate(certificate):
 
 	cn = subject
 	for i in subject.split('/'):
-		if i.startswith('CN='):
-			cn = string.split(i, '=')[1]
+		key, value = i.split('=', 1)
+		if key == 'CN':
+			cn = value
 	if epoch_now < epoch_not_after:
 		valid = "valid"
 
