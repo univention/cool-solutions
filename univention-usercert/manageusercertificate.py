@@ -266,9 +266,8 @@ def saveCert(dn, cfg, ldapObject, delete=False):
 		try:
 			cert = ""
 			if not delete:
-				fh = open(os.path.join(cfg["certpath"], cfg["uid"], "cert.cer"), "r")
-				cert = "".join(fh.readlines())
-				fh.close()
+				with open(os.path.join(cfg["certpath"], cfg["uid"], "cert.cer"), "r") as fd:
+					cert = fd.read()
 			lo = univention.uldap.getAdminConnection()
 			oldValue = ldapObject.get('userCertificate;binary', [""])[0]
 			modlist = [('userCertificate;binary', oldValue, cert)]
