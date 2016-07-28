@@ -1,3 +1,9 @@
+univention-samba-config-ransomware (1.1.1-2) unstable; urgency=medium
+
+  * rename full audit conf #5457
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Fri, 28 Jul 2016 14:18:49 +0200
+
 univention-samba-config-ransomware (1.1.1-1) unstable; urgency=medium
 
   * remove customer names from files #5457
