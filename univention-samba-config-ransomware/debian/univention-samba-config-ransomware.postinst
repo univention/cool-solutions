@@ -31,7 +31,7 @@
 
 call_joinscript 99univention-samba-config-ransomware.inst
 
-echo "include = /etc/samba/local.config.d/full_audit.conf" >> /etc/samba/local.config.conf
+echo "include = /etc/samba/local.config.d/full_audit.global.local.config.conf" >> /etc/samba/local.config.conf
 
 # reload samba
 service samba restart
