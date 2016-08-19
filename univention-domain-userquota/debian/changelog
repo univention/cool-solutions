@@ -1,3 +1,9 @@
+univention-domain-userquota (1.0.1-2) unstable; urgency=low
+
+  * Fixed "multiple open()'s causes domainquota cool solution to fail". Bug #42062
+
+ -- Michel Smidt <smidt@univention.de>  Fri, 19 Aug 2016 13:05:18 +0200
+
 univention-domain-userquota (1.0.1-1) unstable; urgency=low
 
   * Fixed postinst scripts (Ticket #2013090321001511) 

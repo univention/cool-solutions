@@ -32,7 +32,8 @@ class DomainUserQuotaHook(simpleHook):
 			quotasettings = module.get('domainquota')
 			module['domainquota'] = []
 			for quotasetting in quotasettings:
-				module['domainquota'].append(quotasetting.split('$$'))
+				if not isinstance(quotasetting, (list, tuple)):
+					module['domainquota'].append(quotasetting.split('$$'))
 		univention.debug.debug(univention.debug.ADMIN, univention.debug.INFO, 'open: module:%s' % str(module))
 
 	def hook_ldap_modlist(self, module, ml=[]):
