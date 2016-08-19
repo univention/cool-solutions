@@ -1,0 +1,11 @@
+univention-domain-userquota (1.0.1-1) unstable; urgency=low
+
+  * Fixed postinst scripts (Ticket #2013090321001511) 
+
+ -- Erik Damrose <damrose@univention.de>  Tue, 05 Nov 2013 10:49:40 +0100
+
+univention-domain-userquota (1.0.0-1) unstable; urgency=low
+
+  * Initial release (Ticket #2013090321001511)
+
+ -- Erik Damrose <damrose@univention.de>  Thu, 31 Oct 2013 09:36:40 +0100

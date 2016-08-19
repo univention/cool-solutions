@@ -1,0 +1,35 @@
+Source: univention-domain-userquota
+Section: univention
+Maintainer: Univention GmbH <packages@univention.de>
+Standards-Version: 3.8.2
+Build-Depends: debhelper,
+ univention-config-dev,
+ ucslint
+
+Package: univention-domain-userquota
+Architecture: all
+Depends: ${misc:Depends},
+ univention-config-registry,
+ univention-domain-userquota-schema (= ${source:Version})
+Description: UCS - domain wide userquota definition
+ This package enables the admin to define per user quota settings
+ for shares. Several servers and shares can be defined at the
+ user object and are applied in the domain.
+ .
+ It is part of Univention Corporate Server (UCS), an
+ integrated, directory driven solution for managing
+ corporate environments. For more information about UCS,
+ refer to: http://www.univention.de/
+
+Package: univention-domain-userquota-schema
+Architecture: all
+Depends: ${misc:Depends},
+ univention-config-registry
+Description: UCS - domain wide userquota definition
+ This package contains the LDAP schema definition files for the
+ univention-domain-userquota package.
+ .
+ It is part of Univention Corporate Server (UCS), an
+ integrated, directory driven solution for managing
+ corporate environments. For more information about UCS,
+ refer to: http://www.univention.de/
