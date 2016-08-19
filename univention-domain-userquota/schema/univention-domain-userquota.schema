@@ -1,0 +1,18 @@
+#
+# OpenLDAP Schema file
+# for univention-domain-userquota package
+# 
+
+attributetype ( 1.3.6.1.4.1.10176.4300.1.2
+	NAME 'domainquota'
+	DESC 'Definition how much quota the user has at a share on a server '
+	EQUALITY caseExactIA5Match
+	SUBSTR caseExactIA5SubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+objectclass ( 1.3.6.1.4.1.10176.4300.1.1 
+	NAME 'domainquotauser' SUP top AUXILIARY
+	DESC 'A domain wide quota definition is configured'
+	MAY ( domainquota )
+	)
+

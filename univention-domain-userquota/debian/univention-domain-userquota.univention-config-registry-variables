@@ -1,0 +1,5 @@
+[quota/domainuser/softlimitpercent]
+Description[de]=Der Prozentsatz der vom gegebenen Quota-Limit eines Benutzers abgezogen als Softlimit gesetzt wird
+Description[en]=The percentage that is substracted from the given quota limit for a user and set as the softlimit
+Type=int
+Categories=quota
