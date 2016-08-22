@@ -1,3 +1,9 @@
+univention-printer-assignment (7.0.1-2) unstable; urgency=medium
+
+  * fix ucs lint errors (Ticket#: 2016070621000283)
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Mon, 22 Aug 2016 14:42:15 +0200
+
 univention-printer-assignment (7.0.1-1) unstable; urgency=medium
 
   * version dump (Ticket#: 2016070621000283)
