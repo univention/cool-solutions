@@ -1,0 +1,131 @@
+#!/bin/sh
+#
+# Univention Printer Assignment
+#
+# Copyright 2009-2014 Univention GmbH
+#
+# http://www.univention.de/
+#
+# All rights reserved.
+#
+# The source code of this program is made available
+# under the terms of the GNU Affero General Public License version 3
+# (GNU AGPL V3) as published by the Free Software Foundation.
+#
+# Binary versions of this program provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention and not subject to the GNU AGPL V3.
+#
+# In the case you use this program under the terms of the GNU AGPL V3,
+# the program is provided in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License with the Debian GNU/Linux or Univention distribution in file
+# /usr/share/common-licenses/AGPL-3; if not, see
+# <http://www.gnu.org/licenses/>.
+
+VERSION=1
+. /usr/share/univention-lib/all.sh
+. /usr/share/univention-join/joinscripthelper.lib
+joinscript_init
+
+eval "$(/usr/sbin/ucr shell)"
+
+add_ext_attr () {
+	local SUFFIX="$1"
+	local MODULE="$2"
+	shift 2 || exit 1
+
+	udm settings/extended_attribute create "$@" \
+		--ignore_exists \
+		--position "cn=printer-assignment,cn=custom attributes,cn=univention,$ldap_base" \
+		--set name="univention-printer-list-$SUFFIX" \
+		--set CLIName="univention-printer-list" \
+		--set module="$MODULE" \
+		--set tabName="Printer assignment" \
+		--set translationTabName='"de_DE" "Druckerzuordnung"' \
+		--set tabPosition=1 \
+		--set groupName="Printer assignment" \
+		--set translationGroupName='"de_DE" "Druckerzuordnung"' \
+		--set shortDescription="Assigned printers" \
+		--append translationShortDescription='"de_DE" "Zugewiesene Drucker"' \
+		--set longDescription="List of printers that will be assigned automatically during user logon" \
+		--append translationLongDescription='"de_DE" "Liste mit Druckern, die bei der Benutzeranmeldung automatisch zugewiesen werden."' \
+		--set objectClass="univentionAssignedPrinterClass" \
+		--set ldapMapping="univentionAssignedPrinter" \
+		--set syntax="univention-printer-syntax" \
+		--set tabAdvanced=1 \
+		--set mayChange=1 \
+		--set multivalue=1 || die
+
+	udm settings/extended_attribute create "$@" \
+		--ignore_exists \
+		--position "cn=printer-assignment,cn=custom attributes,cn=univention,$ldap_base" \
+		--set name="univention-printer-default-$SUFFIX" \
+		--set CLIName="univention-printer-default" \
+		--set module="$MODULE" \
+		--set tabName="Printer assignment" \
+		--set translationTabName='"de_DE" "Druckerzuordnung"' \
+		--set tabPosition=2 \
+		--set groupName="Printer assignment" \
+		--set translationGroupName='"de_DE" "Druckerzuordnung"' \
+		--set shortDescription="Default printer" \
+		--append translationShortDescription='"de_DE" "Standarddrucker"' \
+		--set longDescription="Printer that will be set as default printer during user logon" \
+		--append translationLongDescription='"de_DE" "Drucker, der bei der Benutzeranmeldung als Standarddrucker zugewiesen wird."' \
+		--set objectClass="univentionAssignedPrinterClass" \
+		--set ldapMapping="univentionAssignedPrinterDefault" \
+		--set syntax="univention-printer-syntax" \
+		--set tabAdvanced=1 \
+		--set mayChange=1 \
+		--set multivalue=0 || die
+}
+
+ucs_addServiceToLocalhost "univention-printer-assignment" "$@"
+
+univention-directory-manager container/cn create "$@" --ignore_exists \
+	--position="cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="printer-assignment" \
+	--set description="Extended Attributes for univention-printer-assignment" || die
+
+univention-directory-manager settings/syntax create "$@" --ignore_exists \
+	--position "cn=printer-assignment,cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="univention-printer-syntax" \
+	--set description="syntax for extended attribute univention-printer-list" \
+	--set attribute="shares/printer: name" \
+	--set value="shares/printer: dn" \
+	--set filter="(objectclass=univentionPrinter)" \
+	--set base="$ldap_base" \
+	--set addEmptyValue="TRUE" \
+	--set viewonly="FALSE" || die
+
+add_ext_attr "host" "computers/windows" "$@"
+add_ext_attr "group" "groups/group" "$@"
+
+udm settings/extended_attribute create "$@" \
+	--ignore_exists \
+	--position "cn=printer-assignment,cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="univention-printer-settings-file" \
+	--set CLIName="univention-printer-settings-file" \
+	--set module="shares/printer" \
+	--set tabName="Printer settings" \
+	--set translationTabName='"de_DE" "Druckereigenschaften"' \
+	--set shortDescription="Settings file" \
+	--append translationShortDescription='"de_DE" "Datei mit Druckereigenschaften"' \
+	--set longDescription="File with printer settings in the printer-settings directory of the print\$ share on the print server" \
+	--append translationLongDescription='"de_DE" "Datei mit Druckereigenschaften im printer-settings Verzeichnis auf der print$ Freigabe des Druckservers"' \
+	--set objectClass="univentionAssignedPrinterSettings" \
+	--set ldapMapping="univentionAssignedPrinterSettingsFile" \
+	--set syntax="string" \
+	--set tabAdvanced=1 \
+	--set mayChange=1 \
+	--set multivalue=0 || die
+
+joinscript_save_current_version
+
+exit 0

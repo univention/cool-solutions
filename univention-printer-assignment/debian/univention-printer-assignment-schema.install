@@ -1,0 +1,3 @@
+schema/univention-printer-assignment.schema usr/share/univention-printer-assignment-schema/
+92univention-printer-assignment-schema.inst usr/lib/univention-install/
+92univention-printer-assignment-schema.uinst usr/lib/univention-uninstall/
