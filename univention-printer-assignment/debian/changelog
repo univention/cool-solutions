@@ -1,3 +1,9 @@
+univention-printer-assignment (7.0.0-1) unstable; urgency=medium
+
+  * version dump (Ticket#: 2016070621000283)
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Mon, 22 Aug 2016 14:03:53 +0200
+
 univention-printer-assignment (6.0.5-2) unstable; urgency=low
 
   * removed more oboselte ucr vars (Ticket#: 2013121921001244) 
