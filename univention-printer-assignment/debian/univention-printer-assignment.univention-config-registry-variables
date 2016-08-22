@@ -1,0 +1,71 @@
+[printer/assignment/backlog/file]
+Description[de]=Pfad zur Backlog-Datei, die vom Listener-Modul geschrieben wird. Die Datei enthält die DNs zu geänderten Drucker-/Gruppen und Rechner-Objekten (Default: /var/lib/univention-printer-assignment/backlog)
+Description[en]=Path to the backlog file the listener module writes changes to. The file contains the DNs of changed printer/group/host objects. (Default: /var/lib/univention-printer-assignment/backlog)
+Type=str
+Categories=service-cups
+
+[printer/assignment/vbs/template]
+Description[de]=Pfad zum VBScript-Template, welches für die Generierung der rechnerspezifischen Logonskripte verwendet wird (Default: /usr/share/univention-printer-assignment/printer-assignment-template.vbs)
+Description[en]=Path to the VBScript template that is used to generate hostspecific logon scripts (Default: /usr/share/univention-printer-assignment/printer-assignment-template.vbs)
+Type=str
+Categories=service-cups
+  
+[printer/assignment/netlogon/path]
+Description[de]=Verzeichnis, in dem die Logon-Skripte abgelegt werden. Falls ein relativer Pfad angegeben wird, wird er relativ auf den Pfad der Standard-Netlogon-Verzeichnisse angewendet. Bei der Angabe eines absoluten Pfades wird dieser direkt verwendet. (Default: printerassignment)
+Description[en]=Directory in which the logon scripts will be created. If a relative path is specified, the given path is used relative to the default netlogon directories. If a absolute path is specified, this path will be used. (Default: printerassignment)
+Type=str
+Categories=service-cups
+
+[printer/assignment/update/debug]
+Description[de]=Ist der Wert auf 'yes' gesetzt, werden während der Ausführung von update-univention-printer-assignment Debug-Meldungen auf Stdout angezeigt (Default: no)
+Description[en]=If set to 'yes', debug messages are shown on stdout while running update-univention-printer-assignment (Default: no)
+Type=str
+Categories=service-cups
+
+[printer/assignment/vbs/removeall]
+Description[de]=Ist der Wert auf 'yes' gesetzt, werden bereits verknüpfte Netwerk-Drucker auf dem Windows-Client entfernt, bevor die Zuordnung von neuen Netzwerk-Druckern begonnen wird. Dabei geht die benutzerbezogene Einstellung des Standarddruckers verloren (Default: no)
+Description[en]=If set to yes, already assigned network printers will be disconnected on the windows client prior to the assignment of new printers. Please note that any changes to the default printer made by the user will be lost if the removal has been activated (Default: no)
+Type=str
+Categories=service-cups
+  
+[printer/assignment/vbs/debug]
+Description[de]=Ist der Wert auf 'yes' gesetzt, werden während der Ausführung der VBScript-Datei Popup-Fenster mit Debug-Meldungen angezeigt (Default: no)
+Description[en]=If set to yes, the VBScript script displays popup messages during printer assignment for debugging purposes (Default: no)
+Type=str
+Categories=service-cups
+
+[printer/assignment/vbs/setdefaultprinter]
+Description[de]=Ist der Wert auf 'yes' gesetzt, wird auch der Standarddrucker während der Druckerzuordnung neu gesetzt sofern er am Rechner- oder Gruppenobjekt definiert wurde (Default: yes)
+Description[en]=If set to yes, the script tries to set the default printer if defined for that host/group (Default: yes).
+Type=str
+Categories=service-cups
+
+[printer/assignment/printuientry/options]
+Description[de]=Optionen für den printUIEntry Befehl zur Übernahme der Druckereinstellungen aus einer Datei (Default: "u f")
+Description[en]=Options for the printUIEntry command to restore printer settings from a file (Default: "u f")
+Type=str
+Categories=service-cups
+
+[printer/assignment/dnfilter/groups]
+Description[de]=Regulärer Ausdruck, der für die Filterung/Auswahl von Gruppenobjekten für die Druckerzuordnung verwendet wird. Ist der Wert nicht gesetzt, werden allte Gruppenobjekte ausgewertet (Default: <nicht gesetzt>)
+Description[en]=Regular expression that is used to filter/select group objects for printer assignment. If the variable is not set, all group objects are considered (Default: <empty>)
+Type=str
+Categories=service-cups
+
+[printer/assignment/cmd/process]
+Description[de]=Kommando, das nach Änderungen an Drucker-, Gruppen- oder Rechnerobjekten ausgeführt wird (Default: /usr/share/univention-printer-assignment/update-univention-printer-assignment)
+Description[en]=Command that will be called if changes to printer, group or host objects have been detected (Default: /usr/share/univention-printer-assignment/update-univention-printer-assignment)
+Type=str
+Categories=service-cups
+
+[printer/assignment/backlog/maxcount]
+Description[de]=Aus Performancegründen wird das Update-Kommando nicht bei jeder LDAP-Änderung aufgerufen sondern erst 15 Sekunden nach der letzten Änderung oder wenn <maxcount> Einträge in der Backlogdatei enthalten sind (Default: 250)
+Description[en]=For performance reasons, the update command is not called on every LDAP change but 15 seconds after the last change or when reaching <maxcount> entries in backlog file (Default: 250)
+Type=str
+Categories=service-cups
+
+[printer/assignment/printuientry/options]
+Description[de]=Optionen des "printui.dll,PrintUIEntry" Kommandos für die Übernahme von Druckereinstellungen auf dem Windows Client (Default: u f)
+Description[en]=Options for the "printui.dll,PrintUIEntry" command to apply printer settings on the windows client (Default: u f)
+Type=str
+Categories=service-cups
