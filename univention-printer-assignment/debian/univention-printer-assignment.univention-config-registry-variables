@@ -40,12 +40,6 @@ Description[en]=If set to yes, the script tries to set the default printer if de
 Type=str
 Categories=service-cups
 
-[printer/assignment/printuientry/options]
-Description[de]=Optionen für den printUIEntry Befehl zur Übernahme der Druckereinstellungen aus einer Datei (Default: "u f")
-Description[en]=Options for the printUIEntry command to restore printer settings from a file (Default: "u f")
-Type=str
-Categories=service-cups
-
 [printer/assignment/dnfilter/groups]
 Description[de]=Regulärer Ausdruck, der für die Filterung/Auswahl von Gruppenobjekten für die Druckerzuordnung verwendet wird. Ist der Wert nicht gesetzt, werden allte Gruppenobjekte ausgewertet (Default: <nicht gesetzt>)
 Description[en]=Regular expression that is used to filter/select group objects for printer assignment. If the variable is not set, all group objects are considered (Default: <empty>)
@@ -65,7 +59,7 @@ Type=str
 Categories=service-cups
 
 [printer/assignment/printuientry/options]
-Description[de]=Optionen des "printui.dll,PrintUIEntry" Kommandos für die Übernahme von Druckereinstellungen auf dem Windows Client (Default: u f)
-Description[en]=Options for the "printui.dll,PrintUIEntry" command to apply printer settings on the windows client (Default: u f)
+Description[de]=Optionen des "printui.dll,PrintUIEntry" Kommandos für die Übernahme von Druckereinstellungen auf dem Windows Client (Default: "u f")
+Description[en]=Options for the "printui.dll,PrintUIEntry" command to apply printer settings on the windows client (Default: "u f")
 Type=str
 Categories=service-cups

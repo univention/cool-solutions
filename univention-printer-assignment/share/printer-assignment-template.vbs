@@ -1,3 +1,10 @@
+' Warning: This file is auto-generated and might be overwritten.
+'          Please edit the following file instead:
+' Warnung: Diese Datei wurde automatisch generiert und kann automatisch
+'          überschrieben werden. Bitte bearbeiten Sie an Stelle dessen
+'          die folgende Datei:
+'
+'         /usr/share/univention-printer-assignment/printer-assignment-template.vbs
 ' Univention Printer Assignment
 ' Copyright 2007-2016 Univention GmbH
 '
@@ -44,38 +51,15 @@ If flagRemoveAllPrinters = 1 Then
     RemoveAllPrinters()
 End if
 
-' add printers
+' add printers and set default printer (to first printer)
 if printerList <> "" Then
     items = split(printerList, " ")
     for i = 0 to UBound(items)
-        prt = items(i)
-        settingsFile = "None"
-        if inStr(items(i), ":") then
-            prt = split(items(i), ":", 2)(0)
-            settingsFile = split(items(i), ":", 2)(1)
-        end if
-
-        ' do not apply printer settings if printer already exists
-        if printExists(prt) then
-            settingsFile = "None"
-            if showDebug = 1 Then
-                wscript.echo "printer " & prt & " already exists"
-            end if
-        end if
-
-        ' adding printer
         if showDebug = 1 Then
-            wscript.echo "Adding printer " & prt
+            wscript.echo "Adding printer " & items(i)
         end if
-        objWshNetwork.AddWindowsPrinterConnection prt
-
-        ' setting preferences from file
-        if settingsFile <> "None" then
-            if showDebug = 1 Then
-                wscript.echo "Apply printer settings from " & settingsFile
-            end if
-            applyPrinterSettingsFromFile prt, settingsFile
-        end if
+        on error resume next
+        objWshNetwork.AddWindowsPrinterConnection items(i)
     next
 end if
 
@@ -84,45 +68,13 @@ if defaultPrinter <> "" Then
     if showDebug = 1 Then
         wscript.echo "Set default printer to " & defaultPrinter
     end if
+    on error resume next
     objWshNetwork.SetDefaultPrinter defaultPrinter
 end if
 
 if showDebug = 1 Then
     wscript.echo "Printer assignment finished."
 end if
-
-''''''''
-' FINE '
-''''''''
-
-' run rundll32 printui.dll,PrintUIEntry
-sub applyPrinterSettingsFromFile(printer,file)
-    Set objFso = CreateObject("Scripting.FileSystemObject")
-    Set objShell = CreateObject("WScript.Shell")
-    server = split(split(printer,"\\")(1),"\", 2)(0)
-    path = "\\" & server & "\print$\printer-settings\" & file
-    cmd = "rundll32 printui.dll,PrintUIEntry"
-    cmd = cmd & " /Sr /n" & chr(34) & printer & chr(34) & " /a " & chr(34) & path & chr(34) & " " & printUIEntryOptions
-    If (objFso.FileExists(path)) Then
-        if showDebug = 1 Then
-            wscript.echo "Running " & cmd
-        end if
-        objShell.Run cmd
-    End If
-end sub
-
-' check if printer connection exists
-function printExists(sPrinter)
-    Set objNetwork = WScript.CreateObject("Wscript.Network")
-    Set oPrinters = objNetwork.EnumPrinterConnections
-    printExists = False
-    For j = 0 to oPrinters.Count - 1 Step 2
-        if StrComp(sPrinter, oPrinters.Item(j+1)) = 0 then
-            printExists = True
-            Exit Function
-        end if
-    Next
-end function
 
 ' remove all none local printers
 sub RemoveAllPrinters()

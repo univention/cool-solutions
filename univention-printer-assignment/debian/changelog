@@ -1,3 +1,9 @@
+univention-printer-assignment (7.0.1-5) unstable; urgency=medium
+
+  * fix VBS template (Ticket#: 2016070621000283)
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Fri, 23 Sep 2016 11:04:39 +0200
+
 univention-printer-assignment (7.0.1-4) unstable; urgency=medium
 
   * put old VBS template back into place
