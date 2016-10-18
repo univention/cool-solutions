@@ -1,3 +1,9 @@
+univention-dovecot-migration (1.0.0-1) unstable; urgency=medium
+
+  * update control file to have build result in correct package name #4493
+
+ -- Valentin Heidelberger <vheidelb@skoja>  Tue, 18 Oct 2016 12:24:36 +0200
+
 univention-dovecot-migration (1.0.0-0) unstable; urgency=medium
 
   * Initial release. #4493
