@@ -1,0 +1,5 @@
+univention-dovecot-migration (1.0.0-0) unstable; urgency=medium
+
+  * Initial release. #4493
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 18 Oct 2016 10:30:00 +0200

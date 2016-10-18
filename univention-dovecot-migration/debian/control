@@ -1,0 +1,12 @@
+Source: univention-dovecot-migration
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Build-Depends: debhelper (>=7)
+Standards-Version: 3.9.6
+Homepage: http://www.univention.de/
+
+Package: offlineimap
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: univention-dovecot-migration is a helper script to automate offlineimap, it can be installed from the unmaintained repository.
