@@ -1,0 +1,6 @@
+Type: file
+File: etc/munin/munin-node.conf
+Variables: munin/node/allowedhosts
+Variables: ldap/master
+Variables: hostname
+Variables: domainname

@@ -1,0 +1,60 @@
+univention-munin (1.0.0-8) unstable; urgency=medium
+
+  * fix order of restarts in postinst
+  * Issue #2722
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Wed, 18 Nov 2015 12:53:05 +0100
+
+univention-munin (1.0.0-7) unstable; urgency=medium
+
+  * fix postrm
+  * add munin.conf as template
+  * Issue #2722
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Wed, 18 Nov 2015 12:36:48 +0100
+
+univention-munin (1.0.0-6) unstable; urgency=medium
+
+  * revert removed icon and fix links
+  * Issue #2722
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Wed, 18 Nov 2015 10:34:25 +0100
+
+univention-munin (1.0.0-5) unstable; urgency=medium
+
+  * remove icon and set ucrv to the icon of the munin package
+  * Issue #2722
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Tue, 17 Nov 2015 17:43:48 +0100
+
+univention-munin (1.0.0-4) unstable; urgency=medium
+
+  * fix apache2 restart in postinst
+  * fix munin-node.conf to allow cidr notation for allowed hosts
+  * add libnet-cidr-perl to dependencies for univention-munin-node
+  * Issue #2722
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Tue, 17 Nov 2015 16:47:52 +0100
+
+univention-munin (1.0.0-3) unstable; urgency=medium
+
+  * fix ucrlint erors
+  * register variables for munin-node.conf
+  * remove empty lines in debian/*.univention-config-registry files
+  * Issue #2722
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Tue, 17 Nov 2015 14:35:22 +0100
+
+univention-munin (1.0.0-2) unstable; urgency=medium
+
+  * fix ucrlint warnings
+  * Issue #2722
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Tue, 17 Nov 2015 14:21:01 +0100
+
+univention-munin (1.0.0-1) unstable; urgency=low
+
+  * Initial release
+  * Issue #2722
+
+ -- Tobias Birkefeld <packages@univention.de>  Mon, 14 Sep 2015 16:05:15 +0200
