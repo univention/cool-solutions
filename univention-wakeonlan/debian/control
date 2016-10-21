@@ -6,7 +6,7 @@ Build-Depends: debhelper (>=9)
 Standards-Version: 3.9.6
 Homepage: http://www.univention.de/
 
-Package: univention-wakeonlan-master
+Package: univention-wakeonlan
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, wakeonlan
 Description: WakeOnLan with a hostname

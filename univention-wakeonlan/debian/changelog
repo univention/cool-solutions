@@ -1,3 +1,10 @@
+univention-wakeonlan (1.0.0-2) unstable; urgency=medium
+
+  * Fixed wrong package name
+  * Redmine Task #5464
+
+ -- Timo Denissen <denissen@univention.de>  Fri, 21 Oct 2016 11:32:12 +0200
+
 univention-wakeonlan (1.0.0-1) unstable; urgency=medium
 
   * Initial release
