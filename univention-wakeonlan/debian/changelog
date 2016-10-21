@@ -1,0 +1,6 @@
+univention-wakeonlan (1.0.0-1) unstable; urgency=medium
+
+  * Initial release
+  * Redmine Task #5464
+
+ -- Timo Denissen <denissen@univention.de>  Fri, 21 Oct 2016 10:51:51 +0200
