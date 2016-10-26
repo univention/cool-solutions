@@ -1,0 +1,5 @@
+univention-lets-encrypt (1.0.0-1) unstable; urgency=medium
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Univention GmbH <packages@univention.de>  Wed, 26 Oct 2016 13:14:00 +0200
