@@ -1,4 +1,5 @@
-#!/usr/bin/make -f
+#!/bin/bash
+# postinst script for univention-letsencrypt
 #
 # Copyright 2016 Univention GmbH
 #
@@ -27,13 +28,27 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-override_dh_auto_install:
-	univention-install-config-registry
-	dh_auto_install
+do_statoverride () {
+	dpkg-statoverride --list "$4" || (dpkg-statoverride --force --update --add "$@" && echo "Added statoverride $@")
+}
 
-override_dh_auto_build:
-	ucslint
-	dh_auto_build
+#DEBHELPER#
 
-%:
-	dh $@
+if [ "$1" = "configure" ] ; then
+	invoke-rc.d apache2 restart
+
+	getent passwd letsencrypt || adduser \
+		--system \
+		--no-create-home \
+		--shell "/bin/bash" \
+		--home "/usr/share/univention-letsencrypt" \
+		--disabled-password \
+		--ingroup www-data \
+		letsencrypt
+	nscd -i passwd
+
+	do_statoverride letsencrypt www-data 0755 "/var/www/.well-known/acme-challenge"
+	do_statoverride letsencrypt root 0775 "/etc/univention/letsencrypt"
+fi
+
+exit 0

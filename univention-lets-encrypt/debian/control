@@ -1,13 +1,15 @@
-Source: univention-lets-encrypt
-Section: univention
-Priority: optional
+Source: univention-letsencrypt
 Maintainer: Univention GmbH <packages@univention.de>
-Build-Depends: debhelper (>=9), ucslint, quilt, univention-config-dev
-Standards-Version: 3.9.6
-Homepage: http://www.univention.de/
+Section: univention
+Build-Depends: debhelper (>> 7),
+ univention-config-dev,
+ ucslint-univention,
+ libunivention-config-dev,
 
-Package: univention-lets-encrypt
+Package: univention-letsencrypt
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Depends: python
+Recommends: apache2
+Description: univention-letsencrypt - automatically request SSL certificates
+ This package contains acme_tiny.py for semi-automatic request of SSL
+ certificates from Let's Encrypt project.
