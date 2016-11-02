@@ -1,10 +1,12 @@
 Source: univention-letsencrypt
 Maintainer: Univention GmbH <packages@univention.de>
+Priority: optional
 Section: univention
+Standards-Version: 3.9.6
 Build-Depends: debhelper (>> 7),
  univention-config-dev,
  ucslint-univention,
- libunivention-config-dev,
+ libunivention-config-dev
 
 Package: univention-letsencrypt
 Architecture: all
