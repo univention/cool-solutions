@@ -7,6 +7,6 @@ Standards-Version: 3.9.6
 Homepage: http://www.univention.de/
 
 Package: univention-dovecot-migration
-Architecture: any
+Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, offlineimap
 Description: univention-dovecot-migration is a helper script to automate offlineimap.
