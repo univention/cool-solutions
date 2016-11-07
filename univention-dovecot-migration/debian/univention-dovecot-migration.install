@@ -1,1 +1,1 @@
-univention-dovecot-migration.sh usr/bin
+univention-dovecot-migration usr/bin

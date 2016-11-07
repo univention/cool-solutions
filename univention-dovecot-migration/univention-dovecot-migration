@@ -227,7 +227,7 @@ Count migrated mails
     ;;
 #actual funtion calls
 '-g') scriptLocation="/usr/bin"
-    generateConfig ${(univention-ldapsearch -LLLo ldif-wrap=no  univentionMailHomeServer="$(hostname -f)" | grep "uid:" | sed 's/uid: //g')
+    generateConfig $(univention-ldapsearch -LLLo ldif-wrap=no  univentionMailHomeServer="$(hostname -f)" | grep "uid:" | sed 's/uid: //g')
     ;;   
 '-t') echo ${remotePass} > .remotepass
     getNumberOfAllMails ${whichToTest}
