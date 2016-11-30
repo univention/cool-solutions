@@ -1,14 +1,11 @@
 #!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
-#import ldap, getopt
-#import os
-#import re
 import time
 import sys
 import getopt
 import subprocess
-
+import argparse
 
 ##### ucr
 _UCR = None
@@ -54,28 +51,33 @@ def init_ldapconnection():
 	"""
 	
 	global _LDAP
-	import univention.uldap
-	ucr = init_ucr()
-	if _LDAP is None:
-		port = ucr.get("ldap/port")
-		if not port:
-			port = ucr.get("ldap/server/port")
-		port = int(port)
-		args = {"base" : ucr.get("ldap/base"),
-				"port" : port,
-				"host" : ucr.get("ldap/server/name")
-				}
-		pw = getmachinesecret()
-		if pw is not None:
-			# perform an authenticated bind
-			args["binddn"] = ucr.get("ldap/hostdn")
-			args["bindpw"] = pw
-		_LDAP = univention.uldap.access(**args)
-	return _LDAP
+	
+	try:
+		import univention.uldap
+		ucr = init_ucr()
+		if _LDAP is None:
+			port = ucr.get("ldap/port")
+			if not port:
+				port = ucr.get("ldap/server/port")
+			port = int(port)
+			args = {"base" : ucr.get("ldap/base"),
+					"port" : port,
+					"host" : ucr.get("ldap/server/name")
+					}
+			pw = getmachinesecret()
+			if pw is not None:
+				# perform an authenticated bind
+				args["binddn"] = ucr.get("ldap/hostdn")
+				args["bindpw"] = pw
+			_LDAP = univention.uldap.access(**args)
+		return _LDAP
+	except:
+		print ("wakeonlan.py: error: Couldn't create a LDAP connection")
+		print ("Arguments: {0}".format(args))
+		sys.exit(0)
 
 
-def ldapsearch(flt, base="", attrlist=None, scope="sub", unique=0, required=0,
-		timeout=-1, sizelimit=0, serverctrls=None):
+def ldapsearch(flt, base="", attrlist=None, scope="sub", unique=0, required=0, timeout=-1, sizelimit=0, serverctrls=None):
 	"""
 	Perform a LDAP search
 	
@@ -100,73 +102,35 @@ def ldapsearch(flt, base="", attrlist=None, scope="sub", unique=0, required=0,
 			sizelimit=sizelimit, serverctrls=serverctrls)
 
 
-def ldapget(dn, attrlist=None):
-	"""
-	Retrieve a single LDAP object
-	
-	:dn: DN of the object that shall be retrieved
-	:attrlist: List of attributes that shall be retrieved
-	:returns: Return the ldap object. The Result is a dict of the form
-	          {attr1: (value1, value2), ..}
-	
-	Example:
-	# this is safe because even if ldapget doesn"t find anything, it still
-	# returns an empty dict ({})
-	for k, v in ldapget("uid=jebersba,...").iteritems():
-		print k
-	"""
-	
-	ldap = init_ldapconnection()
-	assert ldap is not None
-	return ldap.get(dn=dn, attr=attrlist)
+# Create argument parser
+parser=argparse.ArgumentParser(description="Wake a/multiple host(s) by fetching the MAC(s) from the LDAP directory")
+parser.add_argument("-d, --delay", action="store", type=float, default="0.0", dest="delay", required=False, help="Set a delay between multiple wakeonlan-calls (in seconds)")
+parser.add_argument("-i, --host", action="store", nargs="*", dest="hostname", required=True, help="Define all hosts you want to wake up. Setting \"*\" as the HOSTNAME wakes every host listed in the LDAP directory")
 
+args=parser.parse_args()
 
-def getArgs():
-	""" get the commandline arguments """
-	o, hostnames = getopt.getopt(sys.argv[1:], "d:h")  
-	delay = 0
-	opts = {}
-	for k,v in o:                                                             
-		opts[k] = v
-	if  opts.has_key("-h"):                                                 
-		usage() 
-		sys.exit(0)
-	if len(hostnames) < 1:
-		print "ERROR: no hostname given. Exiting."
-		usage()
-		sys.exit(0)
-	if opts.has_key("-d"):
-		delay = float( opts["-d"] )
-	return delay, hostnames
+# Exit, if only spaces/tabs given
+if len(args.hostname) == 0:
+	parser.error("wakeonlan.py: error: argument -i, --host is required")
 
-
-def usage():
-	""" print help text """
-	print """
-univention-wakeonlan : wake a host/multiple hosts by fetching the MAC(s) from the LDAP directory 
-
-usage: univention-wakeonlan [-h] [-d <delay(sec)>] <hostname> [<hostname>] [...]
-
--h\t\t\tprint this message
--d <delay>\t\tset a delay between multiple wakeonlan-calls (in seconds)
-
-example: univention-wakeonlan -d 0.5  hostname1 hostname2 hostname3
-
-Setting "*" as the <hostname> wakes every host listed in the LDAP dir. 
-Please set a delay and use with caution!
-	"""
-
-
-delay, hostnames = getArgs()
+# Create the LDAP connection
 init_ldapconnection()
 
 # for each hostname given
-for hostname in hostnames:
+for host in args.hostname:
 	# Get Mac-Address(es) of Computer and itterate through all of them
-	entry = ldapsearch(flt="(&(objectClass=univentionHost)(cn={0}))".format(hostname), attrlist=["cn", "macAddress"])[0]
-	for mac in entry[1].get("macAddress"):
-		# Wake computer by sending magic package
-		print "waking {0} ({1})".format(entry[1].get("cn")[0], mac)
-		subprocess.call( ["wakeonlan", mac] )
-		time.sleep( delay )
-
+	entry = ldapsearch(flt="(&(objectClass=univentionHost)(cn={0}))".format(host), attrlist=["cn", "macAddress"])
+	
+	if len(entry) == 0:
+		print ("Host {0} not found".format(host))
+	else:
+		macs = entry[0][1].get("macAddress")
+		
+		if macs is None or len(macs) == 0:
+			print ("No MACs defined for Host \"{0}\"".format(entry[1].get("cn")[0]))
+		else:
+			for mac in entry[1].get("macAddress"):
+				print ("Waking {0} ({1})".format(entry[1].get("cn")[0], mac))
+				
+				subprocess.call( ["wakeonlan", mac] )
+				time.sleep (args.delay)
