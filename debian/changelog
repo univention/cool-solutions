@@ -1,3 +1,9 @@
+univention-shalla-list-downloader (2.0.0-1) unstable; urgency=low
+
+  * Updated for UCS 4.1 release. Issue #6801
+
+ -- Andreas Peichert <peichert@univention.de>  Wed, 21 Dec 2016 14:05:23 +0100
+
 univention-shalla-list-downloader (1.1.0-7) unstable; urgency=low
 
   * silent output.  Ticket #2013121121002071

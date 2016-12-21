@@ -2,12 +2,12 @@ Source: univention-shalla-list-downloader
 Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
-Build-Depends: debhelper (>= 8.0.0), ucslint
+Build-Depends: debhelper, ucslint
 Standards-Version: 3.9.4
 Homepage: http://www.univention.de/
 
 Package: univention-shalla-list-downloader
 Architecture: all
 Depends: ucs-school-webproxy, ${shlibs:Depends}, ${misc:Depends}
-Description: # Shalla list downloader for paedML Linux.
+Description: Shalla list downloader for paedML Linux.
  Shalla list downloader for paedML Linux. Downloads/updates shallalists and triggers the initialization of squidGuard databases
