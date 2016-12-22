@@ -68,14 +68,14 @@ FAIL () { # log error message to log file and std-err, then fail
 # To be able to read from Univention-Configuration-Registry we need this one:
 ##
 
-eval "$(ucr shell proxy/filter/blacklists)"
+eval "$(ucr shell proxy/filter/global/blacklists/domains)"
 
 # clean up...
 CLEAN () {
 	rm -rf "${TMP_DIR}"
 }
 
-if [ -z "${proxy_filter_blacklists}" ]; then
+if [ -z "${proxy_filter_global_blacklists_domains}" ]; then
 	# no lists configured, don't download anything
 	if [ -e "${DBHOME}/${BL_DIR}" ]; then
 		rm -rf "${DBHOME}/${BL_DIR}"
@@ -109,8 +109,8 @@ chown -R root:proxy "${DBHOME}/${BL_DIR}"
 chmod -R g+rw "${DBHOME}/${BL_DIR}"
 
 #call webproxy to reload
-if [[ -n "${proxy_filter_blacklists}" ]]; then
-	ucr set proxy/filter/blacklists="${proxy_filter_blacklists}"
+if [[ -n "${proxy_filter_global_blacklists_domains}" ]]; then
+	ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"
 fi
 
 #clean up tar.gz and md5 files
