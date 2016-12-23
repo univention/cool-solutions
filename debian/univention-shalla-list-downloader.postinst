@@ -61,6 +61,8 @@ case "$1" in
 				proxy/filter/global/blacklists/urls="${global_blacklists_urls}"
 			ucr unset proxy/filter/blacklists
 		fi
+		ucr set proxy/filter/global/blacklists/domains?"blacklists/adv/domains blacklists/hacking/domains blacklists/porn/domains blacklists/violence/domains blacklists/proxy/domains blacklists/warez/domains blacklists/aggressive/domains blacklists/drugs/domains blacklists/gamble/domains" \
+			proxy/filter/global/blacklists/urls?"blacklists/adv/urls blacklists/hacking/urls blacklists/porn/urls blacklists/violence/urls blacklists/proxy/urls blacklists/warez/urls blacklists/aggressive/urls blacklists/drugs/urls blacklists/gamble/urls"
 		ucr set cron/shalla-list-downloader/command?"jitter 3600 /usr/sbin/univention-shalla-list-downloader" \
 			cron/shalla-list-downloader/time?"5 1 * * *" \
 			cron/shalla-list-downloader/description?"Update webproxy blacklists"
