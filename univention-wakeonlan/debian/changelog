@@ -1,3 +1,12 @@
+univention-wakeonlan (1.0.2-1) unstable; urgency=medium 
+ 
+  * Added: Argparse for Argument-Parsing 
+  * Added: Error-Catching before Tracebacks occur 
+  * Added: Option to send Wake-Requests to all Hosts in the LDAP-Database 
+  * Redmine Task #5464 
+ 
+ -- Hendrik Peter <hpeter@univention.de>  Wed, 02 Jan 2017 14:45:48 +0100 
+ 
 univention-wakeonlan (1.0.1-1) unstable; urgency=medium
 
   * Code cleanup
