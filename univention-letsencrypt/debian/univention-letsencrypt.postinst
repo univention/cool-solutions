@@ -50,5 +50,8 @@ if [ "$1" = "configure" ] ; then
 	do_statoverride letsencrypt www-data 0755 "/var/www/.well-known/acme-challenge"
 	do_statoverride letsencrypt root 0775 "/etc/univention/letsencrypt"
 fi
+ucr set letsencrypt/services/apache2?no \
+		letsencrypt/services/postfix?no \
+		letsencrypt/services/dovecot?no
 
 exit 0

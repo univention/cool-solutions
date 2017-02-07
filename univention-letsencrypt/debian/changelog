@@ -1,3 +1,11 @@
+univention-letsencrypt (1.0.1-1) unstable; urgency=medium
+
+  * Added /etc to install file
+  * Add UCR variables in postinst
+  * Task #6109
+
+ -- Timo Denissen <denissen@univention.de>  Tue, 07 Feb 2017 20:11:21 +0100
+
 univention-letsencrypt (1.0.0-1) unstable; urgency=low
 
   * Initial version
