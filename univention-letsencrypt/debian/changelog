@@ -1,3 +1,11 @@
+univention-letsencrypt (1.0.2-1) unstable; urgency=medium
+
+  * Updated copyright headers
+  * Added missing dependency
+  * Task #6109
+
+ -- Timo Denissen <denissen@univention.de>  Wed, 08 Feb 2017 11:38:00 +0100
+
 univention-letsencrypt (1.0.1-1) unstable; urgency=medium
 
   * Added /etc to install file

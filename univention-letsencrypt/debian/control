@@ -10,7 +10,7 @@ Build-Depends: debhelper (>> 7),
 
 Package: univention-letsencrypt
 Architecture: all
-Depends: python
+Depends: python, univention-config
 Recommends: apache2
 Description: univention-letsencrypt - automatically request SSL certificates
  This package contains acme_tiny.py for semi-automatic request of SSL
