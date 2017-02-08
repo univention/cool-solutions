@@ -49,7 +49,7 @@ fi
 if [ ! -e "$DIR_LE/account.key" ] ; then
 	echo "Creating account.key..."
 	prepare_file "$DIR_LE/account.key" 0600 root:root
-	setfacl -m u:letsencrypt:r account.key
+	setfacl -m u:letsencrypt:r "$DIR_LE/account.key"
 	openssl genrsa 4096 > "$DIR_LE/account.key"
 fi
 

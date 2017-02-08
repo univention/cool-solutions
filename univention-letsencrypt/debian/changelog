@@ -1,3 +1,10 @@
+univention-letsencrypt (1.0.3-1) unstable; urgency=medium
+
+  * Fixed wrong path for setfacl to alter permissions for account.key
+  * Task #6109
+
+ -- Timo Denissen <denissen@univention.de>  Wed, 08 Feb 2017 12:26:52 +0100
+
 univention-letsencrypt (1.0.2-1) unstable; urgency=medium
 
   * Updated copyright headers
