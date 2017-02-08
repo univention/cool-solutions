@@ -1,3 +1,10 @@
+univention-letsencrypt (1.0.4-1) unstable; urgency=medium
+
+  * Fixed faulty error handling in refresh-cert
+  * Task #6109 
+
+ -- Timo Denissen <denissen@univention.de>  Wed, 08 Feb 2017 13:55:17 +0100
+
 univention-letsencrypt (1.0.3-1) unstable; urgency=medium
 
   * Fixed wrong path for setfacl to alter permissions for account.key

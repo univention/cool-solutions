@@ -35,6 +35,7 @@ if [ ! "$(id -un)" = "letsencrypt" ] ; then
 fi
 
 cleanup () {
+	set +e
 	[ -n "$TMPFN" -a -f "$TMPFN" ] && rm -f "$TMPFN"
 }
 trap cleanup EXIT
