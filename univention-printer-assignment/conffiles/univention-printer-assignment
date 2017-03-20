@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/bin/bash
 # -*- coding: utf-8 -*-
 #
 # Univention Printer Assignment UCR Hook
@@ -29,10 +29,4 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-import subprocess
-
-def main():
-	subprocess.call('univention-directory-listener-ctrl', 'resync', 'univention-printer-assignment')
-
-if __name__ == '__main__':
-	main()
+univention-directory-listener-ctrl resync univention-printer-assignment
