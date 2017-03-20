@@ -1,4 +1,4 @@
 Type: script
-Script: univention-printer-assignment-resync.py
+Script: univention-printer-assignment-resync
 Variables: printer/assignment/vbs/.*
 Variables: printer/assignment/printuientry/options
