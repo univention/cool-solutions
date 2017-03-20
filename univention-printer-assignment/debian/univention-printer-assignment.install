@@ -1,4 +1,4 @@
 listener/univention-printer-assignment.py usr/lib/univention-directory-listener/system/
-listener/univention-printer-assignment-resync.py etc/univention/templates/scripts/
+etc/univention-printer-assignment-resync.py etc/univention/templates/scripts/
 share/update-univention-printer-assignment usr/share/univention-printer-assignment/
 share/printer-assignment-template.vbs usr/share/univention-printer-assignment
