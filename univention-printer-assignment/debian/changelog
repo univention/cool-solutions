@@ -1,8 +1,8 @@
-univention-printer-assignment (7.0.1-12) unstable; urgency=medium
+univention-printer-assignment (7.0.1-13) unstable; urgency=medium
 
   * move resync script #6910 
 
- -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 20 Mar 2017 14:55:45 +0100
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 20 Mar 2017 15:10:35 +0100
 
 univention-printer-assignment (7.0.1-6) unstable; urgency=medium
 
