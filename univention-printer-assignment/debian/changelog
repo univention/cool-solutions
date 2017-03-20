@@ -1,4 +1,10 @@
-univention-printer-assignment (7.0.1-4ubuntu1) unstable; urgency=medium
+univention-printer-assignment (7.0.1-6) unstable ; urgency=medium
+
+  * update dirs file #6910
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 20 Mar 2017 13:10:06 +0100
+
+univention-printer-assignment (7.0.1-5) unstable; urgency=medium
 
   * add UCR hook to recreate VB scripts on relevant change
 
