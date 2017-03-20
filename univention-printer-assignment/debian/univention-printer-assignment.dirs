@@ -1,4 +1,3 @@
-etc/univention/templates/scripts
 usr/lib/univention-install
 usr/lib/univention-directory-listener/system
 var/lib/univention-printer-assignment
