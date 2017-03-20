@@ -1,3 +1,9 @@
+univention-printer-assignment (7.0.1-7) unstable; urgency=medium
+
+  * move resync script 
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 20 Mar 2017 13:44:52 +0100
+
 univention-printer-assignment (7.0.1-6) unstable; urgency=medium
 
   * update dirs file #6910
