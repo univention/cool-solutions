@@ -1,0 +1,23 @@
+univention-dovecot-migration (1.0.0-3) unstable; urgency=medium
+
+  * remove .sh extension, remove unnecessary brace
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 07 Nov 2016 09:47:19 +0100
+
+univention-dovecot-migration (1.0.0-2) unstable; urgency=medium
+
+  * update control file #4493
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Tue, 18 Oct 2016 14:48:32 +0200
+
+univention-dovecot-migration (1.0.0-1) unstable; urgency=medium
+
+  * update control file to have build result in correct package name #4493
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 18 Oct 2016 12:24:36 +0200
+
+univention-dovecot-migration (1.0.0-0) unstable; urgency=medium
+
+  * Initial release. #4493
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 18 Oct 2016 10:30:00 +0200

@@ -1,0 +1,240 @@
+#!/bin/bash
+#Copyright (C) 2016 Univention GmbH
+#
+#http://www.univention.de/
+#
+#All rights reserved.
+#
+#The source code of the software contained in this package
+#as well as the source package itself are made available
+#under the terms of the GNU Affero General Public License version 3
+#(GNU AGPL V3) as published by the Free Software Foundation.
+#
+#Binary versions of this package provided by Univention to you as
+#well as other copyrighted, protected or trademarked materials like
+#Logos, graphics, fonts, specific documentations and configurations,
+#cryptographic keys etc. are subject to a license agreement between
+#you and Univention and not subject to the GNU AGPL V3.
+#
+#In the case you use the software under the terms of the GNU AGPL V3,
+#the program is provided in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#GNU Affero General Public License for more details.
+#
+#You should have received a copy of the GNU Affero General Public
+#License with the Debian GNU/Linux or Univention distribution in file
+#/usr/share/common-licenses/AGPL-3; if not, see
+#<http://www.gnu.org/licenses/>.
+
+generateConfig() {
+
+#Generates a config file for offlineimap using an LDAP query for all users with this server set as mail home server and echoes it to ${outputfile} (can be set with '-of' parameter).
+#If no output file is set, 'migration.conf' is used.
+
+   if [[ -z ${outputfile} ]]
+   then outputfile="migration.conf"
+    fi
+
+    if [[ ${1} == "" ]]
+    then echo $'This generates a config file for offlineimap.
+    Usage: ./generator.sh $(univention-ldapsearch -LLLo ldif-wrap=no  univentionMailHomeServer="$(hostname -f)" | grep "uid:" | sed \'s/uid: //g\')'
+    exit
+    fi
+
+    howOften=$(univention-ldapsearch -LLLo ldif-wrap=no  univentionMailHomeServer="$(hostname -f)" | grep -c univentionMailHomeServer)
+
+    echo "[general]
+accounts = $(univention-ldapsearch -LLLo ldif-wrap=no  univentionMailHomeServer="$(hostname -f)" | grep "mailPrimaryAddress: " | sed 's/mailPrimaryAddress: //g' | tr '\n' ',')
+
+[DEFAULT]
+postsynchook = ${scriptLocation}/univention-dovecot-migration.sh -sd ${sourceDomain} -dd ${destinationDomain} -lf ${localFolder} -p
+    " > ${outputfile}
+
+    sed -i 's/,${//' ${outputfile}
+
+    while [ ${howOften} != "0" ]
+    do
+    currentUser=${1}"@${sourceDomain}"
+echo "[Account ${currentUser}]
+localrepository = ${currentUser}"local"
+remoterepository = ${currentUser}"remote"
+
+[Repository ${currentUser}"local"]
+type = Maildir
+localfolders = ${localFolder}/${sourceDomain}/${currentUser}
+    
+[Repository ${currentUser}"remote"]
+type = IMAP
+remotehost = ${remote}
+remoteuser = ${currentUser}*${migrationUser}
+remotepass = ${migrationPass}
+${ssl}
+${remotePort}
+${CACert}
+${clientCert}
+${clientKey}" >> ${outputfile}
+    shift
+    ((howOften--)) 
+    done
+}
+
+postSyncHook () {
+
+#This function is called after the migration of any user by offlineimap. It moves the migrated mailbox to the right directory and gives it the correct permissions.
+
+    from="${localFolder}/${sourceDomain}/"
+    destination="/var/spool/dovecot/private/${destinationDomain}/"
+    
+    currentUser=$(ls $from | awk 'NR==1')
+    currentUID="$(echo ${currentUser} | sed 's/'"@${sourceDomain}"'//g')"
+
+    #Copy INBOX
+    mv "${from}${currentUser}"/INBOX/*"" "${destination}${currentUID}/Maildir"
+    rm -rf ${from}${currentUser}"/INBOX"
+    
+    copied=0
+
+    #Copy other folders
+    while [ ${copied} != $(ls ${from}${currentUser} | wc -l) ]
+    do
+
+    currentDir="$(ls ${from}${currentUser} | awk 'NR==1')"
+
+    if [[ ${currentDir} == INBOX.*  ]]
+    then currentDirWoutINBOX=$(echo ${currentDir} | sed 's/INBOX.//')
+    mv ${from}${currentUser}"/"${currentDir} ${destination}${currentUID}"/Maildir/."${currentDirWoutINBOX}
+    else mv ${from}${currentUser}"/"${currentDir} ${destination}${currentUID}"/Maildir/."${currentDir}
+    fi
+
+    #Remove current subdirectory from temporary migration folder
+    rm -rf ${from}${currentUser}"/"${currentDir}
+    done
+
+    #Remove entire mailbox from temporary folder
+    rm -rf ${from}${currentUser}
+
+    #Make dovecot the owner of the moved mailbox
+    chown -R dovemail:dovemail ${destination}"/"${currentUID}
+}
+
+getNumberOfAllMails () {
+
+#This function reads how many mails are in the entire Dovecot spool.
+#If the two numbers are the same, all mails have been migrated.
+
+    totalCount=0
+
+    source () {
+        #echo ${remotePass} > .remotepass
+        while [ -n "${1}" ]
+        do
+        currentDirCount=$(univention-ssh .remotepass ${remoteUser}@${remote} ls -R ${remotePath}/${sourceDomain}/${1}/Maildir/*/ | wc -l)
+    
+        totalCount=$((${totalCount} + ${currentDirCount}))
+        shift
+
+        done
+        
+    }
+
+    destination () {
+        while [ -n "${1}" ]
+        do
+        currentDirCount=$(ls -R /var/spool/dovecot/private/${destinationDomain}/${1}/Maildir/*/ | wc -l)
+
+        totalCount=$((${totalCount} + ${currentDirCount}))
+        shift
+
+        done
+    }
+
+    if [[ ${whichToTest} == "s" ]]
+    then source $(univention-ssh .remotepass ${remoteUser}@${remote} ls /var/vmail/${sourceDomain}/)
+    else destination $(univention-ldapsearch -LLLo ldif-wrap=no  univentionMailHomeServer="$(hostname -f)" | grep "uid:" | sed 's/uid: //g')
+    fi
+    
+    rm .remotepass
+    echo ${totalCount}
+} 
+
+while [ "${1}" != "" ]
+do
+case "${1}" in
+'-h') echo "Generate offlineimap-config, provide PostSyncHook, count migrated mails in comparison to source system [options -sd -dd -mu -mp -r -ru -rp -ts/-td] [feature to start -g -p -t]
+Generate config:
+-sd -dd -mu -mp -r -rPort -lf [-ssl -CACert -clientCert -clientKey] -g
+post sync hook:
+-sd -dd -lf -p 
+Count migrated mails
+-ru -rp -r -rPath [-dd -sd] [-ts -td] -t"
+    exit
+    ;;
+#Domain of source (remote) server and destination domain
+'-sd') shift
+    sourceDomain=${1}
+    ;;
+'-dd') shift
+    destinationDomain=${1}
+    ;;
+#remote IP or hostname
+'-r') shift
+    remote=${1}
+    ;;    
+#master user for remote Dovecot server to access all password with one user/password
+'-mu') shift
+    migrationUser=${1}
+    ;;
+'-mp') shift
+    migrationPass=${1}
+    ;;
+#SSH user and password for remote machine
+'-ru') shift
+    remoteUser=${1}
+    ;;
+'-rp') shift
+    remotePass=${1}
+    ;;
+'-rPath') shift
+    remotePath=${1}
+    ;;
+#SSL settings
+'-rPort') shift
+    remotePort="remoteport = ${1}"
+    ;;
+'-ssl') ssl="ssl = yes"
+    ;;
+'-CACert') shift
+    CACert="sslcacertfile = ${1}"
+    ;;
+'-clientKey') shift
+    clientKey="sslclientkey = ${1}"
+    ;;
+'-clientCert') shift
+    clientCert="sslclientcert = ${1}"
+    ;;
+#Mail counter parameter
+'-ts') whichToTest="s"
+    ;;
+'-td') whichToTest="d"
+    ;;
+#local folder to work in and output file for config generator
+'-lf') shift 
+    localFolder=${1}
+    ;;
+'-of') shift 
+    outputfile=${1}
+    ;;
+#actual funtion calls
+'-g') scriptLocation="/usr/bin"
+    generateConfig $(univention-ldapsearch -LLLo ldif-wrap=no  univentionMailHomeServer="$(hostname -f)" | grep "uid:" | sed 's/uid: //g')
+    ;;   
+'-t') echo ${remotePass} > .remotepass
+    getNumberOfAllMails ${whichToTest}
+    ;;
+'-p') postSyncHook
+    ;; 
+esac
+shift
+
+done
