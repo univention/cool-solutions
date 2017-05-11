@@ -1,3 +1,12 @@
+univention-munin (1.0.0-10) unstable; urgency=low
+
+  * Migrated to UCS 4.2. Isuue #7767
+    - Fixed unset UCRv auth/munin/group in postrm
+    - Updated for Apache 2.4
+    - uniupdatecopyright
+
+ -- Andreas Peichert <peichert@univention.de>  Thu, 11 May 2017 15:50:13 +0200
+
 univention-munin (1.0.0-9) unstable; urgency=medium
 
   * fix option for more IP adresses in munin/node/allowedhosts
