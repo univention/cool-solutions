@@ -1,0 +1,21 @@
+Source: univention-munin
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Build-Depends: debhelper (>= 7.0.50~), ucslint-univention, univention-config-dev
+Standards-Version: 3.8.2
+Homepage: http://www.univention.de/
+
+Package: univention-munin-server
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, munin, univention-munin-node
+Description: UCS: munin server support
+ This package installs required packages to allow monitoring
+ clients by munin.
+
+Package: univention-munin-node
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, munin-node, libnet-cidr-perl
+Description: UCS: munin node support
+ This package installs required packages to allow client
+ to be monitored by munin.
