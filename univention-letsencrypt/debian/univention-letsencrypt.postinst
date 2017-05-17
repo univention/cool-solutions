@@ -34,7 +34,21 @@ do_statoverride () {
 
 #DEBHELPER#
 
+# Migration from Apache 2.2 to Apache 2.4
+if  [ "$1" = 'configure' -a -n "$2" ] && dpkg --compare-versions "$2" lt '1.1.0-1'; then
+	webserver=apache2
+	# Disable old site with Apache 2.4
+	if [ -e /etc/$webserver/sites-enabled/univention-letsencrypt ] ; then
+		a2dissite univention-letsencrypt
+	fi
+	# Remove old site with Apache 2.4
+	if [ -e /etc/$webserver/sites-available/univention-letsencrypt ] ; then
+		rm -f /etc/$webserver/sites-available/univention-letsencrypt
+	fi
+fi
+
 if [ "$1" = "configure" ] ; then
+	a2ensite univention-letsencrypt.conf
 	invoke-rc.d apache2 restart
 
 	getent passwd letsencrypt || adduser \

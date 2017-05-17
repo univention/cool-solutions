@@ -34,11 +34,16 @@ do_statoverride_remove () {
 
 #DEBHELPER#
 
+# package files are removed
+if [ "$1" = "remove" ] ; then
+	a2dissite univention-letsencrypt.conf
+	invoke-rc.d apache2 restart
+fi
+
+# purge configuration if empty
 if [ "$1" = "purge" ] ; then
 	do_statoverride_remove /var/www/.well-known/acme-challenge
 	do_statoverride_remove /etc/univention/letsencrypt
-
-	invoke-rc.d apache2 restart
 fi
 
 exit 0
