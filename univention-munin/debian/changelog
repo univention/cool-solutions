@@ -1,3 +1,10 @@
+univention-munin (1.0.1-1) unstable; urgency=low
+
+  * Merge ucr templates with upstrem munin 2.0.25. Issue #6640
+  * Added munin/server/local_address to connect to the nodes from. Issue #6640
+
+ -- Andreas Peichert <peichert@univention.de>  Thu, 18 May 2017 16:05:58 +0200
+
 univention-munin (1.0.1-0) unstable; urgency=low
 
   * Migrated to UCS 4.2. Isuue #7767

@@ -3,3 +3,9 @@ Description[de]=Ist diese Variable auf 'yes' gesetzt, muss sich der Benutzer fü
 Description[en]=If this variable is set to 'yes' a user accessing the Munin web interface needs to authenticate. If set to 'no' the web interface can be accessed without a valid user account.
 Type=str
 Categories=service-munin
+
+[munin/server/local_address]
+Description[de]=Die lokale Adresse zur Verbindung mit den Nodes. Wenn der Munin-Server mehr als eine lokale Adresse hat, kann die zu verwendende Adresse definiert werden. Wenn die Variable nicht gesetzt ist, wird Munin die erste lokale Adresse nehmen.
+Description[en]=The local address to connect to the nodes from. If the Munin server has more than one local address, the address to be used can be defined. If unset, Munin will take the first local address.
+Type=str
+Categories=service-munin

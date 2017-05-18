@@ -1,5 +1,6 @@
 Type: file
 File: etc/munin/munin.conf
+Variables: munin/server/local_address
 
 Type: file
 File: etc/munin/apache24.conf
