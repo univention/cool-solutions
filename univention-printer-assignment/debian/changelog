@@ -1,3 +1,10 @@
+univention-printer-assignment (7.1.0-1) unstable; urgency=low
+
+  * merged branch for 4.2. Issue #7915
+  * Update Copyright
+
+ -- Andreas Peichert <peichert@univention.de>  Mon, 22 May 2017 15:23:47 +0200
+
 univention-printer-assignment (7.0.1-14) unstable; urgency=medium
 
   * move resync script #6910 
