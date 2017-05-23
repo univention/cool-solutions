@@ -1,3 +1,9 @@
+univention-printer-assignment (7.1.0-2) unstable; urgency=low
+
+  * Fixed test/testsuite.sh path and ucslint unquoted argument. Issue #7915
+
+ -- Andreas Peichert <peichert@univention.de>  Tue, 23 May 2017 16:03:12 +0200
+
 univention-printer-assignment (7.1.0-1) unstable; urgency=low
 
   * merged branch for 4.2. Issue #7915

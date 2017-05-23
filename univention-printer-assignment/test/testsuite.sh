@@ -80,7 +80,7 @@ create_host () {
 }
 
 cleanup_hosts () {
-	rm -Rf "/var/lib/samba/sysvol/$(echo $kerberos_realm | tr [:upper:] [:lower:])/scripts/hosts/"*
+	rm -Rf "/var/lib/samba/sysvol/$(echo $kerberos_realm | tr '[:upper:]' '[:lower:]')/scripts/printerassignment/"*
 	: > /var/lib/univention-printer-assignment/backlog
 }
 
@@ -88,8 +88,8 @@ check_changes () {
 	echo "$1"
 	sleep 3s
 	/usr/share/univention-printer-assignment/update-univention-printer-assignment -d -f /var/lib/univention-printer-assignment/backlog
-	ls "/var/lib/samba/sysvol/$(echo $kerberos_realm | tr [:upper:] [:lower:])/scripts/hosts"
-	egrep -Hr '^Dim (printerList|defaultPrinter|default_printer)' "/var/lib/samba/sysvol/$(echo $kerberos_realm | tr [:upper:] [:lower:])/scripts/hosts"
+	ls "/var/lib/samba/sysvol/$(echo $kerberos_realm | tr '[:upper:]' '[:lower:]')/scripts/printerassignment"
+	egrep -Hr '^Dim (printerList|defaultPrinter|default_printer)' "/var/lib/samba/sysvol/$(echo $kerberos_realm | tr '[:upper:]' '[:lower:]')/scripts/printerassignment"
 	cleanup_hosts
 }
 
