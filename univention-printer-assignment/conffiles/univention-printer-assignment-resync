@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/bash
+# -*- coding: utf-8 -*-
 #
-# Univention Printer Assignment
-#
-# Copyright 2009-2017 Univention GmbH
+# Univention Printer Assignment UCR Hook
+# Copyright 2017 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -29,10 +29,4 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-#DEBHELPER#
-
-if [ "$1" = "remove" ] ; then
-	cp /usr/lib/univention-uninstall/92univention-printer-assignment-schema.uinst /usr/lib/univention-install/
-fi
-
-exit 0
+univention-directory-listener-ctrl resync univention-printer-assignment > /dev/null 2>&1

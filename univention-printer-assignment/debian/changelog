@@ -1,3 +1,28 @@
+univention-printer-assignment (7.1.0-1) unstable; urgency=low
+
+  * merged branch for 4.2. Issue #7915
+  * Update Copyright
+
+ -- Andreas Peichert <peichert@univention.de>  Mon, 22 May 2017 15:23:47 +0200
+
+univention-printer-assignment (7.0.1-14) unstable; urgency=medium
+
+  * move resync script #6910 
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 20 Mar 2017 15:10:35 +0100
+
+univention-printer-assignment (7.0.1-6) unstable; urgency=medium
+
+  * update dirs file #6910
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 20 Mar 2017 13:10:06 +0100
+
+univention-printer-assignment (7.0.1-5) unstable; urgency=medium
+
+  * add UCR hook to recreate VB scripts on relevant change
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 20 Mar 2017 12:42:32 +0100
+
 univention-printer-assignment (7.0.1-5) unstable; urgency=medium
 
   * fix VBS template (Ticket#: 2016070621000283)
