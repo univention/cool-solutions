@@ -88,7 +88,7 @@ def __process_backlog():
 	ud.debug(ud.LISTENER, ud.PROCESS, "univention-printer-assignment: processing backlog file (entry count: %d)" % backlog_count)
 	listener.setuid(0)
 	try:
-		result = subprocess.call([backlog_process_cmd, backlog_process_cmd, '-f', backlog_filename])
+		result = subprocess.call([backlog_process_cmd, '-f', backlog_filename])
 	finally:
 		listener.unsetuid()
 	if result:
