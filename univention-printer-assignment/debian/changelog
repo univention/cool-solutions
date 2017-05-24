@@ -1,3 +1,13 @@
+univention-printer-assignment (7.0.1-15) unstable; urgency=low
+
+  * backport changes from 4.2 to 4.1. Issue #7915
+    - Merge branch 'ucs-4.1/univention-printer-assignment/master' into ucs-4.1/master
+    - This will include commit 947487bf40064b7ff7029b535790f8a6498a2b78 (duplicate 7.0.1-5)
+    - Update Copyright
+    - Fixed test/testsuite.sh path and ucslint unquoted argument
+
+ -- Andreas Peichert <peichert@univention.de>  Wed, 24 May 2017 10:52:23 +0200
+
 univention-printer-assignment (7.0.1-14) unstable; urgency=medium
 
   * move resync script #6910 
