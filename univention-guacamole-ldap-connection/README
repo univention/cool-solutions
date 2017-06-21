@@ -1,0 +1,52 @@
+Dieses Readme enthält Informationen über die notwendigend Tests.
+
+Paket "univention-guacamole-rollout"
+* Installation auf den folgenden Systemrollen möglich
+** UCS DC Master
+** UCS Memberserver
+* Das gepatchte Plugin wird nach "/usr/share/guacamole/" installiert
+* Im Postinst werden die UCR-Variablen voreingestellt:
+** 	guacamole/user/dn="cn=users,LDAP-BASIS"
+**	guacamole/config/base/dn="cn=groups,LDAP-BASIS"
+**	guacamole/ldap/username/attribute="uid"
+**	guacamole/external/port=8080
+* Das Joinscript 99univention_install_guacamole.inst
+** Zieht mit Docker das aktuelle mjumper/guacd-Image
+** Lädt das Image mjumper/guacamole herunter
+** Prüft auf Vorhandensein der vier UCR-Variablen guacamole/*
+** Bei Fehlen bricht das Joinscript ab
+** Bei Vorhandensein wird der Guacamole-Container mit den in den UCR-Variablen gesetzten Einstellungen ausgerollt
+** Das gepatchte Plugin wird installiert
+** Die Apache2-Site für Guacamole wird commited
+** Die Apache2-Site für Guacamole wird aktiviert
+** Die Übersichtsseite des Servers bekommt einen Link zu Guacamole
+** Das Script "univention-guacamole-renew" löscht den alten Container und baut ihn mit den UCR-Variablen neu
+* Das Unjoinscript 01univention_install_guacamole-uninstall.uinst
+** Stoppt und löscht den Container "guacd"
+** Stoppt und löscht den Container "guacamole"
+** Entfernt den Eintrag von der Übersichtsseite
+** Entfernt die UCR-Variablen guacamole/*
+** Deaktiviert die Apache2-Site für Guacamole
+* Das Joinscript 98univention_guacamole_searchuser.inst
+** Prüft ob es den Benutzer "guacamole" schon gibt
+*** Falls ja hört das Joinscript auf
+*** Falls nein wird ein Passwort erstellt und in /etc/guacamole.secret gespeichert
+*** Die Berechtigungen werden auf 600 gesetzt
+* Das Unjoinscript 02univention_guacamole_searchuser-uninstall.uinst
+** Prüft ob der Service "GUACAMOLE_SEARCHUSER" noch vorhanden ist
+*** Ist der Service vorhanden wird der Benutzer nicht gelöscht
+*** Ist der Service nicht mehr vorhanden wird auch der Benutzer gelöscht
+
+Paket "univention-guacamole-schema"
+* Installation nur auf den folgenden Systemrollen möglich:
+** UCS DC Master
+** UCS DC Backup
+* Das Schema wird nach "/var/lib/univention-ldap/local-schema/" installiert
+* Das Joinscript 99univention_register_guacamole_schema
+** Registriert das Schema "guacConfigGroup.schema"
+** Das Modul "Gruppen" wird durch zwei Custom Attributes erweitert:
+*** Tab Guacamole
+**** Single-Value Feld "Protokoll"
+**** Multi-Value Feld "Paramter"
+* Das Unjoinscript 01univention_register_guacamole_schema
+** Entfernt die Custom attributes

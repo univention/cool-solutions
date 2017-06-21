@@ -1,0 +1,170 @@
+univention-guacamole-ldap-connection (2.0.0-1) unstable; urgency=medium
+
+  * Version bump to UCS 4.2
+  * univention-guacamole-rollout
+  ** Updated "univention-guacamole-renew" to use "docker cp"
+  ** Updated "99univention_install_guacamole.inst"
+  * univention-guacamole-schema
+  ** 
+  * Updated Apache2 template
+  * Task #8139
+
+ -- Timo Denissen <denissen@univention.de>  Thu, 15 Jun 2017 16:03:20 +0200
+
+univention-guacamole-ldap-connection (1.0.13-3) unstable; urgency=medium
+
+  * Minor update of univention-guacamole-rollout.postinst
+
+ -- Timo Denissen <denissen@univention.de>  Thu, 15 Jun 2017 16:03:20 +0200
+
+univention-guacamole-ldap-connection (1.0.13-2) unstable; urgency=medium
+
+  * Removed automatic call of 02univention_guacamole_searchuser-uninstall.uinst in univention-guacamole-rollout.postrm
+
+ -- Timo Denissen <denissen@univention.de>  Thu, 15 Jun 2017 15:56:06 +0200
+
+univention-guacamole-ldap-connection (1.0.13-1) unstable; urgency=medium
+
+  * Minor fixes in 98univention_guacamole_searchuser.inst
+
+ -- Timo Denissen <denissen@univention.de>  Thu, 15 Jun 2017 14:32:29 +0200
+
+univention-guacamole-ldap-connection (1.0.12-1) unstable; urgency=medium
+
+  * Fixed errors in 98univention_guacamole_searchuser.inst
+
+ -- Timo Denissen <denissen@univention.de>  Thu, 15 Jun 2017 14:20:29 +0200
+
+univention-guacamole-ldap-connection (1.0.11-1) unstable; urgency=medium
+
+  * Added suffix "-uninstall" to all unjoinscripts
+  * Added new join- and unjoinscript for creating a guacamole search user
+
+ -- Timo Denissen <denissen@univention.de>  Thu, 15 Jun 2017 14:10:29 +0200
+
+univention-guacamole-ldap-connection (1.0.10-1) unstable; urgency=medium
+
+  * Fixed script "univention-guacamole-renew" to re-deploy Guacamole container
+
+ -- Timo Denissen <denissen@univention.de>  Thu, 15 Jun 2017 11:53:46 +0200
+
+univention-guacamole-ldap-connection (1.0.9-1) unstable; urgency=medium
+
+  * Added script "univention-guacamole-renew" to re-deploy Guacamole container
+
+ -- Timo Denissen <denissen@univention.de>  Thu, 15 Jun 2017 11:50:46 +0200
+
+univention-guacamole-ldap-connection (1.0.8-1) unstable; urgency=medium
+
+  * Fixed wrong exit in univention-guacamole-schema.postinst
+  * Fixed joinscript 99univention_register_guacamole_schema.inst
+
+ -- Timo Denissen <denissen@univention.de>  Thu, 15 Jun 2017 09:13:46 +0200
+
+univention-guacamole-ldap-connection (1.0.7-1) unstable; urgency=medium
+
+  * Fixed wrong udm command n 01univention_register_guacamole_schema.uinst
+  * Added check if joinscript has already been executed
+
+ -- Timo Denissen <denissen@univention.de>  Wed, 14 Jun 2017 13:33:46 +0200
+
+univention-guacamole-ldap-connection (1.0.6-1) unstable; urgency=medium
+
+  * Removed needless "rm" from unjoinscript "01univention_install_guacamole.uinst"
+  * Fixed wrong path in 01univention-guacamole-schema.uinst
+
+ -- Timo Denissen <denissen@univention.de>  Wed, 14 Jun 2017 13:12:46 +0200
+
+univention-guacamole-ldap-connection (1.0.5-5) unstable; urgency=medium
+
+  * Fixed wrong paths in univention-guacamole-rollout.postrm
+  * Fixed wrong paths in univention-guacamole-rollout.prerm
+
+ -- Timo Denissen <denissen@univention.de>  Wed, 14 Jun 2017 12:56:46 +0200
+
+univention-guacamole-ldap-connection (1.0.5-4) unstable; urgency=medium
+
+  * Updated univention-guacamole-rollout.postrm to run on every system role
+
+ -- Timo Denissen <denissen@univention.de>  Wed, 14 Jun 2017 11:22:11 +0200
+
+univention-guacamole-ldap-connection (1.0.5-3) unstable; urgency=medium
+
+  * Updated univention-guacamole-rollout.postrm to run on every system role
+
+ -- Timo Denissen <denissen@univention.de>  Wed, 14 Jun 2017 11:11:11 +0200
+
+univention-guacamole-ldap-connection (1.0.5-2) unstable; urgency=medium
+
+  * Fixed python syntax
+
+ -- Timo Denissen <denissen@univention.de>  Tue, 13 Jun 2017 17:39:37 +0200
+
+univention-guacamole-ldap-connection (1.0.5-1) unstable; urgency=medium
+
+  * Fixed installation of syntax file
+
+ -- Timo Denissen <denissen@univention.de>  Tue, 13 Jun 2017 17:39:37 +0200
+
+univention-guacamole-ldap-connection (1.0.4-2) unstable; urgency=medium
+
+  * Minor fix in rules file
+
+ -- Timo Denissen <denissen@univention.de>  Tue, 13 Jun 2017 17:26:37 +0200
+
+univention-guacamole-ldap-connection (1.0.4-1) unstable; urgency=medium
+
+  * Fixed typo in joinscript 99univention_install_guacamole.inst
+  * Added syntax file "guacamole_protocol.py"
+  * Added syntax "guacamole_protocol" to joinscript "99univention_register_guacamole_schema.inst"
+ -- Timo Denissen <denissen@univention.de>  Tue, 13 Jun 2017 17:14:37 +0200
+
+univention-guacamole-ldap-connection (1.0.3-1) unstable; urgency=medium
+
+  * Fixed system role check in univention-guacamole-schema.preinst
+  * Moved UCR variables check in 99univention_install_guacamole.inst to the top
+  * Added patched guacamole-auth-ldap-0.9.13-incubating.jar plugin
+  * Removed obsolete guacamole-auth-ldap-0.9.12-incubating.jar plugin
+
+ -- Timo Denissen <denissen@univention.de>  Tue, 13 Jun 2017 15:42:37 +0200
+
+univention-guacamole-ldap-connection (1.0.2-2) unstable; urgency=medium
+
+  * Fixed file name error in univention-guacamole-schema.install
+
+ -- Timo Denissen <denissen@univention.de>  Tue, 13 Jun 2017 11:30:37 +0200
+
+univention-guacamole-ldap-connection (1.0.2-1) unstable; urgency=medium
+
+  * Fixed syntax error in the guacamole template file
+  * Renamed 99univention_register_schema.inst to 99univention_register_guacamole_schema.inst
+  * Renamed 01univention_register_schema.inst to 01univention_register_guacamole_schema.inst
+  * Added missing function in joinscript 99univention_register_guacamole_schema.inst
+
+ -- Timo Denissen <denissen@univention.de>  Tue, 13 Jun 2017 11:18:37 +0200
+
+univention-guacamole-ldap-connection (1.0.1-1) unstable; urgency=medium
+
+  * Fixed installation into local folder
+  * Added preinst script for univention-guacamole-schema
+  * Fixed joinscripts
+
+ -- Timo Denissen <denissen@univention.de>  Tue, 13 Jun 2017 10:43:29 +0200
+
+univention-guacamole-ldap-connection (1.0.0-2) unstable; urgency=medium
+
+  * Added postinst scripts
+  * Added prerm scripts
+  * Added postrm scripts
+  * Added categories to UCR variables
+  * Added UCS overview link
+
+ -- Timo Denissen <denissen@univention.de>  Mon, 12 Jun 2017 16:44:37 +0200
+
+univention-guacamole-ldap-connection (1.0.0-1) unstable; urgency=medium
+
+  * Initial release
+  * Added joinscript to prepare and install Guacamole, and to configure Apache2
+  * Added joinscript to install schema extension and extended attributes
+
+ -- Timo Denissen <denissen@univention.de>  Wed, 07 Jun 2017 13:56:37 +0200
