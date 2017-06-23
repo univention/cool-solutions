@@ -129,19 +129,20 @@ def handler(dn, new, old, command):
 		retval = doit("revoke", new, dn, cr)
 	# object created/changed
 	else:
-		old_cert = old.get('univentionCreateRevokeCertificate', [""])[0] == "1"
-		new_cert = new.get('univentionCreateRevokeCertificate', [""])[0] == "1"
-
 		# create cert
-		if new_cert and not old_cert:
+		if 'univentionCreateRevokeCertificate' in new and new['univentionCreateRevokeCertificate'][0] == "1":
+			if 'univentionCreateRevokeCertificate' not in old:
 				retval = doit("create", new, dn, cr)
 
 		# revoke cert
-		if old_cert and not new_cert:
+		if 'univentionCreateRevokeCertificate' in old and old['univentionCreateRevokeCertificate'][0] == "1":
+			if 'univentionCreateRevokeCertificate' not in new:
+				retval = doit("revoke", new, dn, cr)
+			if 'univentionCreateRevokeCertificate' in new and new['univentionCreateRevokeCertificate'][0] == "0":
 				retval = doit("revoke", new, dn, cr)
 
 		# renew cert
-		if new.get('univentionRenewCertificate', [""])[0] == "1":
+		if 'univentionRenewCertificate' in new and new['univentionRenewCertificate'][0] == "1":
 			retval = doit("renew", new, dn, cr)
 	# fin
 	if retval:
