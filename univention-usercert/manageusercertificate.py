@@ -32,7 +32,7 @@
 __package__ = ''         # workaround for PEP 366
 
 import listener
-import univention.debug as ud
+import univention.debug
 import univention.misc
 import univention.config_registry
 import univention.uldap
@@ -55,11 +55,11 @@ modrdn = '1'
 
 
 def initialize():
-	ud.debug(ud.LISTENER, ud.INFO, 'manageusercertificate: Initialize')
+	univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, 'manageusercertificate: Initialize')
 
 
 def handler(dn, new, old, command):
-	ud.debug(ud.LISTENER, ud.INFO, 'manageusercertificate: handler')
+	univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, 'manageusercertificate: handler')
 
 	# load config registry
 	cr = univention.config_registry.ConfigRegistry()
@@ -67,9 +67,9 @@ def handler(dn, new, old, command):
 
 	# only on master and backup
 	if cr['server/role'] != 'domaincontroller_master':
-		ud.debug(
-			ud.LISTENER,
-			ud.PROCESS,
+		univention.debug.debug(
+			univention.debug.LISTENER,
+			univention.debug.PROCESS,
 			'manageusercertificate: this is not a master'
 		)
 		return
@@ -85,9 +85,9 @@ def handler(dn, new, old, command):
 				os.chmod(FN_CACHE, 0600)
 				cPickle.dump(old, f)
 		except Exception, e:
-			ud.debug(
-				ud.LISTENER,
-				ud.ERROR,
+			univention.debug.debug(
+				univention.debug.LISTENER,
+				univention.debug.ERROR,
 				'manageusercertificate: failed to open/write pickle file: %s' % str(e))
 		listener.unsetuid()
 		return
@@ -99,20 +99,20 @@ def handler(dn, new, old, command):
 			with open(FN_CACHE, 'r') as f:
 				old = cPickle.load(f)
 		except Exception, e:
-			ud.debug(
-				ud.LISTENER,
-				ud.ERROR,
+			univention.debug.debug(
+				univention.debug.LISTENER,
+				univention.debug.ERROR,
 				'manageusercertificate: failed to open/read pickle file: %s' % str(e))
 		try:
 			os.remove(FN_CACHE)
 		except Exception, e:
-			ud.debug(
-				ud.LISTENER,
-				ud.ERROR,
+			univention.debug.debug(
+				univention.debug.LISTENER,
+				univention.debug.ERROR,
 				'manageusercertificate: cannot remove pickle file: %s' % str(e))
-			ud.debug(
-				ud.LISTENER,
-				ud.ERROR,
+			univention.debug.debug(
+				univention.debug.LISTENER,
+				univention.debug.ERROR,
 				'manageusercertificate: for safty reasons manageusercertificate ignores change of LDAP object: %s' % dn)
 			listener.unsetuid()
 			return
@@ -145,15 +145,15 @@ def handler(dn, new, old, command):
 			retval = doit("renew", new, dn, cr)
 	# fin
 	if retval:
-		ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: handler unsuccessfully finished")
+		univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, "manageusercertificate: handler unsuccessfully finished")
 	else:
-		ud.debug(ud.LISTENER, ud.INFO, "manageusercertificate: handler successfully finished")
+		univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, "manageusercertificate: handler successfully finished")
 
 
 # create config config
 def create_config(object, dn, cr):
 	if not os.path.isfile(ssl):
-		ud.debug(ud.LISTENER, ud.ERROR, 'manageusercertificate: could not find %s' % ssl)
+		univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, 'manageusercertificate: could not find %s' % ssl)
 		return 0
 
 	# get ucr ssl config
@@ -250,9 +250,9 @@ def create_config(object, dn, cr):
 	}
 
 	if not cfg["uid"]:
-		ud.debug(
-			ud.LISTENER,
-			ud.ERROR,
+		univention.debug.debug(
+			univention.debug.LISTENER,
+			univention.debug.ERROR,
 			"manageusercertificate: uid is empty, don't know what to do"
 		)
 		return 0
@@ -278,9 +278,9 @@ def saveCert(dn, cfg, ldapObject, delete=False):
 				# object was probably deleted
 				pass
 		except Exception, e:
-			ud.debug(
-				ud.LISTENER,
-				ud.ERROR,
+			univention.debug.debug(
+				univention.debug.LISTENER,
+				univention.debug.ERROR,
 				'manageusercertificate: failed to add certificate to %s (%s)' % (dn, str(e))
 			)
 		finally:
@@ -296,12 +296,12 @@ def doit(action, object, dn, cr):
 
 	# create the cert
 	if action == "create":
-		ud.debug(ud.LISTENER, ud.INFO, "manageusercertificate: create cert %s" % cfg["uid"])
+		univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, "manageusercertificate: create cert %s" % cfg["uid"])
 
 		# parameter test
 		for x in ["uid", "cn", "days", "email", "organizationalunit", "certpath", "sslbase", "ca", "admingroup", "dn", "ldapimport", "state", "organization", "country", "locality"]:
 			if not cfg.get(x, False):
-				ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: %s is missing" % x)
+				univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, "manageusercertificate: %s is missing" % x)
 				return 1
 
 		# test for valid certificate with the same cn
@@ -312,7 +312,7 @@ def doit(action, object, dn, cr):
 		cmd = cmd + " -ca '%s'" % cfg["ca"]
 
 		if run_cmd(cmd, 1):
-			ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: a certificate for cn \"%s\" already exists" % cfg["cn"])
+			univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, "manageusercertificate: a certificate for cn \"%s\" already exists" % cfg["cn"])
 			return 1
 
 		# create command
@@ -343,12 +343,12 @@ def doit(action, object, dn, cr):
 
 	# revoke the cert
 	if action == "revoke":
-		ud.debug(ud.LISTENER, ud.INFO, "manageusercertificate: revoke cert %s" % cfg["uid"])
+		univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, "manageusercertificate: revoke cert %s" % cfg["uid"])
 
 		# parameter test
 		for x in ["uid", "cn", "sslbase", "ca", "dn"]:
 			if not cfg.get(x, False):
-				ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: %s is missing" % x)
+				univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, "manageusercertificate: %s is missing" % x)
 				return 1
 
 		# create command
@@ -366,12 +366,12 @@ def doit(action, object, dn, cr):
 
 	# renew the cert
 	if action == "renew":
-		ud.debug(ud.LISTENER, ud.INFO, "manageusercertificate: renew cert %s" % cfg["uid"])
+		univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, "manageusercertificate: renew cert %s" % cfg["uid"])
 
 		# parameter test
 		for x in ["uid", "cn", "days", "certpath", "sslbase", "ca", "admingroup", "dn", "ldapimport"]:
 			if not cfg.get(x, False):
-				ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: %s is missing" % x)
+				univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, "manageusercertificate: %s is missing" % x)
 				return 1
 
 		# reset renew ldap entry
@@ -380,16 +380,16 @@ def doit(action, object, dn, cr):
 			lo = univention.uldap.getAdminConnection()
 			modlist = [('univentionRenewCertificate', object['univentionRenewCertificate'][0], 0)]
 			lo.modify(dn, modlist)
-			ud.debug(ud.LISTENER, ud.INFO, 'manageusercertificate: reset univentionRenewCertificate successfully')
+			univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, 'manageusercertificate: reset univentionRenewCertificate successfully')
 		except Exception, e:
-			ud.debug(ud.LISTENER, ud.ERROR, 'manageusercertificate: cannot reset univentionRenewCertificate in LDAP (%s): %s' % (dn, str(e)))
+			univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, 'manageusercertificate: cannot reset univentionRenewCertificate in LDAP (%s): %s' % (dn, str(e)))
 			return 1
 		finally:
 			listener.unsetuid()
 
 		# renew only if certificate is saved in user ldap object
 		if not object.get('userCertificate;binary'):
-			ud.debug(ud.LISTENER, ud.WARN, "manageusercertificate: could not find imported user cert, will not renew cert")
+			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "manageusercertificate: could not find imported user cert, will not renew cert")
 			return 0
 
 		# create/run command
@@ -423,7 +423,7 @@ def doit(action, object, dn, cr):
 	# action dn uid certpath
 	if cfg["scripts"].lower() in ("true", "yes"):
 		if os.path.isdir(cfg["runparts"]):
-			ud.debug(ud.LISTENER, ud.INFO, 'manageusercertificate: running scripts in %s' % cfg["runparts"])
+			univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, 'manageusercertificate: running scripts in %s' % cfg["runparts"])
 			cmd = "run-parts %s -a %s -a %s -a %s -a %s" % (cfg["runparts"], action, cfg["dn"], cfg["uid"], cfg["certpath"])
 			if run_cmd(cmd, 0):
 				return 1
@@ -433,7 +433,7 @@ def doit(action, object, dn, cr):
 
 # run a given command as root and return the exit code
 def run_cmd(command, expected_retval):
-	ud.debug(ud.LISTENER, ud.INFO, "manageusercertificate: run %s" % command)
+	univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, "manageusercertificate: run %s" % command)
 	listener.setuid(0)
 	proc = subprocess.Popen(command, bufsize=0, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	stdout = None
@@ -446,10 +446,10 @@ def run_cmd(command, expected_retval):
 
 	if proc.returncode != expected_retval:
 		retval = 1
-		ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: run %s" % command)
-		ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: command failed with exit code: %s" % proc.returncode)
-		ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: stderr: %s" % stderr)
-		ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: stdout: %s" % stderr)
+		univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, "manageusercertificate: run %s" % command)
+		univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, "manageusercertificate: command failed with exit code: %s" % proc.returncode)
+		univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, "manageusercertificate: stderr: %s" % stderr)
+		univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, "manageusercertificate: stdout: %s" % stderr)
 
 	return retval
 
