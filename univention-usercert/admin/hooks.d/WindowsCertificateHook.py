@@ -15,7 +15,7 @@ class WindowsCertificateHook(simpleHook):
 		if module.hasChanged("windowsCertificate"):
 			newml = []
 			for i in ml:
-				if i[0] != "userCertificate;binary":
+				if not i[0] == "userCertificate;binary":
 					newml.append(i)
 			newml.append((
 				"userCertificate;binary",
