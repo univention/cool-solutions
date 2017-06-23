@@ -31,7 +31,11 @@
 # <http://www.gnu.org/licenses/>.
 
 
-script=${0##*/}
+script=${0/\/*\//}
+if [ "univention-certificate-user" = "$script" ]; then
+	user=1
+fi
+
 usage () {
 	if [ -n "$1" ]; then
 		echo ""
@@ -104,36 +108,41 @@ while [ $# -gt 0 ]; do
 	shift 2 || usage "Missing argument to $1"
 done
 
-. /usr/share/univention-ssl/make-certificates-user.sh
+# tests
+if [ "$command" != "list" -a -z "$name" ]; then
+	usage "missing -name"
+fi
 
 if [ -n "$ca" ]; then
 	test -n "$sslbase" || usage "missing -sslbase for -ca"
 	test -d "$sslbase/$ca" || usage "$sslbase/$ca is not a valid directory"
 fi
 
-case "$command" in
-"list")
-	echo "List all certificates"
-	list_cert_names
-	exit $?
-	;;
-esac
+if [ -z "$certpath" ]; then
+	certpath="/etc/univention/ssl"
+fi
 
-[ -n "$name" ] || usage "missing -name"
-path="${certpath:-$SSLBASE}/${name}"
+if [ -n "$user" -a -z "$cn" ]; then
+	usage "user certificate needs cn option"
+fi
 
-case "$script" in
-univention-certificate-user)
-	[ -n "$cn" ] || usage "missing -cn"
-	owner="$name"
-	[ -n "$admingroup" ] || admingroup="Domain Admins"
-	;;
-*)
+if [ -z "$admingroup" -a -z "$user" ]; then
+	admingroup="DC Backup Hosts"
+elif [ -z "$admingroup" ]; then
+	admingroup="Domain Admins"
+fi
+
+
+if [ -z "$user" ]; then
 	cn="$name"
 	owner="root"
-	[ -n "$admingroup" ] || admingroup="DC Backup Hosts"
-	;;
-esac
+else
+	owner="$name"
+fi
+
+
+. /usr/share/univention-ssl/make-certificates-user.sh
+path="$certpath/$name"
 
 case "$command" in
 	"new")
@@ -174,6 +183,10 @@ case "$command" in
 			echo "invalid"
 		fi
 		exit $retval
+		;;
+	"list")
+		echo "List all certificates"
+		list_cert_names
 		;;
 	"dump")
 		echo "Dump certificate: $cn"
