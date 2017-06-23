@@ -38,8 +38,8 @@ DEFAULT_DAYS=$(/usr/sbin/univention-config-registry get ssl/usercert/days)
 . /usr/share/univention-ssl/make-certificates.sh
 
 mk_config () {
-	local outfile=$1
-	local password=$2
+	local outfile=$1;
+	local password=$2;
 	local days=$3
 	local name=$4
 
@@ -58,10 +58,10 @@ mk_config () {
 	if test -z $ssl_email; then eval `univention-config-registry shell ssl/email`; fi
 
 	if test -e $outfile; then
-		rm $outfile
+		rm $outfile;
 	fi
-	touch $outfile
-	chmod 0600 $outfile
+	touch $outfile;
+	chmod 0600 $outfile;
 
     cat <<EOF >>$outfile
 
@@ -191,28 +191,28 @@ _escape () {
 }
 
 renew_cert () {
-	local OPWD=`pwd`
-	local path="$1"
-	local cn="$2"
-	local days="$3"
+	local OPWD=`pwd`;
+	local path="$1";
+	local cn="$2";
+	local days="$3";
 	local owner="$4"
 	local extfile="$5"
-	cd "$SSLBASE"
+	cd "$SSLBASE";
 	
 	if [ -z "$owner" ]; then
 		owner="cert"
 	fi
 
 	if [ -z "$cn" ]; then
-		echo "missing certificate name" 1>&2
-		return 1
+		echo "missing certificate name" 1>&2;
+		return 1;
 	fi
 	
-	local NUM=`list_cert_names | grep "$cn$" | sed -e 's/^\([0-9A-Fa-f]*\).*/\1/1'`
+	local NUM=`list_cert_names | grep "$cn$" | sed -e 's/^\([0-9A-Fa-f]*\).*/\1/1'`;
 	if [ -z "$NUM" ]; then
-		echo "no certificate for $cn registered" 1>&2
-		return 1
-	fi
+		echo "no certificate for $cn registered" 1>&2;
+		return 1;
+	fi;
 	
 	if [ -z "$days" ]; then
 		days=$DEFAULT_DAYS
@@ -239,8 +239,8 @@ renew_cert () {
 	openssl pkcs12 -export -in "$path/cert.pem" -inkey "$path/private.key" -chain -CAfile ucsCA/CAcert.pem -out "$path/$owner.p12" -passout file:"$path/$owner-p12-password.txt"
 
 	# move the new certificate to its place
-	move_cert ${CA}/newcerts/*
-	cd "$OPWD"
+	move_cert ${CA}/newcerts/*;
+	cd "$OPWD";
 }
 
 # Parameter 1: Name des Unterverzeichnisses, in dem das neue Zertifikat abgelegt werden soll
@@ -269,8 +269,8 @@ gencert () {
 	local OPWD=`pwd`
 	cd "$SSLBASE"
 	if has_valid_cert "$2"; then
-	    revoke_cert "$2"
-	fi
+	    revoke_cert "$2";
+	fi;
 
 	if [ -z "$days" ]; then
 		days=$DEFAULT_DAYS
@@ -300,7 +300,7 @@ gencert () {
 	openssl pkcs12 -export -in "$path/cert.pem" -inkey "$path/private.key" -chain -CAfile ucsCA/CAcert.pem -out "$path/$owner.p12" -passout file:"$path/$owner-p12-password.txt"
 
 	# move the new certificate to its place
-	move_cert ${CA}/newcerts/*
+	move_cert ${CA}/newcerts/*;
 
 	find $path -type f | xargs chmod 600
 	find $path -type d | xargs chmod 700
