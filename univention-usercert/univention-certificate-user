@@ -166,7 +166,7 @@ case "$command" in
 		;;
 	"check")
 		echo -n "Certificate \"$cn\" is "
-		has_valid_cert "$cn" >/dev/null 2>&1
+		has_valid_cert "$cn"
 		retval=$?
 		if [ $retval -eq 0 ]; then
 			echo "valid"
