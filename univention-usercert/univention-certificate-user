@@ -158,16 +158,16 @@ case "$command" in
 		echo "Creating certificate: $name"
 		# 1. path to cert, 2. cn, 3. days, 4. email, 5. organizationalunit, 6. country,
 		# 7. state, 8. locality, 9. organization, 10. owner (uid), 11. extensions file
-		if ! gencert "$path" "$cn" "$days" "$email" "$organizationalunit" "$country" "$state" "$locality" "$organization" "$owner" "$extfile"
-		then
+		gencert "$path" "$cn" "$days" "$email" "$organizationalunit" "$country" "$state" "$locality" "$organization" "$owner" "$extfile"
+		if [ $? -ne 0 ]; then
 			usage "failed to generate certificate"
 		fi
-		if getent group "$admingroup" 2>&1 >/dev/null
-		then
+		getent group "$admingroup" 2>&1 >/dev/null
+		if [ $? = 0 ]; then
 			chgrp -R "$admingroup" "$path"
 		fi
-		if getent passwd "$owner" 2>&1 >/dev/null
-		then
+		getent passwd "$owner" 2>&1 >/dev/null
+		if [ $? = 0 ]; then
 			chown -R "$owner" "$path"
 		fi
 		chmod -R g+rx "$path"
