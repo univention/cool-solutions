@@ -36,7 +36,8 @@ if [ "univention-certificate-user" = "$script" ]; then
 	user=1
 fi
 
-usage () {
+usage ()
+{
 	if [ -n "$1" ]; then
 		echo ""
 		echo "$1"
@@ -75,7 +76,15 @@ usage () {
 }
 
 command="$1"
-shift || usage
+shift
+
+if [ "$command" != "new" -a "$command" != "revoke" -a "$command" != "renew" -a "$command" != "check" -a "$command" != "list" -a "$command" != "dump" ]; then
+	if [ -n "$command" ]; then
+		usage "unknown command: $command"
+	else
+		usage
+	fi
+fi
 
 while [ $# -gt 0 ]; do
 	case "$1" in
@@ -168,7 +177,9 @@ case "$command" in
 		revoke_cert "$cn"
 		;;
 	"renew")
-		[ -n "$days" ] || usage "missing -days"
+		if [ -z "$days" ]; then
+			usage "missing -days"
+		fi
 		echo "Renew certificate: $name"
 		# 1. path to cert, 2. cn, 3. days, 4. owner (uid), 5. extensions file
 		renew_cert "$path" "$cn" "$days" "$owner" "$extfile"
@@ -191,8 +202,5 @@ case "$command" in
 	"dump")
 		echo "Dump certificate: $cn"
 		openssl x509 -in "$path/cert.pem" -noout -text
-		;;
-	*)
-		usage "unknown command: $command"
 		;;
 esac
