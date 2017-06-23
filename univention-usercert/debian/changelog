@@ -1,9 +1,3 @@
-univention-usercert (4.0.6-2) unstable; urgency=low
-
-  * Bug #40498: Fix UCS-4.1-2+213 incompatibility
-
- -- Philipp Hahn <hahn@univention.de>  Tue, 26 Jul 2016 15:44:41 +0200
-
 univention-usercert (4.0.6-1) unstable; urgency=medium
 
   * Fixed import of base64 in WindowsCertificateHook.py - Issue #5109
