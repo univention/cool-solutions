@@ -1,5 +1,4 @@
 from univention.admin.hook import simpleHook
-import univention.debug as ud
 
 import M2Crypto
 import re
@@ -41,9 +40,9 @@ class WindowsCertificateHook(simpleHook):
 				module.info["certificateDateNotBeforeWindows"] = notBefore
 				module.info["certificateDateNotAfterWindows"] = notAfter
 			except Exception, e:
-				ud.debug(
-					ud.ADMIN,
-					ud.ERROR,
+				univention.debug.debug(
+					univention.debug.ADMIN,
+					univention.debug.ERROR,
 					"WindowsCertificateHook: x509 parsing failed (%s)" % str(e)
 				)
 			module["windowsCertificate"] = base64.encodestring(module["windowsCertificate"])
