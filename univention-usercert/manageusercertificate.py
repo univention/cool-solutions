@@ -392,7 +392,9 @@ def doit(action, object, dn, cr):
 			listener.unsetuid()
 
 		# renew only if certificate is saved in user ldap object
-		if not object.get('userCertificate;binary'):
+		if 'userCertificate;binary' in object and object['userCertificate;binary']:
+			pass
+		else:
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "manageusercertificate: could not find imported user cert, will not renew cert")
 			return 0
 
