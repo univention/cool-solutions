@@ -2,6 +2,8 @@ from univention.admin.hook import simpleHook
 import univention.debug as ud
 
 import M2Crypto
+import re
+import string
 import base64
 
 
@@ -23,14 +25,19 @@ class WindowsCertificateHook(simpleHook):
 		if module.get("windowsCertificate"):
 			try:
 				x509 = M2Crypto.X509.load_cert_der_string(module["windowsCertificate"])
-				subject = x509.get_subject()
-				issuer = x509.get_issuer()
-				notAfter = x509.get_not_after()
-				notBefore = x509.get_not_before()
-				module.info["certificateSubjectCommonNameWindows"] = subject.CN
-				module.info["certificateIssuerCommonNameWindows"] = issuer.CN
-				module.info["certificateDateNotBeforeWindows"] = str(notBefore)
-				module.info["certificateDateNotAfterWindows"] = str(notAfter)
+				subject = str(x509.get_subject())
+				issuer = str(x509.get_issuer())
+				notAfter = str(x509.get_not_after())
+				notBefore = str(x509.get_not_before())
+				for i in subject.split('/'):
+					if re.match('^CN=', i):
+						module.info["certificateSubjectCommonNameWindows"] = string.split(i, '=')[1]
+				for i in issuer.split('/'):
+					if re.match('^CN=', i):
+						module.info["certificateIssuerCommonNameWindows"] = i.replace("CN=", "")
+
+				module.info["certificateDateNotBeforeWindows"] = notBefore
+				module.info["certificateDateNotAfterWindows"] = notAfter
 			except Exception, e:
 				ud.debug(
 					ud.ADMIN,
