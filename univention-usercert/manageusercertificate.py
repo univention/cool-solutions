@@ -42,7 +42,6 @@ import subprocess
 import ldap
 import copy
 import cPickle
-from pipes import quote
 
 FN_CACHE = '/var/cache/univention-usercert/univention-usercert.pickle'
 
@@ -305,37 +304,36 @@ def doit(action, object, dn, cr):
 				return 1
 
 		# test for valid certificate with the same cn
-		cmd = [
-			cfg["ssl"], "check",
-			"-name", cfg["uid"],
-			"-cn", cfg["cn"],
-			"-sslbase", cfg["sslbase"],
-			"-ca", cfg["ca"],
-		]
+		cmd = "%s check" % cfg["ssl"]
+		cmd = cmd + " -name '%s'" % cfg["uid"]
+		cmd = cmd + " -cn '%s'" % cfg["cn"]
+		cmd = cmd + " -sslbase '%s'" % cfg["sslbase"]
+		cmd = cmd + " -ca '%s'" % cfg["ca"]
+
 		if run_cmd(cmd, 1):
 			ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: a certificate for cn \"%s\" already exists" % cfg["cn"])
 			return 1
 
 		# create command
-		cmd = [
-			cfg["ssl"], "new",
-			"-name", cfg["uid"],
-			"-cn", cfg["cn"],
-			"-days", cfg["days"],
-			"-email", cfg["email"],
-			"-organizationalunit", cfg["organizationalunit"],
-			"-certpath", cfg["certpath"],
-			"-sslbase", cfg["sslbase"],
-			"-ca", cfg["ca"],
-			"-admingroup", cfg["admingroup"],
-			"-state", cfg["state"],
-			"-organization", cfg["organization"],
-			"-country", cfg["country"],
-			"-locality", cfg["locality"],
-		]
+		cmd = "%s new" % cfg["ssl"]
+		cmd = cmd + " -name '%s'" % cfg["uid"]
+		cmd = cmd + " -cn '%s'" % cfg["cn"]
+		cmd = cmd + " -days '%s'" % cfg["days"]
+		cmd = cmd + " -email '%s'" % cfg["email"]
+		cmd = cmd + " -organizationalunit '%s'" % cfg["organizationalunit"]
+		cmd = cmd + " -certpath '%s'" % cfg["certpath"]
+		cmd = cmd + " -sslbase '%s'" % cfg["sslbase"]
+		cmd = cmd + " -ca '%s'" % cfg["ca"]
+		cmd = cmd + " -admingroup '%s'" % cfg["admingroup"]
+		cmd = cmd + " -state '%s'" % cfg["state"]
+		cmd = cmd + " -organization '%s'" % cfg["organization"]
+		cmd = cmd + " -country '%s'" % cfg["country"]
+		cmd = cmd + " -locality '%s'" % cfg["locality"]
+
 		# append extensions optiones
 		if cfg["extFile"]:
-			cmd += ["-extfile", cfg["extFile"]]
+			cmd = cmd + " -extfile '%s'" % cfg["extFile"]
+
 		if run_cmd(cmd, 0):
 			return 1
 
@@ -353,13 +351,12 @@ def doit(action, object, dn, cr):
 				return 1
 
 		# create command
-		cmd = [
-			cfg["ssl"], "revoke",
-			"-name", cfg["uid"],
-			"-cn", cfg["cn"],
-			"-sslbase", cfg["sslbase"],
-			"-ca", cfg["ca"],
-		]
+		cmd = "%s revoke" % cfg["ssl"]
+		cmd = cmd + " -name '%s'" % cfg["uid"]
+		cmd = cmd + " -cn '%s'" % cfg["cn"]
+		cmd = cmd + " -sslbase '%s'" % cfg["sslbase"]
+		cmd = cmd + " -ca '%s'" % cfg["ca"]
+
 		if run_cmd(cmd, 0):
 			return 1
 
@@ -403,18 +400,18 @@ def doit(action, object, dn, cr):
 		# -ssl-base '/etc/univention/ssl/' \
 		# -ca  'ucsCA'
 
-		cmd = [
-			cfg["ssl"], "renew",
-			"-name", cfg["uid"],
-			"-cn", cfg["cn"],
-			"-days", cfg["days"],
-			"-certpath", cfg["certpath"],
-			"-sslbase", cfg["sslbase"],
-			"-ca", cfg["ca"],
-		]
+		cmd = "%s renew" % cfg["ssl"]
+		cmd = cmd + " -name '%s'" % cfg["uid"]
+		cmd = cmd + " -cn '%s'" % cfg["cn"]
+		cmd = cmd + " -days '%s'" % cfg["days"]
+		cmd = cmd + " -certpath '%s'" % cfg["certpath"]
+		cmd = cmd + " -sslbase '%s'" % cfg["sslbase"]
+		cmd = cmd + " -ca '%s'" % cfg["ca"]
+
 		# append extensions optiones
 		if cfg["extFile"]:
-			cmd += ["-extfile", cfg["extFile"]]
+			cmd = cmd + " -extfile '%s'" % cfg["extFile"]
+
 		if run_cmd(cmd, 0):
 			return 1
 
@@ -426,13 +423,7 @@ def doit(action, object, dn, cr):
 	if cfg["scripts"].lower() in ("true", "yes"):
 		if os.path.isdir(cfg["runparts"]):
 			ud.debug(ud.LISTENER, ud.INFO, 'manageusercertificate: running scripts in %s' % cfg["runparts"])
-			cmd = [
-				"run-parts", cfg["runparts"],
-				"-a", action,
-				"-a", cfg["dn"],
-				"-a", cfg["uid"],
-				"-a", cfg["certpath"],
-			]
+			cmd = "run-parts %s -a %s -a %s -a %s -a %s" % (cfg["runparts"], action, cfg["dn"], cfg["uid"], cfg["certpath"])
 			if run_cmd(cmd, 0):
 				return 1
 
@@ -441,10 +432,9 @@ def doit(action, object, dn, cr):
 
 # run a given command as root and return the exit code
 def run_cmd(command, expected_retval):
-	cmd = ' '.join(quote(arg) for arg in command)
-	ud.debug(ud.LISTENER, ud.INFO, "manageusercertificate: run %s" % cmd)
+	ud.debug(ud.LISTENER, ud.INFO, "manageusercertificate: run %s" % command)
 	listener.setuid(0)
-	proc = subprocess.Popen(command, bufsize=0, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	proc = subprocess.Popen(command, bufsize=0, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	stdout = None
 	stderr = None
 	retval = 0
@@ -455,7 +445,7 @@ def run_cmd(command, expected_retval):
 
 	if proc.returncode != expected_retval:
 		retval = 1
-		ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: run %s" % cmd)
+		ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: run %s" % command)
 		ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: command failed with exit code: %s" % proc.returncode)
 		ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: stderr: %s" % stderr)
 		ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: stdout: %s" % stderr)
