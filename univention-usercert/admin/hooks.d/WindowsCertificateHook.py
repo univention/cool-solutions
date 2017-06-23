@@ -13,7 +13,10 @@ class WindowsCertificateHook(simpleHook):
 
 	def __mapCertificate(self, module, ml):
 		if module.hasChanged("windowsCertificate"):
-			newml = [mod for mod in ml if mod[0] != "userCertificate;binary"]
+			newml = []
+			for i in ml:
+				if i[0] != "userCertificate;binary":
+					newml.append(i)
 			newml.append((
 				"userCertificate;binary",
 				module.oldattr.get("userCertificate;binary", [""])[0],
