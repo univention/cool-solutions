@@ -30,6 +30,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 __package__ = ''         # workaround for PEP 366
+from listener import *
 
 import listener
 import univention.debug
