@@ -36,7 +36,6 @@
 
 DEFAULT_DAYS=$(/usr/sbin/univention-config-registry get ssl/usercert/days)
 . /usr/share/univention-ssl/make-certificates.sh
-[ -n "$ca" ] && CA="${ca}"
 
 mk_config () {
 	local outfile=$1
