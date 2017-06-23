@@ -61,9 +61,9 @@ def handler(dn, new, old):
 				if new.get('uid'):
 					listener.setuid(0)
 					try:
-						univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, '%s: starting %s for %s %s' % (name, PATH_SU, new.get('uid')[0], str(new.get('homeDirectory',[]))))
+						univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, '%s: starting %s for %s %s' % (name, PATH_SU, new.get('uid')[0], str(new.get('homeDirectory',[]))))
 						listener.run( PATH_SU, [ PATH_SU, '-c', 'echo', '-', new.get('uid')[0] ] )
-						univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, '%s: created home directory %s for user %s' % (name, str(new.get('homeDirectory',[])), new.get('uid')[0]))
+						univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, '%s: finished %s for %s %s' % (name, PATH_SU, new.get('uid')[0], str(new.get('homeDirectory',[]))))
 					finally:
 						listener.unsetuid()
 			elif ucr['hostname'] in new.get('automountInformation',[ucr['hostname']])[0]:
@@ -73,13 +73,9 @@ def handler(dn, new, old):
 					listener.run( PATH_MKDIR, [ PATH_MKDIR, path ] )
 					listener.run( PATH_CHOWN, [ PATH_CHOWN, new.get('uid')[0], path ] )
 					listener.run( PATH_CHMOD, [ PATH_CHMOD, '0700', path ] )
-					univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, '%s: created home directory %s on share for user %s' % (name, str(new.get('homeDirectory',[])), new.get('uid')[0]))
-					listener.unsetuid()
 			else:
-# debuglevel changes temporary from info to warn
-					univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, '%s: created home directory %s for user %s on host %s' % (name, str(new.get('homeDirectory',[])), new.get('uid')[0],\
-							new.get('automountInformation',[ucr['hostname']])[0].split(' ')[1].split(':')[0]))
-
+				univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, '%s: not on this server %s %s' % (name, PATH_SU, new.get('uid')[0], str(new.get('homeDirectory',[]))))
+				
 
 def clean():
 	return
