@@ -164,7 +164,9 @@ def create_config(object, dn, cr):
 	state = cr.get('ssl/usercert/default/state')
 	country = cr.get('ssl/usercert/default/country')
 
-	host = "univentionWindows" in object.get("objectClass", [])
+	host = False
+	if "univentionWindows" in object.get("objectClass", [""]):
+		host = True
 
 	if host:
 		mapping_cn = cr.get('ssl/windowscert/certldapmapping/cn')
