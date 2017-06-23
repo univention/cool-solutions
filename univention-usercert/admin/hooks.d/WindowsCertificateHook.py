@@ -6,7 +6,6 @@ import re
 import string
 import base64
 
-
 class WindowsCertificateHook(simpleHook):
 
 	type = 'WindowsCertificateHook'
