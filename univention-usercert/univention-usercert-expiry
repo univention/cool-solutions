@@ -145,15 +145,22 @@ for path in [certpath, hostCertPath]:
 						}}
 					)
 
-FMT = '{cn_cert:20}{cn_ldap:20}{uid_ldap:20}{not_after:20}{delta:>23}{serial:>7} {valid:8}'
-print FMT.format(
-	cn_cert="CN (cert)",
-	cn_ldap="CN (ldap)",
-	uid_ldap="UID",
-	not_after="Valid until",
-	delta="Days until expiration",
-	serial="Serial",
-	valid="Valid",
-)
-for cn, cert in sorted(certificates.iteritems()):
-	print FMT.format(**cert)
+cns = certificates.keys()
+cns.sort()
+print \
+	"CN (cert)".ljust(20) + \
+	"CN (ldap)".ljust(20) + \
+	"UID".ljust(20) + \
+	"Valid until".ljust(20) + \
+	"Days until expiration".ljust(23) + \
+	"Serial".ljust(8) + \
+	"Valid".ljust(8)
+for cn in cns:
+	print \
+		str(certificates[cn]["cn_cert"]).ljust(20) + \
+		str(certificates[cn]["cn_ldap"]).ljust(20) + \
+		str(certificates[cn]["uid_ldap"]).ljust(20) + \
+		str(certificates[cn]["not_after"]).ljust(20) + \
+		str(certificates[cn]["delta"]).ljust(23) + \
+		str(certificates[cn]["serial"]).ljust(8) + \
+		str(certificates[cn]["valid"]).ljust(8)
