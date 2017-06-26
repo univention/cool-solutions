@@ -1,0 +1,187 @@
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
+
+import time
+import sys
+import getopt
+import subprocess
+import argparse
+
+##### ucr
+_UCR = None
+def init_ucr(force=False):
+	"""
+	Initialize the configuration registry
+
+	:force: force a reinitialization of UCR
+	:returns: ConfigRegistry object
+	"""
+
+	global _UCR
+	import univention.config_registry
+	if _UCR is None or force:
+		_UCR = univention.config_registry.ConfigRegistry()
+		_UCR.load()
+	return _UCR
+
+
+##### ldapsearch
+def getmachinesecret():
+	"""
+	Reads the machine secret from /etc/machine.secret
+
+	:returns: Returns the machine secret or None if not accessable
+	"""
+
+	try:
+		f = file("/etc/machine.secret")
+		pw = f.read().strip("\n")
+		f.close()
+		return pw
+	except IOError:
+		return
+
+
+_LDAP = None
+def init_ldapconnection():
+	"""
+	Initialize LDAP connection
+	
+	:returns: ldap connection object
+	"""
+	
+	global _LDAP
+	
+	try:
+		import univention.uldap
+		ucr = init_ucr()
+		if _LDAP is None:
+			port = ucr.get("ldap/port")
+			if not port:
+				port = ucr.get("ldap/server/port")
+			port = int(port)
+			args = {"base" : ucr.get("ldap/base"),
+					"port" : port,
+					"host" : ucr.get("ldap/server/name")
+					}
+			pw = getmachinesecret()
+			if pw is not None:
+				# perform an authenticated bind
+				args["binddn"] = ucr.get("ldap/hostdn")
+				args["bindpw"] = pw
+			_LDAP = univention.uldap.access(**args)
+		return _LDAP
+	except:
+		print ("wakeonlan.py: error: Couldn't create a LDAP connection")
+		print ("Arguments: {0}".format(args))
+		sys.exit(0)
+
+
+def ldapsearch(flt, base="", attrlist=None, scope="sub", unique=0, required=0, timeout=-1, sizelimit=0, serverctrls=None):
+	"""
+	Perform a LDAP search
+	
+	:flt: LDAP filter
+	:scope: One of base, one, sub or children
+	:base: LDAP search base, defaults to the LDAP base
+	:attrlist: List of attributes that shall be retrieved
+	:returns: Results of the ldap search. The Result is a list of the form
+	          [(DN, {attr1: (value1, value2), ..}), (DN2..)]
+	
+	Example:
+	# this is safe because even if ldapsearch doesn't find anything, it still
+	# returns an empty list ([])
+	for dn, attrs in ldapsearch("uid=jebersba"):
+		print attrs.get("uid", None)
+	"""
+	try:
+		assert _LDAP is not None
+		return _LDAP.search(filter=flt, base=base, attr=attrlist, scope=scope, \
+				unique=unique, required=required, timeout=timeout, \
+				sizelimit=sizelimit, serverctrls=serverctrls)
+	except Exception as err:
+		print("LDAP error: {0}".format(err))
+		sys.exit(0)
+
+
+# Create argument parser
+parser=argparse.ArgumentParser(description="Wake a/multiple host(s) by fetching the MAC(s) from the LDAP directory")
+parser.add_argument("-d, --delay", action="store", type=float, default="0.0", dest="delay", required=False, help="Set a delay between multiple wakeonlan-calls (in seconds)")
+parser.add_argument("-i, --host", action="store", nargs="*", dest="hostname", required=False, help="Define all hosts you want to wake up. Setting \"*\" as the HOSTNAME (including the quotation marks) wakes every host listed in the LDAP directory")
+parser.add_argument("-a, --wakeup-allhost", action="store_true", dest="allhosts", default=False, help="Wakes every host listed in the LDAP directory")
+args = parser.parse_args()
+
+# Exit, if only spaces/tabs given
+#if len(args.hostname) == 0:
+#	parser.error("wakeonlan.py: error: argument -i is required")
+
+# Create the LDAP connection
+init_ldapconnection()
+# for each hostname given
+
+if args.allhosts == True and args.hostname > 0:
+	parser.error("wakeonlan.py: error: use argument -i for specific hosts or argument -a for all hosts inthe LDAP")
+
+
+if args.allhosts == True:
+	get_mac = []
+	get_mac.append("*")
+	for host in get_mac:	
+                # Get Mac-Address(es) of Computer and iterate through all of them
+                entry = ldapsearch(flt="(&(objectClass=univentionHost)(cn={0}))".format(host), attrlist=["cn", "macAddress"])
+                if len(entry) == 0:
+                        print ("Host {0} not found")
+                elif len(entry) > 1:
+                        count_entry=0
+                        while count_entry < len(entry):
+                                entry_pc = entry[count_entry]
+                                macs = entry_pc[1].get("macAddress")
+                                if macs is None or len(macs) == 0:
+                                        print("No MACs defined for Host \"{0}\"".format(entry[1].get("cn")[0]))
+                                else:
+                                        for mac in entry_pc[1].get("macAddress"):
+                                                print ("Waking {0} ({1})".format(entry_pc[1].get("cn")[0], mac))
+                                                subprocess.call( ["wakeonlan", mac] )
+                                                time.sleep (args.delay)
+                                count_entry +=1
+                else:
+                        entry_pc = entry[0]
+                        macs = entry_pc[1].get("macAddress")
+                        if macs is None or len(macs) == 0:
+                                print ("No MACs defined for Host \"{0}\"".format(entry[1].get("cn")[0]))
+                        else:
+                                for mac in entry_pc[1].get("macAddress"):
+                                        print ("Waking {0} ({1})".format(entry_pc[1].get("cn")[0], mac))
+                                        subprocess.call( ["wakeonlan", mac] )
+                                        time.sleep (args.delay)
+
+else:
+	for host in args.hostname:
+		# Get Mac-Address(es) of Computer and iterate through all of them
+		entry = ldapsearch(flt="(&(objectClass=univentionHost)(cn={0}))".format(host), attrlist=["cn", "macAddress"])
+		if len(entry) == 0:
+			print ("Host {0} not found".format(host))
+		elif len(entry) > 1:
+			count_entry=0
+			while count_entry < len(entry):
+				entry_pc = entry[count_entry]
+				macs = entry_pc[1].get("macAddress")
+				if macs is None or len(macs) == 0:
+					print("No MACs defined for Host \"{0}\"".format(entry[1].get("cn")[0]))
+				else:
+					for mac in entry_pc[1].get("macAddress"):
+						print ("Waking {0} ({1})".format(entry_pc[1].get("cn")[0], mac))
+						subprocess.call( ["wakeonlan", mac] )
+						time.sleep (args.delay)
+				count_entry +=1
+		else:
+			entry_pc = entry[0]
+			macs = entry_pc[1].get("macAddress")
+			if macs is None or len(macs) == 0:
+				print ("No MACs defined for Host \"{0}\"".format(entry[1].get("cn")[0]))
+			else:
+				for mac in entry_pc[1].get("macAddress"):
+					print ("Waking {0} ({1})".format(entry_pc[1].get("cn")[0], mac))
+					subprocess.call( ["wakeonlan", mac] )
+					time.sleep (args.delay)
+

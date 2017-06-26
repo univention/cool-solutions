@@ -5,7 +5,7 @@ Um die App "Univention Demo Data" zu aktualisieren müssen folgende Schritte dur
 3. Anpassen der univention-demo-data.ini in app/metadata.
 3.1. Erhöhen der Versionsnummer in "Version".
 4. Das neugebaute Paket nach app/packages/all kopieren
-5. Die neue App paketieren: tar cfzv app univention-demo-data.tar.gz
+5. Die neue App paketieren: tar cfzv univention-demo-data.tar.gz app
 6. Upload von univention-demo-data.tar.gz auf https://upload.univention.de
 7. Die Upload-ID an appcenter@univention.de schicken mit der Bitte die App im Test-Appcenter zu
 aktualisieren und automatisch prüfen zu lassen

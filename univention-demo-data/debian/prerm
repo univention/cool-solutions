@@ -4,6 +4,6 @@ set -e
 
 case "$1" in
 	purge|remove)
-		/usr/lib/univention-uninstall/01univention-cool-solutions-demo-data.uninst
+		/usr/lib/univention-uninstall/01univention-demo-data.uinst
 	;;
 esac

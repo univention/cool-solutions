@@ -3,7 +3,7 @@
 # Univention SSL
 #  openssl wrapper
 #
-# Copyright 2004-2015 Univention GmbH
+# Copyright 2004-2017 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -31,13 +31,8 @@
 # <http://www.gnu.org/licenses/>.
 
 
-script=${0/\/*\//} 
-if [ "univention-certificate-user" = "$script" ]; then
-	user=1
-fi
-
-usage ()
-{
+script=${0##*/}
+usage () {
 	if [ -n "$1" ]; then
 		echo ""
 		echo "$1"
@@ -76,156 +71,85 @@ usage ()
 }
 
 command="$1"
-shift
-
-if [ "$command" != "new" -a "$command" != "revoke" -a "$command" != "renew" -a "$command" != "check" -a "$command" != "list" -a "$command" != "dump" ]; then
-	if [ -n "$command" ]; then
-		usage "unknown command: $command"
-	else
-		usage
-	fi
-fi
+shift || usage
 
 while [ $# -gt 0 ]; do
 	case "$1" in
-	"-path")
-		shift
-		path="$1"
-		shift
-		;;
-	"-name")
-		shift
-		name="$1"
-		shift
-		;;
-	"-days")
-		shift
-		days="$1"
-		shift
-		;;
+	"-path") path="$2" ;;
+	"-name") name="$2" ;;
+	"-days") days="$2" ;;
 	"-sslbase")
-		shift
-		sslbase="$1"
-		test -d $sslbase || usage "$sslbase is not a valid directory"
-		shift
+		sslbase="$2"
+		test -d "$sslbase" || usage "$sslbase is not a valid directory"
 		;;
-	"-ca")
-		shift
-		ca="$1"
-		shift
-		;;
+	"-ca") ca="$2" ;;
 	"-certpath")
-		shift
-		certpath="$1"
-		test -d $certpath || usage "$certpath is not a valid directory"
-		shift
+		certpath="$2"
+		test -d "$certpath" || usage "$certpath is not a valid directory"
 		;;
 	"-extfile")
-		shift
-		extfile="$1"
-		test -f $extfile || usage "$extfile is not a valid file"
-		shift
+		extfile="$2"
+		test -f "$extfile" || usage "$extfile is not a valid file"
 		;;
-	"-cn")
-		shift
-		cn="$1"
-		shift
-		;;
-	"-organizationalunit")
-		shift
-		organizationalunit="$1"
-		shift
-		;;
-	"-email")
-		shift
-		email="$1"
-		shift
-		;;
-	"-admingroup")
-		shift
-		admingroup="$1"
-		shift
-		;;
-	"-country")
-		shift
-		country="$1"
-		shift
-		;;
-	"-state")
-		shift
-		state="$1"
-		shift
-		;;
-	"-locality")
-		shift
-		locality="$1"
-		shift
-		;;
-	"-organization")
-		shift
-		organization="$1"
-		shift
-		;;
-	*)
-		usage "unknown option $1"
-		shift
-		;;
+	"-cn") cn="$2" ;;
+	"-organizationalunit") organizationalunit="$2" ;;
+	"-email") email="$2" ;;
+	"-admingroup") admingroup="$2" ;;
+	"-country") country="$2" ;;
+	"-state") state="$2" ;;
+	"-locality") locality="$2" ;;
+	"-organization") organization="$2" ;;
+	*) usage "unknown option $1" ;;
 	esac
+	shift 2 || usage "Missing argument to $1"
 done
 
-# tests
-if [ "$command" != "list" -a -z "$name" ]; then
-	usage "missing -name"
-fi
+. /usr/share/univention-ssl/make-certificates-user.sh
 
 if [ -n "$ca" ]; then
 	test -n "$sslbase" || usage "missing -sslbase for -ca"
 	test -d "$sslbase/$ca" || usage "$sslbase/$ca is not a valid directory"
 fi
 
-if [ -z "$certpath" ]; then
-	certpath="/etc/univention/ssl"
-fi
+case "$command" in
+"list")
+	echo "List all certificates"
+	list_cert_names
+	exit $?
+	;;
+esac
 
-if [ -n "$user" -a -z "$cn" ]; then
-	usage "user certificate needs cn option"
-fi
+[ -n "$name" ] || usage "missing -name"
+path="${certpath:-$SSLBASE}/${name}"
 
-if [ -z "$admingroup" -a -z "$user" ]; then
-	admingroup="DC Backup Hosts"
-elif [ -z "$admingroup" ]; then
-	admingroup="Domain Admins"
-fi
-
-
-if [ -z "$user" ]; then
+case "$script" in
+univention-certificate-user)
+	[ -n "$cn" ] || usage "missing -cn"
+	owner="$name"
+	[ -n "$admingroup" ] || admingroup="Domain Admins"
+	;;
+*)
 	cn="$name"
 	owner="root"
-else
-	owner="$name"
-fi
-
-
-
-source /usr/share/univention-ssl/make-certificates-user.sh
-path="$certpath/$name"
+	[ -n "$admingroup" ] || admingroup="DC Backup Hosts"
+	;;
+esac
 
 case "$command" in
 	"new")
 		echo "Creating certificate: $name"
-
-		# 1. path to cert, 2. cn, 3. days, 4. email, 5. organizationalunit, 6. country, 
+		# 1. path to cert, 2. cn, 3. days, 4. email, 5. organizationalunit, 6. country,
 		# 7. state, 8. locality, 9. organization, 10. owner (uid), 11. extensions file
-		gencert "$path" "$cn" "$days" "$email" "$organizationalunit" "$country" "$state" "$locality" "$organization" "$owner" "$extfile"
-		if [ $? -ne 0 ]; then
+		if ! gencert "$path" "$cn" "$days" "$email" "$organizationalunit" "$country" "$state" "$locality" "$organization" "$owner" "$extfile"
+		then
 			usage "failed to generate certificate"
 		fi
-		getent group "$admingroup" 2>&1 >/dev/null
-		if [ $? = 0 ]; then
+		if getent group "$admingroup" 2>&1 >/dev/null
+		then
 			chgrp -R "$admingroup" "$path"
 		fi
-		getent passwd "$owner" 2>&1 >/dev/null
-		if [ $? = 0 ]; then
+		if getent passwd "$owner" 2>&1 >/dev/null
+		then
 			chown -R "$owner" "$path"
 		fi
 		chmod -R g+rx "$path"
@@ -235,16 +159,14 @@ case "$command" in
 		revoke_cert "$cn"
 		;;
 	"renew")
-		if [ -z "$days" ]; then
-			usage "missing -days"
-		fi
+		[ -n "$days" ] || usage "missing -days"
 		echo "Renew certificate: $name"
 		# 1. path to cert, 2. cn, 3. days, 4. owner (uid), 5. extensions file
 		renew_cert "$path" "$cn" "$days" "$owner" "$extfile"
 		;;
 	"check")
 		echo -n "Certificate \"$cn\" is "
-		has_valid_cert "$cn"
+		has_valid_cert "$cn" >/dev/null 2>&1
 		retval=$?
 		if [ $retval -eq 0 ]; then
 			echo "valid"
@@ -253,13 +175,11 @@ case "$command" in
 		fi
 		exit $retval
 		;;
-	"list")
-		echo "List all certificates"
-		list_cert_names
-		;;
 	"dump")
 		echo "Dump certificate: $cn"
 		openssl x509 -in "$path/cert.pem" -noout -text
 		;;
+	*)
+		usage "unknown command: $command"
+		;;
 esac
-

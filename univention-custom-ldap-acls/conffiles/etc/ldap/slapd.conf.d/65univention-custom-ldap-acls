@@ -1,0 +1,77 @@
+@!@
+import re
+
+key_prefix = 'ldap/acls/custom/'
+key_regex = re.compile( 'ldap/acls/custom/(?P<name>[^/]*)/(?P<attr>[^/]*)' )
+
+if configRegistry.get( 'server/role' ) == 'domaincontroller_master':
+	right = 'write'
+else:
+	right = 'read'
+
+def _create_rule( attribute ):
+	prefix = key_prefix + attribute + '/'
+	create = configRegistry[ prefix + 'create' ].lower() in ( 'yes', 'true', '1' )
+	pattern = { 'description' : configRegistry.get( prefix + 'description', 'no description' ),
+				'filter' : '',
+				'attrs' : '',
+				'regex' : "((ou|cn)=.+),%s$$" % configRegistry.get( 'ldap/base' ),
+				'base' : configRegistry.get( 'ldap/base' ),
+				'name' : attribute,
+				'right' : right }
+
+	if configRegistry.get( prefix + 'filter', None ):
+		pattern[ 'filter' ] = 'filter="%s"' % configRegistry.get( prefix + 'filter' )
+	if configRegistry.get( prefix + 'attrs', None ):
+		pattern[ 'attrs' ] = 'attrs="%s"' % configRegistry.get( prefix + 'attrs' )
+	print '''# Change object: %(description)s
+access to dn.regex="^([^,]+),%(regex)s" %(attrs)s %(filter)s
+	by group/univentionCustomACLReferences/%(name)s.expand=$2,%(base)s %(right)s
+	by * none break
+''' % pattern
+
+	if create:
+		print '''# Create/delete object: %(description)s
+access to dn.regex="^([^,]+),%(regex)s" attrs="entry" %(filter)s
+	by group/univentionCustomACLReferences/%(name)s.expand=$2,%(base)s %(right)s
+	by * none break
+
+# Add/remove object to/from parent object: %(description)s
+access to dn.regex="^%(regex)s" attrs="children"
+	by group/univentionCustomACLReferences/%(name)s.expand=$1,%(base)s %(right)s
+	by * none break
+''' % pattern
+
+_seen = []
+
+for key in configRegistry.keys():
+	if not key.startswith( key_prefix ):
+		continue
+	match = key_regex.match( key )
+	if not match:
+		continue
+	groups = match.groupdict()
+	if groups.get( 'name' ) and groups.get( 'attr' ):
+		if not groups.get( 'name' ) in _seen:
+			_seen.append( groups.get( 'name' ) )
+			_create_rule( groups.get( 'name' ) )
+
+# access rights to temporary objects for the groups in 'ldap/acls/temporary_objects/groups'
+if configRegistry.get( 'ldap/acls/temporary_objects/groups', None ):
+	by = ''
+	for group in configRegistry.get( 'ldap/acls/temporary_objects/groups' ).split( ':' ):
+		by += 'by group/univentionGroup/uniqueMember="%s" %s\n' % ( group, right )
+	print '''# access to temporary objects
+access to dn.regex="^cn=([^,]+),cn=([^,]+),cn=temporary,cn=univention,%(base)s$$" filter="(&(objectClass=lock)(!(objectClass=posixAccount)))"
+        %(access)s
+        by * none break
+
+access to dn.regex="^cn=([^,]+),cn=temporary,cn=univention,%(base)s$$" attrs=children,entry
+        %(access)s
+        by * none break
+
+access to dn.regex="^cn=([^,]+),cn=temporary,cn=univention,%(base)s$$" attrs=univentionLastUsedValue
+        %(access)s
+        by * none break
+''' % { 'access' : by[ : -1 ], 'base' : configRegistry.get( 'ldap/base' ) }
+@!@

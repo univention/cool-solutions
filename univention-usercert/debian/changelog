@@ -1,3 +1,27 @@
+univention-usercert (4.0.7-0) unstable; urgency=low
+
+  * Copyright update and merged to 4.2. Issue #7484
+
+ -- Andreas Peichert <peichert@univention.de>  Fri, 12 May 2017 12:26:06 +0200
+
+univention-usercert (4.0.6-3) unstable; urgency=low
+
+  * Bug #41829: Handle boolean ABI change
+
+ -- Philipp Hahn <hahn@univention.de>  Thu, 28 Jul 2016 12:57:37 +0200
+
+univention-usercert (4.0.6-2) unstable; urgency=low
+
+  * Bug #40498: Fix UCS-4.1-2+213 incompatibility
+
+ -- Philipp Hahn <hahn@univention.de>  Tue, 26 Jul 2016 15:44:41 +0200
+
+univention-usercert (4.0.6-1) unstable; urgency=medium
+
+  * Fixed import of base64 in WindowsCertificateHook.py - Issue #5109
+
+ -- Michael Grandjean <grandjean@univention.de>  Wed, 04 May 2016 13:31:54 +0200
+
 univention-usercert (4.0.5-1) unstable; urgency=medium
 
   * Fixed joinscript 32univention-windowscert.inst
@@ -58,7 +82,7 @@ univention-usercert (4.0.0-1) unstable; urgency=low
 
 univention-usercert (3.0.5-1) unstable; urgency=low
 
-  * disbale listener on non master systems planio Issue #892 
+  * disbale listener on non master systems planio Issue #892
 
  -- Felix Botner <botner@univention.de>  Tue, 02 Sep 2014 09:39:41 +0200
 
@@ -78,13 +102,13 @@ univention-usercert (3.0.3-1) unstable; urgency=low
 
 univention-usercert (3.0.1-6) unstable; urgency=low
 
-  * added modrdn support Ticket #2013090321001557 
+  * added modrdn support Ticket #2013090321001557
 
  -- Felix Botner <botner@univention.de>  Fri, 22 Nov 2013 09:37:24 +0100
 
 univention-usercert (3.0.1-4) unstable; urgency=low
 
-  * fixed univention-usercert-expiry Ticket #2013090321001557 
+  * fixed univention-usercert-expiry Ticket #2013090321001557
 
  -- Felix Botner <botner@univention.de>  Thu, 17 Oct 2013 12:26:59 +0200
 
@@ -98,13 +122,13 @@ univention-usercert (3.0.1-3) unstable; urgency=low
 
 univention-usercert (3.0.1-2) unstable; urgency=low
 
-  * no pkcs12chain for hosts Ticket #2013090321001557 
+  * no pkcs12chain for hosts Ticket #2013090321001557
 
  -- Felix Botner <botner@univention.de>  Wed, 09 Oct 2013 12:05:35 +0200
 
 univention-usercert (3.0.1-1) unstable; urgency=low
 
-  * added windows client stuff Ticket #2013090321001557 
+  * added windows client stuff Ticket #2013090321001557
 
  -- Felix Botner <botner@univention.de>  Wed, 09 Oct 2013 10:26:11 +0200
 
@@ -128,7 +152,7 @@ univention-usercert (3.0.0-4) unstable; urgency=low
 
 univention-usercert (3.0.0-3) unstable; urgency=low
 
-  * Updated copyright 
+  * Updated copyright
   * Bug #14967
 
  -- Kevin Dominik Korte <korte@univention.de>  Tue, 05 Feb 2013 09:19:28 +0100
@@ -141,7 +165,7 @@ univention-usercert (3.0.0-2) unstable; urgency=low
 
 univention-usercert (3.0.0-1) unstable; urgency=low
 
-  * Update to UCS 3.1 
+  * Update to UCS 3.1
   * Handle revocation of SSL certs
   * Bug 14967
 
@@ -151,7 +175,7 @@ univention-usercert (2.0.0-1) unstable; urgency=low
 
   * UCS 3.0 update
   * added -chain -CA ... to pkcs12 export
-    Ticket: #2012011021003781 
+    Ticket: #2012011021003781
 
  -- Felix Botner <botner@univention.de>  Thu, 12 Jan 2012 17:20:21 +0100
 
@@ -166,7 +190,7 @@ univention-usercert (1.0.2-1) unstable; urgency=low
 
 univention-usercert (1.0.1-1) unstable; urgency=low
 
-  * added certExtentionsExample.txt Ticket: #2009100710000568 
+  * added certExtentionsExample.txt Ticket: #2009100710000568
 
  -- Felix Botner <botner@univention.de>  Thu, 23 Dec 2010 15:41:24 +0100
 
@@ -180,7 +204,7 @@ univention-usercert (1.0.0-1) unstable; urgency=low
     univention-ssl
   * check crl in univention-usercert-expiry
   * minor fixes in make-certificates-user.sh
-    Ticket: #2009100710000568 
+    Ticket: #2009100710000568
 
  -- Felix Botner <botner@univention.de>  Thu, 23 Dec 2010 15:18:03 +0100
 

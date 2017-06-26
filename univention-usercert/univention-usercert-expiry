@@ -1,6 +1,6 @@
 #!/usr/bin/python2.7
 #
-# Copyright 2009-2015 Univention GmbH
+# Copyright 2009-2017 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -30,16 +30,13 @@
 import os
 import sys
 import base64
-import tempfile
-import string
 import time
 import datetime
 import M2Crypto
 import univention.uldap
 import univention.config_registry
-import itertools
 
-configRegistry=univention.config_registry.ConfigRegistry()
+configRegistry = univention.config_registry.ConfigRegistry()
 configRegistry.load()
 
 ldap_base = configRegistry.get('ldap/base', False)
@@ -59,7 +56,7 @@ revoked = {}
 sslBase = configRegistry.get('ssl/usercert/sslbase', '/etc/univention/ssl/')
 ca = configRegistry.get('ssl/usercert/ca', 'ucsCA')
 crlFile = os.path.join(sslBase, ca, "crl", "crl.pem")
-crl = M2Crypto.X509.load_crl(crlFile) 
+crl = M2Crypto.X509.load_crl(crlFile)
 for i in crl.as_text().split('\n'):
 	i = i.strip()
 	if i.startswith("Serial Number: "):
@@ -67,39 +64,43 @@ for i in crl.as_text().split('\n'):
 		if s:
 			revoked[int(s, 16)] = 1
 
+
 # get pem file or certificate string
 # return "valid/invalid", cn and not_after date
 def parse_certificate(certificate):
-
 	if os.path.isfile(certificate):
 		x509 = M2Crypto.X509.load_cert(certificate)
 	else:
 		x509 = M2Crypto.X509.load_cert_string(certificate)
 
-	not_after = "%s" % x509.get_not_after()
-	subject = "%s" % x509.get_subject()
+	subject = x509.get_subject()
 	serial = x509.get_serial_number()
-	epoch_not_after = time.mktime(time.strptime(not_after, "%b %d %H:%M:%S %Y %Z"))
-	epoch_now = time.time()
-	valid = "invalid per date"
+	not_after = x509.get_not_after()
 
-	date_not_after = datetime.datetime.fromtimestamp(epoch_not_after)
+	date_not_after = not_after.get_datetime().replace(tzinfo=None)
 	date_now = datetime.datetime.now()
 	delta = date_not_after - date_now
-	delta = delta.days
-	date_not_after = date_not_after.isoformat()
-
-	cn = subject
-	for i in subject.split('/'):
-		if i.startswith('CN='):
-			cn = string.split(i, '=')[1]
-	if epoch_now < epoch_not_after:
-		valid = "valid"
 
 	if serial in revoked:
 		valid = "invalid per crl"
+	elif date_not_after < date_now:
+		valid = "invalid per date"
+	else:
+		valid = "valid"
 
-	return (valid, cn, date_not_after, delta, serial)
+	try:
+		cn = subject.CN
+	except:
+		cn = str(subject)
+
+	return (cn, {
+		'valid': valid,
+		'cn_cert': cn,
+		'not_after': date_not_after.isoformat(),
+		'delta': delta.days,
+		'serial': serial,
+	})
+
 
 # ldap certificates
 try:
@@ -108,60 +109,38 @@ except Exception, e:
 	print 'ERROR: authentication error: %s' % str(e)
 	sys.exit(1)
 
-results = lo.search(filter='userCertificate;binary=*', attr=['userCertificate;binary', 'uid', 'cn'])
-
-for result in results:
-	dn = result[0] 
-	attrs = result[1]
-
-	if 'uid' in attrs and 'userCertificate;binary' in attrs and 'cn' in attrs:
-		uid = attrs['uid'][0]
-		cert = attrs['userCertificate;binary'][0]
-		cn_ldap = attrs['cn'][0]
-		if uid and cert:
-			cert = '-----BEGIN CERTIFICATE-----\n%s-----END CERTIFICATE-----\n' % base64.encodestring(cert)
-			(valid, cn_cert, not_after, delta, serial) = parse_certificate(cert)
-
-			certificates.update({ cn_cert : { "not_after" : not_after, "valid" : valid, "cn_cert" : cn_cert, "delta" : delta, "cn_ldap" : cn_ldap, "uid_ldap" : uid , "serial" : serial} })
+results = lo.search(filter='(&(userCertificate;binary=*)(uid=*)(cn=*))', attr=['userCertificate;binary', 'uid', 'cn'])
+for dn, attrs in results:
+	cert = attrs['userCertificate;binary'][0]
+	cert = '-----BEGIN CERTIFICATE-----\n%s-----END CERTIFICATE-----\n' % base64.encodestring(cert)
+	(cn_cert, rec) = parse_certificate(cert)
+	rec['cn_ldap'] = attrs['cn'][0]
+	rec['uid_ldap'] = attrs['uid'][0]
+	certificates[cn_cert] = rec
 
 # pem files in usercert directory
 for path in [certpath, hostCertPath]:
 	if path and os.path.isdir(path):
 		for root, dirs, files in os.walk(path):
 			for file in files:
-				if not file == "cert.pem":
+				if file != "cert.pem":
 					continue
-				file = root + "/" + file
-				(valid, cn_cert, not_after, delta, serial) = parse_certificate(file)
-				if not cn_cert in certificates:
-					certificates.update(
-						{cn_cert : { 
-							"not_after" : not_after,
-							"valid" : valid,
-							"cn_cert" : cn_cert,
-							"delta" : delta,
-							"cn_ldap" : "",
-							"uid_ldap" : "" ,
-							"serial" : serial
-						}}
-					)
+				file = os.path.join(root, file)
+				(cn_cert, rec) = parse_certificate(file)
+				if cn_cert not in certificates:
+					rec['cn_ldap'] = ""
+					rec['uid_ldap'] = ""
+					certificates[cn_cert] = rec
 
-cns = certificates.keys()
-cns.sort()
-print \
-	"CN (cert)".ljust(20) + \
-	"CN (ldap)".ljust(20) + \
-	"UID".ljust(20) + \
-	"Valid until".ljust(20) + \
-	"Days until expiration".ljust(23) + \
-	"Serial".ljust(8) + \
-	"Valid".ljust(8)
-for cn in cns:
-	print \
-		str(certificates[cn]["cn_cert"]).ljust(20) + \
-		str(certificates[cn]["cn_ldap"]).ljust(20) + \
-		str(certificates[cn]["uid_ldap"]).ljust(20) + \
-		str(certificates[cn]["not_after"]).ljust(20) + \
-		str(certificates[cn]["delta"]).ljust(23) + \
-		str(certificates[cn]["serial"]).ljust(8) + \
-		str(certificates[cn]["valid"]).ljust(8)
+FMT = '{cn_cert:20}{cn_ldap:20}{uid_ldap:20}{not_after:20}{delta:>23}{serial:>7} {valid:8}'
+print FMT.format(
+	cn_cert="CN (cert)",
+	cn_ldap="CN (ldap)",
+	uid_ldap="UID",
+	not_after="Valid until",
+	delta="Days until expiration",
+	serial="Serial",
+	valid="Valid",
+)
+for cn, cert in sorted(certificates.iteritems()):
+	print FMT.format(**cert)

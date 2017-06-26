@@ -1,3 +1,37 @@
+univention-demo-data (2.0.4-1) unstable; urgency=medium
+
+  * Removed mailPrimaryAddress from joinscript
+  * Fixed wrong image folder
+  * Issue #2115
+
+ -- Timo Denissen <denissen@univention.de>  Mon, 30 Nov 2015 10:11:01 +0100
+
+univention-demo-data (2.0.3-1) unstable; urgency=medium
+
+  * Fixed unjoinscript to remove the correct parent ou (was given twice)
+  * Fixed unjoinscript to remove the correct joinscript
+  * Issue #2115
+
+ -- Timo Denissen <denissen@univention.de>  Fri, 13 Nov 2015 12:34:44 +0100
+
+univention-demo-data (2.0.2-1) unstable; urgency=medium
+
+  * Added check to remove parent ou "univention-demo-data" from LDAP
+  * Issue #2115
+
+ -- Timo Denissen <denissen@univention.de>  Fri, 13 Nov 2015 11:30:55 +0100
+
+univention-demo-data (2.0.1-1) unstable; urgency=medium
+
+  * Renamed joinscript
+  * Renamed unjoinscript
+  * Fixed files containing old unjoinscript and joinscript
+  * Added creation of new parent ou "univention-demo-data" in the joinscript to save all objects into, to prevent accidental deletion of productive data* 
+  * Added new parent ou "univention-demo-data" in unjoinscript
+  * Issue #2115
+
+ -- Timo Denissen <denissen@univention.de>  Thu, 12 Nov 2015 14:20:06 +0100
+
 univention-demo-data (2.0.0-1) unstable; urgency=low
 
   * Ported package to UCS 4.0

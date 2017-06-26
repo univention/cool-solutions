@@ -1,5 +1,5 @@
 Type: file
-File: etc/apache2/sites-available/univention-letsencrypt
+File: etc/apache2/sites-available/univention-letsencrypt.conf
 
 Type: file
 File: etc/cron.d/univention-letsencrypt

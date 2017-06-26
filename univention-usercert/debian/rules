@@ -3,7 +3,7 @@
 # Univention SSL
 #  rules file for the debian package
 #
-# Copyright 2009-2015 Univention GmbH
+# Copyright 2009-2017 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -32,7 +32,7 @@
 
 override_dh_auto_install:
 	univention-install-config-registry
-	dh_auto_install 
+	dh_auto_install
 
 override_dh_auto_test:
 	#ucslint
@@ -40,4 +40,3 @@ override_dh_auto_test:
 
 %:
 	dh $@ --with python_support
-
