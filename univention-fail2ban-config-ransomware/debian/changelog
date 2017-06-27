@@ -1,3 +1,9 @@
+univention-fail2ban-config-ransomware (1.0.3-4) unstable; urgency=medium
+
+  * update filter list #8160
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 27 Jun 2017 13:00:55 +0200
+
 univention-fail2ban-config-ransomware (1.0.3-1) unstable; urgency=medium
 
   * fix in debian folder. Issue #5416
