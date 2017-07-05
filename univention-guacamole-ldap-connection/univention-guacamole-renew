@@ -40,15 +40,15 @@ echo -n "Creating new Guacamole container... "
     --name guacamole \
     --link guacd:guacd \
     --restart=always \
-    -e LDAP_HOSTNAME="${ldap_master}" \
-    -e LDAP_PORT="${ldap_port}" \
+    -e LDAP_HOSTNAME="${ldap_server_name}" \
+    -e LDAP_PORT="${ldap_server_port}" \
     -e LDAP_USER_BASE_DN="${guacamole_user_dn}" \
     -e LDAP_CONFIG_BASE_DN="${guacamole_config_base_dn}" \
     -e LDAP_USERNAME_ATTRIBUTE="${guacamole_ldap_username_attribute}" \
     -e LDAP_SEARCH_BIND_DN="uid=guacamole,cn=users,${ldap_base}" \
     -e LDAP_SEARCH_BIND_PASSWORD="$(cat /etc/guacamole.secret)" \
     -d -p "${guacamole_external_port}":8080 mjumper/guacamole > /dev/null
-/usr/bin/docker cp /usr/share/guacamole/guacamole-auth-ldap-* guacamole:/opt/guacamole/ldap/ > /dev/null
+docker cp /usr/share/guacamole/guacamole-auth-ldap-* guacamole:/opt/guacamole/ldap/
 /usr/bin/docker restart guacamole > /dev/null
 echo -e "Done!"
 

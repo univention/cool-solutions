@@ -3,6 +3,7 @@ class guacamole_protocol(select):
 		('', ''),
 		('rdp', 'RDP'),
 		('ssh', 'SSH'),
+		('telnet','Telnet'),
 		('vnc', 'VNC'),
 	]
 	default = ''

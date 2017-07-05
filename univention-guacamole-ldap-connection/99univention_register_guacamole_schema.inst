@@ -49,7 +49,6 @@ udm settings/extended_attribute create "$@" \
     --set module="groups/group" \
     --set ldapMapping="guacConfigProtocol" \
     --set overwriteTab=1 \
-    --set valueRequired=1 \
     --set CLIName="guacConfigProtocol" \
     --set tabName="Guacamole" \
     --set tabAdvanced=0 \
@@ -73,7 +72,6 @@ udm settings/extended_attribute create "$@" \
     --set module="groups/group" \
     --set ldapMapping="guacConfigParameter" \
     --set overwriteTab=1 \
-    --set valueRequired=1 \
     --set CLIName="guacConfigParameter" \
     --set tabName="Guacamole" \
     --set tabAdvanced=0 \
