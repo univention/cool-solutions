@@ -1,4 +1,4 @@
-nivention-guacamole-ldap-connection (2.0.0-2) unstable; urgency=medium
+univention-guacamole-ldap-connection (2.0.0-2) unstable; urgency=medium
 
   * Removed debian/source directory
   * Task #8139
