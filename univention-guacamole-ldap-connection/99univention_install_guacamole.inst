@@ -97,8 +97,8 @@ echo -e "Restarting Container Guacamole for using patched plugin..."
 echo -e "Done!"
 
 echo -e "Configure Apache2 site for Guacamole... "
-/usr/sbin/univention-config-registry commit /etc/apache2/sites-available/guacamole
-a2ensite guacamole
+/usr/sbin/univention-config-registry commit /etc/apache2/sites-available/guacamole.conf
+a2ensite guacamole.conf
 service apache2 reload
 echo -e "Done!"
 
