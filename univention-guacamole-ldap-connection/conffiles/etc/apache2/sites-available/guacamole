@@ -1,9 +1,0 @@
-@%@UCRWARNING=# @%@
-
-<Location /guacamole>
-	Require all granted
-@!@
-print("\tProxyPass http://localhost:%s/guacamole max=20 flushpackets=on" % (configRegistry.get('guacamole/external/port', '8080')))
-print("\tProxyPassReverse http://localhost:%s/guacamole" % (configRegistry.get('guacamole/external/port', '8080')))
-@!@
-</Location>
