@@ -1,3 +1,9 @@
+univention-samba-config-ransomware (1.0.5-1) unstable; urgency=medium
+
+  * update joinscript version
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 27 Jun 2017 10:24:43 +0200
+
 univention-samba-config-ransomware (1.0.5-0) unstable; urgency=medium
 
   * use UCR instead of file based config for full_audit #8160
