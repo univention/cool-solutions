@@ -1,3 +1,10 @@
+univention-guacamole-ldap-connection (2.0.2-1) unstable; urgency=medium
+
+  * Change MUST to MAY for guacConfigProtocol in objectClass definition
+  * Issue #7707
+
+ -- Michael Grandjean <grandjean@univention.de>  Fri, 11 Aug 2017 11:33:13 +0200
+
 univention-guacamole-ldap-connection (2.0.1-2) unstable; urgency=medium
 
   * Fixed UCR install
