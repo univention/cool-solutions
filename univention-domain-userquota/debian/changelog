@@ -1,3 +1,11 @@
+univention-domain-userquota (2.0.1-1) unstable; urgency=medium
+
+  * Updated package to UCS 4.2
+  * Added new package "univention-domain-userquota-school-acl" with UCS@School ACL for new LDAP attribute "domainquota"
+  * Issue #6274
+
+ -- Timo Denissen <denissen@univention.de>  Tue, 26 Sep 2017 15:23:43 +0200
+
 univention-domain-userquota (1.0.1-2) unstable; urgency=low
 
   * Fixed "multiple open()'s causes domainquota cool solution to fail". Bug #42062

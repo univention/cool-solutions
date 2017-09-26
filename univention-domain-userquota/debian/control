@@ -33,3 +33,9 @@ Description: UCS - domain wide userquota definition
  integrated, directory driven solution for managing
  corporate environments. For more information about UCS,
  refer to: http://www.univention.de/
+
+Package: univention-domain-userquota-school-acl
+Architecture: all
+Depends: ${misc:Depends}
+Description: Adds ACL for teachers to reset passwords
+ Adds ACL to allow teachers to reset passwords when a student (or other teacher) has a configured LDAP quota.
