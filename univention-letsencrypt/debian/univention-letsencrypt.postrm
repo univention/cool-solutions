@@ -34,6 +34,9 @@ do_statoverride_remove () {
 
 #DEBHELPER#
 
+# remove force_https exclude pattern
+ucr unset apache2/force_https/exclude/request_uri/letsencrypt
+
 # package files are removed
 if [ "$1" = "remove" ] ; then
 	a2dissite univention-letsencrypt.conf
