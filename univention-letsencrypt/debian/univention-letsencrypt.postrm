@@ -40,7 +40,6 @@ ucr unset apache2/force_https/exclude/request_uri/letsencrypt
 # package files are removed
 if [ "$1" = "remove" ] ; then
 	a2dissite univention-letsencrypt.conf
-	ucr unset apache2/ssl/certificate apache2/ssl/certificatechain apache2/ssl/key
 	invoke-rc.d apache2 restart
 fi
 
