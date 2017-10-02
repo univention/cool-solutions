@@ -1,3 +1,9 @@
+univention-letsencrypt (1.1.0-4) unstable; urgency=medium
+
+  * reset ssl settings after app removal #8871
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 02 Oct 2017 12:05:19 +0200
+
 univention-letsencrypt (1.1.0-3) unstable; urgency=medium
 
   * restart apache after exclusion pattern has been added, don't unset force_https #8871
