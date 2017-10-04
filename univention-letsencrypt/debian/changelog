@@ -1,3 +1,9 @@
+univention-letsencrypt (1.1.0-6) unstable; urgency=medium
+
+  * reset apache2 ssl settings after package removal #8871
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 04 Oct 2017 12:07:05 +0200
+
 univention-letsencrypt (1.1.0-5) unstable; urgency=medium
 
   * make setup-letsencrypt non-interactive #8871
