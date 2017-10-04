@@ -34,8 +34,8 @@ do_statoverride_remove () {
 
 #DEBHELPER#
 
-# remove force_https exclude pattern
-ucr unset apache2/force_https/exclude/request_uri/letsencrypt
+# remove force_https exclude pattern and reset apache ssl settings
+ucr unset apache2/force_https/exclude/request_uri/letsencrypt apache2/ssl/certificate apache2/ssl/certificatechain apache2/ssl/key
 
 # package files are removed
 if [ "$1" = "remove" ] ; then
