@@ -1,19 +1,23 @@
 [letsencrypt/domains]
-Type = String
-Description = Domain(s) to obtain a certificate for, separated by space
-Description[de] = Domain(s) für die ein Zertifikat geholt werden soll, durch Leerzeichen getrennt
+Description[en]=Domain(s) to obtain a certificate for, separated by space
+Description[de]=Domain(s) für die ein Zertifikat geholt werden soll, durch Leerzeichen getrennt
+Type=String
+Categories=univention-letsencrypt
 
 [letsencrypt/services/apache2]
-Type = Bool
-Description = Use certificate in Apache
-Description[de] = Zertifikat in Apache verwenden
+Description[en]=Use certificate in Apache
+Description[de]=Zertifikat in Apache verwenden
+Type=Bool
+Categories=univention-letsencrypt
 
 [letsencrypt/services/dovecot]
-Type = Bool
-Description = Use certificate in Dovecot
-Description[de] = Zertifikat in Dovecot verwenden
+Description[en]=Use certificate in Dovecot
+Description[de]=Zertifikat in Dovecot verwenden
+Type=Bool
+Categories=univention-letsencrypt
 
 [letsencrypt/services/postfix]
-Type = Bool
-Description = Use certificate in Postfix
-Description[de] = Zertifikat in Postfix verwenden
+Description[en]=Use certificate in Postfix
+Description[de]=Zertifikat in Postfix verwenden
+Type=Bool
+Categories=univention-letsencrypt
