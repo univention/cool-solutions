@@ -1,0 +1,19 @@
+[letsencrypt/domains]
+Type = String
+Description = Domain(s) to obtain a certificate for, separated by space
+Description[de] = Domain(s) für die ein Zertifikat geholt werden soll, durch Leerzeichen getrennt
+
+[letsencrypt/services/apache2]
+Type = Bool
+Description = Use certificate in Apache
+Description[de] = Zertifikat in Apache verwenden
+
+[letsencrypt/services/dovecot]
+Type = Bool
+Description = Use certificate in Dovecot
+Description[de] = Zertifikat in Dovecot verwenden
+
+[letsencrypt/services/postfix]
+Type = Bool
+Description = Use certificate in Postfix
+Description[de] = Zertifikat in Postfix verwenden
