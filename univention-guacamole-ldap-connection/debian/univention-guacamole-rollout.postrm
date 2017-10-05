@@ -32,10 +32,11 @@
 if [ "$1" = "remove" ]
 then
 	/usr/sbin/univention-config-registry unset \
-	guacamole/user/dn \
 	guacamole/config/base/dn \
+	guacamole/external/port \
+	guacamole/ldap/user/searchfilter \
 	guacamole/ldap/username/attribute \
-	guacamole/external/port
+	guacamole/user/dn
 
 	eval $(ucr shell server/role)
 

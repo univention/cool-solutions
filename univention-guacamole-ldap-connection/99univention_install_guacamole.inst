@@ -59,6 +59,12 @@ else
     echo -e "External port cannot be set, check UCR variable 'guacamole/external/port'!"
     exit 1
 fi
+if [ "${guacamole_ldap_user_searchfilter}" ]; then
+	echo -e "LDAP_USER_SEARCH_FILTER can be set"
+else
+	echo -e "LDAP_USER_SEARCH_FILTER cannot be set, check UCR variables 'guacamole/ldap/user/searchfilter'!"
+	exit 1
+fi
 if [ -e /etc/guacamole.secret ]; then
     echo "Search user can be used"
 else
@@ -85,6 +91,7 @@ echo -e "Downloading and installing Guacamole... "
     -e LDAP_USERNAME_ATTRIBUTE="${guacamole_ldap_username_attribute}" \
     -e LDAP_SEARCH_BIND_DN="uid=guacamole,cn=users,${ldap_base}" \
     -e LDAP_SEARCH_BIND_PASSWORD="$(cat /etc/guacamole.secret)" \
+	-e LDAP_USER_SEARCH_FILTER="${guacamole_ldap_user_searchfilter}" \
     -d -p "${guacamole_external_port}":8080 mjumper/guacamole
 echo -e "Done!"
 

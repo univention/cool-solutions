@@ -21,3 +21,9 @@ Description[de]=Port unter welchem Guacamole erreichbar sein wird.
 Description[en]=Port which Guacamole can be accessed from.
 Type=int
 Categories=Guacamole
+
+[guacamole/ldap/user/searchfilter]
+Description[de]=Filter um die Suche nach Benutzern einzuschränken, standardmäßig ist dies (objectClass=*).
+Description[en]=Filter to limit search for users, default is (objectClass=*)
+Type=str
+Categories=Guacamole
