@@ -1,3 +1,10 @@
+univention-guacamole-ldap-connection (2.0.4-1) unstable; urgency=medium
+
+  * Fixed joinscript to install Guacamole
+  * Task #8139
+
+ -- Timo Denissen <denissen@univention.de>  Fri, 06 Oct 2017 11:34:22 +0200
+
 univention-guacamole-ldap-connection (2.0.3-1) unstable; urgency=medium
 
   * Added new UCR variable "guacamole/ldap/user/searchfilter" to limit found user objects
