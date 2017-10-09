@@ -1,0 +1,8 @@
+<p>Während der Deinstallation werden alle Objekte, die durch diese App in der <b>ou=univention-demo-data</b> erstellt wurden entfernt. Dabei werden folgende Objekte entfernt:</p>
+<ul>
+<li>Benutzer</li>
+<li>Computer</li>
+<li>Gruppen</li>
+</ul>
+Sollte ein Objekt, welches von dieser App erstellt wurde, in einen anderen Ordner, beispielsweise <u>cn=users</u> verschoben worden sein, wird dieses Objekt <b>nicht</b> entfernt.</p>
+<p>Wenn ein Objekt unterhalb der <b>ou=univention-demo-data</b> erstellt wurde, wird der entsprechende Ordnerpfad <b>nicht</b> entfernt.</p>

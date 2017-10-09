@@ -4,7 +4,7 @@
 # Univention Samba full_audit config
 #  join script
 #
-# Copyright 2008-2016 Univention GmbH
+# Copyright 2008-2017 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -31,26 +31,25 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-VERSION=1
+VERSION=2
 
 . /usr/share/univention-join/joinscripthelper.lib
 joinscript_init
 
 eval "$(univention-config-registry shell)"
 
-# add full_audit configuration
-# not posiible because of Bug#41508
-#
-#univention-config-registry set 'samba/global/options/full_audit:failure=none' \
-#	'samba/global/options/full_audit:success=pwrite write rename' \
-#	'samba/global/options/full_audit:prefix=IP=%I|USER=%u|MACHINE=%m|VOLUME=%S' \
-#	'samba/global/options/full_audit:facility=local7' \
-#	'samba/global/options/full_audit:priority=NOTICE' || die
+#add full_audit configuration
+ucr set 'samba/global/options/full_audit:failure=none' \
+ 'samba/global/options/full_audit:success=pwrite write rename' \
+ 'samba/global/options/full_audit:prefix=IP=%I|USER=%u|MACHINE=%m|VOLUME=%S' \
+ 'samba/global/options/full_audit:facility=local7' \
+ 'samba/global/options/full_audit:priority=NOTICE'
 
 # add full_audit to this host's shares
 for i in $(udm shares/share list --filter=host=$(hostname -f) | grep DN: | sed 's/DN: //'); do
 	udm shares/share modify "$@" --dn "$i" --set sambaVFSObjects="full_audit" || die
 done
+
 
 joinscript_save_current_version
 

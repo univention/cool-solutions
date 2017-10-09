@@ -67,18 +67,11 @@ else
 fi
 
 # remove domain.csr if list of domains has been changed and domain.csr is therefore invalid/outdated.
-if [ -e "$DIR_LE/domain.csr" -a "$INTERACTIVE" = "yes" ] ; then
+if [ -e "$DIR_LE/domain.csr" ] ; then
 	if [ ! "$(< "$DIR_LE/domains")" = "$LE_NAMES" ] ; then
 		echo "WARNING: UCR variable letsencrypt/domains does not match domains in CSR."
-		answer=""
-		while [ ! "$answer" = "y" -a ! "$answer" = "n" ] ; do
-			echo -n "Delete and recreate $DIR_LE/domain.csr? [yn] "
-			read answer
-		done
-		if [ "$answer" = "y" ] ; then
-			echo "Removing domain.csr..."
-			rm -f "$DIR_LE/domain.csr"
-		fi
+		echo "Removing domain.csr..."
+		rm -f "$DIR_LE/domain.csr"
 	fi
 fi
 

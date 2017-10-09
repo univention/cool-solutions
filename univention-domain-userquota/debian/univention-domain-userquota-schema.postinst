@@ -39,7 +39,7 @@ eval "$(univention-config-registry shell)"
 case "$1" in
         configure)
 		if [ -x /etc/init.d/slapd ]; then
-			invoke-rc.d slapd restart
+			systemctl restart slapd.service
 		fi
 
 		stop_udm_cli_server

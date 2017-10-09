@@ -1,3 +1,45 @@
+univention-letsencrypt (1.1.0-8) unstable; urgency=medium
+
+  * add ucr category definition #8871
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 05 Oct 2017 17:44:11 +0200
+
+univention-letsencrypt (1.1.0-7) unstable; urgency=medium
+
+  * add ucr variable definition, so a description is displayed on the shell #8871
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 05 Oct 2017 14:04:20 +0200
+
+univention-letsencrypt (1.1.0-6) unstable; urgency=medium
+
+  * reset apache2 ssl settings after package removal #8871
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 04 Oct 2017 12:07:05 +0200
+
+univention-letsencrypt (1.1.0-5) unstable; urgency=medium
+
+  * make setup-letsencrypt non-interactive #8871
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 04 Oct 2017 11:50:51 +0200
+
+univention-letsencrypt (1.1.0-4) unstable; urgency=medium
+
+  * don't unset force_https  #8871
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 02 Oct 2017 12:05:19 +0200
+
+univention-letsencrypt (1.1.0-3) unstable; urgency=medium
+
+  * restart apache after exclusion pattern has been added #8871
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 02 Oct 2017 11:46:21 +0200
+
+univention-letsencrypt (1.1.0-2) unstable; urgency=medium
+
+  * add force_https exclusion rule for acme_challenge #8871
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 02 Oct 2017 10:32:07 +0200
+
 univention-letsencrypt (1.1.0-1) unstable; urgency=low
 
   * Migration from Apache 2.2 to Apache 2.4. Isuue #7829

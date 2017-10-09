@@ -36,22 +36,6 @@ if [ ! "$(id -un)" = "root" ] ; then
 	exit 1
 fi
 
-# reset apache config to old state in any case
-cleanup () {
-	if [ -n "$APACHE_FORCE_HTTPS" ] ; then
-		ucr set apache2/force_https="$APACHE_FORCE_HTTPS"
-		invoke-rc.d apache2 restart
-	fi
-}
-trap cleanup EXIT
-
-# if HTTPS is enforced by apache2, then disable it
-if is_ucr_true apache2/force_https; then
-	APACHE_FORCE_HTTPS="$(ucr get apache2/force_https)"
-	ucr set apache2/force_https=no
-	invoke-rc.d apache2 restart
-fi
-
 su - letsencrypt -c "/usr/share/univention-letsencrypt/refresh-cert"
 
 run-parts --verbose "$DIR_LE/post-refresh.d/"

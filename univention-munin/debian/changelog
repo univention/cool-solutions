@@ -1,3 +1,9 @@
+univention-munin (1.1.0-1) unstable; urgency=low
+
+  * Version Bump #6640
+
+ -- Andreas Peichert <peichert@univention.de>  Fri, 19 May 2017 13:50:48 +0200
+
 univention-munin (1.0.1-1) unstable; urgency=low
 
   * Merge ucr templates with upstrem munin 2.0.25. Issue #6640

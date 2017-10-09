@@ -68,4 +68,8 @@ ucr set letsencrypt/services/apache2?no \
 		letsencrypt/services/postfix?no \
 		letsencrypt/services/dovecot?no
 
+# Add exclude pattern for acme-challenge, so validation works if force_https is enabled
+ucr set apache2/force_https/exclude/request_uri/letsencrypt="/.well-known/acme-challenge/.*$" 
+service apache2 restart
+
 exit 0
