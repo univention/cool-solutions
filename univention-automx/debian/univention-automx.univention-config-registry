@@ -2,6 +2,7 @@ Type: file
 File: etc/automx.conf
 Variables: domainname
 Variables: hostname
+Variables: mail/hosteddomains
 Variables: ldap/base
 Variables: ldap/master
 Variables: ldap/master/port
