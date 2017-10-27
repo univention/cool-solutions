@@ -38,7 +38,7 @@ set -e
 case "$1" in
     configure)
 		call_joinscript 91univention-automx.inst
-		/usr/sbin/a2ensite univention-automx.confi && systemctl reload apache2.service
+		/usr/sbin/a2ensite univention-automx.conf && systemctl reload apache2.service
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
