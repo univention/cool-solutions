@@ -1,0 +1,13 @@
+Type: file
+File: etc/automx.conf
+Variables: domainname
+Variables: hostname
+Variables: ldap/base
+Variables: ldap/master
+Variables: ldap/master/port
+Variables: ldap/hostdn
+
+Type: file                                                                                                                                                                                                         
+File: etc/apache2/sites-available/univention-automx.conf
+Variables: domainname                                                                                                                                                                                              
+
