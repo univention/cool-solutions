@@ -7,7 +7,6 @@ Variables: ldap/master
 Variables: ldap/master/port
 Variables: ldap/hostdn
 
-Type: file                                                                                                                                                                                                         
+Type: file
 File: etc/apache2/sites-available/univention-automx.conf
-Variables: domainname                                                                                                                                                                                              
-
+Variables: domainname
