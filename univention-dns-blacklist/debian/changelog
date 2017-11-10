@@ -1,0 +1,5 @@
+univention-dns-blacklist (1.0.0-1) unstable; urgency=log
+
+  * Initial release
+
+ -- Hendrik Peter <packages@univention.de>  Fri, 10 Nov 2017 10:19:19 +0100
