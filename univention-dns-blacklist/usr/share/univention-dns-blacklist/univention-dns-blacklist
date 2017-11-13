@@ -49,26 +49,26 @@ function RemoveTempAndExit() {
 }
 
 # Itterate through BLACKLIST - Files
-for GFILE in ${dns_blacklist_record_domains}
+for BFILE in ${dns_blacklist_record_domains}
 do
   # Check, if line is empty. Should never trigger
-  if [ ! -z "$GFILE" ]; then
+  if [ ! -z "$BFILE" ]; then
     # Check, if file exists
-    if [ ! -f "$BLACKLISTDIR/$GFILE" ]; then
-      echo "WARNING: File $BLACKLISTDIR/$GFILE does not exist"
+    if [ ! -f "$BLACKLISTDIR/$BFILE" ]; then
+      echo "WARNING: File $BLACKLISTDIR/$BFILE does not exist"
     else
-      echo "NOTE: Added content of File $BLACKLISTDIR/$GFILE"
-      cat "$BLACKLISTDIR/$GFILE" >> "$TMPFILE1"
+      echo "NOTE: Added content of File $BLACKLISTDIR/$BFILE"
+      cat "$BLACKLISTDIR/$BFILE" >> "$TMPFILE1"
     fi
   fi
 done
 
 # Sort and Unique the Content of the File while ignoring cases
-echo "NOTE: Sorting the lists and removing duplicates..."
+#echo "NOTE: Sorting the lists and removing duplicates..."
 sort -uf -o "$TMPFILE1" "$TMPFILE1"
 
 # Search for invalid Domains
-echo "NOTE: Searching for invalid Entries..."
+#echo "NOTE: Searching for invalid Entries..."
 sed -e "/^$\\|[^a-zA-Z0-9.-]/d" "$TMPFILE1" > "$TMPFILE2"
 
 # Insert warning string into config file
@@ -95,15 +95,15 @@ fi
 cp $TMPFILE1 $BINDCONFIG
 
 # Let Bind9 reload its Config Files
-echo "NOTE: Reloading bind9"
+#echo "NOTE: Reloading bind9"
 RESULT=$(service bind9 reload)
 echo "$RESULT"
 
 # Bind9 failed to reload successfully. Warn the User
-if [[ "$RESULT" == *"done"* ]]; then
-  echo "NOTE: Task finished successfully."
-else
+if [[ "$RESULT" != *"done"* ]]; then
   echo "ERROR: Bind9 failed to reload. Check your syslog for further help."
+#else
+  #echo "NOTE: Task finished successfully."
 fi
 
 # Clean up the Temp File
