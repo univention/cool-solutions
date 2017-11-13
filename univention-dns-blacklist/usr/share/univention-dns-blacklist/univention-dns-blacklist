@@ -1,0 +1,114 @@
+#!/bin/bash
+#
+# blacklist2bind
+# Proof of Concept: Automatically DNS-Block Domains listed in a given file
+#
+# Copyright 2010-2017 Univention GmbH
+#
+# http://www.univention.de/
+#
+# All rights reserved.
+#
+# The source code of this program is made available
+# under the terms of the GNU Affero General Public License version 3
+# (GNU AGPL V3) as published by the Free Software Foundation.
+#
+# Binary versions of this program provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention and not subject to the GNU AGPL V3.
+#
+# In the case you use this program under the terms of the GNU AGPL V3,
+# the program is provided in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License with the Debian GNU/Linux or Univention distribution in file
+# /usr/share/common-licenses/AGPL-3; if not, see
+# <http://www.gnu.org/licenses/>.
+
+
+BINDCONFIG="/etc/bind/univention-dns-blacklist.conf"  # The Bind9 Config file INCLUDING the Base Folder, which will be written to (old content will be completely overwritten)
+BINDDB="/etc/bind/db.univention-dns-blacklist"        # The Bind9 Database File INCLUDING the Base Folder, which contains all DNS entries for the Zone(s)
+BLACKLISTDIR="/etc/univention/dns-blacklist"          # The complete Base-Path containing all Blacklists
+TMPFILE1=$(mktemp)                                    # A temporary File which will contain the Bind9 Config until all vadility checks are done
+TMPFILE2=$(mktemp)                                    # 
+
+. /usr/share/univention-lib/all.sh
+eval "$(ucr shell dns/blacklist/record/domains)"
+
+# A Function to remove the temporary File before leaving
+function RemoveTempAndExit() {
+  rm "$TMPFILE1" "$TMPFILE2"
+  exit $1
+}
+
+# Check, if the Global Blacklists are set
+if [ -z "${dns_blacklist_record_domains}" ]; then
+  echo "ERROR: No Blacklists configured."
+  RemoveTempAndExit 0
+fi
+
+# Itterate through BLACKLIST - Files
+for GFILE in ${dns_blacklist_record_domains}
+do
+  # Check, if line is empty. Should never trigger
+  if [ ! -z "$GFILE" ]; then
+    # Check, if file exists
+    if [ ! -f "$BLACKLISTDIR/$GFILE" ]; then
+      echo "WARNING: File $BLACKLISTDIR/$GFILE does not exist"
+    else
+      echo "NOTE: Added content of File $BLACKLISTDIR/$GFILE"
+      cat "$BLACKLISTDIR/$GFILE" >> "$TMPFILE1"
+    fi
+  fi
+done
+
+# Sort and Unique the Content of the File while ignoring cases
+echo "NOTE: Sorting the lists and removing duplicates..."
+sort -uf -o "$TMPFILE1" "$TMPFILE1"
+
+# Search for invalid Domains
+echo "NOTE: Searching for invalid Entries..."
+sed -e "/^$\\|[^a-zA-Z0-9.-]/d" "$TMPFILE1" > "$TMPFILE2"
+
+# Properly excape the path to the Bind9 Database File before inserting it, then
+# Rewrite the File in a valid Bind9 format
+BINDDB=$(echo $BINDDB | sed "s/\//\\\\\//g")
+sed -e "s/^.*$/zone \"\\0\"\t{ type master; notify no; file \"$BINDDB\"; };/g" "$TMPFILE2" > "$TMPFILE1"
+
+# TODO: Insert Copyright & Rebuild warning
+
+
+# Do a final check of the Config File by Bind9
+echo "NOTE: Checking the final config"
+CHECK=$(named-checkconf ${TMPFILE1})
+
+# Bind9 found an Error while checking the Config File. Warn the User
+if [ ! -z "$CHECK" ]; then
+  printf "FATAL ERROR: The Check wasn't successful\r\nCOMMAND: named-checkconf $TMPFILE1\r\nERROR: $CHECK\r\n"
+  RemoveTempAndExit 0
+else
+  echo "NOTE: Check completed successfully. Going Live."
+fi
+
+# The Check completed successfully. Copy the Config File to the final Destination
+cp $TMPFILE1 $BINDCONFIG
+
+# Let Bind9 reload its Config Files
+echo "NOTE: Reloading bind9"
+RESULT=$(service bind9 reload)
+echo "$RESULT"
+
+# Bind9 failed to reload successfully. Warn the User
+if [[ "$RESULT" == *"done"* ]]; then
+  echo "NOTE: Task finished successfully."
+else
+  echo "ERROR: Bind9 failed to reload. Check your syslog for further help."
+fi
+
+# Clean up the Temp File
+RemoveTempAndExit 1

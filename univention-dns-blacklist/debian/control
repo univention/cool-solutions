@@ -2,12 +2,14 @@ Source: univention-dns-blacklist
 Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
-Build-Depends: debhelper (>> 7), univention-config-dev
+Build-Depends: debhelper (>> 3.0.0), 
+ univention-config-dev,
+ ucslint-univention
 Standards-Version: 3.9.6
 
 Package: univention-dns-blacklist
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, univention-bind
 Recommends: univention-shalla-list-downloader
-Description: <insert up to 60 chars description>
+Description: TODO: <insert up to 60 chars description>
  <insert long description, indented with spaces>
