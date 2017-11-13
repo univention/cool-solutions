@@ -12,7 +12,7 @@ Architecture: all
 Depends: ${shlibs:Depends}, 
  ${misc:Depends}, 
  univention-config-registry,
- shell-univention-lib
+ shell-univention-lib,
  univention-bind
 Recommends: univention-shalla-list-downloader
 Description: TODO: <insert up to 60 chars description>
