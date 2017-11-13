@@ -2,8 +2,8 @@
 
 
 @!@
-redirect_ipv4 = configRegistry.get("dns/blacklist/redirect/ipv4")
-redirect_ipv6 = configRegistry.get("dns/blacklist/redirect/ipv6")
+redirect_ipv4 = configRegistry.get("dns/blacklist/ipv4")
+redirect_ipv6 = configRegistry.get("dns/blacklist/ipv6")
 nameserver = "master.ucs.demo" # TODO: GET
 
 print "$TTL\t3600"
