@@ -36,6 +36,8 @@ BINDDB="/etc/bind/db.univention-dns-blacklist"        # The Bind9 Database File 
 BLACKLISTDIR="/etc/univention/dns-blacklist"          # The complete Base-Path containing all Blacklists
 TMPFILE1=$(mktemp)                                    # A temporary File which will contain the Bind9 Config until all vadility checks are done
 TMPFILE2=$(mktemp)                                    # 
+SCRIPTPATH=$(readlink -f "$0")
+WARNING_STRING=$(python -c "from univention.config_registry.handler import warning_string; print warning_string(srcfiles=['$SCRIPTPATH'])")
 
 . /usr/share/univention-lib/all.sh
 eval "$(ucr shell dns/blacklist/record/domains)"
@@ -45,12 +47,6 @@ function RemoveTempAndExit() {
   rm "$TMPFILE1" "$TMPFILE2"
   exit $1
 }
-
-# Check, if the Global Blacklists are set
-if [ -z "${dns_blacklist_record_domains}" ]; then
-  echo "ERROR: No Blacklists configured."
-  RemoveTempAndExit 0
-fi
 
 # Itterate through BLACKLIST - Files
 for GFILE in ${dns_blacklist_record_domains}
@@ -75,13 +71,13 @@ sort -uf -o "$TMPFILE1" "$TMPFILE1"
 echo "NOTE: Searching for invalid Entries..."
 sed -e "/^$\\|[^a-zA-Z0-9.-]/d" "$TMPFILE1" > "$TMPFILE2"
 
+# Insert warning string into config file
+printf "$WARNING_STRING\n\n" > "$TMPFILE1"
+
 # Properly excape the path to the Bind9 Database File before inserting it, then
 # Rewrite the File in a valid Bind9 format
 BINDDB=$(echo $BINDDB | sed "s/\//\\\\\//g")
-sed -e "s/^.*$/zone \"\\0\"\t{ type master; notify no; file \"$BINDDB\"; };/g" "$TMPFILE2" > "$TMPFILE1"
-
-# TODO: Insert Copyright & Rebuild warning
-
+sed -e "s/^.*$/zone \"\\0\"\t{ type master; notify no; file \"$BINDDB\"; };/g" "$TMPFILE2" >> "$TMPFILE1"
 
 # Do a final check of the Config File by Bind9
 echo "NOTE: Checking the final config"
