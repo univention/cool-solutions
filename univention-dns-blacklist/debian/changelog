@@ -1,5 +1,12 @@
+univention-dns-blacklist (1.0.0-2) unstable; urgency=low
+
+  * Add 'auto-generated' warning when generating bind9 configuration file
+  * Corrected incomplete calling path
+
+ -- Hendrik Peter <hpeter@univention.de>  Mon, 13 Nov 2017 13:58:20 +0100
+
 univention-dns-blacklist (1.0.0-1) unstable; urgency=log
 
   * Initial release
 
- -- Hendrik Peter <packages@univention.de>  Fri, 10 Nov 2017 10:19:19 +0100
+ -- Hendrik Peter <hpeter@univention.de>  Fri, 10 Nov 2017 10:19:19 +0100
