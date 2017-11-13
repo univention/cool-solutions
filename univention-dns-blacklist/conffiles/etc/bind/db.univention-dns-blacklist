@@ -1,6 +1,5 @@
 @%@UCRWARNING=; @%@
 
-
 @!@
 redirect_ipv4 = configRegistry.get("dns/blacklist/ipv4")
 redirect_ipv6 = configRegistry.get("dns/blacklist/ipv6")
@@ -21,5 +20,3 @@ print "@\t\tAAAA\t%s" % redirect_ipv6
 print "@\tIN\tAAAA\t%s" % redirect_ipv6
 print ""
 @!@
-
-
