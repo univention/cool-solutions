@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# shalla-list-downloader for paedmllinux / LMZ
+# shalla-list-downloader
 # download/update shallalist and trigger the initializization of the databases
 #
 # Copyright 2010-2017 Univention GmbH

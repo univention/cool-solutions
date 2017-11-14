@@ -6,7 +6,7 @@ univention-shalla-list-downloader (2.0.0-3) unstable; urgency=low
 
 univention-shalla-list-downloader (2.0.0-2) unstable; urgency=low
 
-  * migrate UCR lmz blacklists values to U@S global/blacklists. Issue #6801
+  * migrate UCR blacklists values to U@S global/blacklists. Issue #6801
 
  -- Andreas Peichert <peichert@univention.de>  Thu, 22 Dec 2016 13:43:50 +0100
 
@@ -18,63 +18,63 @@ univention-shalla-list-downloader (2.0.0-1) unstable; urgency=low
 
 univention-shalla-list-downloader (1.1.0-7) unstable; urgency=low
 
-  * silent output.  Ticket #2013121121002071
+  * silent output.
 
  -- Jan Christoph Ebersbach <ebersbach@univention.de>  Wed, 02 Apr 2014 12:05:07 +0200
 
 univention-shalla-list-downloader (1.1.0-6) unstable; urgency=low
 
-  * add ucslint.  Ticket #2013121121002071
+  * add ucslint.
 
  -- Jan Christoph Ebersbach <ebersbach@univention.de>  Tue, 04 Mar 2014 19:19:47 +0100
 
 univention-shalla-list-downloader (1.1.0-5) unstable; urgency=low
 
-  * fix broken postrm. Ticket #2013121121002071
+  * fix broken postrm.
 
  -- Jan Christoph Ebersbach <ebersbach@univention.de>  Tue, 07 Jan 2014 15:15:37 +0100
 
 univention-shalla-list-downloader (1.1.0-4) unstable; urgency=low
 
-  * don't download anything if no blacklists are configured. Ticket #2013121121002071
+  * don't download anything if no blacklists are configured.
   * delete blacklists directory if no blacklists are used
 
  -- Jan Christoph Ebersbach <ebersbach@univention.de>  Thu, 12 Dec 2013 09:29:31 +0100
 
 univention-shalla-list-downloader (1.1.0-3) unstable; urgency=low
 
-  * fix initial definition of UCR variables. Ticket #2013102221003669
+  * fix initial definition of UCR variables.
 
  -- Jan Christoph Ebersbach <ebersbach@univention.de>  Thu, 05 Dec 2013 18:54:04 +0100
 
 univention-shalla-list-downloader (1.1.0-2) unstable; urgency=low
 
-  * delete shalla lists when removing or purging package. Ticket #2013102221003669
+  * delete shalla lists when removing or purging package.
   * remove cronjob when removing or purging package
 
  -- Jan Christoph Ebersbach <ebersbach@univention.de>  Thu, 05 Dec 2013 18:34:02 +0100
 
 univention-shalla-list-downloader (1.1.0-1) unstable; urgency=low
 
-  * bump version. Ticket #2013102221003669
+  * bump version.
 
  -- Jan Christoph Ebersbach <ebersbach@univention.de>  Mon, 11 Nov 2013 10:13:13 +0100
 
 univention-shalla-list-downloader (1.0.0-7) unstable; urgency=low
 
-  * fix error in testing for downloading blacklists. Ticket #2013062621001224
+  * fix error in testing for downloading blacklists.
 
  -- Jan Christoph Ebersbach <ebersbach@univention.de>  Tue, 16 Jul 2013 20:06:46 +0200
 
 univention-shalla-list-downloader (1.0.0-6) unstable; urgency=low
 
-  * download lists during installation. Ticket #2013062621001224
+  * download lists during installation.
 
  -- Jan Christoph Ebersbach <ebersbach@univention.de>  Tue, 16 Jul 2013 19:59:44 +0200
 
 univention-shalla-list-downloader (1.0.0-5) unstable; urgency=low
 
-  * move downloader script to /usr/sbin. Ticket #2013062621001224
+  * move downloader script to /usr/sbin.
   * move UCR variable description to ucs-school-webproxy
 
  -- Jan Christoph Ebersbach <ebersbach@univention.de>  Tue, 16 Jul 2013 19:33:36 +0200
@@ -99,7 +99,7 @@ univention-shalla-list-downloader (1.0.0-2) unstable; urgency=low
 
 univention-shalla-list-downloader (1.0.0-1) unstable; urgency=low
 
-  * Initial release (Closes: #Ticket#2013062621001224) 
+  * Initial release
 
  -- Daniel Orrego <orrego@univention.de>  Mon, 15 Jul 2013 10:09:08 +0200
 

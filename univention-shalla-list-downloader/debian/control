@@ -9,5 +9,5 @@ Homepage: http://www.univention.de/
 Package: univention-shalla-list-downloader
 Architecture: all
 Depends: ucs-school-webproxy, ${shlibs:Depends}, ${misc:Depends}
-Description: Shalla list downloader for paedML Linux.
- Shalla list downloader for paedML Linux. Downloads/updates shallalists and triggers the initialization of squidGuard databases
+Description: Shalla list downloader
+ Shalla list downloader. Downloads/updates shallalists and triggers the initialization of squidGuard databases

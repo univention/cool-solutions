@@ -50,7 +50,7 @@ case "$1" in
 		if [ ! -e /var/lib/ucs-school-webproxy/blacklists/COPYRIGHT ]; then
 			/usr/sbin/univention-shalla-list-downloader || true
 		fi
-		# migrate UCR lmz blacklists values to U@S global/blacklists
+		# migrate UCR blacklists values to U@S global/blacklists
 		# ucr set proxy/filter/blacklists?"adv hacking porn violence proxy warez aggressive drugs gamble"
 		if [ -n "$(ucr get proxy/filter/blacklists)" ]; then
 			ucr unset proxy/filter/blacklists
