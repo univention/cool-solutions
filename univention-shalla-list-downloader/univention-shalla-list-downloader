@@ -32,7 +32,7 @@
 
 ##
 BL_DIR=blacklists
-DBHOME=/var/lib/ucs-school-webproxy
+DBHOME=/usr/local/share/univention-shalla-list-downloader # TODO: Link wanted categories into /var/lib/ucs-school-webproxy folder (link, not copy, if possible)
 URL=http://www.shallalist.de/Downloads/shallalist.tar.gz
 BL_PKG=shallalist.tar.gz
 #
@@ -40,6 +40,7 @@ BL_PKG=shallalist.tar.gz
 # First things first: we need a logfile:
 ##
 
+# TODO: Generalize, don't use the webproxy log
 . /usr/share/univention-lib/all.sh
 create_logfile_if_missing /var/log/univention/ucs-school-webproxy.log "root:adm" 640
 
@@ -68,6 +69,7 @@ FAIL () { # log error message to log file and std-err, then fail
 # To be able to read from Univention-Configuration-Registry we need this one:
 ##
 
+# TODO: Generalize, add the dns blacklist variables and download, if either is set 
 eval "$(ucr shell proxy/filter/global/blacklists/domains)"
 
 # clean up...
@@ -104,10 +106,13 @@ fi
 cp -rf BL/* "${DBHOME}/${BL_DIR}"
 echo "...OK!"
 
+# TODO: Generalize, is this needed?
 #echo "Setting lists permissions"
 chown -R root:proxy "${DBHOME}/${BL_DIR}"
 chmod -R g+rw "${DBHOME}/${BL_DIR}"
 
+# TODO: Generalize, only reload the webproxy if variable is set
+# TODO: Generalize, do the same for the dns blacklist
 #call webproxy to reload
 if [[ -n "${proxy_filter_global_blacklists_domains}" ]]; then
 	ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"
