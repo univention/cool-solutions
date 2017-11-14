@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# blacklist2bind
+# TODO: Rename:   blacklist2bind
 # Proof of Concept: Automatically DNS-Block Domains listed in a given file
 #
 # Copyright 2010-2017 Univention GmbH
@@ -31,9 +31,9 @@
 # <http://www.gnu.org/licenses/>.
 
 
-BINDCONFIG="/etc/bind/univention-dns-blacklist.conf"  # The Bind9 Config file INCLUDING the Base Folder, which will be written to (old content will be completely overwritten)
-BINDDB="/etc/bind/db.univention-dns-blacklist"        # The Bind9 Database File INCLUDING the Base Folder, which contains all DNS entries for the Zone(s)
-BLACKLISTDIR="/etc/univention/dns-blacklist"          # The complete Base-Path containing all Blacklists
+BINDCONFIG="/etc/bind/univention-bind-blacklist.conf"  # The Bind9 Config file INCLUDING the Base Folder, which will be written to (old content will be completely overwritten)
+BINDDB="/etc/bind/db.univention-bind-blacklist"        # The Bind9 Database File INCLUDING the Base Folder, which contains all DNS entries for the Zone(s)
+BLACKLISTDIR="/etc/univention/bind-blacklist"          # The complete Base-Path containing all Blacklists
 TMPFILE1=$(mktemp)                                    # A temporary File which will contain the Bind9 Config until all vadility checks are done
 TMPFILE2=$(mktemp)                                    # 
 SCRIPTPATH=$(readlink -f "$0")

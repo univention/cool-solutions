@@ -1,4 +1,4 @@
-Source: univention-dns-blacklist
+Source: univention-bind-blacklist
 Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
@@ -7,7 +7,7 @@ Build-Depends: debhelper,
  ucslint-univention
 Standards-Version: 3.9.6
 
-Package: univention-dns-blacklist
+Package: univention-bind-blacklist
 Architecture: all
 Depends: ${shlibs:Depends}, 
  ${misc:Depends}, 
