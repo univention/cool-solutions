@@ -6,6 +6,7 @@ Build-Depends: debhelper,
  univention-config-dev,
  ucslint-univention
 Standards-Version: 3.9.6
+Homepage: http://www.univention.de/
 
 Package: univention-bind-blacklist
 Architecture: all
