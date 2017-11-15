@@ -1,3 +1,9 @@
+univention-letsencrypt (1.1.0-11) unstable; urgency=medium
+
+  * make acme_tiny executable #9823
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 15 Nov 2017 16:12:01 +0100
+
 univention-letsencrypt (1.1.0-10) unstable; urgency=medium
 
   * rename new acme-tiny to acme_tiny #9283
