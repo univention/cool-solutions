@@ -47,12 +47,6 @@ set -e
 
 case "$1" in
     configure)
-		if [ ! -e /usr/local/share/univention-shalla-list-downloader/blacklists/COPYRIGHT ]; then
-			/usr/share/univention-shalla-list-downloader/univention-shalla-list-downloader || true
-		fi
-
-
-
 		# migrate UCR blacklists values to U@S global/blacklists
 		# ucr set proxy/filter/blacklists?"adv hacking porn violence proxy warez aggressive drugs gamble"
 		#if [ -n "$(ucr get proxy/filter/blacklists)" ]; then
@@ -64,6 +58,10 @@ case "$1" in
 		ucr set cron/shalla-list-downloader/command?"jitter 3600 /usr/share/univention-shalla-list-downloader/univention-shalla-list-downloader" \
 			cron/shalla-list-downloader/time?"5 1 * * *" \
 			cron/shalla-list-downloader/description?"Update shalla lists"
+		
+		if [ ! -e /usr/local/share/univention-shalla-list-downloader/blacklists/COPYRIGHT ]; then
+			/usr/share/univention-shalla-list-downloader/univention-shalla-list-downloader || true
+		fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

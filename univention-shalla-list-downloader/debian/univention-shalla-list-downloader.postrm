@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # postrm script for univention-shalla-list-downloader
 #
 # see: dh_installdeb(1)
@@ -55,20 +55,22 @@ case "$1" in
 		rm -rf /usr/local/share/univention-shalla-list-downloader
 		rm -rf /var/lib/ucs-school-webproxy/blacklists
 
+		
+		ucr unset cron/shalla-list-downloader/command cron/shalla-list-downloader/time cron/shalla-list-downloader/description
 		#
-		echo "Reload the webproxy and dns server"
-		. /usr/share/univention-lib/all.sh
+		#echo "Reload the webproxy and dns server"
+		#. /usr/share/univention-lib/all.sh
 
-		eval "$(ucr shell proxy/filter/global/blacklists/domains)"
-		eval "$(ucr shell proxy/filter/global/blacklists/urls)"
-		if [[ -n "${proxy_filter_global_blacklists_domains}" || -n "${proxy_filter_global_blacklists_urls}"  ]]; then
-			ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"
-		fi
+		#eval "$(ucr shell proxy/filter/global/blacklists/domains)"
+		#eval "$(ucr shell proxy/filter/global/blacklists/urls)"
+		#if [[ -n "${proxy_filter_global_blacklists_domains}" || -n "${proxy_filter_global_blacklists_urls}"  ]]; then
+		#	ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"
+		#fi
 
-		eval "$(ucr shell dns/blacklist/record/domains)"
-		if [[ -n "${dns_blacklist_record_domains}" ]]; then
-			ucr set dns/blacklist/record/domains="${dns_blacklist_record_domains}"
-		fi
+		#eval "$(ucr shell dns/blacklist/record/domains)"
+		#if [[ -n "${dns_blacklist_record_domains}" ]]; then
+		#	ucr set dns/blacklist/record/domains="${dns_blacklist_record_domains}"
+		#fi
 		;;
 	upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
 		;;

@@ -118,5 +118,5 @@ echo "Download/update finished ($(date))"
 echo "--------------------* * *--------------------"
 
 # xx
-./univention-shalla-list-relink -r
+/usr/share/univention-shalla-list-downloader/univention-shalla-list-relink -r
 exit 0
