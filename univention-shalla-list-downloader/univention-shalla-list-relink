@@ -31,7 +31,7 @@
 # <http://www.gnu.org/licenses/>.
 
 ##
-BL_DIR="blacklists"
+BL_DIR="shallalists"
 DBHOME="/usr/local/share/univention-shalla-list-downloader" 
 PROXYHOME="/var/lib/ucs-school-webproxy"
 RELOAD=true

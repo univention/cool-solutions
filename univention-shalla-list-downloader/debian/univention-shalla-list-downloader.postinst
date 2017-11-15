@@ -40,7 +40,7 @@ case "$1" in
 			cron/shalla-list-downloader/description?"Update shalla lists"
 		
 		# Run the script if the lists don't already exist
-		if [ ! -e /usr/local/share/univention-shalla-list-downloader/blacklists/COPYRIGHT ]; then
+		if [ ! -e /usr/local/share/univention-shalla-list-downloader/shallalists/COPYRIGHT ]; then
 			/usr/share/univention-shalla-list-downloader/univention-shalla-list-downloader || true
 		fi
     ;;

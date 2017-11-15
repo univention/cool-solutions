@@ -35,7 +35,7 @@ case "$1" in
 	remove)
 		echo "Deleting shalla lists."
 		rm -rf /usr/local/share/univention-shalla-list-downloader
-		rm -rf /var/lib/ucs-school-webproxy/blacklists
+		rm -rf /var/lib/ucs-school-webproxy/shallalists
 
 		# Remove the cronjob
 		ucr unset cron/shalla-list-downloader/command cron/shalla-list-downloader/time cron/shalla-list-downloader/description
