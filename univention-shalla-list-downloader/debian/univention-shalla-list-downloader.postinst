@@ -47,19 +47,23 @@ set -e
 
 case "$1" in
     configure)
-		if [ ! -e /var/lib/ucs-school-webproxy/blacklists/COPYRIGHT ]; then
-			/usr/sbin/univention-shalla-list-downloader || true
+		if [ ! -e /usr/local/share/univention-shalla-list-downloader/blacklists/COPYRIGHT ]; then
+			/usr/share/univention-shalla-list-downloader/univention-shalla-list-downloader || true
 		fi
+
+
+
 		# migrate UCR blacklists values to U@S global/blacklists
 		# ucr set proxy/filter/blacklists?"adv hacking porn violence proxy warez aggressive drugs gamble"
-		if [ -n "$(ucr get proxy/filter/blacklists)" ]; then
-			ucr unset proxy/filter/blacklists
-		fi
-		ucr set proxy/filter/global/blacklists/domains?"blacklists/adv/domains blacklists/hacking/domains blacklists/porn/domains blacklists/violence/domains blacklists/redirector/domains blacklists/warez/domains blacklists/aggressive/domains blacklists/drugs/domains blacklists/gamble/domains" \
-			proxy/filter/global/blacklists/urls?"blacklists/adv/urls blacklists/hacking/urls blacklists/porn/urls blacklists/violence/urls blacklists/redirector/urls blacklists/warez/urls blacklists/aggressive/urls blacklists/drugs/urls blacklists/gamble/urls"
-		ucr set cron/shalla-list-downloader/command?"jitter 3600 /usr/sbin/univention-shalla-list-downloader" \
-			cron/shalla-list-downloader/time?"5 1 * * *" \
-			cron/shalla-list-downloader/description?"Update webproxy blacklists"
+		#if [ -n "$(ucr get proxy/filter/blacklists)" ]; then
+		#	ucr unset proxy/filter/blacklists
+		#fi
+		#ucr set proxy/filter/global/blacklists/domains?"blacklists/adv/domains blacklists/hacking/domains blacklists/porn/domains blacklists/violence/domains blacklists/redirector/domains blacklists/warez/domains blacklists/aggressive/domains blacklists/drugs/domains blacklists/gamble/domains" \
+		
+		#	proxy/filter/global/blacklists/urls?"blacklists/adv/urls blacklists/hacking/urls blacklists/porn/urls blacklists/violence/urls blacklists/redirector/urls blacklists/warez/urls blacklists/aggressive/urls blacklists/drugs/urls blacklists/gamble/urls"
+		#ucr set cron/shalla-list-downloader/command?"jitter 3600 /usr/sbin/univention-shalla-list-downloader" \
+		#	cron/shalla-list-downloader/time?"5 1 * * *" \
+		#	cron/shalla-list-downloader/description?"Update webproxy blacklists"
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

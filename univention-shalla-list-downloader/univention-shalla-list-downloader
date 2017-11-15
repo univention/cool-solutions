@@ -31,21 +31,25 @@
 # <http://www.gnu.org/licenses/>.
 
 ##
-BL_DIR=blacklists
-DBHOME=/usr/local/share/univention-shalla-list-downloader # TODO: Link wanted categories into /var/lib/ucs-school-webproxy folder (link, not copy, if possible)
-URL=http://www.shallalist.de/Downloads/shallalist.tar.gz
-BL_PKG=shallalist.tar.gz
+BL_DIR="blacklists"
+DBHOME="/usr/local/share/univention-shalla-list-downloader" # TODO: Link wanted categories into /var/lib/ucs-school-webproxy folder (link, not copy, if possible)
+BL_PKG="shallalist.tar.gz"
+URL="http://www.shallalist.de/Downloads/${BL_PKG}"
+
+#
+. /usr/share/univention-lib/all.sh
+
 #
 ##
 # First things first: we need a logfile:
 ##
 
 # TODO: Generalize, don't use the webproxy log
-. /usr/share/univention-lib/all.sh
-create_logfile_if_missing /var/log/univention/ucs-school-webproxy.log "root:adm" 640
 
-exec 3>>/var/log/univention/ucs-school-webproxy.log
-exec 1>&3
+#create_logfile_if_missing /var/log/univention/ucs-school-webproxy.log "root:adm" 640
+
+#exec 3>>/var/log/univention/ucs-school-webproxy.log
+#exec 1>&3
 echo "---------------------------------------------"
 echo "Process started: ($(date))"
 
@@ -65,31 +69,32 @@ FAIL () { # log error message to log file and std-err, then fail
 
     exit 1
 }
-##
-# To be able to read from Univention-Configuration-Registry we need this one:
-##
-
-# TODO: Generalize, add the dns blacklist variables and download, if either is set 
-eval "$(ucr shell proxy/filter/global/blacklists/domains)"
 
 # clean up...
 CLEAN () {
 	rm -rf "${TMP_DIR}"
 }
 
-if [ -z "${proxy_filter_global_blacklists_domains}" ]; then
-	# no lists configured, don't download anything
-	if [ -e "${DBHOME}/${BL_DIR}" ]; then
-		rm -rf "${DBHOME}/${BL_DIR}"
-	fi
-	exit 0
-fi
-
 TMP_DIR=$(mktemp -d)
 cd "${TMP_DIR}"
 
-echo "Downloading lists..."
-wget -q "${URL}" "${URL}.md5"
+echo "Checking for updated lists..."
+wget -q "${URL}.md5"
+if [ $? -ne 0 ]; then
+	FAIL "Failed to download the lists: Check the connection and try again"
+fi
+
+cmp --silent "${BL_PKG}.md5" "${DBHOME}/${BL_DIR}/${BL_PKG}.md5"
+if [ $? -e 0 ]; then
+	CLEAN
+	echo "Nothing changed since the last update"
+	echo "Download/update finished ($(date))"
+	echo "--------------------* * *--------------------"
+	exit 0
+fi
+
+echo "Update available. Downloading lists..."
+wget -q "${URL}"
 if [ $? -ne 0 ]; then
 	FAIL "Failed to download the lists: Check the connection and try again"
 fi
@@ -104,22 +109,29 @@ if [ ! -d "${DBHOME}/${BL_DIR}" ]; then
 	mkdir "${DBHOME}/${BL_DIR}"
 fi
 cp -rf BL/* "${DBHOME}/${BL_DIR}"
+cp -f "${BL_PKG}.md5" "${DBHOME}/${BL_DIR}"
 echo "...OK!"
-
-# TODO: Generalize, is this needed?
-#echo "Setting lists permissions"
-chown -R root:proxy "${DBHOME}/${BL_DIR}"
-chmod -R g+rw "${DBHOME}/${BL_DIR}"
-
-# TODO: Generalize, only reload the webproxy if variable is set
-# TODO: Generalize, do the same for the dns blacklist
-#call webproxy to reload
-if [[ -n "${proxy_filter_global_blacklists_domains}" ]]; then
-	ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"
-fi
 
 #clean up tar.gz and md5 files
 CLEAN
 echo "Download/update finished ($(date))"
 echo "--------------------* * *--------------------"
 exit 0
+
+#########################
+
+
+
+# TODO: Generalize, is this needed?
+#echo "Setting lists permissions"
+#chown -R root:proxy "${DBHOME}/${BL_DIR}"
+#chmod -R g+rw "${DBHOME}/${BL_DIR}"
+
+# TODO: Generalize, only reload the webproxy if variable is set
+# TODO: Generalize, do the same for the dns blacklist
+#call webproxy to reload
+#if [[ -n "${proxy_filter_global_blacklists_domains}" ]]; then
+#	ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"
+#fi
+
+

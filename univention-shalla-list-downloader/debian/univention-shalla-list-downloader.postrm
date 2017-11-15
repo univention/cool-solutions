@@ -52,7 +52,7 @@ case "$1" in
 		# TODO: Delete Linkings to these files
 		# /usr/local/share/univention-shalla-list-downloader
 		echo "Deleting shalla lists."
-		rm -rf /var/lib/ucs-school-webproxy/blacklists
+		rm -rf /usr/local/share/univention-shalla-list-downloader/blacklists
 		ucr unset cron/shalla-list-downloader/command \
 			cron/shalla-list-downloader/time \
 			cron/shalla-list-downloader/description || true
