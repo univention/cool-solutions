@@ -1,3 +1,9 @@
+univention-shalla-list-downloader (2.0.0-5) unstable; urgency=low
+
+  * created script to implement lists into webproxy and/or dns-server
+
+ -- Hendrik Peter <hpeter@univention.de>  Wed, 15 Nov 2017 13:38:45 +0100
+
 univention-shalla-list-downloader (2.0.0-4) unstable; urgency=low
 
   * moved script out of sbin folder

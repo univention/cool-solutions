@@ -1,0 +1,5 @@
+Type: script
+Script: /usr/share/univention-shalla-list-downloader/univention-shalla-list-relink
+Variables: dns/blacklist/record/domains
+Variables: proxy/filter/global/blacklists/domains
+Variables: proxy/filter/global/blacklists/urls

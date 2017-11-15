@@ -32,7 +32,7 @@
 
 ##
 BL_DIR="blacklists"
-DBHOME="/usr/local/share/univention-shalla-list-downloader" # TODO: Link wanted categories into /var/lib/ucs-school-webproxy folder (link, not copy, if possible)
+DBHOME="/usr/local/share/univention-shalla-list-downloader" 
 BL_PKG="shallalist.tar.gz"
 URL="http://www.shallalist.de/Downloads/${BL_PKG}"
 
@@ -102,7 +102,7 @@ md5sum -c "${BL_PKG}.md5"
 if [ $? -ne 0 ]; then
 	FAIL "Failed to verify the checksum: try again"
 fi
-#Extract and update
+# Extract and update
 tar zxf "${BL_PKG}"
 
 if [ ! -d "${DBHOME}/${BL_DIR}" ]; then
@@ -112,26 +112,11 @@ cp -rf BL/* "${DBHOME}/${BL_DIR}"
 cp -f "${BL_PKG}.md5" "${DBHOME}/${BL_DIR}"
 echo "...OK!"
 
-#clean up tar.gz and md5 files
+# clean up tar.gz and md5 files
 CLEAN
 echo "Download/update finished ($(date))"
 echo "--------------------* * *--------------------"
+
+# xx
+./univention-shalla-list-relink -r
 exit 0
-
-#########################
-
-
-
-# TODO: Generalize, is this needed?
-#echo "Setting lists permissions"
-#chown -R root:proxy "${DBHOME}/${BL_DIR}"
-#chmod -R g+rw "${DBHOME}/${BL_DIR}"
-
-# TODO: Generalize, only reload the webproxy if variable is set
-# TODO: Generalize, do the same for the dns blacklist
-#call webproxy to reload
-#if [[ -n "${proxy_filter_global_blacklists_domains}" ]]; then
-#	ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"
-#fi
-
-
