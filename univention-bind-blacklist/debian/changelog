@@ -1,3 +1,9 @@
+univention-bind-blacklist (1.0.0-3) unstable; urgency=low
+
+  * Implemented shalla lists provided by univention-shalla-list-downloader
+
+ -- Hendrik Peter <hpeter@univention.de>  Wed, 15 Nov 2017 14:56:14 +0100
+
 univention-bind-blacklist (1.0.0-2) unstable; urgency=low
 
   * Add 'auto-generated' warning when generating bind9 configuration file
