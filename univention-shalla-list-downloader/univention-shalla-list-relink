@@ -34,13 +34,13 @@
 BL_DIR="blacklists"
 DBHOME="/usr/local/share/univention-shalla-list-downloader" 
 PROXYHOME="/var/lib/ucs-school-webproxy"
-RELOAD=false
+RELOAD=true
 #
 . /usr/share/univention-lib/all.sh
 
 case "$1" in
-	-r|--reload)
-	RELOAD=true
+	-u|--ucr)
+	RELOAD=false
 	shift
 	;;
 	*)
