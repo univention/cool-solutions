@@ -1,3 +1,11 @@
+univention-shalla-list-downloader (2.0.0-4) unstable; urgency=low
+
+  * moved script out of sbin folder
+  * generalised this package away from webproxy
+  * precheck for changes before downloading the lists
+
+ -- Hendrik Peter <hpeter@univention.de>  Wed, 15 Nov 2017 11:14:24 +0100
+
 univention-shalla-list-downloader (2.0.0-3) unstable; urgency=low
 
   * removed UCR migration; update global/blacklists proxy to redirector. Issue #6801
