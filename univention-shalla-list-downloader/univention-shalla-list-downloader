@@ -106,7 +106,7 @@ fi
 tar zxf "${BL_PKG}"
 
 if [ ! -d "${DBHOME}/${BL_DIR}" ]; then
-	mkdir "${DBHOME}/${BL_DIR}"
+	mkdir -p "${DBHOME}/${BL_DIR}"
 fi
 cp -rf BL/* "${DBHOME}/${BL_DIR}"
 cp -f "${BL_PKG}.md5" "${DBHOME}/${BL_DIR}"
