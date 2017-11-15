@@ -59,20 +59,19 @@ esac
 
 #exec 3>>/var/log/univention/ucs-school-webproxy.log
 #exec 1>&3
-echo "---------------------------------------------"
-echo "Process started: ($(date))"
+#echo "---------------------------------------------"
+#echo "Process started: ($(date))"
 
 
 
 eval "$(ucr shell proxy/filter/global/blacklists/domains)"
 eval "$(ucr shell proxy/filter/global/blacklists/urls)"
 if [[ -n "${proxy_filter_global_blacklists_domains}" || -n "${proxy_filter_global_blacklists_urls}"  ]]; then
-	echo "Resyncing the proxy blacklist"
-
 	# Trigger reload of the webproxy
 	if $RELOAD; then
 		ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"
 	else
+		echo "Resyncing the proxy blacklist"
 		# recreate all links
 		rm -rf "$PROXYHOME/$BL_DIR"
 		ln -s "$DBHOME/$BL_DIR" "$PROXYHOME/$BL_DIR"
@@ -86,14 +85,13 @@ fi
 
 eval "$(ucr shell dns/blacklist/record/domains)"
 if [[ -n "${dns_blacklist_record_domains}" ]]; then
-	echo "Resyncing the bind blacklist"
-
 	# Trigger reload of the dns server
 	if $RELOAD; then
+		echo "Resyncing the bind blacklist"
 		/usr/share/univention-bind-blacklist/univention-bind-blacklist
 	fi
 fi
 
-echo "Resync/Relink finished ($(date))"
-echo "--------------------* * *--------------------"
+#echo "Resync/Relink finished ($(date))"
+#echo "--------------------* * *--------------------"
 exit 0
