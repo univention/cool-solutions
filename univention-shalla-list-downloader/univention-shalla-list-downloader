@@ -85,7 +85,7 @@ if [ $? -ne 0 ]; then
 fi
 
 cmp --silent "${BL_PKG}.md5" "${DBHOME}/${BL_DIR}/${BL_PKG}.md5"
-if [ $? -e 0 ]; then
+if [ $? -eq 0 ]; then
 	CLEAN
 	echo "Nothing changed since the last update"
 	echo "Download/update finished ($(date))"
