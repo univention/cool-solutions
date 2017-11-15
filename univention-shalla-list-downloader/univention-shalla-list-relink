@@ -59,32 +59,34 @@ esac
 
 #exec 3>>/var/log/univention/ucs-school-webproxy.log
 #exec 1>&3
-#echo "---------------------------------------------"
-#echo "Process started: ($(date))"
+echo "---------------------------------------------"
+echo "Process started: ($(date))"
 
 
 
 eval "$(ucr shell proxy/filter/global/blacklists/domains)"
 eval "$(ucr shell proxy/filter/global/blacklists/urls)"
 if [[ -n "${proxy_filter_global_blacklists_domains}" || -n "${proxy_filter_global_blacklists_urls}"  ]]; then
-	# First, remove all links
-	rm -rf "$PROXYHOME/$BL_DIR"
-	ln -s "$DBHOME/$BL_DIR" "$PROXYHOME/$BL_DIR"
+	echo "Resyncing the proxy blacklist"
+
+	# Trigger reload of the webproxy
+	if $RELOAD; then
+		ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"
+	else
+		# recreate all links
+		rm -rf "$PROXYHOME/$BL_DIR"
+		ln -s "$DBHOME/$BL_DIR" "$PROXYHOME/$BL_DIR"
+	fi
 
 	# TODO: is this needed?
 	#echo "Setting lists permissions"
 	#chown -R root:proxy "${DBHOME}/${BL_DIR}"
 	#chmod -R g+rw "${DBHOME}/${BL_DIR}"
-
-	# Trigger reload of the webproxy
-	if $RELOAD; then
-		/etc/univention/templates/modules/ucs-school-webproxy.py
-	fi
 fi
 
 eval "$(ucr shell dns/blacklist/record/domains)"
 if [[ -n "${dns_blacklist_record_domains}" ]]; then
-	echo "TODO: Implement"
+	echo "Resyncing the bind blacklist"
 
 	# Trigger reload of the dns server
 	if $RELOAD; then
@@ -92,4 +94,6 @@ if [[ -n "${dns_blacklist_record_domains}" ]]; then
 	fi
 fi
 
+echo "Resync/Relink finished ($(date))"
+echo "--------------------* * *--------------------"
 exit 0

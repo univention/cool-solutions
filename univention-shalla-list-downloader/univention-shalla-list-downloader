@@ -73,6 +73,7 @@ FAIL () { # log error message to log file and std-err, then fail
 # clean up...
 CLEAN () {
 	rm -rf "${TMP_DIR}"
+	cd "/usr/share/univention-shalla-list-downloader/"
 }
 
 TMP_DIR=$(mktemp -d)

@@ -56,7 +56,7 @@ case "$1" in
 		rm -rf /var/lib/ucs-school-webproxy/blacklists
 
 
-		#ucr unset cron/shalla-list-downloader/command cron/shalla-list-downloader/time cron/shalla-list-downloader/description
+		ucr unset cron/shalla-list-downloader/command cron/shalla-list-downloader/time cron/shalla-list-downloader/description
 		#
 		#echo "Reload the webproxy and dns server"
 		#. /usr/share/univention-lib/all.sh
