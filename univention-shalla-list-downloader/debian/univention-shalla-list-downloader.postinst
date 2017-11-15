@@ -1,8 +1,6 @@
 #!/bin/sh
 # postinst script for univention-shalla-list-downloader
 #
-# see: dh_installdeb(1)
-#
 # Copyright (C) 2013-2017 Univention GmbH
 #
 # http://www.univention.de/
@@ -30,35 +28,18 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-set -e
-
-# summary of how this script can be called:
-#        * <postinst> `configure' <most-recently-configured-version>
-#        * <old-postinst> `abort-upgrade' <new version>
-#        * <conflictor's-postinst> `abort-remove' `in-favour' <package>
-#          <new-version>
-#        * <postinst> `abort-remove'
-#        * <deconfigured's-postinst> `abort-deconfigure' `in-favour'
-#          <failed-install-package> <version> `removing'
-#          <conflicting-package> <version>
-# for details, see http://www.debian.org/doc/debian-policy/ or
-# the debian-policy package
-
-
 case "$1" in
     configure)
-		# migrate UCR blacklists values to U@S global/blacklists
-		# ucr set proxy/filter/blacklists?"adv hacking porn violence proxy warez aggressive drugs gamble"
-		#if [ -n "$(ucr get proxy/filter/blacklists)" ]; then
-		#	ucr unset proxy/filter/blacklists
-		#fi
-		#ucr set proxy/filter/global/blacklists/domains?"blacklists/adv/domains blacklists/hacking/domains blacklists/porn/domains blacklists/violence/domains blacklists/redirector/domains blacklists/warez/domains blacklists/aggressive/domains blacklists/drugs/domains blacklists/gamble/domains" \
+		# The location of the script changed. Adjust the cronjob
+		if dpkg --compare-versions "$2" lt "2.0.0-4"; then
+			ucr set cron/shalla-list-downloader/command="jitter 3600 /usr/share/univention-shalla-list-downloader/univention-shalla-list-downloader"
+		fi
 		
-		#	proxy/filter/global/blacklists/urls?"blacklists/adv/urls blacklists/hacking/urls blacklists/porn/urls blacklists/violence/urls blacklists/redirector/urls blacklists/warez/urls blacklists/aggressive/urls blacklists/drugs/urls blacklists/gamble/urls"
 		ucr set cron/shalla-list-downloader/command?"jitter 3600 /usr/share/univention-shalla-list-downloader/univention-shalla-list-downloader" \
 			cron/shalla-list-downloader/time?"5 1 * * *" \
 			cron/shalla-list-downloader/description?"Update shalla lists"
 		
+		# Run the script if the lists don't already exist
 		if [ ! -e /usr/local/share/univention-shalla-list-downloader/blacklists/COPYRIGHT ]; then
 			/usr/share/univention-shalla-list-downloader/univention-shalla-list-downloader || true
 		fi
