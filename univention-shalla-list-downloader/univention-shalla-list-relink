@@ -78,7 +78,7 @@ if [[ -n "${proxy_filter_global_blacklists_domains}" || -n "${proxy_filter_globa
 
 	# Trigger reload of the webproxy
 	if $RELOAD; then
-		ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"
+		/etc/univention/templates/modules/ucs-school-webproxy.py
 	fi
 fi
 
