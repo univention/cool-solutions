@@ -48,9 +48,9 @@ set -e
 
 
 case "$1" in
-	purge|remove)
-		# TODO: Delete Linkings to these files
-		# /usr/local/share/univention-shalla-list-downloader
+	purge)
+		;;
+	remove)
 		echo "Deleting shalla lists."
 		rm -rf /usr/local/share/univention-shalla-list-downloader
 		rm -rf /var/lib/ucs-school-webproxy/blacklists

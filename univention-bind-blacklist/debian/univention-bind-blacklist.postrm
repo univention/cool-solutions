@@ -30,7 +30,9 @@
 #DEBHELPER#
 
 case "$1" in
-	purge|remove)
+	purge)
+		;;
+	remove)
 		#echo "Deleting shalla lists."
 		#rm -rf /etc/univention/dns-blacklist/global
 		ucr unset dns/blacklist/ipv4 dns/blacklist/ipv6 dns/blacklist/record/domains
