@@ -1,6 +1,7 @@
 univention-bind-blacklist (1.0.0-3) unstable; urgency=low
 
   * Implemented shalla lists provided by univention-shalla-list-downloader
+  * Also block all subdomains of given domains
 
  -- Hendrik Peter <hpeter@univention.de>  Wed, 15 Nov 2017 14:56:14 +0100
 
