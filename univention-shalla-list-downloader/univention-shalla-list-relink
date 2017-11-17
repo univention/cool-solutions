@@ -48,25 +48,15 @@ case "$1" in
 	;;
 esac
 
-#
-##
-# First things first: we need a logfile:
-##
-
 # TODO: Generalize, don't use the webproxy log
 
 #create_logfile_if_missing /var/log/univention/ucs-school-webproxy.log "root:adm" 640
 
 #exec 3>>/var/log/univention/ucs-school-webproxy.log
 #exec 1>&3
-#echo "---------------------------------------------"
-#echo "Process started: ($(date))"
-
-
 
 eval "$(ucr shell proxy/filter/global/blacklists/domains)"
-eval "$(ucr shell proxy/filter/global/blacklists/urls)"
-if [[ -n "${proxy_filter_global_blacklists_domains}" || -n "${proxy_filter_global_blacklists_urls}"  ]]; then
+if dpkg --get-selections | grep -q "^ucs-school-webproxy[[:space:]]*install$" >/dev/null; then
 	# Trigger reload of the webproxy
 	if $RELOAD; then
 		ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"
@@ -92,6 +82,4 @@ if [[ -n "${dns_blacklist_record_domains}" ]]; then
 	fi
 fi
 
-#echo "Resync/Relink finished ($(date))"
-#echo "--------------------* * *--------------------"
 exit 0
