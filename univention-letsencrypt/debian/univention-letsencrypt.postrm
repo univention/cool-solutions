@@ -37,7 +37,9 @@ do_statoverride_remove () {
 if [ "$1" = "purge" ] ; then
 	do_statoverride_remove /var/www/.well-known/acme-challenge
 	do_statoverride_remove /etc/univention/letsencrypt
+        do_statoverride_remove /usr/local/share/ca-certificates/lets-encrypt.crt
 
+	update-ca-certificates --fresh
 	invoke-rc.d apache2 restart
 fi
 
