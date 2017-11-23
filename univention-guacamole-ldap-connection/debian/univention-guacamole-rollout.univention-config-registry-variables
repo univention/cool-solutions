@@ -1,0 +1,29 @@
+[guacamole/user/dn]
+Description[de]=DN des obersten Containers in welchem Benutzer gespeichert sind.
+Description[en]=DN of the top-most container where users are saved.
+Type=str
+Categories=Guacamole
+
+[guacamole/config/base/dn]
+Description[de]=DN des Containers welcher die Guacamole-Konfigurationen an Gruppen enthält.
+Description[en]=DN of the container where groups are located containing Guacamole configurations.
+Type=str
+Categories=Guacamole
+
+[guacamole/ldap/username/attribute]
+Description[de]=LDAP-Attribut, welches den Benutzernamen enthält, standardmäßig ist dies uid.
+Description[en]=LDAP attribute containing the username, default is uid.
+Type=str
+Categories=Guacamole
+
+[guacamole/external/port]
+Description[de]=Port unter welchem Guacamole erreichbar sein wird.
+Description[en]=Port which Guacamole can be accessed from.
+Type=int
+Categories=Guacamole
+
+[guacamole/ldap/user/searchfilter]
+Description[de]=Filter um die Suche nach Benutzern einzuschränken, standardmäßig ist dies (objectClass=*).
+Description[en]=Filter to limit search for users, default is (objectClass=*)
+Type=str
+Categories=Guacamole

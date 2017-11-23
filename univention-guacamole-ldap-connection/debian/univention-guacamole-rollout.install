@@ -1,0 +1,7 @@
+01univention_install_guacamole-uninstall.uinst usr/lib/univention-uninstall
+02univention_guacamole_searchuser-uninstall.uinst usr/lib/univention-uninstall
+98univention_guacamole_searchuser.inst usr/lib/univention-install
+99univention_install_guacamole.inst usr/lib/univention-install
+guacamole-auth-ldap-0.9.13-incubating.jar usr/share/guacamole
+start.sh usr/share/guacamole
+univention-guacamole-renew usr/bin
