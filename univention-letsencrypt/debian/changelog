@@ -1,3 +1,9 @@
+univention-letsencrypt (1.0.4-4) unstable; urgency=medium
+
+  * create symlink to intermediate.pem also if intermediate.pem already exists #9063
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 23 Nov 2017 10:13:19 +0100
+
 univention-letsencrypt (1.0.4-3) unstable; urgency=medium
 
   * add lets encrypt's intermediate.pem to ca certificates during setup #9063
