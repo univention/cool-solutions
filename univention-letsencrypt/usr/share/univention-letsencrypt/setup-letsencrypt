@@ -101,6 +101,11 @@ if [ ! -f "$DIR_LE/intermediate.pem" ] ; then
 	wget --no-verbose -O - "https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem" > "$DIR_LE/intermediate.pem"
 fi
 
+if [ ! -f "/usr/local/share/ca-certificates/lets-encrypt.crt" ] ; then
+	ln -s "$DIR_LE/intermediate.pem" /usr/local/share/ca-certificates/lets-encrypt.crt
+	update-ca-certificates --fresh
+fi
+
 prepare_file "$DIR_LE/signed.crt" 0644 letsencrypt:root
 prepare_file "$DIR_LE/chained.pem" 0644 letsencrypt:root
 prepare_file "/var/log/univention/letsencrypt.log" 0664 letsencrypt:root
