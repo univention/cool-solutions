@@ -1,3 +1,9 @@
+univention-letsencrypt (1.0.4-5) unstable; urgency=medium
+
+  * remove Let's Encrypt CA cert on purge
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 23 Nov 2017 10:29:40 +0100
+
 univention-letsencrypt (1.0.4-4) unstable; urgency=medium
 
   * create symlink to intermediate.pem also if intermediate.pem already exists #9063
