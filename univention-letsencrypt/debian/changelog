@@ -1,3 +1,9 @@
+univention-letsencrypt (1.0.4-6) unstable; urgency=medium
+
+  * don't use --fresh in update-ca-certificates #9063
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Fri, 24 Nov 2017 12:47:03 +0100
+
 univention-letsencrypt (1.0.4-5) unstable; urgency=medium
 
   * remove Let's Encrypt CA cert on purge
