@@ -103,7 +103,7 @@ fi
 
 if [ ! -f "/usr/local/share/ca-certificates/lets-encrypt.crt" ] ; then
 	ln -s "$DIR_LE/intermediate.pem" /usr/local/share/ca-certificates/lets-encrypt.crt
-	update-ca-certificates --fresh
+	update-ca-certificates 
 fi
 
 prepare_file "$DIR_LE/signed.crt" 0644 letsencrypt:root
