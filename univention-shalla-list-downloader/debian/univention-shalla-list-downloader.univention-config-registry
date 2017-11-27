@@ -1,5 +1,4 @@
 Type: script
 Script: univention-shalla-list-resync
-Variables: dns/blacklist/record/domains
 Variables: proxy/filter/global/blacklists/domains
 Variables: proxy/filter/global/blacklists/urls
