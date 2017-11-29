@@ -28,9 +28,30 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
+set -e
+
 case "$1" in
     install)
-		. /usr/share/debconf/confmodule
+        # Source debconf library.
+        . /usr/share/debconf/confmodule
+
+        # Display the license and ask for agreement
+        db_input critical univention-shalla-list-downloader/present-shalla-license-v1 || true
+        db_input critical univention-shalla-list-downloader/accepted-shalla-license-v1 || true
+        db_go || true
+
+        # Check their answer.
+        db_get univention-shalla-list-downloader/accepted-shalla-license-v1
+        if [ "$RET" = "false" ]; then
+            # Show license on next call again
+            db_fset univention-shalla-list-downloader/present-shalla-license-v1 seen false
+            db_fset univention-shalla-list-downloader/accepted-shalla-license-v1 seen false
+
+            # Show error and exit
+            db_input high univention-shalla-list-downloader/error-shalla-license-v1 || true
+            db_go
+            exit 1
+        fi
     ;;
 
     upgrade|abort-upgrade)

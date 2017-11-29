@@ -33,12 +33,16 @@ case "$1" in
 	purge)
 		;;
 	remove)
+		# Reset license prompts
+		. /usr/share/debconf/confmodule
+        db_fset univention-shalla-list-downloader/present-shalla-license-v1 seen false
+        db_fset univention-shalla-list-downloader/accepted-shalla-license-v1 seen false
+        
 		echo "Deleting shalla lists."
 		rm -rf /usr/local/share/univention-shalla-list-downloader
 		rm -rf /var/lib/ucs-school-webproxy/shallalists
-
 		# Remove the cronjob
-		ucr unset cron/shalla-list-downloader/command cron/shalla-list-downloader/time cron/shalla-list-downloader/description
+		ucr unset cron/shalla-list-downloader/command cron/shalla-list-downloader/time cron/shalla-list-downloader/description || true
 		
 		#echo "Reload the webproxy and dns server"
 		#. /usr/share/univention-lib/all.sh
