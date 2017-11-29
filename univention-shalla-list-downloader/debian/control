@@ -10,6 +10,7 @@ Homepage: http://www.univention.de/
 
 Package: univention-shalla-list-downloader
 Architecture: all
+Pre-Depends: debconf (>= 0.2.17)
 Depends: ${shlibs:Depends}, 
  ${misc:Depends},
  univention-config-registry,
