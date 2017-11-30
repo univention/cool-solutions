@@ -35,7 +35,20 @@ case "$1" in
 	remove)
 		ucr unset dns/blacklist/ipv4 dns/blacklist/ipv6 dns/blacklist/record/domains
 
-		# TODO: Remove 'include "/etc/bind/univention-bind-blacklist.conf";' from /etc/bind/local.conf.samba4
+		# Remove include from bind
+        command="^include.*univention-bind-blacklist.conf.*$"
+        for file in "/etc/bind/local.conf" "/etc/bind/local.conf.proxy" "/etc/bind/local.conf.samba4"; do
+            if [ -f $file ]; then
+                if grep -xq "$command" "$file";then
+                    echo "Removing include from file $file"
+					sed -i "/$command/d" "$file"
+                else
+                    echo "File $file doesn't contain include"
+                fi
+            else
+                echo "Warning: File $file not found!"
+            fi
+        done
 		;;
 	upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
 		;;

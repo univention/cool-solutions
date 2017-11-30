@@ -34,7 +34,21 @@ case "$1" in
 		ucr set dns/blacklist/ipv4?"127.0.0.1" \
 				dns/blacklist/ipv6?"::1" \
 				dns/blacklist/record/domains?""
-		# TODO: Insert 'include "/etc/bind/univention-bind-blacklist.conf";' into /etc/bind/local.conf.samba4
+
+        # Add include to bind
+        command='include "/etc/bind/univention-bind-blacklist.conf";'
+        for file in "/etc/bind/local.conf" "/etc/bind/local.conf.proxy" "/etc/bind/local.conf.samba4"; do
+            if [ -f $file ]; then
+                if grep -Fxq "$command" "$file";then
+                    echo "File $file already contains include"
+                else
+                    echo "Inserting include into file $file"
+                    echo "$command" >> "$file"
+                fi
+            else
+                echo "Warning: File $file not found!"
+            fi
+        done
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
