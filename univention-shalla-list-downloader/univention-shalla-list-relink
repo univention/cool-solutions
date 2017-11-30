@@ -49,9 +49,7 @@ case "$1" in
 esac
 
 # TODO: Generalize, don't use the webproxy log
-
 #create_logfile_if_missing /var/log/univention/ucs-school-webproxy.log "root:adm" 640
-
 #exec 3>>/var/log/univention/ucs-school-webproxy.log
 #exec 1>&3
 
