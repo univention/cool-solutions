@@ -32,12 +32,16 @@ case "$1" in
     configure)
 		# The location of the script changed. Adjust the cronjob
 		if dpkg --compare-versions "$2" lt "2.0.0-4"; then
-			ucr set cron/shalla-list-downloader/command="jitter 3600 /usr/share/univention-shalla-list-downloader/univention-shalla-list-downloader"
+			eval "$(ucr shell cron/shalla-list-downloader/time)"
+			eval "$(ucr shell cron/shalla-list-downloader/description)"
+			ucr set cron/shalla-list-downloader/command="jitter 3600 /usr/share/univention-shalla-list-downloader/univention-shalla-list-downloader" \
+				cron/shalla-list-downloader/time="${cron_shalla-list-downloader_time}" \
+				cron/shalla-list-downloader/description="${cron_shalla-list-downloader_description}"
+		else
+			ucr set cron/shalla-list-downloader/command?"jitter 3600 /usr/share/univention-shalla-list-downloader/univention-shalla-list-downloader" \
+				cron/shalla-list-downloader/time?"5 1 * * *" \
+				cron/shalla-list-downloader/description?"Update shalla lists"
 		fi
-		
-		ucr set cron/shalla-list-downloader/command?"jitter 3600 /usr/share/univention-shalla-list-downloader/univention-shalla-list-downloader" \
-			cron/shalla-list-downloader/time?"5 1 * * *" \
-			cron/shalla-list-downloader/description?"Update shalla lists"
 		
 		# Run the script if the lists don't already exist
 		if [ ! -e /usr/local/share/univention-shalla-list-downloader/shallalists/COPYRIGHT ]; then
