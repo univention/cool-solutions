@@ -48,13 +48,12 @@ case "$1" in
 	;;
 esac
 
-# TODO: Generalize, don't use the webproxy log
-#create_logfile_if_missing /var/log/univention/ucs-school-webproxy.log "root:adm" 640
-#exec 3>>/var/log/univention/ucs-school-webproxy.log
-#exec 1>&3
+create_logfile_if_missing /var/log/univention/shalla-list-downloader.log "root:adm" 640
+exec 3>>/var/log/univention/shalla-list-downloader.log
+exec 1>&3
 
 eval "$(ucr shell proxy/filter/global/blacklists/domains)"
-if dpkg --get-selections | grep -q "^ucs-school-webproxy[[:space:]]*install$" >/dev/null; then
+if dpkg --get-selections | grep -q "^ucs-school-webproxy[[:space:]]*install$"; then
 	# Trigger reload of the webproxy
 	if $RELOAD; then
 		ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"

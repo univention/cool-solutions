@@ -46,10 +46,10 @@ URL="http://www.shallalist.de/Downloads/${BL_PKG}"
 
 # TODO: Generalize, don't use the webproxy log
 
-#create_logfile_if_missing /var/log/univention/ucs-school-webproxy.log "root:adm" 640
+create_logfile_if_missing /var/log/univention/shalla-list-downloader.log "root:adm" 640
 
-#exec 3>>/var/log/univention/ucs-school-webproxy.log
-#exec 1>&3
+exec 3>>/var/log/univention/shalla-list-downloader.log
+exec 1>&3
 echo "---------------------------------------------"
 echo "Process started: ($(date))"
 

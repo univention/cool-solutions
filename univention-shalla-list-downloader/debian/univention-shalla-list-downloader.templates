@@ -57,7 +57,7 @@ Description: Shalla's Blacklists license for univention-shalla-list-downloader
 
 Template: univention-shalla-list-downloader/accepted-shalla-license-v1
 Type: boolean
-Default: false
+Default: true
 Description: Do you accept Shalla's Blacklists license terms?
  In order to install this package, you must accept the license terms, of the
  "Shalla's Blacklists - Licence" - www.shallalist.de/licence.html. Not accepting

@@ -1,6 +1,7 @@
 univention-shalla-list-downloader (2.0.0-5) unstable; urgency=low
 
   * Included the Shalla Blacklist license agreement
+  * Fixed UCR error on update of cron job during package upgrade
 
  -- Hendrik Peter <hpeter@univention.de>  Wed, 29 Nov 2017 15:01:14 +0100
 
