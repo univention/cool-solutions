@@ -38,4 +38,17 @@ fi
 
 su - letsencrypt -c "/usr/share/univention-letsencrypt/refresh-cert"
 
-run-parts --verbose "$DIR_LE/post-refresh.d/"
+ucr set letsencrypt/status="$(tail -n 1 /var/log/univention/letsencrypt.log)"
+
+openssl x509 -in "$DIR_LE/signed.crt" -text -noout > /dev/null
+check_cert=$?
+
+if [[ $check_cert -eq 0 ]]; then
+	run-parts --verbose "$DIR_LE/post-refresh.d/"
+else 
+	ucr unset \
+		apache2/ssl/certificatechain \
+		apache2/ssl/certificate \
+		apache2/ssl/key
+	invoke-rc.d apache2 restart
+fi
