@@ -36,6 +36,8 @@ if [ ! "$(id -un)" = "root" ] ; then
 	exit 1
 fi
 
+trap 'ucr set letsencrypt/status="$(tail -n 1 /var/log/univention/letsencrypt.log)"' ERR
+
 su - letsencrypt -c "/usr/share/univention-letsencrypt/refresh-cert"
 
 ucr set letsencrypt/status="$(tail -n 1 /var/log/univention/letsencrypt.log)"
