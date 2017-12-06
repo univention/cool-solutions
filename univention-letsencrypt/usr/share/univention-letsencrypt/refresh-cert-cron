@@ -54,7 +54,7 @@ fi
 
 su - letsencrypt -c "/usr/share/univention-letsencrypt/refresh-cert"
 
-openssl x509 -in "$DIR_LE/signed.crt" -text -noout > /dev/null
+openssl x509 -in "$DIR_LE/signed.crt" -text -noout > /dev/null 2>&1
 check_cert=$?
 
 if [[ $check_cert -eq 0 ]]; then
@@ -67,4 +67,20 @@ else
 			apache2/ssl/key
 		invoke-rc.d apache2 restart
 	fi
+
+        if [[ $mail_dovecot_ssl_certificate == "$DIR_LE/chained.pem" ]]; then
+                ucr unset \
+                        mail/dovecot/ssl/key \
+                        mail/dovecot/ssl/certificate \
+                        mail/dovecot/ssl/cafile
+                invoke-rc.d apache2 restart
+        fi
+        
+        if [[ $mail_postfix_ssl_certificate == "$DIR_LE/signed.crt" ]]; then
+                ucr unset \
+                        mail/postfix/ssl/key\
+                        mail/postfix/ssl/certificate \
+                        mail/postfix/ssl/cafile
+                invoke-rc.d postfix restart
+        fi
 fi
