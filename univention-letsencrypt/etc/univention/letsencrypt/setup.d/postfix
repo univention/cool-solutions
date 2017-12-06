@@ -34,8 +34,9 @@ DIR_LE="/etc/univention/letsencrypt"
 if is_ucr_true letsencrypt/services/postfix ; then
 	setfacl -m u:postfix:r "$DIR_LE/domain.key"
 	ucr set \
-		mail/postfix/ssl/key=/etc/univention/letsencrypt/domain.key \
-		mail/postfix/ssl/certificate=/etc/univention/letsencrypt/signed.crt \
-		mail/postfix/ssl/cafile=/etc/univention/letsencrypt/chained.pem
+		mail/postfix/ssl/key="$DIR_LE/domain.key" \
+		mail/postfix/ssl/certificate="$DIR_LE/signed.crt" \
+		mail/postfix/ssl/cafile="$DIR_LE/chained.pem"
+	invoke-rc.d postfix restart
 fi
 

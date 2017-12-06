@@ -1,3 +1,9 @@
+univention-letsencrypt (1.1.1-7) unstable; urgency=medium
+
+  * reset SSL settings of Dovecot and Postfix to UCS CA aswell, if certificate is invalid
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 06 Dec 2017 17:32:45 +0100
+
 univention-letsencrypt (1.1.1-6) unstable; urgency=medium
 
   * set status correctly, if error comes from Let's Encrypt, not acme_tiny
