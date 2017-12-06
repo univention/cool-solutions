@@ -36,8 +36,8 @@ do_statoverride_remove () {
 
 #DEBHELPER#
 
-# remove force_https exclude pattern and reset apache ssl settings
-ucr unset apache2/force_https/exclude/request_uri/letsencrypt
+# remove force_https exclude pattern, last status message of the app and reset apache ssl settings
+ucr unset apache2/force_https/exclude/request_uri/letsencrypt letsencrypt/status
 
 if is_ucr_true letsencrypt/services/apache2 ; then
 ucr unset apache2/ssl/certificate apache2/ssl/certificatechain apache2/ssl/key
