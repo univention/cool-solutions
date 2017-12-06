@@ -37,5 +37,6 @@ if is_ucr_true letsencrypt/services/apache2 ; then
 		apache2/ssl/certificatechain="$DIR_LE/intermediate.pem" \
 		apache2/ssl/certificate="$DIR_LE/signed.crt" \
 		apache2/ssl/key="$DIR_LE/domain.key"
+	invoke-rc.d apache2 restart
 fi
 
