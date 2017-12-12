@@ -29,18 +29,18 @@
 # <http://www.gnu.org/licenses/>.
 
 do_statoverride_remove () {
-	dpkg-statoverride --list "$1" && dpkg-statoverride --remove "$@" && echo "Removed statoverride for $@"
+    dpkg-statoverride --list "$1" && dpkg-statoverride --remove "$@" && echo "Removed statoverride for $@"
 }
 
 #DEBHELPER#
 
 if [ "$1" = "purge" ] ; then
-	do_statoverride_remove /var/www/.well-known/acme-challenge
-	do_statoverride_remove /etc/univention/letsencrypt
-        rm /usr/local/share/ca-certificates/lets-encrypt.crt
+    do_statoverride_remove /var/www/.well-known/acme-challenge
+    do_statoverride_remove /etc/univention/letsencrypt
+    rm /usr/local/share/ca-certificates/lets-encrypt.crt
 
-	update-ca-certificates --fresh
-	invoke-rc.d apache2 restart
+    update-ca-certificates --fresh
+    invoke-rc.d apache2 restart
 fi
 
 exit 0

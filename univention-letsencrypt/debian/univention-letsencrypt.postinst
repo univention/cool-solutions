@@ -29,29 +29,29 @@
 # <http://www.gnu.org/licenses/>.
 
 do_statoverride () {
-	dpkg-statoverride --list "$4" || (dpkg-statoverride --force --update --add "$@" && echo "Added statoverride $@")
+    dpkg-statoverride --list "$4" || (dpkg-statoverride --force --update --add "$@" && echo "Added statoverride $@")
 }
 
 #DEBHELPER#
 
 if [ "$1" = "configure" ] ; then
-	invoke-rc.d apache2 restart
+    invoke-rc.d apache2 restart
 
-	getent passwd letsencrypt || adduser \
-		--system \
-		--no-create-home \
-		--shell "/bin/bash" \
-		--home "/usr/share/univention-letsencrypt" \
-		--disabled-password \
-		--ingroup www-data \
-		letsencrypt
-	nscd -i passwd
+    getent passwd letsencrypt || adduser \
+                --system \
+                --no-create-home \
+                --shell "/bin/bash" \
+                --home "/usr/share/univention-letsencrypt" \
+                --disabled-password \
+                --ingroup www-data \
+                letsencrypt
+    nscd -i passwd
 
-	do_statoverride letsencrypt www-data 0755 "/var/www/.well-known/acme-challenge"
-	do_statoverride letsencrypt root 0775 "/etc/univention/letsencrypt"
+    do_statoverride letsencrypt www-data 0755 "/var/www/.well-known/acme-challenge"
+    do_statoverride letsencrypt root 0775 "/etc/univention/letsencrypt"
 fi
 ucr set letsencrypt/services/apache2?no \
-		letsencrypt/services/postfix?no \
-		letsencrypt/services/dovecot?no
+        letsencrypt/services/postfix?no \
+        letsencrypt/services/dovecot?no
 
 exit 0

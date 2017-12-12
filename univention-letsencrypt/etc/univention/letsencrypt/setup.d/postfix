@@ -32,13 +32,12 @@
 DIR_LE="/etc/univention/letsencrypt"
 
 if is_ucr_true letsencrypt/services/postfix ; then
-        if dpkg -l univention-mail-postfix | grep -q ^ii &>/dev/null
-        then setfacl -m u:postfix:r "$DIR_LE/domain.key"
-		ucr set \
-			mail/postfix/ssl/key=/etc/univention/letsencrypt/domain.key \
-			mail/postfix/ssl/certificate=/etc/univention/letsencrypt/signed.crt \
-			mail/postfix/ssl/cafile=/etc/univention/letsencrypt/chained.pem
-        else ucr unset letsencrypt/services/postfix                           
-        fi
+    if dpkg -l univention-mail-postfix | grep -q ^ii &>/dev/null
+    then setfacl -m u:postfix:r "$DIR_LE/domain.key"
+        ucr set \
+            mail/postfix/ssl/key=/etc/univention/letsencrypt/domain.key \
+            mail/postfix/ssl/certificate=/etc/univention/letsencrypt/signed.crt \
+            mail/postfix/ssl/cafile=/etc/univention/letsencrypt/chained.pem
+    else ucr unset letsencrypt/services/postfix                           
+    fi
 fi
-

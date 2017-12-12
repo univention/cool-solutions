@@ -32,6 +32,5 @@
 DIR_LE="/etc/univention/letsencrypt"
 
 if is_ucr_true letsencrypt/services/apache2 ; then
-	invoke-rc.d apache2 restart
+    invoke-rc.d apache2 restart
 fi
-
