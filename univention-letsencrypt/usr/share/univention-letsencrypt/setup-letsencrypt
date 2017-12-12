@@ -90,7 +90,7 @@ if [ ! -e "$DIR_LE/domain.csr" ] ; then
     echo "$LE_NAMES" > "$DIR_LE/domains"
 
     if [ "$(echo "$LE_NAMES" | tr ' ' '\n' | wc -l)" = "1" ] ; then
-       # single domain
+        # single domain
         echo "Single domain mode"
         openssl req -new -sha256 -key "$DIR_LE/domain.key" -subj "/CN=${LE_NAMES}" > "$DIR_LE/domain.csr"
     else
