@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 #
 # Copyright 2016-2017 Univention GmbH
 #
@@ -37,21 +37,7 @@ if [ ! "$(id -un)" = "root" ] ; then
 	exit 1
 fi
 
-statusTrap() {
-status=$(tail -n1 /var/log/univention/letsencrypt.log)
-
-if [[ $status != *"Error"* ]]
-then status=$(grep "detail" /var/log/univention/letsencrypt.log | tail -n 1)
-fi
-
-ucr set letsencrypt/status="$status"
-}
-
-trap 'statusTrap' ERR
-
 su - letsencrypt -c "/usr/share/univention-letsencrypt/refresh-cert"
-
-ucr set letsencrypt/status="$(tail -n 1 /var/log/univention/letsencrypt.log)"
 
 openssl x509 -in "$DIR_LE/signed.crt" -text -noout > /dev/null 2>&1
 check_cert=$?
@@ -60,7 +46,7 @@ if [[ $check_cert -eq 0 ]]; then
 	run-parts --verbose "$DIR_LE/post-refresh.d/"
 else 
 	if [[ $apache2_ssl_certificate == "$DIR_LE/signed.crt" ]]; then
-		ucr unset 
+		ucr unset \
 			apache2/ssl/certificatechain \
 			apache2/ssl/certificate \
 			apache2/ssl/key
@@ -83,3 +69,11 @@ else
 		invoke-rc.d postfix restart
 	fi
 fi
+
+status=$(tail -n1 /var/log/univention/letsencrypt.log)
+
+if [[ $status != *"Error"* ]]
+then status=$(grep "detail" /var/log/univention/letsencrypt.log | tail -n 1)
+fi
+
+ucr set letsencrypt/status="$status"
