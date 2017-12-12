@@ -56,7 +56,7 @@ else
             apache2/ssl/certificatechain \
             apache2/ssl/certificate \
             apache2/ssl/key
-       invoke-rc.d apache2 restart
+        invoke-rc.d apache2 restart
     fi
 
     if [[ $mail_dovecot_ssl_certificate == "$DIR_LE/chained.pem" ]]; then
@@ -64,7 +64,7 @@ else
             mail/dovecot/ssl/key \
             mail/dovecot/ssl/certificate \
             mail/dovecot/ssl/cafile
-       invoke-rc.d dovecot restart
+        invoke-rc.d dovecot restart
     fi
 
     if [[ $mail_postfix_ssl_certificate == "$DIR_LE/signed.crt" ]]; then
@@ -72,7 +72,7 @@ else
             mail/postfix/ssl/key\
             mail/postfix/ssl/certificate \
             mail/postfix/ssl/cafile
-       invoke-rc.d postfix restart
+        invoke-rc.d postfix restart
     fi
 fi
 
