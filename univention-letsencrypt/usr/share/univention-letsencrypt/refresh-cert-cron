@@ -73,7 +73,7 @@ else
                         mail/dovecot/ssl/key \
                         mail/dovecot/ssl/certificate \
                         mail/dovecot/ssl/cafile
-                invoke-rc.d apache2 restart
+                invoke-rc.d dovecot restart
         fi
         
         if [[ $mail_postfix_ssl_certificate == "$DIR_LE/signed.crt" ]]; then
