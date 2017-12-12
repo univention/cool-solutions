@@ -35,6 +35,7 @@ do_statoverride () {
 #DEBHELPER#
 
 if [ "$1" = "configure" ] ; then
+    a2ensite univention-letsencrypt
     invoke-rc.d apache2 restart
 
     getent passwd letsencrypt || adduser \
