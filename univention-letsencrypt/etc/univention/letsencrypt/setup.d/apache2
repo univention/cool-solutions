@@ -32,10 +32,14 @@
 DIR_LE="/etc/univention/letsencrypt"
 
 if is_ucr_true letsencrypt/services/apache2 ; then
-	setfacl -m u:www-data:r "$DIR_LE/domain.key"
-	ucr set \
-		apache2/ssl/certificatechain="$DIR_LE/intermediate.pem" \
-		apache2/ssl/certificate="$DIR_LE/signed.crt" \
-		apache2/ssl/key="$DIR_LE/domain.key"
+        if dpkg -l apache2 | grep -q ^ii &>/dev/null          
+        then setfacl -m u:www-data:r "$DIR_LE/domain.key"
+		ucr set \
+			apache2/ssl/certificatechain="$DIR_LE/intermediate.pem" \
+			apache2/ssl/certificate="$DIR_LE/signed.crt" \
+			apache2/ssl/key="$DIR_LE/domain.key"
+		invoke-rc.d apache2 restart
+        else ucr unset letsencrypt/services/apache2
+        fi
 fi
 

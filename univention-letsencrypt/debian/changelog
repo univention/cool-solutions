@@ -1,3 +1,9 @@
+univention-letsencrypt (1.1.1-8) unstable; urgency=medium
+
+  * fix restarts, check if services are installed before setting up certs
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 12 Dec 2017 11:05:19 +0100
+
 univention-letsencrypt (1.1.1-7) unstable; urgency=medium
 
   * reset SSL settings of Dovecot and Postfix to UCS CA aswell, if certificate is invalid
