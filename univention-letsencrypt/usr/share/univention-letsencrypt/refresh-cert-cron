@@ -28,7 +28,6 @@
 # <http://www.gnu.org/licenses/>.
 
 . /usr/share/univention-lib/ucr.sh
-eval "$(ucr shell)"
 
 DIR_LE="/etc/univention/letsencrypt"
 
