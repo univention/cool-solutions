@@ -71,8 +71,10 @@ fi
 
 status=$(tail -n1 /var/log/univention/letsencrypt.log)
 
-if [[ $status != *"Error"* ]]
-then status=$(grep "detail" /var/log/univention/letsencrypt.log | tail -n 1)
+if [[ $status != *"Certificate refreshed"* ]]
+then if [[ $status != *"Error"* ]]
+     then status=$(grep -E "detail\":" /var/log/univention/letsencrypt.log | tail -n 1)
+     fi
 fi
 
 ucr set letsencrypt/status="$status"

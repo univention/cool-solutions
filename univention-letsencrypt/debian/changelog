@@ -1,3 +1,9 @@
+univention-letsencrypt (1.1.2-2) unstable; urgency=medium
+
+  * set status correctly 
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 12 Dec 2017 17:22:51 +0100
+
 univention-letsencrypt (1.1.2-1) unstable; urgency=medium
 
   * code cleanup
