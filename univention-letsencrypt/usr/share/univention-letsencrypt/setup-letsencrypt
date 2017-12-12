@@ -108,6 +108,7 @@ if [ ! -f "$DIR_LE/intermediate.pem" ] ; then
     wget --no-verbose -O - "https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem" > "$DIR_LE/intermediate.pem"
 fi
 
+# add lets encrypt CA to global CA store
 if [ ! -f "/usr/local/share/ca-certificates/lets-encrypt.crt" ] ; then
     ln -s "$DIR_LE/intermediate.pem" /usr/local/share/ca-certificates/lets-encrypt.crt
     update-ca-certificates 

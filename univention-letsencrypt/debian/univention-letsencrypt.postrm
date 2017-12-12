@@ -34,6 +34,17 @@ do_statoverride_remove () {
 
 #DEBHELPER#
 
+if is_ucr_true letsencrypt/services/apache2 ; then
+    ucr unset apache2/ssl/certificate apache2/ssl/certificatechain apache2/ssl/key
+fi
+
+# package files are removed
+if [ "$1" = "remove" ] ; then
+    a2dissite univention-letsencrypt
+    invoke-rc.d apache2 restart
+fi
+
+# purge configuration if empty
 if [ "$1" = "purge" ] ; then
     do_statoverride_remove /var/www/.well-known/acme-challenge
     do_statoverride_remove /etc/univention/letsencrypt
