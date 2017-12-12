@@ -35,9 +35,9 @@ INTERACTIVE="yes"
 [ "$1" = "--non-interactive" ] && INTERACTIVE=""
 
 prepare_file () {
-  touch "$1"
-  chown "$3" "$1"
-  chmod "$2" "$1"
+    touch "$1"
+    chown "$3" "$1"
+    chmod "$2" "$1"
 }
 
 if [ ! -e "$DIR_LE" ] ; then
@@ -70,15 +70,15 @@ fi
 if [ -e "$DIR_LE/domain.csr" -a "$INTERACTIVE" = "yes" ] ; then
     if [ ! "$(< "$DIR_LE/domains")" = "$LE_NAMES" ] ; then
         echo "WARNING: UCR variable letsencrypt/domains does not match domains in CSR."
-	    answer=""
-	    while [ ! "$answer" = "y" -a ! "$answer" = "n" ] ; do
-	        echo -n "Delete and recreate $DIR_LE/domain.csr? [yn] "
-		    read answer
-            done
-            if [ "$answer" = "y" ] ; then
-                echo "Removing domain.csr..."
-                rm -f "$DIR_LE/domain.csr"
-            fi
+        answer=""
+	while [ ! "$answer" = "y" -a ! "$answer" = "n" ] ; do
+	    echo -n "Delete and recreate $DIR_LE/domain.csr? [yn] "
+	    read answer
+        done
+        if [ "$answer" = "y" ] ; then
+            echo "Removing domain.csr..."
+            rm -f "$DIR_LE/domain.csr"
+        fi
     fi
 fi
 
@@ -90,11 +90,11 @@ if [ ! -e "$DIR_LE/domain.csr" ] ; then
     echo "$LE_NAMES" > "$DIR_LE/domains"
 
     if [ "$(echo "$LE_NAMES" | tr ' ' '\n' | wc -l)" = "1" ] ; then
-    # single domain
-            echo "Single domain mode"
-            openssl req -new -sha256 -key "$DIR_LE/domain.key" -subj "/CN=${LE_NAMES}" > "$DIR_LE/domain.csr"
+       # single domain
+        echo "Single domain mode"
+        openssl req -new -sha256 -key "$DIR_LE/domain.key" -subj "/CN=${LE_NAMES}" > "$DIR_LE/domain.csr"
     else
-    # multiple domains
+        # multiple domains
         echo "Multi domain mode"
         subjectAltName="$(echo "$LE_NAMES" | sed -re 's/ /,DNS:/g')"
         openssl req -new -sha256 -key "$DIR_LE/domain.key" -subj "/" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:${subjectAltName}")) > "$DIR_LE/domain.csr"

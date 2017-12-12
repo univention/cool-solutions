@@ -38,13 +38,13 @@ if [ "$1" = "configure" ] ; then
     invoke-rc.d apache2 restart
 
     getent passwd letsencrypt || adduser \
-                --system \
-                --no-create-home \
-                --shell "/bin/bash" \
-                --home "/usr/share/univention-letsencrypt" \
-                --disabled-password \
-                --ingroup www-data \
-                letsencrypt
+            --system \
+            --no-create-home \
+            --shell "/bin/bash" \
+            --home "/usr/share/univention-letsencrypt" \
+            --disabled-password \
+            --ingroup www-data \
+            letsencrypt
     nscd -i passwd
 
     do_statoverride letsencrypt www-data 0755 "/var/www/.well-known/acme-challenge"
