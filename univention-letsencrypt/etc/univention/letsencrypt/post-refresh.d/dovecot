@@ -32,6 +32,5 @@
 DIR_LE="/etc/univention/letsencrypt"
 
 if is_ucr_true letsencrypt/services/dovecot ; then
-	invoke-rc.d dovecot restart
+    invoke-rc.d dovecot restart
 fi
-

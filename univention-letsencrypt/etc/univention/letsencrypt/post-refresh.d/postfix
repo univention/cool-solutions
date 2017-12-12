@@ -32,5 +32,5 @@
 DIR_LE="/etc/univention/letsencrypt"
 
 if is_ucr_true letsencrypt/services/postfix ; then
-	invoke-rc.d postfix restart
+    invoke-rc.d postfix restart
 fi

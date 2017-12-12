@@ -32,13 +32,12 @@
 DIR_LE="/etc/univention/letsencrypt"
 
 if is_ucr_true letsencrypt/services/dovecot ; then
-        if dpkg -l univention-mail-dovecot | grep -q ^ii &>/dev/null          
-	then	setfacl -m u:dovecot:r "$DIR_LE/domain.key"
-		ucr set \
-			mail/dovecot/ssl/key="$DIR_LE/domain.key" \
-			mail/dovecot/ssl/certificate="$DIR_LE/chained.pem" \
-			mail/dovecot/ssl/cafile="$DIR_LE/chained.pem"
-        else ucr unset letsencrypt/services/dovecot                           
-        fi
+    if dpkg -l univention-mail-dovecot | grep -q ^ii &>/dev/null          
+    then setfacl -m u:dovecot:r "$DIR_LE/domain.key"
+         ucr set \
+             mail/dovecot/ssl/key="$DIR_LE/domain.key" \
+             mail/dovecot/ssl/certificate="$DIR_LE/chained.pem" \
+             mail/dovecot/ssl/cafile="$DIR_LE/chained.pem"
+    else ucr unset letsencrypt/services/dovecot                           
+    fi
 fi
-

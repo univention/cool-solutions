@@ -29,44 +29,44 @@
 # <http://www.gnu.org/licenses/>.
 
 do_statoverride () {
-	dpkg-statoverride --list "$4" || (dpkg-statoverride --force --update --add "$@" && echo "Added statoverride $@")
+    dpkg-statoverride --list "$4" || (dpkg-statoverride --force --update --add "$@" && echo "Added statoverride $@")
 }
 
 #DEBHELPER#
 
 # Migration from Apache 2.2 to Apache 2.4
 if  [ "$1" = 'configure' -a -n "$2" ] && dpkg --compare-versions "$2" lt '1.1.0-1'; then
-	webserver=apache2
-	# Disable old site with Apache 2.4
-	if [ -e /etc/$webserver/sites-enabled/univention-letsencrypt ] ; then
-		a2dissite univention-letsencrypt
-	fi
-	# Remove old site with Apache 2.4
-	if [ -e /etc/$webserver/sites-available/univention-letsencrypt ] ; then
-		rm -f /etc/$webserver/sites-available/univention-letsencrypt
-	fi
+    webserver=apache2
+    # Disable old site with Apache 2.4
+    if [ -e /etc/$webserver/sites-enabled/univention-letsencrypt ] ; then
+        a2dissite univention-letsencrypt
+    fi
+    # Remove old site with Apache 2.4
+    if [ -e /etc/$webserver/sites-available/univention-letsencrypt ] ; then
+        rm -f /etc/$webserver/sites-available/univention-letsencrypt
+    fi
 fi
 
 if [ "$1" = "configure" ] ; then
-	a2ensite univention-letsencrypt.conf
-	invoke-rc.d apache2 restart
+    a2ensite univention-letsencrypt.conf
+    invoke-rc.d apache2 restart
 
-	getent passwd letsencrypt || adduser \
-		--system \
-		--no-create-home \
-		--shell "/bin/bash" \
-		--home "/usr/share/univention-letsencrypt" \
-		--disabled-password \
-		--ingroup www-data \
-		letsencrypt
-	nscd -i passwd
+    getent passwd letsencrypt || adduser \
+        --system \
+        --no-create-home \
+        --shell "/bin/bash" \
+        --home "/usr/share/univention-letsencrypt" \
+        --disabled-password \
+        --ingroup www-data \
+        letsencrypt
+    nscd -i passwd
 
-	do_statoverride letsencrypt www-data 0755 "/var/www/.well-known/acme-challenge"
-	do_statoverride letsencrypt root 0775 "/etc/univention/letsencrypt"
+    do_statoverride letsencrypt www-data 0755 "/var/www/.well-known/acme-challenge"
+    do_statoverride letsencrypt root 0775 "/etc/univention/letsencrypt"
 fi
 ucr set letsencrypt/services/apache2?no \
-		letsencrypt/services/postfix?no \
-		letsencrypt/services/dovecot?no
+        letsencrypt/services/postfix?no \
+        letsencrypt/services/dovecot?no
 
 # Add exclude pattern for acme-challenge, so validation works if force_https is enabled
 ucr set apache2/force_https/exclude/request_uri/letsencrypt="/.well-known/acme-challenge/.*$" 

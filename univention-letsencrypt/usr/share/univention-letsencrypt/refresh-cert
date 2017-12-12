@@ -30,13 +30,13 @@
 DIR_LE="/etc/univention/letsencrypt"
 
 if [ ! "$(id -un)" = "letsencrypt" ] ; then
-	echo "ERROR: please restart this script as user 'letsencrypt'."
-	exit 1
+    echo "ERROR: please restart this script as user 'letsencrypt'."
+    exit 1
 fi
 
 cleanup () {
-	set +e
-	[ -n "$TMPFN" -a -f "$TMPFN" ] && rm -f "$TMPFN"
+    set +e
+    [ -n "$TMPFN" -a -f "$TMPFN" ] && rm -f "$TMPFN"
 }
 trap cleanup EXIT
 TMPFN="$(mktemp --tmpdir="$DIR_LE")"
