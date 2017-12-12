@@ -38,7 +38,6 @@ if is_ucr_true letsencrypt/services/dovecot ; then
 			mail/dovecot/ssl/key="$DIR_LE/domain.key" \
 			mail/dovecot/ssl/certificate="$DIR_LE/chained.pem" \
 			mail/dovecot/ssl/cafile="$DIR_LE/chained.pem"
-		invoke-rc.d dovecot restart
 	else ucr unset letsencrypt/services/dovecot
 	fi
 fi

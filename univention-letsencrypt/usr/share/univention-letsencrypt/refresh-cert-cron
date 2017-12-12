@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 #
 # Copyright 2016-2017 Univention GmbH
 #
@@ -35,15 +35,6 @@ if [ ! "$(id -un)" = "root" ] ; then
 	echo "ERROR: please restart this script as user 'root'."
 	exit 1
 fi
-
-# reset apache config to old state in any case
-cleanup () {
-	if [ -n "$APACHE_FORCE_HTTPS" ] ; then
-		ucr set apache2/force_https="$APACHE_FORCE_HTTPS"
-		invoke-rc.d apache2 restart
-	fi
-}
-trap cleanup EXIT
 
 # if HTTPS is enforced by apache2, then disable it
 if is_ucr_true apache2/force_https; then
@@ -83,4 +74,10 @@ else
                         mail/postfix/ssl/cafile
                 invoke-rc.d postfix restart
         fi
+fi
+
+#reset force_https config
+if [ -n "$APACHE_FORCE_HTTPS" ] ; then
+	ucr set apache2/force_https="$APACHE_FORCE_HTTPS"
+	invoke-rc.d apache2 restart
 fi
