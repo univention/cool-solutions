@@ -38,7 +38,6 @@ if is_ucr_true letsencrypt/services/postfix ; then
 			mail/postfix/ssl/key="$DIR_LE/domain.key" \
 			mail/postfix/ssl/certificate="$DIR_LE/signed.crt" \
 			mail/postfix/ssl/cafile="$DIR_LE/chained.pem"
-		invoke-rc.d postfix restart
 	else ucr unset letsencrypt/services/postfix
         fi
 fi

@@ -1,3 +1,9 @@
+univention-letsencrypt (1.1.1-9) unstable; urgency=medium
+
+  * restart only in refresh scripts
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 12 Dec 2017 11:20:51 +0100
+
 univention-letsencrypt (1.1.1-8) unstable; urgency=medium
 
   * fix restarts, check if services are installed before setting up certs
