@@ -1,3 +1,9 @@
+univention-letsencrypt (1.0.5-3) unstable; urgency=medium
+
+  * fix apache package name
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 13 Dec 2017 15:21:07 +0100
+
 univention-letsencrypt (1.0.5-2) unstable; urgency=medium
 
   * code cleanup 

@@ -32,7 +32,7 @@
 DIR_LE="/etc/univention/letsencrypt"
 
 if is_ucr_true letsencrypt/services/apache2 ; then
-    if dpkg -l apache2 | grep -q ^ii &>/dev/null
+    if dpkg -l "apache2.2-bin" | grep -q ^ii &>/dev/null
     then setfacl -m u:www-data:r "$DIR_LE/domain.key"
         ucr set \
             apache2/ssl/certificatechain="$DIR_LE/intermediate.pem" \
