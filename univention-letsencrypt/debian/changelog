@@ -1,3 +1,9 @@
+univention-letsencrypt (1.1.2-3) unstable; urgency=medium
+
+  * parse correct lines from status files
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 13 Dec 2017 14:48:48 +0100
+
 univention-letsencrypt (1.1.2-2) unstable; urgency=medium
 
   * set status correctly 

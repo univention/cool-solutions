@@ -38,6 +38,16 @@ fi
 
 su - letsencrypt -c "/usr/share/univention-letsencrypt/refresh-cert"
 
+status=$(tail -n1 /var/log/univention/letsencrypt.log)
+
+if [[ $status != *"Certificate refreshed"* ]]
+then if [[ $status != *"Error"* ]]
+     then status=$(grep -E "detail\":" /var/log/univention/letsencrypt.log | tail -n 1)
+     fi
+fi
+
+ucr set letsencrypt/status="$status"
+
 openssl x509 -in "$DIR_LE/signed.crt" -text -noout > /dev/null 2>&1
 check_cert=$?
 
@@ -68,13 +78,3 @@ else
         invoke-rc.d postfix restart
     fi
 fi
-
-status=$(tail -n1 /var/log/univention/letsencrypt.log)
-
-if [[ $status != *"Certificate refreshed"* ]]
-then if [[ $status != *"Error"* ]]
-     then status=$(grep -E "detail\":" /var/log/univention/letsencrypt.log | tail -n 1)
-     fi
-fi
-
-ucr set letsencrypt/status="$status"
