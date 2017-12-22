@@ -35,6 +35,9 @@ case "$1" in
 	remove)
 		ucr unset dns/blacklist/ipv4 dns/blacklist/ipv6 dns/blacklist/record/domains
 
+		echo "Removing file /etc/bind/univention-bind-blacklist.conf"
+		rm "/etc/bind/univention-bind-blacklist.conf"
+
 		# Remove include from bind
         command="^include.*univention-bind-blacklist.conf.*$"
         for file in "/etc/bind/local.conf" "/etc/bind/local.conf.proxy" "/etc/bind/local.conf.samba4"; do
