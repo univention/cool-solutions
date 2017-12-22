@@ -1,3 +1,9 @@
+univention-bind-blacklist (1.0.0-6) unstable; urgency=low
+
+  * Corrected configuration file set after installation
+
+ -- Hendrik Peter <hpeter@univention.de>  Fri, 22 Dec 2017 15:55:56 +0100
+
 univention-bind-blacklist (1.0.0-5) unstable; urgency=low
 
   * Set Package univention-shalla-list-downloader from Recommendation to
