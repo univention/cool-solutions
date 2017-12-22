@@ -31,12 +31,21 @@
 
 case "$1" in
     configure)
+        # Create files with permissions
+        file_db="/etc/bind/db.univention-bind-blacklist"
+        file_blacklist="/etc/bind/db.univention-bind-blacklist"
+        touch "$file_db"
+        touch "$file_blacklist"
+        chmod 644 "$file_db"
+        chmod 644 "$file_blacklist"
+
+        # Set UCR default values
 		ucr set dns/blacklist/ipv4?"127.0.0.1" \
 				dns/blacklist/ipv6?"::1" \
 				dns/blacklist/record/domains?""
-
+        
         # Add include to bind
-        command='include "/etc/bind/univention-bind-blacklist.conf";'
+        command="include \"$file_blacklist\";"
         for file in "/etc/bind/local.conf" "/etc/bind/local.conf.proxy" "/etc/bind/local.conf.samba4"; do
             if [ -f $file ]; then
                 if grep -Fxq "$command" "$file";then
@@ -55,7 +64,7 @@ case "$1" in
     ;;
 
     *)
-        echo "postinst called with unknown argument \`$1'" >&2
+        echo "postinst called with unknown argument \'$1'" >&2
         exit 1
     ;;
 esac

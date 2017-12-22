@@ -15,6 +15,6 @@ Depends: ${shlibs:Depends},
  univention-config-registry,
  shell-univention-lib,
  univention-bind
-Recommends: univention-shalla-list-downloader
+Suggests: univention-shalla-list-downloader
 Description: TODO: <insert up to 60 chars description>
  <insert long description, indented with spaces>

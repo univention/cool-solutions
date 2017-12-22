@@ -1,3 +1,12 @@
+univention-bind-blacklist (1.0.0-5) unstable; urgency=low
+
+  * Set Package univention-shalla-list-downloader from Recommendation to
+    Suggestion
+  * Set permissions of bind files after installation
+  * Split parsing of custom blacklists and shalla blacklists into two segments
+
+ -- Hendrik Peter <hpeter@univention.de>  Fri, 22 Dec 2017 15:32:55 +0100
+
 univention-bind-blacklist (1.0.0-4) unstable; urgency=low
 
   * Automatically add include into local.conf files

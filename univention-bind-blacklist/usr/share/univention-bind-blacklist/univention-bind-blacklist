@@ -34,7 +34,6 @@
 BINDCONFIG="/etc/bind/univention-bind-blacklist.conf"  # The Bind9 Config file INCLUDING the Base Folder, which will be written to (old content will be completely overwritten)
 BINDDB="/etc/bind/db.univention-bind-blacklist"        # The Bind9 Database File INCLUDING the Base Folder, which contains all DNS entries for the Zone(s)
 BLACKLISTDIR="/etc/univention/bind-blacklist"          # The complete Base-Path containing all custom created Blacklists
-LOCALDIR="$BLACKLISTDIR"                               # 
 SHALLADIR="/usr/local/share/univention-shalla-list-downloader" # The complete Base-Path containing all shalla Blacklists (provided by univention-shalla-lsit-downloader)
 SHALLAPREFIX="shallalists"                            # 
 TMPFILE1=$(mktemp)                                    # A temporary File which will contain the Bind9 Config until all vadility checks are done
@@ -52,23 +51,28 @@ function RemoveTempAndExit() {
 }
 
 # Itterate through BLACKLIST - Files
+for BFILE in $(find $BLACKLISTDIR/ -type f -exec echo '{}' \;)
+do
+  # Check, if file exists (Should never trigger)
+  if [ ! -f "$BFILE" ]; then
+    echo "WARNING: File $BFILE does not exist"
+  else
+    echo "NOTE: Added content of File $BFILE"
+    cat "$BFILE" >> "$TMPFILE1"
+  fi
+done
+
+# Itterate through SHALLA - Files
 for BFILE in ${dns_blacklist_record_domains}
 do
   # Check, if line is empty. Should never trigger
   if [ ! -z "$BFILE" ]; then
-    # Check, if entry is a shalla list or a cutom one
-    if [[ $BFILE == $SHALLAPREFIX* ]]; then
-      BLACKLISTDIR="$SHALLADIR"
-    else
-      BLACKLISTDIR="$LOCALDIR"
-    fi
-      
     # Check, if file exists
-    if [ ! -f "$BLACKLISTDIR/$BFILE" ]; then
-      echo "WARNING: File $BLACKLISTDIR/$BFILE does not exist"
+    if [ ! -f "$SHALLADIR/$BFILE" ]; then
+      echo "WARNING: File $SHALLADIR/$BFILE does not exist"
     else
-      echo "NOTE: Added content of File $BLACKLISTDIR/$BFILE"
-      cat "$BLACKLISTDIR/$BFILE" >> "$TMPFILE1"
+      echo "NOTE: Added content of File $SHALLADIR/$BFILE"
+      cat "$SHALLADIR/$BFILE" >> "$TMPFILE1"
     fi
   fi
 done
