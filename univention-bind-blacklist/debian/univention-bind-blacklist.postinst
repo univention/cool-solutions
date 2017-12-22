@@ -33,7 +33,7 @@ case "$1" in
     configure)
         # Create files with permissions
         file_db="/etc/bind/db.univention-bind-blacklist"
-        file_blacklist="/etc/bind/db.univention-bind-blacklist"
+        file_blacklist="/etc/bind/univention-bind-blacklist.conf"
         touch "$file_db"
         touch "$file_blacklist"
         chmod 644 "$file_db"
