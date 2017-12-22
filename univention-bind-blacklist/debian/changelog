@@ -1,8 +1,8 @@
-univention-bind-blacklist (1.0.0-6) unstable; urgency=low
+univention-bind-blacklist (1.0.0-7) unstable; urgency=low
 
   * Corrected configuration file set after installation
 
- -- Hendrik Peter <hpeter@univention.de>  Fri, 22 Dec 2017 15:55:56 +0100
+ -- Hendrik Peter <hpeter@univention.de>  Fri, 22 Dec 2017 16:01:32 +0100
 
 univention-bind-blacklist (1.0.0-5) unstable; urgency=low
 
