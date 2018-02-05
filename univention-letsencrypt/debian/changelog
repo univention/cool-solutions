@@ -1,3 +1,9 @@
+univention-letsencrypt (1.1.2-4) unstable; urgency=medium
+
+  * wait until /etc/ssl/certs/ca-certificates.crt exists again, don't restart service during setup
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 05 Feb 2018 15:53:24 +0100
+
 univention-letsencrypt (1.1.2-3) unstable; urgency=medium
 
   * parse correct lines from status files

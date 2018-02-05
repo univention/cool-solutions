@@ -52,7 +52,10 @@ openssl x509 -in "$DIR_LE/signed.crt" -text -noout > /dev/null 2>&1
 check_cert=$?
 
 if [[ $check_cert -eq 0 ]]; then
-    run-parts --verbose "$DIR_LE/post-refresh.d/"
+    if [[ $1 != "--setup" ]]
+    then
+        run-parts --verbose "$DIR_LE/post-refresh.d/"
+    fi
 else 
     if [[ $apache2_ssl_certificate == "$DIR_LE/signed.crt" ]]; then
         ucr unset \
