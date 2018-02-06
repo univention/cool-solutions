@@ -1,3 +1,9 @@
+univention-letsencrypt (1.1.2-5) unstable; urgency=medium
+
+  * update copyright, don't remove configs during update 
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 06 Feb 2018 12:47:21 +0100
+
 univention-letsencrypt (1.1.2-4) unstable; urgency=medium
 
   * wait until /etc/ssl/certs/ca-certificates.crt exists again, don't restart service during setup

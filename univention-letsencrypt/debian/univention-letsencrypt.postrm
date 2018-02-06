@@ -1,7 +1,7 @@
 #!/bin/bash
 # postrm script for univention-letsencrypt
 #
-# Copyright 2016-2017 Univention GmbH
+# Copyright 2016-2018 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -34,17 +34,15 @@ do_statoverride_remove () {
     dpkg-statoverride --list "$1" && dpkg-statoverride --remove "$@" && echo "Removed statoverride for $@"
 }
 
-#DEBHELPER#
-
-# remove force_https exclude pattern, last status message of the app and reset apache ssl settings
-ucr unset apache2/force_https/exclude/request_uri/letsencrypt letsencrypt/status
-
-if is_ucr_true letsencrypt/services/apache2 ; then
-    ucr unset apache2/ssl/certificate apache2/ssl/certificatechain apache2/ssl/key
-fi
-
 # package files are removed
 if [ "$1" = "remove" ] ; then
+    # remove force_https exclude pattern, last status message of the app and reset apache ssl settings
+    ucr unset apache2/force_https/exclude/request_uri/letsencrypt letsencrypt/status
+
+    if is_ucr_true letsencrypt/services/apache2 ; then
+        ucr unset apache2/ssl/certificate apache2/ssl/certificatechain apache2/ssl/key
+    fi
+
     a2dissite univention-letsencrypt.conf
     invoke-rc.d apache2 restart
 fi
@@ -55,6 +53,10 @@ if [ "$1" = "purge" ] ; then
     do_statoverride_remove /etc/univention/letsencrypt
     rm /usr/local/share/ca-certificates/lets-encrypt.crt
     update-ca-certificates --fresh
+    while [ ! -f /etc/ssl/certs/ca-certificates.crt ]
+    do
+        sleep 1
+    done
     invoke-rc.d apache2 restart
 fi
 
