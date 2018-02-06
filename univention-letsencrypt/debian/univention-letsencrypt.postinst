@@ -28,6 +28,8 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
+. /usr/share/univention-lib/ucr.sh
+
 do_statoverride () {
     dpkg-statoverride --list "$4" || (dpkg-statoverride --force --update --add "$@" && echo "Added statoverride $@")
 }
@@ -35,7 +37,7 @@ do_statoverride () {
 #DEBHELPER#
 
 # Set Apache2 config, which were unset in old postrm
-if  [ "$1" = 'configure' -a -n "$2" ] && dpkg --compare-versions "$2" lt '1.0.5-4'; then
+if  [ "$1" = 'configure' -a -n "$2" ] && dpkg --compare-versions "$2" lt '1.0.5-6'; then
     if is_ucr_true letsencrypt/services/apache2 ; then
         /etc/univention/letsencrypt/setup.d/apache2
         invoke-rc.d apache2 restart

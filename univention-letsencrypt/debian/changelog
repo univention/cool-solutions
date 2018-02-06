@@ -1,3 +1,9 @@
+univention-letsencrypt (1.0.5-6) unstable; urgency=medium
+
+  * make ucr vars usable in postinst
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 06 Feb 2018 17:23:33 +0100
+
 univention-letsencrypt (1.0.5-5) unstable; urgency=medium
 
   * fix apache ssl config in postinst
