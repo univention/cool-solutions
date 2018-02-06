@@ -34,6 +34,14 @@ do_statoverride () {
 
 #DEBHELPER#
 
+# Set Apache2 config, which were unset in old postrm
+if  [ "$1" = 'configure' -a -n "$2" ] && dpkg --compare-versions "$2" lt '1.0.5-4'; then
+    if is_ucr_true letsencrypt/services/apache2 ; then
+        /etc/univention/letsencrypt/setup.d/apache2
+        invoke-rc.d apache2 restart
+    fi
+fi
+
 if [ "$1" = "configure" ] ; then
     a2ensite univention-letsencrypt
     invoke-rc.d apache2 restart
