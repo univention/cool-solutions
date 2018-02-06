@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2016-2017 Univention GmbH
+# Copyright 2016-2018 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -111,7 +111,11 @@ fi
 # add lets encrypt CA to global CA store
 if [ ! -f "/usr/local/share/ca-certificates/lets-encrypt.crt" ] ; then
     ln -s "$DIR_LE/intermediate.pem" /usr/local/share/ca-certificates/lets-encrypt.crt
-    update-ca-certificates 
+    update-ca-certificates
+    while [ ! -f /etc/ssl/certs/ca-certificates.crt ]
+    do
+        sleep 1
+    done
 fi
 
 prepare_file "$DIR_LE/signed.crt" 0644 letsencrypt:root

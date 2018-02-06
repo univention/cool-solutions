@@ -1,3 +1,9 @@
+univention-letsencrypt (1.0.5-4) unstable; urgency=medium
+
+  * update copyright, don't unset config on upgrade
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 06 Feb 2018 13:00:46 +0100
+
 univention-letsencrypt (1.0.5-3) unstable; urgency=medium
 
   * fix apache package name
