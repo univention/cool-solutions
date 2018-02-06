@@ -28,6 +28,8 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
+. /usr/share/univention-lib/ucr.sh
+
 do_statoverride () {
     dpkg-statoverride --list "$4" || (dpkg-statoverride --force --update --add "$@" && echo "Added statoverride $@")
 }
@@ -44,6 +46,14 @@ if  [ "$1" = 'configure' -a -n "$2" ] && dpkg --compare-versions "$2" lt '1.1.0-
     # Remove old site with Apache 2.4
     if [ -e /etc/$webserver/sites-available/univention-letsencrypt ] ; then
         rm -f /etc/$webserver/sites-available/univention-letsencrypt
+    fi
+fi
+
+# Set Apache2 config, which were unset in old postrm
+if  [ "$1" = 'configure' -a -n "$2" ] && dpkg --compare-versions "$2" lt '1.1.2-5'; then
+    if is_ucr_true letsencrypt/services/apache2 ; then
+        /etc/univention/letsencrypt/setup.d/apache2
+        invoke-rc.d apache2 restart
     fi
 fi
 
