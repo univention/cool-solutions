@@ -1,3 +1,9 @@
+univention-demo-data (2.0.5-1) unstable; urgency=medium
+
+  * fix issue which prevented creation of computer objects (issue #9899)
+
+ -- Ingo Steuwer <steuwer@univention.de>  Thu, 18 Jan 2018 16:35:02 +0100
+
 univention-demo-data (2.0.4-1) unstable; urgency=medium
 
   * Removed mailPrimaryAddress from joinscript
