@@ -21,3 +21,9 @@ Description[en]=Use certificate in Postfix
 Description[de]=Zertifikat in Postfix verwenden
 Type=Bool
 Categories=univention-letsencrypt
+
+[letsencrypt/status]
+Description[en]=Status of the Let's Encrypt App
+Description[de]=Status der Let's Encrypt App
+Type=Bool
+Categories=univention-letsencrypt

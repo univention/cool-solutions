@@ -1,6 +1,6 @@
-#!/bin/bash -e
+#!/bin/bash
 #
-# Copyright 2016-2017 Univention GmbH
+# Copyright 2016-2018 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -32,10 +32,52 @@
 DIR_LE="/etc/univention/letsencrypt"
 
 if [ ! "$(id -un)" = "root" ] ; then
-	echo "ERROR: please restart this script as user 'root'."
-	exit 1
+    echo "ERROR: please restart this script as user 'root'."
+    exit 1
 fi
 
 su - letsencrypt -c "/usr/share/univention-letsencrypt/refresh-cert"
 
-run-parts --verbose "$DIR_LE/post-refresh.d/"
+status=$(tail -n1 /var/log/univention/letsencrypt.log)
+
+if [[ $status != *"Certificate refreshed"* ]]
+then if [[ $status != *"Error"* ]]
+     then status=$(grep -E "detail\":" /var/log/univention/letsencrypt.log | tail -n 1)
+     fi
+fi
+
+ucr set letsencrypt/status="$status"
+
+openssl x509 -in "$DIR_LE/signed.crt" -text -noout > /dev/null 2>&1
+check_cert=$?
+
+if [[ $check_cert -eq 0 ]]; then
+    if [[ $1 != "--setup" ]]
+    then
+        run-parts --verbose "$DIR_LE/post-refresh.d/"
+    fi
+else 
+    if [[ $apache2_ssl_certificate == "$DIR_LE/signed.crt" ]]; then
+        ucr unset \
+            apache2/ssl/certificatechain \
+            apache2/ssl/certificate \
+            apache2/ssl/key
+        invoke-rc.d apache2 restart
+    fi
+
+    if [[ $mail_dovecot_ssl_certificate == "$DIR_LE/chained.pem" ]]; then
+        ucr unset \
+            mail/dovecot/ssl/key \
+            mail/dovecot/ssl/certificate \
+            mail/dovecot/ssl/cafile
+        invoke-rc.d dovecot restart
+    fi
+
+    if [[ $mail_postfix_ssl_certificate == "$DIR_LE/signed.crt" ]]; then
+        ucr unset \
+            mail/postfix/ssl/key\
+            mail/postfix/ssl/certificate \
+            mail/postfix/ssl/cafile
+        invoke-rc.d postfix restart
+    fi
+fi

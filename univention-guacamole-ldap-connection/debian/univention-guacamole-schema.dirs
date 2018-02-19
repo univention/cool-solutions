@@ -1,0 +1,4 @@
+usr/lib/univention-install
+usr/lib/univention-uninstall
+var/lib/univention-ldap/local-schema
+usr/share/pyshared/univention/admin/syntax.d
