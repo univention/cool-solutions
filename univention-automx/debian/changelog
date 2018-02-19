@@ -1,0 +1,5 @@
+univention-automx (1.0.0-5) unstable; urgency=medium
+
+  * Initial release (Issue: #4497)
+
+ -- Tobias Birkefeld <packages@univention.de>  Fri, 27 Oct 2017 09:18:51 +0200

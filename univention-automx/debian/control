@@ -1,0 +1,13 @@
+Source: univention-automx
+Section: univention
+Priority: optional
+Maintainer: Tobias Birkefeld <packages@univention.de>
+Build-Depends: debhelper (>= 9), ucslint, quilt, univention-config-dev
+Standards-Version: 3.9.8
+Homepage: http://www.univention.de/
+
+Package: univention-automx
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, automx, python-ldap, libapache2-mod-wsgi
+Description: Package provide an automx config for UCS
+ This package provide an automx config for UCS.
