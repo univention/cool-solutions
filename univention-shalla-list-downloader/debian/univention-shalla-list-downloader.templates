@@ -1,0 +1,71 @@
+Template: univention-shalla-list-downloader/present-shalla-license-v1
+Type: note
+Description: Shalla's Blacklists license for univention-shalla-list-downloader
+ .
+ THIS SOFTWARE IS BASED ON SHALLA'S BLACKLISTS PROVIDED BY 
+ SHALLA SECURE SERVICES, KG. ("SHALLA"). IN ORDER TO INSTALL THIS PACKAGE,
+ YOU MUST ACCEPT ALL OF THE TERMS CONTAINED IN THIS LICENSE AGREEMENT.
+ PLEASE READ THE AGREEMENT CAREFULLY. BY INSTALLING, USING, OR DISTRIBUTING
+ THIS SOFTWARE, YOU ACCEPT ALL OF THE TERMS OF THE AGREEMENT.
+ .
+ Shalla's Blacklists does not only live from our work but from the many 
+ contributions we receive. In the light of this the following licence apply:
+ .
+ 1) Private usage:
+  Home users may use the lists free of charge and without registration (i.e. signing a usage contract). 
+  Yet you can apply for a registration if you want to. See the notes under Registration for details and benefits.
+  The lists are for private use only and must not be given away to any third party.
+ .
+ 2) Schools (public/non commercial):
+  Although usage in schools is not private usage the licence conditions for private usage apply. 
+  Anyhow, for commercially orientated schools like private or business schools the licence conditions under 
+  point 3 "Companies, Institutions and Goverment" apply.
+ .
+ 3) Companies, Institutions and Goverment:
+  The usage of Shalla's Blacklists within companies, institutions or government agencies are considered commercial usage in the sense 
+  that it is not private but part of the business (restricting access to the internet to the employees).
+  The lists may be used free of charge but companies, institutions and government agencies have to register by signing a usage contract. 
+  The usage contract can be obtained by sending mail to info (at) shalla.de.
+  The lists are for internal use only and must not be given away to any third party.
+ .
+ 4) Resellers:
+  The reseller licence applies to the following scenarios:
+   1) Shalla's Blacklists are sold (complete or parts of it, pure or mixed with entries of other list collections).
+   2) Shalla's Blacklists are integrated into a commercial product/services.
+   3) Shalla's Blacklists are integrated into products and services that can be used commercially. 
+   4) For this kind of usage an annual fee is charged. Please contact info (at) shalla.de for more information.
+ .
+ Registration
+ .
+ Registration requires signing a usage contract and sending back a signed copy to 
+ Shalla Secure Services (either via post, mail or fax). The usage contract basically 
+ make statements about the above mentioned restrictions of using the lists and regulates 
+ the handling of list errors.
+ In order to register for using Shalla's Blacklists please send mail to info (at) shalla.de.
+ .
+ Benefits:
+  You will be informed by mail of any upcoming changes of the lists such as new categries, 
+  split/merge/deletion of categories and (planned) maintainance outages.
+  Any submission from registered users are processed with a higher priority.
+  In case any anomalies are detected when accessing our site (excessive downoads, attacks) 
+  registered users will be contacted to clear the situation. Users without an registration 
+  will silently be blocked.
+ .
+ For inquiries please contact: Shalla Secure Services KG, Lulu-Beck-Weg 24, 
+ 82131 Gauting, Germany
+ .
+
+Template: univention-shalla-list-downloader/accepted-shalla-license-v1
+Type: boolean
+Default: true
+Description: Do you accept Shalla's Blacklists license terms?
+ In order to install this package, you must accept the license terms, of the
+ "Shalla's Blacklists - Licence" - www.shallalist.de/licence.html. Not accepting
+ will cancel the installation.
+
+Template: univention-shalla-list-downloader/error-shalla-license-v1
+Type: error
+Description: Declined Shalla's Blacklists license for the univention-shalla-list-downloader
+ If you do not agree to the Shalla's Blacklists license terms, you cannot install this software.
+ .
+ The installation of this package will be canceled.

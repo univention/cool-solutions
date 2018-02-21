@@ -1,0 +1,20 @@
+Source: univention-bind-blacklist
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Build-Depends: debhelper, 
+ univention-config-dev,
+ ucslint-univention
+Standards-Version: 3.9.6
+Homepage: http://www.univention.de/
+
+Package: univention-bind-blacklist
+Architecture: all
+Depends: ${shlibs:Depends}, 
+ ${misc:Depends}, 
+ univention-config-registry,
+ shell-univention-lib,
+ univention-bind
+Suggests: univention-shalla-list-downloader
+Description: TODO: <insert up to 60 chars description>
+ <insert long description, indented with spaces>

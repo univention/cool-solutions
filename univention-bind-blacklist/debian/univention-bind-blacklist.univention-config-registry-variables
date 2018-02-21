@@ -1,0 +1,17 @@
+[dns/blacklist/ipv4]
+Description[de]=TODO: Eine univention-bind-blacklist-Einstellung
+Description[en]=TODO: A univention-bind-blacklist setting
+Type=str
+Categories=service-bind
+
+[dns/blacklist/ipv6]
+Description[de]=TODO: Eine univention-bind-blacklist-Einstellung
+Description[en]=TODO: A univention-bind-blacklist setting
+Type=str
+Categories=service-bind
+
+[dns/blacklist/record/domains]
+Description[de]=TODO: Eine univention-bind-blacklist-Einstellung
+Description[en]=Space separated list of text files that will be included as blacklist for domains within the bind9 dns configuration.
+Type=str
+Categories=service-bind

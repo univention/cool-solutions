@@ -1,0 +1,76 @@
+#!/bin/sh
+# preinst script for univention-shalla-list-downloader
+#
+# Copyright (C) 2013-2017 Univention GmbH
+#
+# http://www.univention.de/
+#
+# All rights reserved.
+#
+# The source code of this program is made available
+# under the terms of the GNU Affero General Public License version 3
+# (GNU AGPL V3) as published by the Free Software Foundation.
+#
+# Binary versions of this program provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention and not subject to the GNU AGPL V3.
+#
+# In the case you use this program under the terms of the GNU AGPL V3,
+# the program is provided in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License with the Debian GNU/Linux or Univention distribution in file
+# /usr/share/common-licenses/AGPL-3; if not, see
+# <http://www.gnu.org/licenses/>.
+
+set -e
+
+case "$1" in
+    install)
+        # Source debconf library.
+        . /usr/share/debconf/confmodule
+
+        # Display the license and ask for agreement
+        printf "\nShalla's Blacklists license for univention-shalla-list-downloader\n THIS SOFTWARE IS BASED ON SHALLA'S BLACKLISTS PROVIDED BY \n SHALLA SECURE SERVICES, KG. ('SHALLA'). IN ORDER TO INSTALL THIS PACKAGE,\n YOU MUST ACCEPT ALL OF THE TERMS CONTAINED IN THIS LICENSE AGREEMENT.\n PLEASE READ THE AGREEMENT CAREFULLY. BY INSTALLING, USING, OR DISTRIBUTING\n THIS SOFTWARE, YOU ACCEPT ALL OF THE TERMS OF THE AGREEMENT.\n \n Shalla's Blacklists does not only live from our work but from the many \n contributions we receive. In the light of this the following licence apply:\n \n 1) Private usage:\n  Home users may use the lists free of charge and without registration (i.e. signing a usage contract). \n  Yet you can apply for a registration if you want to. See the notes under Registration for details and benefits.\n  The lists are for private use only and must not be given away to any third party.\n \n 2) Schools (public/non commercial):\n  Although usage in schools is not private usage the licence conditions for private usage apply. \n  Anyhow, for commercially orientated schools like private or business schools the licence conditions under \n  point 3 'Companies, Institutions and Goverment' apply.\n \n 3) Companies, Institutions and Goverment:\n  The usage of Shalla's Blacklists within companies, institutions or government agencies are considered commercial usage in the sense \n  that it is not private but part of the business (restricting access to the internet to the employees).\n  The lists may be used free of charge but companies, institutions and government agencies have to register by signing a usage contract. \n  The usage contract can be obtained by sending mail to info (at) shalla.de.\n  The lists are for internal use only and must not be given away to any third party.\n \n 4) Resellers:\n  The reseller licence applies to the following scenarios:\n   1) Shalla's Blacklists are sold (complete or parts of it, pure or mixed with entries of other list collections).\n   2) Shalla's Blacklists are integrated into a commercial product/services.\n   3) Shalla's Blacklists are integrated into products and services that can be used commercially. \n   4) For this kind of usage an annual fee is charged. Please contact info (at) shalla.de for more information.\n \n Registration\n \n Registration requires signing a usage contract and sending back a signed copy to \n Shalla Secure Services (either via post, mail or fax). The usage contract basically \n make statements about the above mentioned restrictions of using the lists and regulates \n the handling of list errors.\n In order to register for using Shalla's Blacklists please send mail to info (at) shalla.de.\n \n Benefits:\n  You will be informed by mail of any upcoming changes of the lists such as new categries, \n  split/merge/deletion of categories and (planned) maintainance outages.\n  Any submission from registered users are processed with a higher priority.\n  In case any anomalies are detected when accessing our site (excessive downoads, attacks) \n  registered users will be contacted to clear the situation. Users without an registration \n  will silently be blocked.\n \n For inquiries please contact: Shalla Secure Services KG, Lulu-Beck-Weg 24, \n 82131 Gauting, Germany\n\n"
+        db_input critical univention-shalla-list-downloader/present-shalla-license-v1 || true
+        db_input critical univention-shalla-list-downloader/accepted-shalla-license-v1 || true
+        db_go || true
+
+        # Check their answer.
+        db_get univention-shalla-list-downloader/accepted-shalla-license-v1 || true
+        if [ "$RET" = "false" ]; then
+            db_reset univention-shalla-list-downloader/accepted-shalla-license-v1
+            
+            # Show license on next call again
+            db_fset univention-shalla-list-downloader/present-shalla-license-v1 seen false
+            db_fset univention-shalla-list-downloader/accepted-shalla-license-v1 seen false
+
+            # Show error and exit
+            db_input high univention-shalla-list-downloader/error-shalla-license-v1 || true
+            db_go
+            exit 1
+        else
+            db_reset univention-shalla-list-downloader/accepted-shalla-license-v1
+        fi
+    ;;
+
+    upgrade|abort-upgrade)
+    ;;
+
+    *)
+        echo "preinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+# dh_installdeb will replace this with shell code automatically
+# generated by other debhelper scripts.
+
+#DEBHELPER#
+
+exit 0

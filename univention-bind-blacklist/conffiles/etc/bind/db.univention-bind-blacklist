@@ -1,0 +1,25 @@
+@%@UCRWARNING=; @%@
+
+@!@
+from socket import getfqdn
+from datetime import datetime
+
+redirect_ipv4 = configRegistry.get("dns/blacklist/ipv4")
+redirect_ipv6 = configRegistry.get("dns/blacklist/ipv6")
+nameserver = getfqdn()
+timestamp = datetime.today().strftime("%Y%m%d%H")
+
+print "$TTL\t3600"
+print "@\tIN\tSOA\tlocalhost. %s. (" % nameserver
+print "\t\t\t  %s \t; Serial" % timestamp
+print "\t\t\t        7200 \t; Refresh"
+print "\t\t\t         120 \t; Retry"
+print "\t\t\t      604800 \t; Expire"
+print "\t\t\t        3600 )\t; Default TTL"
+print ";"
+print "\tIN\tNS\t%s." % nameserver
+print "\tIN\tA\t%s" % redirect_ipv4
+print "*\tIN\tA\t%s" % redirect_ipv4
+print "\tIN\tAAAA\t%s" % redirect_ipv6
+print "*\tIN\tAAAA\t%s" % redirect_ipv6
+@!@
