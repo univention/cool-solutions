@@ -35,3 +35,5 @@ case "$1" in
 		/usr/lib/univention-uninstall/01univention-demo-data.uinst
 	;;
 esac
+
+exit 0
