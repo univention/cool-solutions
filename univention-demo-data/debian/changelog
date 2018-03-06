@@ -1,3 +1,9 @@
+univention-demo-data (2.1.0-1) unstable; urgency=low
+
+  * ported for UCS 4.3 Issue #10081
+
+ -- Alexander Ulpts <ulpts@univention.de>  Tue, 06 Mar 2018 11:06:22 +0100
+
 univention-demo-data (2.0.5-1) unstable; urgency=medium
 
   * fix issue which prevented creation of computer objects (issue #9899)
