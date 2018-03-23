@@ -1,3 +1,9 @@
+univention-usercert (4.1.0-1) unstable; urgency=low
+
+  * Copyright update and merged to 4.3. Issue #10456
+
+ -- Alexander Ulpts <ulpts@univention.de>  Fri, 23 Mar 2018 10:33:48 +0100
+
 univention-usercert (4.0.7-0) unstable; urgency=low
 
   * Copyright update and merged to 4.2. Issue #7484
