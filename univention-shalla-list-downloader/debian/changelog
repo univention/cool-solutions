@@ -2,8 +2,11 @@ univention-shalla-list-downloader (2.0.0-7) unstable; urgency=low
 
   * Fixed dpkg output pipe error on call of the relinking script. Issue #9280
   * Added note to remove shallalist content from UCR variables after remove. Issue #9280
+  * Updated Copyright. Issue #9280
+  * Made packages ucs-school-webproxy and univention-bind-blacklist optional. Issue #9280
+  * Added config regeneration to postremove cleanup. Issue #9280
 
- -- Hendrik Peter <hpeter@univention.de>  Wed, 11 Apr 2018 16:58:26 +0200
+ -- Hendrik Peter <hpeter@univention.de>  Wed, 11 Apr 2018 17:41:26 +0200
 
 univention-shalla-list-downloader (2.0.0-6) unstable; urgency=low
 

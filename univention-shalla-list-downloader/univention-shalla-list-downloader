@@ -3,7 +3,7 @@
 # shalla-list-downloader
 # download/update shallalist and trigger the initializization of the databases
 #
-# Copyright 2010-2017 Univention GmbH
+# Copyright 2017-2018 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -43,9 +43,6 @@ URL="http://www.shallalist.de/Downloads/${BL_PKG}"
 ##
 # First things first: we need a logfile:
 ##
-
-# TODO: Generalize, don't use the webproxy log
-
 create_logfile_if_missing /var/log/univention/shalla-list-downloader.log "root:adm" 640
 
 exec 3>>/var/log/univention/shalla-list-downloader.log
@@ -118,6 +115,6 @@ CLEAN
 echo "Download/update finished ($(date))"
 echo "--------------------* * *--------------------"
 
-# xx
+# Relink files and reload services
 /usr/share/univention-shalla-list-downloader/univention-shalla-list-relink
 exit 0
