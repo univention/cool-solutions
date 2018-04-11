@@ -13,7 +13,6 @@ Architecture: all
 Pre-Depends: debconf (>= 0.2.17)
 Depends: ${shlibs:Depends}, 
  ${misc:Depends},
- univention-config-registry,
  shell-univention-lib,
 Recommends: ucs-school-webproxy,
  univention-bind-blacklist

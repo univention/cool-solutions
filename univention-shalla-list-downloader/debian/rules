@@ -30,9 +30,7 @@
 
 override_dh_install:
 	dh_install
-	univention-install-config-registry
-	univention-install-config-registry-info
-
+	
 override_dh_auto_test:
 	dh_auto_test
 	ucslint

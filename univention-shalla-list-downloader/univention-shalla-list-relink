@@ -34,19 +34,8 @@
 BL_DIR="shallalists"
 DBHOME="/usr/local/share/univention-shalla-list-downloader" 
 PROXYHOME="/var/lib/ucs-school-webproxy"
-RELOAD=true
 #
 . /usr/share/univention-lib/all.sh
-
-case "$1" in
-	-u|--ucr)
-	RELOAD=false
-	shift
-	;;
-	*)
-	shift
-	;;
-esac
 
 create_logfile_if_missing /var/log/univention/shalla-list-downloader.log "root:adm" 640
 exec 3>>/var/log/univention/shalla-list-downloader.log
@@ -54,29 +43,21 @@ exec 1>&3
 
 eval "$(ucr shell proxy/filter/global/blacklists/domains)"
 if dpkg --get-selections | grep -q "^ucs-school-webproxy[[:space:]]*install$"; then
-	# Trigger reload of the webproxy
-	if $RELOAD; then
-		ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"
-	else
-		echo "Resyncing the proxy blacklist"
-		# recreate all links
-		rm -rf "$PROXYHOME/$BL_DIR"
-		ln -s "$DBHOME/$BL_DIR" "$PROXYHOME/$BL_DIR"
-	fi
+	echo "Resyncing the proxy blacklist"
+	# recreate all links
+	rm -rf "$PROXYHOME/$BL_DIR"
+	ln -s "$DBHOME/$BL_DIR" "$PROXYHOME/$BL_DIR"
 
-	# TODO: is this needed?
-	#echo "Setting lists permissions"
-	#chown -R root:proxy "${DBHOME}/${BL_DIR}"
-	#chmod -R g+rw "${DBHOME}/${BL_DIR}"
+	# Trigger reload of the webproxy
+	# Note: Regeneration has to be triggered with 'proxy/filter/global/blacklists/%s' variable. Else the config file won't get regenerated
+	ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"
 fi
 
 eval "$(ucr shell dns/blacklist/record/domains)"
 if [[ -n "${dns_blacklist_record_domains}" ]]; then
 	# Trigger reload of the dns server
-	if $RELOAD; then
-		echo "Resyncing the bind blacklist"
-		/usr/share/univention-bind-blacklist/univention-bind-blacklist
-	fi
+	echo "Resyncing the bind blacklist"
+	/usr/share/univention-bind-blacklist/univention-bind-blacklist
 fi
 
 exit 0
