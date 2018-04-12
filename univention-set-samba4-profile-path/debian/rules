@@ -1,0 +1,67 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# enable this to install UCR templates with older versions of debhelper (UCS < 2.4)
+#binary:
+#	dh_testdir
+#	dh_auto_configure
+#	dh_auto_build
+#	dh_auto_test
+#	dh_testroot
+#	dh_prep
+#	dh_installdirs
+#	dh_auto_install
+#	dh_install
+#	univention-install-config-registry
+#	univention-install-config-registry-info
+#	dh_installdocs
+#	dh_installchangelogs
+#	dh_installexamples
+#	dh_installman
+#	dh_installcatalogs
+#	dh_installcron
+#	dh_installdebconf
+#	dh_installifupdown
+#	dh_installinfo
+#	dh_installinit
+#	dh_installmodules
+#	dh_installlogcheck
+#	dh_installlogrotate
+#	dh_lintian
+#	dh_usrlocal
+#	dh_link
+#	dh_compress
+#	dh_fixperms
+#	dh_strip
+#	dh_makeshlibs
+#	dh_shlibdeps
+#	dh_installdeb
+#	dh_gencontrol
+#	dh_md5sums
+#	dh_builddeb
+
+# enable this to install UCR templates (UCS >= 2.4)
+#override_dh_install:
+#	dh_install
+#	univention-install-config-registry
+#	univention-install-config-registry-info
+
+# enable this to run ucslint during build time (UCS >= 3.0)
+#override_dh_auto_build:
+#	ucslint
+#	dh_auto_build
+
+# enable this to use quilt with older versions of quilt (quilt < 0.48.3)
+#include /usr/share/quilt/quilt.make
+#
+#clean: unpatch
+#	dh $@
+#
+#binary: patch
+#	dh $@
+
+%:
+	dh $@
+
+	# enable this to use quilt (quilt >= 0.48.3)
+	#dh --with quilt $@
