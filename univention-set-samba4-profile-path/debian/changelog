@@ -1,0 +1,41 @@
+univention-set-samba4-profile-path (1.0.1-0) unstable; urgency=low
+
+  * Handles LDAP CN with blank spaces (Issue #10607)
+
+ -- Johannes Kenkel <kenkel@univention.de>  Thu, 12 Apr 2018 13:40:08 +0200
+
+univention-set-samba4-profile-path (1.0.0-6) unstable; urgency=low
+
+  * script fixed due some errors. Bug #34718
+
+ -- Tobias Birkefeld <birkefeld@univention.de>  Thu, 21 Aug 2014 11:09:08 +0200
+
+univention-set-samba4-profile-path (1.0.0-5) unstable; urgency=low
+
+  * Changed script to make OUs optional Ticket#: 2012011621003092
+
+ -- Kevin Dominik Korte <korte@univention.de>  Thu, 23 Feb 2012 16:55:46 +0100
+
+univention-set-samba4-profile-path (1.0.0-4) unstable; urgency=low
+
+  * Changed script to include OU Ticket#: 2012011621003092
+
+ -- Kevin Dominik Korte <korte@univention.de>  Wed, 22 Feb 2012 14:50:48 +0100
+
+univention-set-samba4-profile-path (1.0.0-3) unstable; urgency=low
+
+  * Changed Help text to standard Ticket#: 2012011621003092
+
+ -- Kevin Dominik Korte <korte@univention.de>  Tue, 17 Jan 2012 14:52:18 +0100
+
+univention-set-samba4-profile-path (1.0.0-2) unstable; urgency=low
+
+  * changed control file Ticket#: 2012011621003092
+
+ -- Kevin Dominik Korte <korte@univention.de>  Mon, 16 Jan 2012 09:58:00 +0100
+
+univention-set-samba4-profile-path (1.0.0-1) unstable; urgency=low
+
+  * Bulk set profile path for all users Ticket#: 2012011621003092
+
+ -- Kevin Dominik Korte <korte@univention.de>  Mon, 16 Jan 2012 09:48:04 +0100
