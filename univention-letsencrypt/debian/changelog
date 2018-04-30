@@ -1,6 +1,12 @@
+univention-letsencrypt (1.2.1-2) unstable; urgency=medium
+
+  * update to ACME v2 #10035
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 30 Apr 2018 13:39:44 +0200
+
 univention-letsencrypt (1.2.1-1) unstable; urgency=medium
 
-  * don execute update-ca-certificates in postrm #9901
+  * don't execute update-ca-certificates in postrm #9901
 
  -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 30 Apr 2018 12:54:22 +0200
 

@@ -49,13 +49,13 @@ cat  "$DIR_LE/domains"
 /usr/share/univention-letsencrypt/acme_tiny.py --account-key "$DIR_LE/account.key" --csr "$DIR_LE/domain.csr" --acme-dir "/var/www/.well-known/acme-challenge/" > "$TMPFN"
 
 # on success (script didn't stop) use correct filename and create chained.pem
-mv -f "$TMPFN" "$DIR_LE/signed.crt"
-chmod 0644 "$DIR_LE/signed.crt"
-cat "$DIR_LE/signed.crt" "$DIR_LE/intermediate.pem" > "$DIR_LE/chained.pem"
-chmod 0644 "$DIR_LE/chained.pem"
+mv -f "$TMPFN" "$DIR_LE/signed_chain.crt"
+chmod 0644 "$DIR_LE/signed_chain.crt"
+#cat "$DIR_LE/signed.crt" "$DIR_LE/intermediate.pem" > "$DIR_LE/chained.pem"
+#chmod 0644 "$DIR_LE/chained.pem"
 
 # create backup
-cp "$DIR_LE/signed.crt" "$DIR_LE/signed.crt_$(date +%Y%m%d-%H%M%S)"
-cp "$DIR_LE/chained.pem" "$DIR_LE/chained.pem_$(date +%Y%m%d-%H%M%S)"
+cp "$DIR_LE/signed_chain.crt" "$DIR_LE/signed_chain.crt_$(date +%Y%m%d-%H%M%S)"
+#cp "$DIR_LE/chained.pem" "$DIR_LE/chained.pem_$(date +%Y%m%d-%H%M%S)"
 
 echo "Certificate refreshed at $(date)"
