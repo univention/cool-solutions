@@ -37,7 +37,7 @@ if is_ucr_true letsencrypt/services/postfix ; then
         ucr set \
             mail/postfix/ssl/key="$DIR_LE/domain.key" \
             mail/postfix/ssl/certificate="$DIR_LE/signed_chain.crt" \
-            mail/postfix/ssl/cafile="$DIR_LE/signed_chain.pem"
+            mail/postfix/ssl/cafile="$DIR_LE/signed_chain.crt"
     else ucr unset letsencrypt/services/postfix
     fi
 fi

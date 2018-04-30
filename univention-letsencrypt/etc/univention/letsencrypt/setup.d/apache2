@@ -35,7 +35,6 @@ if is_ucr_true letsencrypt/services/apache2 ; then
     if dpkg -l apache2 | grep -q ^ii &>/dev/null
     then setfacl -m u:www-data:r "$DIR_LE/domain.key"
         ucr set \
-    #        apache2/ssl/certificatechain="$DIR_LE/intermediate.pem" \
             apache2/ssl/certificate="$DIR_LE/signed_chain.crt" \
             apache2/ssl/key="$DIR_LE/domain.key"
     else ucr unset letsencrypt/services/apache2

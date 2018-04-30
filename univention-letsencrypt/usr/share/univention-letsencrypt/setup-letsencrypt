@@ -102,9 +102,9 @@ fi
 #fi
 
 # add lets encrypt CA to global CA store
-if [ ! -f "/usr/local/share/ca-certificates/lets-encrypt.crt" ] ; then
-    ln -s "$DIR_LE/intermediate.pem" /usr/local/share/ca-certificates/lets-encrypt.crt
-fi
+#if [ ! -f "/usr/local/share/ca-certificates/lets-encrypt.crt" ] ; then
+    #ln -s "$DIR_LE/intermediate.pem" /usr/local/share/ca-certificates/lets-encrypt.crt
+#fi
 
 prepare_file "$DIR_LE/signed_chain.crt" 0644 letsencrypt:root
 #prepare_file "$DIR_LE/chained.pem" 0644 letsencrypt:root
