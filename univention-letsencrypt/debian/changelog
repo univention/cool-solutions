@@ -1,4 +1,4 @@
-univention-letsencrypt (1.2.1-4) unstable; urgency=medium
+univention-letsencrypt (1.2.1-5) unstable; urgency=medium
 
   * fix symlink to chain, fix setup hooks #10035
 
