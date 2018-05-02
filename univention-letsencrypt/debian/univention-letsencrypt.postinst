@@ -57,7 +57,7 @@ if  [ "$1" = 'configure' -a -n "$2" ] && dpkg --compare-versions "$2" lt '1.1.2-
     fi
 fi
 
-if  [ "$1" = 'configure' -a -n "$2" ] && dpkg --compare-versions "$2" lt '1.2.1-8'; then
+if  [ "$1" = 'configure' -a -n "$2" ] && dpkg --compare-versions "$2" lt '1.2.1-9'; then
     /usr/share/univention-letsencrypt/setup-letsencrypt
 fi
 

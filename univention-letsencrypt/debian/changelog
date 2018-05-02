@@ -1,3 +1,9 @@
+univention-letsencrypt (1.2.1-9) unstable; urgency=medium
+
+  * don't use certs from staging endpoint anywhere, don't create obsolete chained.pem and signed.crt #10035
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 02 May 2018 15:04:38 +0200
+
 univention-letsencrypt (1.2.1-8) unstable; urgency=medium
 
   * add option for staging environment #10035
