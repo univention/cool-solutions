@@ -105,10 +105,10 @@ if [ ! -f "/usr/local/share/ca-certificates/lets-encrypt.crt" ] ; then
     ln -s "$DIR_LE/intermediate.pem" /usr/local/share/ca-certificates/lets-encrypt.crt
 fi
 
-prepare_file "$DIR_LE/signed_chain.crt" 0644 letsencrypt:root
 prepare_file "/var/log/univention/letsencrypt.log" 0664 letsencrypt:root
 
 if is_ucr_false letsencrypt/staging ; then
+  prepare_file "$DIR_LE/signed_chain.crt" 0644 letsencrypt:root
   run-parts --verbose "$DIR_LE/setup.d/"
 fi
 # always refresh certificate
