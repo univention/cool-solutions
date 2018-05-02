@@ -31,9 +31,6 @@ eval "$(ucr shell)"
 
 DIR_LE="/etc/univention/letsencrypt"
 
-INTERACTIVE="yes"
-[ "$1" = "--non-interactive" ] && INTERACTIVE=""
-
 prepare_file () {
     touch "$1"
     chown "$3" "$1"
