@@ -1,3 +1,9 @@
+univention-letsencrypt (1.2.1-7) unstable; urgency=medium
+
+  * fix cert check after refresh #10035
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 02 May 2018 11:50:07 +0200
+
 univention-letsencrypt (1.2.1-6) unstable; urgency=medium
 
   * add update routine for old versions with acme_tiny v1 #10035
