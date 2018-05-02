@@ -1,3 +1,9 @@
+univention-letsencrypt (1.2.2-2) unstable; urgency=medium
+
+  * check if app has already been migrated during update
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 02 May 2018 16:15:24 +0200
+
 univention-letsencrypt (1.2.2-1) unstable; urgency=medium
 
   * don't prepare signed_chain in staging mode #10035
