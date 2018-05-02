@@ -29,6 +29,8 @@
 
 . /usr/share/univention-lib/ucr.sh
 
+eval "$(ucr shell)"
+
 DIR_LE="/etc/univention/letsencrypt"
 
 if [ ! "$(id -un)" = "root" ] ; then
@@ -48,7 +50,11 @@ fi
 
 ucr set letsencrypt/status="$status"
 
-openssl x509 -in "$DIR_LE/signed.crt" -text -noout > /dev/null 2>&1
+if is_ucr_true letsencrypt/staging ; then
+  exit
+fi
+
+openssl x509 -in "$DIR_LE/signed_chain.crt" -text -noout > /dev/null 2>&1
 check_cert=$?
 
 if [[ $check_cert -eq 0 ]]; then
@@ -56,8 +62,8 @@ if [[ $check_cert -eq 0 ]]; then
     then
         run-parts --verbose "$DIR_LE/post-refresh.d/"
     fi
-else 
-    if [[ $apache2_ssl_certificate == "$DIR_LE/signed.crt" ]]; then
+else
+    if [[ $apache2_ssl_certificate == "$DIR_LE/signed_chain.crt" ]]; then
         ucr unset \
             apache2/ssl/certificatechain \
             apache2/ssl/certificate \
@@ -65,7 +71,7 @@ else
         invoke-rc.d apache2 restart
     fi
 
-    if [[ $mail_dovecot_ssl_certificate == "$DIR_LE/chained.pem" ]]; then
+    if [[ $mail_dovecot_ssl_certificate == "$DIR_LE/signed_chain.crt" ]]; then
         ucr unset \
             mail/dovecot/ssl/key \
             mail/dovecot/ssl/certificate \
@@ -73,7 +79,7 @@ else
         invoke-rc.d dovecot restart
     fi
 
-    if [[ $mail_postfix_ssl_certificate == "$DIR_LE/signed.crt" ]]; then
+    if [[ $mail_postfix_ssl_certificate == "$DIR_LE/signed_chain.crt" ]]; then
         ucr unset \
             mail/postfix/ssl/key\
             mail/postfix/ssl/certificate \

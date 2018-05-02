@@ -36,8 +36,8 @@ if is_ucr_true letsencrypt/services/postfix ; then
     then setfacl -m u:postfix:r "$DIR_LE/domain.key"
         ucr set \
             mail/postfix/ssl/key="$DIR_LE/domain.key" \
-            mail/postfix/ssl/certificate="$DIR_LE/signed.crt" \
-            mail/postfix/ssl/cafile="$DIR_LE/chained.pem"
+            mail/postfix/ssl/certificate="$DIR_LE/signed_chain.crt" \
+            mail/postfix/ssl/cafile="$DIR_LE/signed_chain.crt"
     else ucr unset letsencrypt/services/postfix
     fi
 fi

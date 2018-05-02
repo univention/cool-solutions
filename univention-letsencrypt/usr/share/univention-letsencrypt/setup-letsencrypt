@@ -27,12 +27,11 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
+. /usr/share/univention-lib/ucr.sh
+
 eval "$(ucr shell)"
 
 DIR_LE="/etc/univention/letsencrypt"
-
-INTERACTIVE="yes"
-[ "$1" = "--non-interactive" ] && INTERACTIVE=""
 
 prepare_file () {
     touch "$1"
@@ -104,18 +103,13 @@ fi
 # add lets encrypt CA to global CA store
 if [ ! -f "/usr/local/share/ca-certificates/lets-encrypt.crt" ] ; then
     ln -s "$DIR_LE/intermediate.pem" /usr/local/share/ca-certificates/lets-encrypt.crt
-    update-ca-certificates
-    while [ ! -f /etc/ssl/certs/ca-certificates.crt ]
-    do
-        sleep 1
-    done
 fi
 
-prepare_file "$DIR_LE/signed.crt" 0644 letsencrypt:root
-prepare_file "$DIR_LE/chained.pem" 0644 letsencrypt:root
 prepare_file "/var/log/univention/letsencrypt.log" 0664 letsencrypt:root
 
-run-parts --verbose "$DIR_LE/setup.d/"
-
+if is_ucr_false letsencrypt/staging ; then
+  prepare_file "$DIR_LE/signed_chain.crt" 0644 letsencrypt:root
+  run-parts --verbose "$DIR_LE/setup.d/"
+fi
 # always refresh certificate
 /usr/share/univention-letsencrypt/refresh-cert-cron --setup 2>&1 | tee -a /var/log/univention/letsencrypt.log
