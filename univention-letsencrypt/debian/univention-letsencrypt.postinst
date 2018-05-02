@@ -57,8 +57,11 @@ if  [ "$1" = 'configure' -a -n "$2" ] && dpkg --compare-versions "$2" lt '1.1.2-
     fi
 fi
 
-if  [ "$1" = 'configure' -a -n "$2" ] && dpkg --compare-versions "$2" lt '1.2.1-9'; then
+if  [ "$1" = 'configure' -a -n "$2" ] && dpkg --compare-versions "$2" lt '1.1.2-7'; then
+  if ! is_ucr_true letsencrypt/v2migrated; then
     /usr/share/univention-letsencrypt/setup-letsencrypt
+    ucr set letsencrypt/v2migrated="true"
+  fi
 fi
 
 if [ "$1" = "configure" ] ; then
