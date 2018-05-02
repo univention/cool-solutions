@@ -27,6 +27,10 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
+. /usr/share/univention-lib/ucr.sh
+
+eval "$(ucr shell)"
+
 DIR_LE="/etc/univention/letsencrypt"
 
 if [ ! "$(id -un)" = "letsencrypt" ] ; then
@@ -45,8 +49,12 @@ date
 echo "Refreshing certificate for following domains:"
 cat  "$DIR_LE/domains"
 
+if is_ucr_true letsencrypt/staging ; then
+  useStaging="--directoryURL https://acme-staging-v02.api.letsencrypt.org/directory"
+fi
+
 # get new signed certificate
-/usr/share/univention-letsencrypt/acme_tiny.py --disable-check --account-key "$DIR_LE/account.key" --csr "$DIR_LE/domain.csr" --acme-dir "/var/www/.well-known/acme-challenge/" > "$TMPFN"
+/usr/share/univention-letsencrypt/acme_tiny.py --disable-check ${useStaging} --account-key "$DIR_LE/account.key" --csr "$DIR_LE/domain.csr" --acme-dir "/var/www/.well-known/acme-challenge/" > "$TMPFN"
 
 # on success (script didn't stop) use correct filename and create chained.pem
 mv -f "$TMPFN" "$DIR_LE/signed_chain.crt"
