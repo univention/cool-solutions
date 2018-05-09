@@ -1,3 +1,10 @@
+univention-guacamole-ldap-connection (2.0.5-2) unstable; urgency=medium
+
+  * Fixed postinst for running the searchuser join script
+  * Presales #10212
+
+ -- Timo Denissen <denissen@univention.de>  Wed, 09 May 2018 15:24:50 +0200
+
 univention-guacamole-ldap-connection (2.0.5-1) unstable; urgency=medium
 
   * Switched from mjumper-images to guacamole-images
