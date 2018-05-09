@@ -72,6 +72,13 @@ else
     exit 1
 fi
 
+if joinscript_check_any_version_executed; then
+	echo -n "Removing old Guacd container... "
+	/usr/bin/docker stop guacd > /dev/null
+	/usr/bin/docker rm guacd > /dev/null
+	echo -e "Done!"
+fi
+
 echo -e "Downloading and installing guacd... "
 /usr/bin/docker run \
     --name guacd \
@@ -110,7 +117,7 @@ echo -n "Installing patched LDAP auth plugin... "
 /usr/bin/docker cp /usr/share/guacamole/guacamole-auth-ldap-* guacamole:/opt/guacamole/ldap/
 echo -e "Done!"
 
-echo -n "Installing patched start script to used LDAP_USER_SEARCH_FILTER..."
+echo -n "Installing patched start script to use LDAP_USER_SEARCH_FILTER..."
 /usr/bin/docker cp /usr/share/guacamole/start.sh guacamole:/opt/guacamole/bin
 echo -e "Done!"
 

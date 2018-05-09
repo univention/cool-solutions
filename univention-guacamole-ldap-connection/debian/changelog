@@ -1,3 +1,10 @@
+univention-guacamole-ldap-connection (2.0.6-1) unstable; urgency=medium
+
+  * Modified joinscript 99univention_install_guacamole to always redownload guacd
+  * Presales #10212
+
+ -- Timo Denissen <denissen@univention.de>  Wed, 09 May 2018 15:49:07 +0200
+
 univention-guacamole-ldap-connection (2.0.5-2) unstable; urgency=medium
 
   * Fixed postinst for running the searchuser join script
