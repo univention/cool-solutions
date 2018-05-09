@@ -48,7 +48,9 @@ echo -e "\t* guacamole/ldap/username/attribute"
 echo -e "\t* guacamole/user/dn"
 echo -e "---------------"
 
+set +e
 . /usr/share/univention-lib/base.sh
 call_joinscript 98univention_guacamole_searchuser.inst
+set -e
 
 exit 0
