@@ -1,3 +1,9 @@
+univention-letsencrypt (1.1.2-8) unstable; urgency=medium
+
+  * evaluate unset variable correctly #10035
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Fri, 11 May 2018 13:36:13 +0200
+
 univention-letsencrypt (1.1.2-7) unstable; urgency=medium
 
   * fix traceback in app settings, migrate to ACME v2, add option for staging endpoint #10035 and #9901

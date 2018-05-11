@@ -54,7 +54,7 @@ fi
 # get new signed certificate
 /usr/share/univention-letsencrypt/acme_tiny.py --disable-check ${useStaging} --account-key "$DIR_LE/account.key" --csr "$DIR_LE/domain.csr" --acme-dir "/var/www/.well-known/acme-challenge/" > "$TMPFN"
 
-if is_ucr_false letsencrypt/staging ; then
+if ! is_ucr_true letsencrypt/staging ; then
 # on success (script didn't stop) use correct filename
 mv -f "$TMPFN" "$DIR_LE/signed_chain.crt"
 chmod 0644 "$DIR_LE/signed_chain.crt"
