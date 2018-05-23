@@ -16,5 +16,5 @@ Depends: ${shlibs:Depends},
  shell-univention-lib,
  univention-bind
 Suggests: univention-shalla-list-downloader
-Description: TODO: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Description: bind9 DNS Blacklist generator
+ A tool that generates DNS blacklists based on textfiles
