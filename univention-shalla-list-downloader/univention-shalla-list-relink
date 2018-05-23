@@ -41,12 +41,16 @@ create_logfile_if_missing /var/log/univention/shalla-list-downloader.log "root:a
 exec 3>>/var/log/univention/shalla-list-downloader.log
 exec 1>&3
 
-if dpkg --get-selections | grep -q "^ucs-school-webproxy[[:space:]]*install$"; then
-	echo "Resyncing the proxy blacklist"
-	# recreate all links
-	rm -rf "$PROXYHOME/$BL_DIR"
-	ln -s "$DBHOME/$BL_DIR" "$PROXYHOME/$BL_DIR"
+echo "Resyncing the proxy blacklist"
+# Recursively create the Webproxy directory, as it is no forced dependency anymore
+if [ ! -d "$DIRECTORY" ]; then
+	mkdir -p "$PROXYHOME"
+fi
+# Recreate all links, even if the Webproxy isn't installed
+rm -rf "$PROXYHOME/$BL_DIR"
+ln -s "$DBHOME/$BL_DIR" "$PROXYHOME/$BL_DIR"
 
+if dpkg --get-selections | grep -q "^ucs-school-webproxy[[:space:]]*install$"; then
 	# Trigger reload of the webproxy
 	# Note: Regeneration has to be triggered with 'proxy/filter/global/blacklists/%s' variable. Else the config file won't get regenerated
 	eval "$(ucr shell proxy/filter/global/blacklists/domains)"

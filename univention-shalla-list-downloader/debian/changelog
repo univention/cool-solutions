@@ -1,3 +1,9 @@
+univention-shalla-list-downloader (2.0.0-8) unstable; urgency=low
+
+  * Corrected broken symlink when downloader gets installed before proxy. Issue #9280
+
+ -- Hendrik Peter <hpeter@univention.de>  Wed, 23 May 2018 14:12:01 +0200
+
 univention-shalla-list-downloader (2.0.0-7) unstable; urgency=low
 
   * Fixed dpkg output pipe error on call of the relinking script. Issue #9280
