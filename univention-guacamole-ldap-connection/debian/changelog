@@ -1,3 +1,31 @@
+univention-guacamole-ldap-connection (2.0.7-2) unstable; urgency=medium
+
+  * Increased joinscript number for 99univention_install_guacamole
+  * Presales #10212
+
+ -- Timo Denissen <denissen@univention.de>  Fri, 11 May 2018 10:18:26 +0200
+
+univention-guacamole-ldap-connection (2.0.6-1) unstable; urgency=medium
+
+  * Modified joinscript 99univention_install_guacamole to always redownload guacd
+  * Presales #10212
+
+ -- Timo Denissen <denissen@univention.de>  Wed, 09 May 2018 15:49:07 +0200
+
+univention-guacamole-ldap-connection (2.0.5-2) unstable; urgency=medium
+
+  * Fixed postinst for running the searchuser join script
+  * Presales #10212
+
+ -- Timo Denissen <denissen@univention.de>  Wed, 09 May 2018 15:24:50 +0200
+
+univention-guacamole-ldap-connection (2.0.5-1) unstable; urgency=medium
+
+  * Switched from mjumper-images to guacamole-images
+  * Presales #10212
+
+ -- Timo Denissen <denissen@univention.de>  Wed, 09 May 2018 14:43:55 +0200
+
 univention-guacamole-ldap-connection (2.0.4-1) unstable; urgency=medium
 
   * Fixed joinscript to install Guacamole

@@ -11,8 +11,8 @@ Paket "univention-guacamole-rollout"
 **	guacamole/ldap/username/attribute="uid"
 **	guacamole/external/port=8080
 * Das Joinscript 99univention_install_guacamole.inst
-** Zieht mit Docker das aktuelle mjumper/guacd-Image
-** Lädt das Image mjumper/guacamole herunter
+** Lädt mit Docker das Image "guacamole/guacd:0.9.13-incubating" herunter
+** Lädt mit Docker das Image "guacamole/guacamole:0.9.13-incubating" herunter
 ** Prüft auf Vorhandensein der vier UCR-Variablen guacamole/*
 ** Bei Fehlen bricht das Joinscript ab
 ** Bei Vorhandensein wird der Guacamole-Container mit den in den UCR-Variablen gesetzten Einstellungen ausgerollt
