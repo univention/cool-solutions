@@ -1,0 +1,27 @@
+Source: univention-ldap-restore
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Standards-Version: 3.9.8
+Build-Depends: debhelper (>= 7),
+ python-all,
+ python-support (>= 0.90),
+ univention-config-dev,
+ ucslint-univention,
+ python-mock,
+ python-mockldap
+
+Package: univention-ldap-restore
+Architecture: all
+Depends: ${python:Depends},
+ ${misc:Depends},
+ python-univention-config-registry (>= 10.0.0-1),
+Provides: ${python:Provides}
+Description: UCS - restore LDAP object from backup
+ This package contains tools to restore a LDAP DN
+ from a backup (ldif) file.
+ .
+ It is part of Univention Corporate Server (UCS), an
+ integrated, directory driven solution for managing
+ corporate environments. For more information about UCS,
+ refer to: http://www.univention.de/

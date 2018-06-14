@@ -1,0 +1,2 @@
+python/restore_ldap_object_from_backup.py usr/share/pyshared/univention/
+univention-restore-ldap-object-from-backup usr/bin

@@ -1,0 +1,5 @@
+univention-ldap-restore (0.1.0-1) unstable; urgency=medium
+
+  * Task #11292: init
+
+ -- Felix Botner <botner@univention.de>  Thu, 14 Jun 2018 12:42:46 +0200
