@@ -39,13 +39,13 @@ RELOAD=true
 . /usr/share/univention-lib/all.sh
 
 case "$1" in
-	-u|--ucr)
-	RELOAD=false
-	shift
-	;;
-	*)
-	shift
-	;;
+    -u|--ucr)
+    RELOAD=false
+    shift
+    ;;
+    *)
+    shift
+    ;;
 esac
 
 create_logfile_if_missing /var/log/univention/shalla-list-downloader.log "root:adm" 640
@@ -54,29 +54,29 @@ exec 1>&3
 
 eval "$(ucr shell proxy/filter/global/blacklists/domains)"
 if dpkg --get-selections | grep -q "^ucs-school-webproxy[[:space:]]*install$"; then
-	# Trigger reload of the webproxy
-	if $RELOAD; then
-		ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"
-	else
-		echo "Resyncing the proxy blacklist"
-		# recreate all links
-		rm -rf "$PROXYHOME/$BL_DIR"
-		ln -s "$DBHOME/$BL_DIR" "$PROXYHOME/$BL_DIR"
-	fi
+    # Trigger reload of the webproxy
+    if $RELOAD; then
+        ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"
+    else
+        echo "Resyncing the proxy blacklist"
+        # recreate all links
+        rm -rf "$PROXYHOME/$BL_DIR"
+        ln -s "$DBHOME/$BL_DIR" "$PROXYHOME/$BL_DIR"
+    fi
 
-	# TODO: is this needed?
-	#echo "Setting lists permissions"
-	#chown -R root:proxy "${DBHOME}/${BL_DIR}"
-	#chmod -R g+rw "${DBHOME}/${BL_DIR}"
+    # TODO: is this needed?
+    #echo "Setting lists permissions"
+    #chown -R root:proxy "${DBHOME}/${BL_DIR}"
+    #chmod -R g+rw "${DBHOME}/${BL_DIR}"
 fi
 
 eval "$(ucr shell dns/blacklist/record/domains)"
 if [[ -n "${dns_blacklist_record_domains}" ]]; then
-	# Trigger reload of the dns server
-	if $RELOAD; then
-		echo "Resyncing the bind blacklist"
-		/usr/share/univention-bind-blacklist/univention-bind-blacklist
-	fi
+    # Trigger reload of the dns server
+    if $RELOAD; then
+        echo "Resyncing the bind blacklist"
+        /usr/share/univention-bind-blacklist/univention-bind-blacklist
+    fi
 fi
 
 exit 0
