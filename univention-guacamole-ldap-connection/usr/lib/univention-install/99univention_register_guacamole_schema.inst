@@ -32,13 +32,18 @@ VERSION=2
 
 eval "$(ucr shell)"
 
-. /usr/share/univention-lib/ldap.sh
 . /usr/share/univention-join/joinscripthelper.lib
+. /usr/share/univention-lib/ldap.sh
 joinscript_init
 
 echo -e "Registering Guacamole schema... "
 ucs_registerLDAPExtension "$@" \
     --schema /var/lib/univention-ldap/local-schema/guacConfigGroup.schema
+echo -e "Done!"
+
+echo -e "Registering Guacamole protocol options... "
+ucs_registerLDAPExtension "$@" \
+    --udm_syntax /usr/share/pyshared/univention/admin/syntax.d/guacamole_protocol.py
 echo -e "Done!"
 
 echo -e "Adding extended attribute for Guacamole protocol... "
@@ -61,7 +66,7 @@ udm settings/extended_attribute create "$@" \
     --set longDescription="Remote computer's protocol" \
     --set translationLongDescription='"de_DE" "Protokoll des entfernten Computers"' \
     --set tabPosition=1 \
-    --set syntax="guacamole_protocol"
+    --set syntax=guacamole_protocol
 echo -e "Done!"
 
 echo -e "Adding extended attribute for Guacamole parameters... "

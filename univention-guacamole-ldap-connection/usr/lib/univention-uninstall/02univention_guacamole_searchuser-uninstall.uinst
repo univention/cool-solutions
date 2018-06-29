@@ -1,5 +1,5 @@
 #!/bin/bash
-# removal joinscript for univention-guacamole-rollout
+# removal searchuser joinscript for univention-guacamole-rollout
 #
 # Copyright (C) 2017-2018 Univention GmbH
 #
@@ -29,35 +29,21 @@
 # <http://www.gnu.org/licenses/>.
 
 VERSION=1
+SERVICE="GUACAMOLE_SEARCHUSER"
 
 . /usr/share/univention-join/joinscripthelper.lib
+. /usr/share/univention-lib/ldap.sh
 joinscript_init
 
-eval "$(ucr shell)"
+eval "$(ucr shell ldap/base)"
+eval "$(ucr shell hostname)"
 
-echo -e "Stopping and removing guacd... "
-/usr/bin/docker stop guacd
-/usr/bin/docker rm guacd
+ucs_removeServiceFromLocalhost "$SERVICE" "$@" || die
+
+echo -e "Removing guacamole searchuser... "
+udm users/user remove "$@" \
+    --dn "uid=guacamole-${hostname},cn=users,${ldap_base}"
 echo -e "Done!"
 
-echo -e "Stopping and removing Guacamole... "
-/usr/bin/docker stop guacamole
-/usr/bin/docker rm guacamole
-echo -e "Done!"
-
-echo -e "Disable Apache2 site for Guacamole... "
-a2dissite guacamole
-service apache2 reload
-echo -e "Done!"
-
-echo -e "Removing Guacamole from the overview site... "
-/usr/sbin/univention-config-registry unset \
-    ucs/web/overview/entries/service/guacamole/link \
-    ucs/web/overview/entries/service/guacamole/label \
-    ucs/web/overview/entries/service/guacamole/description \
-    ucs/web/overview/entries/service/guacamole/description/de \
-    ucs/web/overview/entries/service/guacamole/icon
-echo -e "Done!"
-
-joinscript_remove_script_from_status_file univention_install_guacamole
+joinscript_remove_script_from_status_file univention_guacamole_searchuser
 exit 0

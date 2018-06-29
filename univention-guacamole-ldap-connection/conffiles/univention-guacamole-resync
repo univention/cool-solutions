@@ -1,7 +1,8 @@
 #!/bin/bash
-# removal joinscript for univention-guacamole-schema
+# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2017-2018 Univention GmbH
+# Univention Guacamole UCR Hook
+# Copyright 2017-2018 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -28,22 +29,4 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-VERSION=1
-
-. /usr/share/univention-join/joinscripthelper.lib
-joinscript_init
-
-eval "$(ucr shell)"
-
-echo -e "Removing guacamole searchuser... "
-udm settings/extended_attribute remove "$@" \
-    --dn "cn=guacConfigProtocol,cn=custom attributes,cn=univention,${ldap_base}"
-echo -e "Done!"
-
-echo -e "Removing extended attribute for the Guacamole parameters... "
-udm settings/extended_attribute remove "$@" \
-    --dn="cn=guacConfigParameter,cn=custom attributes,cn=univention,${ldap_base}"
-echo -e "Done!"
-
-joinscript_remove_script_from_status_file univention_register_schema
-exit 0
+/usr/bin/univention-guacamole-renew

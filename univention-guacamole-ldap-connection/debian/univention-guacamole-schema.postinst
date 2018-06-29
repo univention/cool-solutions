@@ -31,6 +31,6 @@
 #DEBHELPER#
 
 . /usr/share/univention-lib/base.sh
-call_joinscript_on_dcmaster 99univention_register_guacamole_schema.inst || true
+call_joinscript 99univention_register_guacamole_schema.inst || true
 
 exit 0

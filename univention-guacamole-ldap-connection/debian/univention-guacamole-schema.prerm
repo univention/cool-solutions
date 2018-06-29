@@ -32,7 +32,7 @@
 
 if [ "$1" = "remove" ]
 then
-	cp /usr/lib/univention-uninstall/01univention_register_guacamole_schema-uninstall.uinst /usr/lib/univention-install
+    cp /usr/lib/univention-uninstall/01univention_register_guacamole_schema-uninstall.uinst /usr/lib/univention-install
 fi
 
 exit 0

@@ -1,5 +1,5 @@
 #!/bin/bash
-# removal searchuser joinscript for univention-guacamole-rollout
+# searchuser joinscript for univention-guacamole-rollout
 #
 # Copyright (C) 2017-2018 Univention GmbH
 #
@@ -32,19 +32,29 @@ VERSION=1
 SERVICE="GUACAMOLE_SEARCHUSER"
 
 . /usr/share/univention-join/joinscripthelper.lib
+. /usr/share/univention-lib/base.sh
+. /usr/share/univention-lib/ldap.sh
 joinscript_init
 
+ucs_addServiceToLocalhost "$SERVICE" "$@"
+
 eval "$(ucr shell ldap/base)"
+eval "$(ucr shell hostname)"
 
-. /usr/share/univention-lib/ldap.sh
-ucs_removeServiceFromLocalhost "$SERVICE" "$@" || die
-if ucs_isServiceUnused "$SERVICE" "$@"; then
-    echo -e "Removing extended attribute for the Guacamole protocol... "
-    udm users/user remove "$@" \
-        --dn "uid=guacamole,cn=users,${ldap_base}"
-    echo -e "Done!"
-fi
+echo -e "Creating search user for guacamole... "
+guacamole_pwd=create_machine_password
+echo -n "${guacamole_pwd}" > /etc/guacamole.secret
+chmod 600 /etc/guacamole.secret
 
-joinscript_remove_script_from_status_file univention_guacamole_searchuser
+udm users/user create "$@" \
+    --ignore_exists \
+    --position "cn=users,${ldap_base}" \
+    --set username="guacamole-${hostname}" \
+    --set lastname="Guacamole search user, system '${hostname}'" \
+    --set password="${guacamole_pwd}" \
+    --option=ldap_pwd
+unset guacamole_pwd
+echo -e "Done!"
 
+joinscript_save_current_version
 exit 0

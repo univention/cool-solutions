@@ -32,23 +32,16 @@
 
 if [ "$1" = "remove" ]
 then
-	/usr/sbin/univention-config-registry unset \
-	guacamole/config/base/dn \
-	guacamole/external/port \
-	guacamole/ldap/user/searchfilter \
-	guacamole/ldap/username/attribute \
-	guacamole/user/dn
+    /usr/sbin/univention-config-registry unset \
+    guacamole/config/base/dn \
+    guacamole/external/port \
+    guacamole/ldap/user/searchfilter \
+    guacamole/ldap/username/attribute \
+    guacamole/user/dn
 
-	eval $(ucr shell server/role)
-
-	if [ "${server_role}" = "domaincontroller_master" -o "${server_role}" = "domaincontroller_backup" ]; then
-		. /usr/share/univention-lib/all.sh
-		call_unjoinscript 02univention_guacamole_searchuser-uninstall.uinst
-		call_unjoinscript 01univention_install_guacamole-uninstall.uinst
-	else
-		/usr/lib/univention-install/01univention_install_guacamole-uninstall.uinst
-		rm /usr/lib/univention-install/01univention_install_guacamole-uninstall.uinst
-	fi
+    . /usr/share/univention-lib/all.sh
+    call_unjoinscript 02univention_guacamole_searchuser-uninstall.uinst || true
+    call_unjoinscript 01univention_install_guacamole-uninstall.uinst || true
 fi
 
 exit 0

@@ -1,7 +1,7 @@
-#!/bin/bash -e
-# preinst script for univention-guacamole-schema
+# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2017-2018 Univention GmbH
+# Univention Guacamole UCR Module - apache2 reload
+# Copyright 2017-2018 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -27,16 +27,12 @@
 # License with the Debian GNU/Linux or Univention distribution in file
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
+import subprocess
 
-#DEBHELPER#
+def preinst(baseConfig, changes):
+    pass
 
-eval $(ucr shell server/role)
-
-if ! [ "${server_role}" = "domaincontroller_master" -o "${server_role}" = "domaincontroller_backup" ]; then
-    echo -e "Only to be installed in the following system roles:"
-    echo -e "\t* UCS DC Master"
-    echo -e "\t* UCS DC Backup"
-    exit 1
-fi
-
-exit 0
+def postinst(baseConfig, changes):
+    # Altered Guacamole port, reload apache after postinst of '/etc/apache2/sites-available/guacamole.conf'
+    command = ['systemctl', 'reload', 'apache2']
+    return subprocess.call(command, shell=False)

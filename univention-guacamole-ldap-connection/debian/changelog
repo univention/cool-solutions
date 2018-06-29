@@ -1,3 +1,12 @@
+univention-guacamole-ldap-connection (2.0.8-25) unstable; urgency=low
+
+  * Migrated into App Center #8197
+  * Updated copyright
+  * Moved definition of UCR variables into App Center portal
+  * Fixed univention-guacamole-schema joinscript reset
+
+ -- Hendrik Peter <hpeter@univention.de>  Tue, 28 Jul 2018 15:12:22 +0200
+
 univention-guacamole-ldap-connection (2.0.7-2) unstable; urgency=medium
 
   * Increased joinscript number for 99univention_install_guacamole

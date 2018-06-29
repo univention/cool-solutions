@@ -1,5 +1,5 @@
 #!/bin/bash
-# searchuser joinscript for univention-guacamole-rollout
+# removal joinscript for univention-guacamole-schema
 #
 # Copyright (C) 2017-2018 Univention GmbH
 #
@@ -34,35 +34,21 @@ SERVICE="GUACAMOLE_SEARCHUSER"
 . /usr/share/univention-join/joinscripthelper.lib
 joinscript_init
 
-. /usr/share/univention-lib/ldap.sh
-ucs_addServiceToLocalhost "$SERVICE" "$@"
-
 eval "$(ucr shell ldap/base)"
 
-echo -n "Checking if search user already exists... "
-udm users/user list "$@" --filter uid=guacamole | grep -q "password"
-if [ $? -eq 0 ]; then
-    echo -e "Search user exists, skipping creation!"
-    joinscript_save_current_version
-    exit 0
+# Don't, if still needed
+. /usr/share/univention-lib/ldap.sh
+if ucs_isServiceUnused "$SERVICE" "$@"; then
+    echo -e "Removing extended attribute for the Guacamole protocol... "
+    udm settings/extended_attribute remove "$@" \
+        --dn "cn=guacConfigProtocol,cn=custom attributes,cn=univention,${ldap_base}"
+    echo -e "Done!"
+
+    echo -e "Removing extended attribute for the Guacamole parameters... "
+    udm settings/extended_attribute remove "$@" \
+        --dn="cn=guacConfigParameter,cn=custom attributes,cn=univention,${ldap_base}"
+    echo -e "Done!"
 fi
-echo -n "Not found... "
 
-guacamole_pwd=$(makepasswd --char=20 --string=abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789)
-echo -n "${guacamole_pwd}" > /etc/guacamole.secret
-chmod 600 /etc/guacamole.secret
-
-echo -e "Creating search user for guacamole... "
-udm users/user create "$@" \
-    --ignore_exists \
-    --position "cn=users,${ldap_base}" \
-    --set username="guacamole" \
-    --set lastname="Guacamole search user" \
-    --set password="${guacamole_pwd}" \
-    --option=ldap_pwd
-unset guacamole_pwd
-echo -e "Done!"
-
-joinscript_save_current_version
-
+joinscript_remove_script_from_status_file univention_register_guacamole_schema
 exit 0
