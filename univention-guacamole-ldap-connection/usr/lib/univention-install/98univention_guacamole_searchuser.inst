@@ -42,7 +42,7 @@ eval "$(ucr shell ldap/base)"
 eval "$(ucr shell hostname)"
 
 echo -e "Creating search user for guacamole... "
-guacamole_pwd=create_machine_password
+guacamole_pwd="$(create_machine_password)"
 echo -n "${guacamole_pwd}" > /etc/guacamole.secret
 chmod 600 /etc/guacamole.secret
 
