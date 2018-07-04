@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 # postrm script for univention-guacamole-schema
 #
 # Copyright (C) 2017-2018 Univention GmbH

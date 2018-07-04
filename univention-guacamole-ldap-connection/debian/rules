@@ -28,10 +28,10 @@
 # <http://www.gnu.org/licenses/>.
 
 # install UCR templates
-override_dh_install:
-	dh_install
+override_dh_auto_install:
 	univention-install-config-registry
 	univention-install-config-registry-info
+	dh_auto_install
 
 # ucslint during build
 override_dh_auto_test:
@@ -39,4 +39,4 @@ override_dh_auto_test:
 	dh_auto_test
 
 %:
-	dh $@ --with 'python_support'
+	dh $@ --with python2

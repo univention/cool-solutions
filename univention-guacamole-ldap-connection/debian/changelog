@@ -1,6 +1,12 @@
+univention-guacamole-ldap-connection (2.0.8-27) unstable; urgency=low
+
+  * Solved debian build warnings ä8197
+
+ -- Hendrik Peter <hpeter@univention.de>  Wed, 04 Jul 2018 16:35:18 +0200
+
 univention-guacamole-ldap-connection (2.0.8-26) unstable; urgency=low
 
-  * Fixed create_machine_password function call in Joinscript
+  * Fixed create_machine_password function call in Joinscript #8197
 
  -- Alexander Ulpts <ulpts@univention.de>  Wed, 04 Jul 2018 16:09:02 +0200
 

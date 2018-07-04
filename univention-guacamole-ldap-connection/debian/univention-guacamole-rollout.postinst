@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 # postinst script for univention-guacamole-rollout
 #
 # Copyright (C) 2017-2018 Univention GmbH
