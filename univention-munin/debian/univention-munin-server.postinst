@@ -34,10 +34,10 @@
 
 # set default baseconfig settings
 univention-config-registry set \
-	'munin/server/authenticate?yes' \
-	'auth/munin/restrict?yes' \
+	munin/server/authenticate?'yes' \
+	auth/munin/restrict?'yes' \
 	'auth/munin/group/Domain Admins?yes' \
-	'auth/munin/user/Administrator?yes'
+	auth/munin/user/Administrator?'yes'
 
 # umc overview
 univention-config-registry set \
