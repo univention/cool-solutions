@@ -1,3 +1,11 @@
+univention-munin (1.2.0-3) unstable; urgency=low
+
+  * Migrated to UCS 4.3. Issue #11575
+  * Copyright update
+  * Added automated service reload on attribute change
+
+ -- Hendrik Peter <hpeter@univention.de>  Fri, 06 Jul 2018 17:42:07 +0200
+
 univention-munin (1.1.0-1) unstable; urgency=low
 
   * Version Bump #6640
