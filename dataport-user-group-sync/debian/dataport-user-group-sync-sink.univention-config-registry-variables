@@ -1,0 +1,11 @@
+[dataport/user_group_sync/sink/user_container]
+Description[de]=Container in dem die synchronisierten Benutzer gespeichert werden
+Description[en]=container where the synchronised users are stored
+Type=str
+Categories=system
+
+[dataport/user_group_sync/sink/group_container]
+Description[de]=Container in dem die synchronisierten Gruppen gespeichert werden
+Description[en]=container where the synchronised groups are stored
+Type=str
+Categories=system
