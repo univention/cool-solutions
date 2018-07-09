@@ -1,3 +1,10 @@
+univention-munin (1.2.0-4) unstable; urgency=low
+
+  * Add index.html, if cronjob didn't run yet - Prevents display of
+    'Forbidden'-Error. Issue #8147
+
+ -- Hendrik Peter <hpeter@univention.de>  Mon, 09 Jul 2018 15:30:31 +0200
+
 univention-munin (1.2.0-3) unstable; urgency=low
 
   * Migrated to UCS 4.3. Issue #11575
