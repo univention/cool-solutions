@@ -1,3 +1,13 @@
+dataport-user-group-sync (1.0.0-2) unstable; urgency=medium
+
+  * Fork from sfb-user-group-sync #11448
+  * Update for UCS 4.3
+    - Update copyright
+    - Update interpreter version
+  * Add cron mechanism to transfer and import pickle files
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 10 Jul 2018 10:00:56 +0200
+
 dataport-user-group-sync (1.0.0-1) unstable; urgency=low
 
   * Initial release. (Ticket #2012101021012585)

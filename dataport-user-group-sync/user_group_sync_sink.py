@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 #
 """user group sync sink
@@ -270,6 +270,7 @@ _translate_user.mapping = {
 	'uid': ('username', univention.admin.mapping.ListToString, ),
 	'userPassword': ('password', _random_password, ),
 	}
+
 def _translate_user_update(attribute, value):
 	if attribute in _translate_user_update.ignore:
 		return (None, None, )
