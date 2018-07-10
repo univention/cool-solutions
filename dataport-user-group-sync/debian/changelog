@@ -10,6 +10,6 @@ dataport-user-group-sync (1.0.0-2) unstable; urgency=medium
 
 dataport-user-group-sync (1.0.0-1) unstable; urgency=low
 
-  * Initial release. (Ticket #2012101021012585)
+  * Initial release.
 
  -- Janek Walkenhorst <walkenhorst@univention.de>  Mon, 15 Jul 2013 14:36:43 +0200
