@@ -1,0 +1,29 @@
+[dataport/user_group_sync/sink/identifier]
+Description[de]=Identifier für den Pickle-Dateien vom Quell-System übertragen werden sollen
+Description[en]=Identifier for which pickle files shall be obtained from source system
+Type=str
+Categories=system
+
+[dataport/user_group_sync/sink/source/address]
+Description[de]=Hostname oder IP von dem Pickle-Dateien übertragen werden sollen
+Description[en]=Hostname or IP from which pickle files shall be obtained
+Type=str
+Categories=system
+
+[dataport/user_group_sync/sink/source/user]
+Description[de]=Benutzer zur Datenübertragung vom Quell-System
+Description[en]=User name for data transfer from source system
+Type=str
+Categories=system
+
+[dataport/user_group_sync/sink/source/pwdfile]
+Description[de]=Pfad zu Passwort-Datei zur Datenübertragung vom Quell-System
+Description[en]=Path to password file for data transfer from source system
+Type=str
+Categories=system
+
+[dataport/user_group_sync/sink/mapping/*]
+Description[de]=Mapping von OUs aus Quell-System zu OUs in diesem System
+Description[en]=Mapping of OUs from source system to OUs in this system
+Type=str
+Categories=system

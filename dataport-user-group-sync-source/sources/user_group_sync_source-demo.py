@@ -31,14 +31,13 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
+IDENTIFIER = 'demo'
+
 name = 'user_group_sync_source' # API, pylint: disable-msg=C0103
 description = 'Store user and group information to be transferred to another system.' # API, pylint: disable-msg=C0103
-FILTER_GROUP = '(&(objectClass=posixGroup)(objectClass=univentionGroup))'
-FILTER_USER = '(objectClass=posixAccount)'
-filter = '(|%s%s)' % (FILTER_USER, FILTER_GROUP, ) # API, pylint: disable-msg=W0622,C0103
 attributes = [] # API, pylint: disable-msg=C0103
 modrdn = '1' # API, pylint: disable-msg=C0103
-
+DB_BASE_PATH = '/var/lib/dataport-user-group-sync-source/'
 __package__ = '' # workaround for PEP 366, pylint: disable-msg=W0622
 
 import cPickle as pickle
@@ -46,11 +45,16 @@ import os
 import tempfile
 import time
 
+DB_PATH = os.path.join(DB_BASE_PATH, '{}'.format(IDENTIFIER))
+
 import univention.debug
 import univention.uldap
+import univention.config_registry
 
+ucr = univention.config_registry.ConfigRegistry()
+ucr.load()
 
-DATABASE_PATH = '/var/lib/dataport-user-group-sync-source'
+filter = ucr.get('dataport/user_group_sync/source/{}/filter'.format(IDENTIFIER)) # API, pylint: disable-msg=W0622,C0103
 
 def _log(message, level):
 	"""log a <message> (str) with log<level>"""
@@ -83,14 +87,14 @@ def _format_filename(timestamp):
 	return '%019.7f' % (timestamp, )
 
 def _write_file(filename, data):
-	"""write the <data> to <filename> in <DATABASE_PATH> atomically
+	"""write the <data> to <filename> in <DB_PATH> atomically
 	does not return before the data is stored on disk (fsync)"""
-	temporary_file = tempfile.NamedTemporaryFile(dir=DATABASE_PATH, delete=False)
+	temporary_file = tempfile.NamedTemporaryFile(dir=DB_PATH, delete=False)
 	temporary_file.write(data)
 	temporary_file.flush()
 	os.fsync(temporary_file.fileno())
 	temporary_file.close()
-	filename = os.path.join(DATABASE_PATH, filename)
+	filename = os.path.join(DB_PATH, filename)
 	os.rename(temporary_file.name, filename)
 	final_file = open(filename, 'ab')
 	os.fsync(final_file.fileno())

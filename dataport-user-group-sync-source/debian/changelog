@@ -1,0 +1,26 @@
+dataport-user-group-sync-source (1.0.0-3) unstable; urgency=medium
+
+  * Fork to individual package #11448
+  * Use individual source listener modules with identifiers for different sinks
+  * Add LDAP filter configuration via UCR for listener module
+  * Add script and config to restart listener service after changes to LDAP filters
+  * Remove pickle file push mechanism to sinks
+  * Use tempfile module correctly
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Fri, 20 Jul 2018 11:18:04 +0200
+
+dataport-user-group-sync-source (1.0.0-2) unstable; urgency=medium
+
+  * Fork from sfb-user-group-sync #11448
+  * Update for UCS 4.3
+    - Update copyright
+    - Update interpreter version
+  * Add cron mechanism to transfer and import pickle files
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 10 Jul 2018 10:00:56 +0200
+
+dataport-user-group-sync-source (1.0.0-1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Janek Walkenhorst <walkenhorst@univention.de>  Mon, 15 Jul 2013 14:36:43 +0200

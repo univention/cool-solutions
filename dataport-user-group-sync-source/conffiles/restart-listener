@@ -1,7 +1,6 @@
 #!/bin/sh
 #
 # user group sync source
-#  postinst script
 #
 # Copyright 2013-2018 Univention GmbH
 #
@@ -30,21 +29,4 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-#DEBHELPER#
-
-case "$1" in
-	configure)
-		chown listener /var/lib/dataport-user-group-sync-source
-		systemctl restart univention-directory-listener.service
-		;;
-
-	abort-upgrade|abort-remove|abort-deconfigure)
-		;;
-
-	*)
-		echo "postinst called with unknown argument '$1'" >&2
-		exit 1
-		;;
-esac
-
-exit 0
+systemctl restart univention-directory-listener.service

@@ -1,0 +1,5 @@
+[dataport/user_group_sync/source/*/filter]
+Description[de]=LDAP-Filter für Sink <identifier>
+Description[en]=LDAP Filter for sink <identifier>
+Type=str
+Categories=system
