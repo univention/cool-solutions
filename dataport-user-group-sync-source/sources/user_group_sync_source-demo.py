@@ -41,6 +41,8 @@ DB_BASE_PATH = '/var/lib/dataport-user-group-sync-source/'
 __package__ = '' # workaround for PEP 366, pylint: disable-msg=W0622
 
 import cPickle as pickle
+import pwd
+import grp
 import os
 import tempfile
 import time
@@ -50,110 +52,117 @@ DB_PATH = os.path.join(DB_BASE_PATH, '{}'.format(IDENTIFIER))
 import univention.debug
 import univention.uldap
 import univention.config_registry
+import listener
 
 ucr = univention.config_registry.ConfigRegistry()
 ucr.load()
 
 filter = ucr.get('dataport/user_group_sync/source/{}/filter'.format(IDENTIFIER)) # API, pylint: disable-msg=W0622,C0103
 
+owning_group = ucr.get('dataport/user_group_sync/source/{}/owning_group'.format(IDENTIFIER))
+owning_group_number = grp.getgrnam(owning_group).gr_gid
+
 def _log(message, level):
-	"""log a <message> (str) with log<level>"""
-	message = '[%s] %s' % (name, message, )
-	univention.debug.debug(univention.debug.LISTENER, level, message)
+    """log a <message> (str) with log<level>"""
+    message = '[%s] %s' % (name, message, )
+    univention.debug.debug(univention.debug.LISTENER, level, message)
 def _log_debug(message):
-	"""log a "debug" <message> (str)"""
-	return _log(message, univention.debug.ALL)
+    """log a "debug" <message> (str)"""
+    return _log(message, univention.debug.ALL)
 def _log_info(message):
-	"""log a "info" <message> (str)"""
-	return _log(message, univention.debug.INFO)
+    """log a "info" <message> (str)"""
+    return _log(message, univention.debug.INFO)
 def _log_process(message):
-	"""log a "process" <message> (str)"""
-	return _log(message, univention.debug.PROCESS)
+    """log a "process" <message> (str)"""
+    return _log(message, univention.debug.PROCESS)
 def _log_warn(message):
-	"""log a "warn" <message> (str)"""
-	return _log(message, univention.debug.WARN)
+    """log a "warn" <message> (str)"""
+    return _log(message, univention.debug.WARN)
 def _log_error(message):
-	"""log a "error" <message> (str)"""
-	return _log(message, univention.debug.ERROR)
+    """log a "error" <message> (str)"""
+    return _log(message, univention.debug.ERROR)
 
 def _format_filename(timestamp):
-	"""format a unix timestamp into a filename
-	guaranteed to generate a unique name for every different <float> timestamp
-	(if timestamp is after 2011)"""
-	# 17 significant digits capture the full precision of python floats
-	# because timestamp is always > 1300000000 this format has 17 significant digits
-	# 11 digit seconds work until 5138-11-16
-	# 19 == 11 + 7 + 1 because the dot also consumes a character
-	return '%019.7f' % (timestamp, )
+    """format a unix timestamp into a filename
+    guaranteed to generate a unique name for every different <float> timestamp
+    (if timestamp is after 2011)"""
+    # 17 significant digits capture the full precision of python floats
+    # because timestamp is always > 1300000000 this format has 17 significant digits
+    # 11 digit seconds work until 5138-11-16
+    # 19 == 11 + 7 + 1 because the dot also consumes a character
+    return '%019.7f' % (timestamp, )
 
 def _write_file(filename, data):
-	"""write the <data> to <filename> in <DB_PATH> atomically
-	does not return before the data is stored on disk (fsync)"""
-	temporary_file = tempfile.NamedTemporaryFile(dir=DB_PATH, delete=False)
-	temporary_file.write(data)
-	temporary_file.flush()
-	os.fsync(temporary_file.fileno())
-	temporary_file.close()
-	filename = os.path.join(DB_PATH, filename)
-	os.rename(temporary_file.name, filename)
-	final_file = open(filename, 'ab')
-	os.fsync(final_file.fileno())
-	final_file.close()
+    """write the <data> to <filename> in <DB_PATH> atomically
+    does not return before the data is stored on disk (fsync)"""
+    temporary_file = tempfile.NamedTemporaryFile(dir=DB_PATH, delete=False)
+    temporary_file.write(data)
+    temporary_file.flush()
+    os.fsync(temporary_file.fileno())
+    temporary_file.close()
+    filename = os.path.join(DB_PATH, filename)
+    os.rename(temporary_file.name, filename)
+    final_file = open(filename, 'ab')
+    os.fsync(final_file.fileno())
+    final_file.close()
+    listener.setuid(0)
+    os.chown(filename, -1, owning_group_number)
+    listener.unsetuid()
 
 def _wait_until_after(timestamp):
-	"""wait until the current (system) time is later than <timestamp>"""
-	while time.time() <= timestamp:
-		time.sleep(0.01)
+    """wait until the current (system) time is later than <timestamp>"""
+    while time.time() <= timestamp:
+        time.sleep(0.01)
 
 def _format_data(object_dn, new_attributes):
-	"""encode (serialise) object data"""
-	data = (object_dn, new_attributes, )
-	return pickle.dumps(data, protocol=2)
+    """encode (serialise) object data"""
+    data = (object_dn, new_attributes, )
+    return pickle.dumps(data, protocol=2)
 
 def handler(object_dn, new_attributes, _, command):
-	"""called for each uniqueMember-change on a group"""
-	_log_debug("handler for: %r %r" % (object_dn, command, ))
-	_wait_until_after(handler.last_time)
-	timestamp = time.time()
-	filename = _format_filename(timestamp)
-	data = _format_data(object_dn, new_attributes)
-	_write_file(filename, data)
-	handler.last_time = timestamp
-handler.last_time = 1300000000
+    """called for each uniqueMember-change on a group"""
+    _log_debug("handler for: %r %r" % (object_dn, command, ))
+    _wait_until_after(handler.last_time)
+    timestamp = time.time()
+    filename = _format_filename(timestamp)
+    data = _format_data(object_dn, new_attributes)
+    _write_file(filename, data)
+    handler.last_time = timestamp
+    handler.last_time = 1300000000
 
 def _connect_ldap():
-	"""open uldap connection"""
-	return univention.uldap.access(
-		host=_connect_ldap.ldapserver,
-		base=_connect_ldap.basedn,
-		binddn=_connect_ldap.binddn,
-		bindpw=_connect_ldap.bindpw,
-		start_tls=2
-		)
+    """open uldap connection"""
+    return univention.uldap.access(
+        host=_connect_ldap.ldapserver,
+        base=_connect_ldap.basedn,
+        binddn=_connect_ldap.binddn,
+        bindpw=_connect_ldap.bindpw,
+        start_tls=2
+        )
 _connect_ldap.ldapserver = None
 _connect_ldap.basedn = None
 _connect_ldap.binddn = None
 _connect_ldap.bindpw = None
 
 def setdata(key, value):
-	"""called multiple times to set the LDAP configuration"""
-	if key == 'basedn':
-		_connect_ldap.basedn = value
-	elif key == 'binddn':
-		_connect_ldap.binddn = value
-	elif key == 'bindpw':
-		_connect_ldap.bindpw = value
-	elif key == 'ldapserver':
-		_connect_ldap.ldapserver = value
+    """called multiple times to set the LDAP configuration"""
+    if key == 'basedn':
+        _connect_ldap.basedn = value
+    elif key == 'binddn':
+        _connect_ldap.binddn = value
+    elif key == 'bindpw':
+        _connect_ldap.bindpw = value
+    elif key == 'ldapserver':
+        _connect_ldap.ldapserver = value
 
 def initialize():
-	"""called for initial (or re)-sync"""
+    """called for initial (or re)-sync"""
 
 def clean():
-	"""called before resync"""
+    """called before resync"""
 
 def prerun():
-	"""called before a batch of handler calls (until next postrun)"""
+    """called before a batch of handler calls (until next postrun)"""
 
 def postrun():
-	"""called 15s after the last handler call"""
+    """called 15s after the last handler call"""

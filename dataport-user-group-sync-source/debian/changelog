@@ -1,3 +1,9 @@
+dataport-user-group-sync-source (1.0.0-4) unstable; urgency=medium
+
+  * Change group ownership of pickle files to gid of group defined in UCR #11448
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 25 Jul 2018 17:03:16 +0200
+
 dataport-user-group-sync-source (1.0.0-3) unstable; urgency=medium
 
   * Fork to individual package #11448
