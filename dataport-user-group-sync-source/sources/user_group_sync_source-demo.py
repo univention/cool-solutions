@@ -107,6 +107,7 @@ def _write_file(filename, data):
     final_file.close()
     listener.setuid(0)
     os.chown(filename, -1, owning_group_number)
+    os.chmod(filename, 0640)
     listener.unsetuid()
 
 def _wait_until_after(timestamp):
@@ -128,17 +129,17 @@ def handler(object_dn, new_attributes, _, command):
     data = _format_data(object_dn, new_attributes)
     _write_file(filename, data)
     handler.last_time = timestamp
-    handler.last_time = 1300000000
+handler.last_time = 1300000000
 
 def _connect_ldap():
     """open uldap connection"""
     return univention.uldap.access(
-        host=_connect_ldap.ldapserver,
-        base=_connect_ldap.basedn,
-        binddn=_connect_ldap.binddn,
-        bindpw=_connect_ldap.bindpw,
-        start_tls=2
-        )
+    host=_connect_ldap.ldapserver,
+    base=_connect_ldap.basedn,
+    binddn=_connect_ldap.binddn,
+    bindpw=_connect_ldap.bindpw,
+    start_tls=2
+    )
 _connect_ldap.ldapserver = None
 _connect_ldap.basedn = None
 _connect_ldap.binddn = None
