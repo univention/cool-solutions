@@ -83,12 +83,7 @@ fi
 
 # A simple index.html to avoid the 403 error
 if [ ! -f /var/cache/munin/www/index.html ]; then
-    echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-<head><link rel="stylesheet" href="./static/style-new.css" type="text/css" /><title></title><meta http-equiv="content-type" content="application/xhtml+xml; charset=iso-8859-1" /><link rel="icon" type="image/vnd.microsoft.icon" href="./static/favicon.ico" /><link rel="SHORTCUT ICON" href="./static/favicon.ico"/></head><body>
-<div id="header"><h1><a href="."><span class="logo"></span></a> <span class="currentpage">Overview</span></h1></div>
-<div id="main"><div id="nav"><p class="navigationjump"><a href="#content">Skip navigation</a></p><h2>Problems</h2><ul><li>Critical</li><li>Warning</li><li>Unknown</li></ul><h2>Groups</h2><ul><li></li></ul><h2>Categories</h2><ul><li>disk [ d w m y ]</li><li>munin [ d w m y ]</li><li>network [ d w m y ]</li><li>nfs [ d w m y ]</li><li>postfix [ d w m y ]</li><li>processes [ d w m y ]</li><li>system [ d w m y ]</li><li>time [ d w m y ]</li></ul></div>
-<div id="content"><h2>Overview</h2><ul class="groupview">No data has been generated yet. Correctly configure Munin nodes and call the following command once to initially generate the data:<br><br><i style="color: black;">&nbsp;sudo -u munin /usr/bin/munin-cron</i></ul><div class="contentpusher"></div></div></div>
-<div id="footer"><p class="tagline"> </p></div></body></html>' > /var/cache/munin/www/index.html
+    echo '<html><head><title>Munin</title></head><body>Munin has not run yet.  Please try again in a few moments.</body></html>' > /var/cache/munin/www/index.html
 	chmod 644 /var/cache/munin/www/index.html
 	chown munin:munin /var/cache/munin/www/index.html
 fi

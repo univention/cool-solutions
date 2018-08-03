@@ -1,3 +1,9 @@
+univention-munin (1.2.0-5) unstable; urgency=low
+
+  * Removed references to non-existent dependencies. Issue #8147
+
+ -- Hendrik Peter <hpeter@univention.de>  Fri, 03 Aug 2018 14:57:01 +0200
+
 univention-munin (1.2.0-4) unstable; urgency=low
 
   * Add index.html, if cronjob didn't run yet - Prevents display of
