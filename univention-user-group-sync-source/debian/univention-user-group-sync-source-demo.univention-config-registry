@@ -1,3 +1,0 @@
-Type: script
-Script: restart-listener
-Variables: dataport/user_group_sync/source/.*/filter

@@ -61,8 +61,8 @@ def readOUMappingList():
     global ouMappingList
     ouMappingList = []
     for key in ucr.keys():
-        if key.startswith('dataport/user_group_sync/sink/mapping/'):
-            ouMappingList.append(re.sub(r'dataport\/user_group_sync\/sink\/mapping\/', r'', key))
+        if key.startswith('ldap/sync/sink/mapping/'):
+            ouMappingList.append(re.sub(r'ldap\/sync\/sink\/mapping\/', r'', key))
 
 def getLdapConnection():
     global lo, po, user_module, group_module
@@ -123,7 +123,7 @@ def _decode_data(raw):
 def applyOUMapping(dn):
     for ou in ouMappingList:
         if re.match(r'.*ou\={}'.format(ou), dn):
-            dn = re.sub(r'ou\={}'.format(ou), r'ou={}'.format(ucr.get('dataport/user_group_sync/sink/mapping/{}'.format(ou))), dn)
+            dn = re.sub(r'ou\={}'.format(ou), r'ou={}'.format(ucr.get('ldap/sync/sink/mapping/{}'.format(ou))), dn)
     return dn
 
 def getPosition(user_dn):

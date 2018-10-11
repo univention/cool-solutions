@@ -31,7 +31,7 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-IDENTIFIER = 'demo'
+IDENTIFIER = 'demo' # TODO: Change
 
 name = 'user_group_sync_source' # API, pylint: disable-msg=C0103
 description = 'Store user and group information to be transferred to another system.' # API, pylint: disable-msg=C0103
@@ -57,9 +57,9 @@ import listener
 ucr = univention.config_registry.ConfigRegistry()
 ucr.load()
 
-filter = ucr.get('dataport/user_group_sync/source/{}/filter'.format(IDENTIFIER)) # API, pylint: disable-msg=W0622,C0103
+filter = ucr.get('ldap/sync/source/{}/filter'.format(IDENTIFIER)) # API, pylint: disable-msg=W0622,C0103
 
-owning_group = ucr.get('dataport/user_group_sync/source/{}/owning_group'.format(IDENTIFIER))
+owning_group = ucr.get('ldap/sync/source/{}/owning_group'.format(IDENTIFIER))
 owning_group_number = grp.getgrnam(owning_group).gr_gid
 
 def _log(message, level):

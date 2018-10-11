@@ -34,7 +34,7 @@
 
 case "$1" in
 	configure)
-		chown listener /var/lib/univention-user-group-sync-sink
+		chown -R listener /var/lib/univention-user-group-sync-sink
 		;;
 
 	abort-upgrade|abort-remove|abort-deconfigure)

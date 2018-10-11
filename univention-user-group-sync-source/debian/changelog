@@ -1,3 +1,9 @@
+univention-user-group-sync-source (2.0.0-1) unstable; urgency=low
+
+  * Migration to Cool Solution
+
+ -- Hendrik Peter <hpeter@univention.de>  Thu, 11 Oct 2018 12:51:24 +0200
+
 univention-user-group-sync-source (1.0.0-4) unstable; urgency=medium
 
   * Change group ownership of pickle files to gid of group defined in UCR #11448
@@ -17,7 +23,7 @@ univention-user-group-sync-source (1.0.0-3) unstable; urgency=medium
 
 univention-user-group-sync-source (1.0.0-2) unstable; urgency=medium
 
-  * Fork from sfb-user-group-sync #11448
+  * Fork from xxx-user-group-sync #11448
   * Update for UCS 4.3
     - Update copyright
     - Update interpreter version
