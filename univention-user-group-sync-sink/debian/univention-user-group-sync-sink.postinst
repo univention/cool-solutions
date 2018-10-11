@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# user group sync source
+# user group sync sink
 #  postinst script
 #
 # Copyright 2013-2018 Univention GmbH
@@ -34,8 +34,7 @@
 
 case "$1" in
 	configure)
-		chown -R listener /var/lib/dataport-user-group-sync-source
-		systemctl restart univention-directory-listener.service
+		chown listener /var/lib/univention-user-group-sync-sink
 		;;
 
 	abort-upgrade|abort-remove|abort-deconfigure)

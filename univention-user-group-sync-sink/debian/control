@@ -1,4 +1,4 @@
-Source: dataport-user-group-sync-sink
+Source: univention-user-group-sync-sink
 Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
@@ -6,7 +6,7 @@ Build-Depends-Indep: debhelper (>= 7.0.50~),
  univention-config-dev
 Standards-Version: 3.5.5
 
-Package: dataport-user-group-sync-sink
+Package: univention-user-group-sync-sink
 Architecture: all
 Description: import transferred user and group information
  This package contains a program to import the stored user and group information

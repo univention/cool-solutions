@@ -46,7 +46,7 @@ import univention.config_registry
 ucr = univention.config_registry.ConfigRegistry()
 ucr.load()
 
-DB_PATH = '/var/lib/dataport-user-group-sync-sink'
+DB_PATH = '/var/lib/univention-user-group-sync-sink'
 DB_ENTRY_FORMAT = re.compile('^[0-9]{11}[.][0-9]{7}$')
 
 LOCK_FD = open(sys.argv[0], 'rb')

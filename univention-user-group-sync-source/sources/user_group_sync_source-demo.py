@@ -37,7 +37,7 @@ name = 'user_group_sync_source' # API, pylint: disable-msg=C0103
 description = 'Store user and group information to be transferred to another system.' # API, pylint: disable-msg=C0103
 attributes = [] # API, pylint: disable-msg=C0103
 modrdn = '1' # API, pylint: disable-msg=C0103
-DB_BASE_PATH = '/var/lib/dataport-user-group-sync-source/'
+DB_BASE_PATH = '/var/lib/univention-user-group-sync-source/'
 __package__ = '' # workaround for PEP 366, pylint: disable-msg=W0622
 
 import cPickle as pickle
