@@ -1,1 +1,1 @@
-user_group_sync_sink.py /usr/bin
+sources/user_group_sync_sink.py /usr/bin
