@@ -163,6 +163,25 @@ def createUser(position, attributes):
             user[attribute] = values
     user.create()
 
+def _delete(object_dn):
+    if object_dn.startswith('uid='):
+        return _delete_user(object_dn)
+    if object_dn.startswith('cn='):
+        return _delete_group(object_dn)
+    print 'Unknown object type %r' % (object_dn, )
+
+def _delete_user(user_dn):
+    uid = user_dn.split(',', 1)[0].split('=', 1)[1]
+    search_filter = univention.admin.filter.expression('uid', uid)
+    for existing_user in udmModuleUsersUser.lookup(configObject, ldapObject, search_filter):
+        existing_user.remove()
+
+def _delete_group(group_dn):
+    cn = group_dn.split(',', 1)[0].split('=', 1)[1]
+    search_filter = univention.admin.filter.expression('cn', cn)
+    for existing_group in udmModuleGroupsGroup.lookup(configObject, ldapObject, search_filter):
+        existing_group.remove()
+
 def _user_should_be_updated(existing_user, attributes, user_position):
     return existing_user.position.getDn().endswith(str(user_position))
 
