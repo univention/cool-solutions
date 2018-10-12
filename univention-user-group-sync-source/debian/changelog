@@ -1,8 +1,8 @@
-univention-user-group-sync-source (2.0.0-1) unstable; urgency=low
+univention-user-group-sync-source (2.0.0-3) unstable; urgency=low
 
   * Migration to Cool Solution
 
- -- Hendrik Peter <hpeter@univention.de>  Thu, 11 Oct 2018 12:51:24 +0200
+ -- Hendrik Peter <hpeter@univention.de>  Fri, 12 Oct 2018 13:22:18 +0200
 
 univention-user-group-sync-source (1.0.0-4) unstable; urgency=medium
 

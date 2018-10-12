@@ -1,1 +1,1 @@
-sources/user_group_sync_sink.py /usr/bin
+sources/univention_user_group_sync_sink.py /usr/bin
