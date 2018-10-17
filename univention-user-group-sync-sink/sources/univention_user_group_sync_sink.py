@@ -393,7 +393,6 @@ def main():
     getLdapConnection()
     getConfig()
     getUCRV()
-    print 'E: Example xx'
     _process_files()
     _release_lock()
 
