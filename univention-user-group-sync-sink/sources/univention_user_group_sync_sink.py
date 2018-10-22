@@ -120,12 +120,19 @@ def _process_file(path, filename):
     data = _read_file(path)
     _import(data)
     os.remove(path)
-    print filename # Important to remove the remote file too
+    #_write_file("%s/meta.delete" % DB_PATH, "%s\n" % filename, True) # Important to remove the remote file too
+    print filename
 
-def _read_file(path):
+def _read_file(path, append=False):
     '''Read the pickle file found under given path'''
     raw_data = open(path, 'rb').read()
     return _decode_data(raw_data)
+
+#def _write_file(path, text, append=False):
+    #'''Write a (meta) file found under given path'''
+    #
+    #with open(path, "a") as file:
+        #file.write(text)
 
 def _decode_data(raw):
     '''Decode the given pickle data'''

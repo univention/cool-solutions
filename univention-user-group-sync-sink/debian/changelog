@@ -1,14 +1,9 @@
-univention-user-group-sync-sink (2.0.0-3) unstable; urgency=low
-
-  * Readded delete functions
-
- -- Hendrik Peter <hpeter@univention.de>  Fri, 12 Oct 2018 13:22:18 +0200
-
-univention-user-group-sync-sink (2.0.0-1) unstable; urgency=low
+univention-user-group-sync-sink (2.0.0-4) unstable; urgency=low
 
   * Migration to Cool Solution #12769
+  * Readded delete functions #12769
 
- -- Hendrik Peter <hpeter@univention.de>  Thu, 11 Oct 2018 12:52:03 +0200
+ -- Hendrik Peter <hpeter@univention.de>  Mon, 22 Oct 2018 16:41:18 +0200
 
 univention-user-group-sync-sink (1.0.0-3) unstable; urgency=medium
 
