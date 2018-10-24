@@ -59,27 +59,13 @@ ucr.load()
 #
 def ucr_map_identifier():
     map_identifier = {}
-    for key in [x for x in ucr.keys() if x.startswith('ldap/sync/source/') and x.endswith('filter')]: #'ims/ldap/map/objectClass/'
-        keys = key.split('/')
-        ident = None if len(keys) != 5 else keys[3]
-        if ident is None:
-            continue
-        
-        filt = ucr.get('ldap/sync/source/{}/filter'.format(ident))
-        if not filt:
-            filt = filter
-        map_identifier[keys[3]] = { 
-            'filter': filt, 
-            #'address': ucr.get('ldap/sync/source/{}/sink/address'.format(ident)), 
-            #'user': ucr.get('ldap/sync/source/{}/sink/user'.format(ident)), 
-            #'pwdfile': ucr.get('ldap/sync/source/{}/sink/pwdfile'.format(ident)) 
-        }
-        path = os.path.join(DB_BASE_PATH, '{}'.format(ident))
-        if not os.path.isdir(path):
-            listener.setuid(0)
-            os.mkdir(path)
-            os.chown(path, owning_user_number, owning_group_number)
-            listener.unsetuid()
+    filt = ucr.get('ldap/sync/filter')
+    if not filt:
+        filt = filter
+    map_identifier['filter'] = filt
+    #'address': ucr.get('ldap/sync/address'), 
+    #'user': ucr.get('ldap/sync/user'), 
+    #'pwdfile': ucr.get('ldap/sync/pwdfile') 
     return map_identifier
 map_identifier = ucr_map_identifier()
 
@@ -155,11 +141,10 @@ def handler(object_dn, new_attributes, _, command):
     filename = _format_filename(timestamp)
     data = _format_data(object_dn, new_attributes)
     ldap = _connect_ldap()
-    for ident in map_identifier:
-        if not ldap.search(filter=map_identifier[ident]["filter"], base=object_dn):
-            continue
-        path = os.path.join(DB_BASE_PATH, '{}'.format(ident))
-        _write_file(filename, path, data)
+
+    if not ldap.search(filter=map_identifier["filter"], base=object_dn):
+        return
+    _write_file(filename, DB_BASE_PATH, data)
     handler.last_time = timestamp
 handler.last_time = 1300000000
 

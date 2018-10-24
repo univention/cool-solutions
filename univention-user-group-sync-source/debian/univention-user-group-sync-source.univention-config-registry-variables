@@ -1,22 +1,22 @@
-[ldap/sync/source/*/filter]
-Description[de]=LDAP-Filter für Sink <identifier>
-Description[en]=LDAP Filter for sink <identifier>
+[ldap/sync/filter]
+Description[de]=LDAP-Filter, welcher alle gewollten Benutzer und Gruppen filtert
+Description[en]=LDAP Filter that filters all wanted users and groups
 Type=str
 Categories=system
 
-[ldap/sync/source/*/sink/address]
+[ldap/sync/address]
 Description[de]=Hostname oder IP zu dem Pickle-Dateien übertragen werden sollen
 Description[en]=Hostname or IP to which pickle files shall be transmitted to
 Type=str
 Categories=system
 
-[ldap/sync/source/*/sink/user]
+[ldap/sync/user]
 Description[de]=Benutzer zur Datenübertragung zum Ziel-System
 Description[en]=User name for data transfer to the target system
 Type=str
 Categories=system
 
-[ldap/sync/source/*/sink/pwdfile]
+[ldap/sync/pwdfile]
 Description[de]=Pfad zu Passwort-Datei zur Datenübertragung zum Ziel-System
 Description[en]=Path to password file for data transfer to the target system
 Type=str
