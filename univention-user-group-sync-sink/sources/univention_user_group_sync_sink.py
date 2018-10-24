@@ -58,22 +58,6 @@ def _release_lock():
     '''Unlock this script'''
     fcntl.flock(LOCK_FD, fcntl.LOCK_UN) # UNlock
 
-# Map OUs
-def readOUMappingList():
-    '''Create a list of all OU mappings'''
-    global ouMappingList
-    ouMappingList = []
-    for key in ucr.keys():
-        if key.startswith('ldap/sync/sink/mapping/ou/'):
-            ouMappingList.append(re.sub(r'ldap\/sync\/sink\/mapping\/ou\/', r'', key))
-
-def applyOUMapping(dn):
-    '''Apply all OU mapping entries to the given DN'''
-    for ou in ouMappingList:
-        if re.match(r'.*ou\={}'.format(ou), dn):
-            dn = re.sub(r'ou\={}'.format(ou), r'ou={}'.format(ucr.get('ldap/sync/sink/mapping/ou/{}'.format(ou))), dn)
-    return dn
-
 # Initialize by creating an LDAP connection and getting UCR configuration
 def getLdapConnection():
     '''Create an LDAP connection and initialize UDM User and Group modules'''
@@ -138,12 +122,11 @@ def _decode_data(raw):
     '''Decode the given pickle data'''
     return pickle.loads(raw)
 
-# Find the User/Group by replacing the LDAP Base and mapping the OUs, if needed
+# Find the User/Group by replacing the LDAP Base, if needed
 def getPosition(user_dn):
-    '''Maps the given DN to the LDAP by replacing the base and OU, if defined'''
+    '''Maps the given DN to the LDAP by replacing the base, if defined'''
     position = re.sub(r'(dc\=.*$)', base, user_dn)
     position = re.sub(r'^(uid|cn)=[a-zA-Z0-9-_]*,', '', position)
-    position = applyOUMapping(position)
     return position
 
 # Temporarily generate a random password
@@ -396,7 +379,6 @@ def _import(data):
 # Execute
 def main():
     _take_lock()
-    readOUMappingList()
     getLdapConnection()
     getConfig()
     getUCRV()

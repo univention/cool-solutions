@@ -1,5 +1,0 @@
-[ldap/sync/sink/mapping/ou/*]
-Description[de]=Mapping von OUs aus Quell-System zu OUs in diesem System
-Description[en]=Mapping of OUs from source system to OUs in this system
-Type=str
-Categories=system

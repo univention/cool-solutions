@@ -1,3 +1,9 @@
+univention-user-group-sync-sink (2.0.0-5) unstable; urgency=low
+
+  * Removed OU mapping mechanism
+
+ -- Hendrik Peter <hpeter@univention.de>  Wed, 24 Oct 2018 13:13:08 +0200
+
 univention-user-group-sync-sink (2.0.0-4) unstable; urgency=low
 
   * Migration to Cool Solution #12769
