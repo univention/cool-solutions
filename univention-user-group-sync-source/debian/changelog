@@ -10,7 +10,7 @@ univention-user-group-sync-source (2.0.0-6) unstable; urgency=low
   * Renamed pickle file folder to /var/lib/univention-user-group-sync
   * Changed package structure
   * Use a service user for data transfer
-  * Renamed UCR attribute [ldap/sync/address to [ldap/sync/destination
+  * Renamed UCR attribute ldap/sync/address to ldap/sync/destination
   * Prevent multiple sync processes at the same time
   * Added a temporary fix for UCS Bug #48062
 
