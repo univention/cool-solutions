@@ -59,7 +59,8 @@ case "$1" in
         destination_host="$RET"
 
         # Confirm ssh connection
-        echo "Please enter the password of user 'ucs-sync' on the chosen destination host $destination_host."
+        echo "\nPlease enter the set password of user 'ucs-sync' on the chosen destination host $destination_host."
+        echo "It has to be the password that has been entered during the installation of package univention-user-group-sync-dest."
         echo "This password will only be needed once and won't be saved."
 
         ssh-copy-id -i /var/lib/univention-user-group-sync/.ssh/id_rsa -o StrictHostKeyChecking=no -o PubkeyAuthentication=no ucs-sync@$destination_host

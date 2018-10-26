@@ -1,3 +1,9 @@
+univention-user-group-sync-source (2.0.0-7) unstable; urgency=low
+
+  * Adjusted notes for the ucs-sync password #12769
+
+ -- Hendrik Peter <hpeter@univention.de>  Fri, 26 Oct 2018 17:22:59 +0200
+
 univention-user-group-sync-source (2.0.0-6) unstable; urgency=low
 
   * Get user input through debconf during the installation #12769
