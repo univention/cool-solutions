@@ -4,20 +4,8 @@ Description[en]=LDAP Filter that filters all wanted users and groups
 Type=str
 Categories=system
 
-[ldap/sync/address]
+[ldap/sync/destination]
 Description[de]=Hostname oder IP zu dem Pickle-Dateien übertragen werden sollen
 Description[en]=Hostname or IP to which pickle files shall be transmitted to
-Type=str
-Categories=system
-
-[ldap/sync/user]
-Description[de]=Benutzer zur Datenübertragung zum Ziel-System
-Description[en]=User name for data transfer to the target system
-Type=str
-Categories=system
-
-[ldap/sync/pwdfile]
-Description[de]=Pfad zu Passwort-Datei zur Datenübertragung zum Ziel-System
-Description[en]=Path to password file for data transfer to the target system
 Type=str
 Categories=system

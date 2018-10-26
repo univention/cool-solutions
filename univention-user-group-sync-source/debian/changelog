@@ -1,6 +1,18 @@
+univention-user-group-sync-source (2.0.0-6) unstable; urgency=low
+
+  * Get user input through debconf during the installation #12769
+  * Renamed pickle file folder to /var/lib/univention-user-group-sync
+  * Changed package structure
+  * Use a service user for data transfer
+  * Renamed UCR attribute [ldap/sync/address to [ldap/sync/destination
+  * Prevent multiple sync processes at the same time
+  * Added a temporary fix for UCS Bug #48062
+
+ -- Hendrik Peter <hpeter@univention.de>  Fri, 26 Oct 2018 15:43:53 +0200
+
 univention-user-group-sync-source (2.0.0-5) unstable; urgency=low
 
-  * Removal of multiple target system option
+  * Removal of multiple target system option #12769
 
  -- Hendrik Peter <hpeter@univention.de>  Wed, 24 Oct 2018 13:25:52 +0200
 

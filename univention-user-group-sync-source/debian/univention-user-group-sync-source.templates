@@ -1,0 +1,6 @@
+Template: univention-user-group-sync-source/destination_host
+Type: string
+Description: The FQDN or IP of the destination host
+ A SSH connection to the destination host has to be created once during the package installation
+ to validate a possible synchronization connection to the destination.
+

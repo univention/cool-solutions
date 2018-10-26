@@ -1,9 +1,9 @@
-#!/usr/bin/make -f
+#!/bin/sh
 #
-# user group sync
-#  rules file for the debian package
+# user_group_sync_source
+# Synchronize all existing ldap-diff files to the target host set in the ldap/sync/destination variable
 #
-# Copyright 2013-2018 Univention GmbH
+# Copyright 2018 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -30,10 +30,24 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-override_dh_install:
-	dh_install
-	univention-install-config-registry
-	univention-install-config-registry-info
+FILE_BASE=/var/lib/univention-user-group-sync
+LOCKFILE=${FILE_BASE}/.lock
+if [ -e ${LOCKFILE} ] && kill -0 `cat ${LOCKFILE}`; then
+    echo "Already running"
+    exit
+fi
 
-%:
-	dh $@
+# Make sure the lockfile is removed when we exit and then claim it
+trap "rm -f ${LOCKFILE}; exit" INT TERM EXIT
+echo $$ > ${LOCKFILE}
+
+# Synchronize
+eval "$(/usr/sbin/univention-config-registry shell ldap/sync/destination)"
+if [ -z ${ldap_sync_destination} ]; then
+    echo "No destination host defined"
+    exit
+fi
+rsync -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" -q --remove-source-files --ignore-missing-args --exclude="*/" --exclude=".*" ${FILE_BASE}/* ucs-sync@${ldap_sync_destination}:${FILE_BASE}/
+
+# Remove the lockfile
+rm -f ${LOCKFILE}

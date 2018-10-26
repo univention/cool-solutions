@@ -1,7 +1,7 @@
-#!/usr/bin/make -f
+#!/bin/sh
 #
-# user group sync
-#  rules file for the debian package
+# user group sync source
+#  postinst script
 #
 # Copyright 2013-2018 Univention GmbH
 #
@@ -30,10 +30,35 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-override_dh_install:
-	dh_install
-	univention-install-config-registry
-	univention-install-config-registry-info
+#DEBHELPER#
 
-%:
-	dh $@
+case "$1" in
+	configure)
+		# User listener:nogroup needs writing rights
+		chmod 777 /var/lib/univention-user-group-sync
+
+		# 
+		echo "Creating a synchronization cron job"
+		eval "$(ucr shell ldap/sync/destination)"
+		ucr set cron/ldap-sync-src/command="univention_user_group_sync_source_synchronize" \
+		cron/ldap-sync-src/time="*/5 * * * *" \
+		cron/ldap-sync-src/user="ucs-sync" \
+		cron/ldap-sync-src/description="Synchronize all existing ldap-diff files to the target host set in the ldap/sync/destination variable"
+
+		# Restart the directory listener to load our module
+		systemctl restart univention-directory-listener.service
+
+		# Temporary fix for Bug #48062
+		systemctl restart cron.service
+		;;
+
+	abort-upgrade|abort-remove|abort-deconfigure)
+		;;
+
+	*)
+		echo "postinst called with unknown argument '$1'" >&2
+		exit 1
+		;;
+esac
+
+exit 0

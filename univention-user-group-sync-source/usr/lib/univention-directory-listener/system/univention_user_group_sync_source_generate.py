@@ -42,15 +42,15 @@ import univention.uldap
 import univention.config_registry
 import listener
 
-name = 'univention_user_group_sync_source' # API, pylint: disable-msg=C0103
+name = 'univention_user_group_sync_source_generate' # API, pylint: disable-msg=C0103
 description = 'Store user and group information to be transferred to another system.' # API, pylint: disable-msg=C0103
 attributes = [] # API, pylint: disable-msg=C0103
 modrdn = '1' # API, pylint: disable-msg=C0103
-DB_BASE_PATH = '/var/lib/univention-user-group-sync-source/'
+DB_BASE_PATH = '/var/lib/univention-user-group-sync/'
 filter = '(|(&(objectClass=posixGroup)(objectClass=univentionGroup))(objectClass=posixAccount))' # API, pylint: disable-msg=W0622,C0103
 __package__ = '' # workaround for PEP 366, pylint: disable-msg=W0622
 
-owning_user_number = pwd.getpwnam('listener').pw_uid
+owning_user_number = pwd.getpwnam('ucs-sync').pw_uid
 owning_group_number = grp.getgrnam("root").gr_gid
 
 ucr = univention.config_registry.ConfigRegistry()
@@ -58,16 +58,10 @@ ucr.load()
 
 #
 def ucr_map_identifier():
-    map_identifier = {}
     filt = ucr.get('ldap/sync/filter')
-    if not filt:
-        filt = filter
-    map_identifier['filter'] = filt
-    #'address': ucr.get('ldap/sync/address'), 
-    #'user': ucr.get('ldap/sync/user'), 
-    #'pwdfile': ucr.get('ldap/sync/pwdfile') 
-    return map_identifier
-map_identifier = ucr_map_identifier()
+    if filt:
+        filter = filt
+ucr_map_identifier()
 
 # Log Messages
 def _log(message, level):
@@ -142,7 +136,7 @@ def handler(object_dn, new_attributes, _, command):
     data = _format_data(object_dn, new_attributes)
     ldap = _connect_ldap()
 
-    if not ldap.search(filter=map_identifier["filter"], base=object_dn):
+    if not ldap.search(filter=filter, base=object_dn):
         return
     _write_file(filename, DB_BASE_PATH, data)
     handler.last_time = timestamp
