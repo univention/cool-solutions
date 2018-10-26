@@ -1,17 +1,28 @@
-univention-user-group-sync-sink (2.0.0-5) unstable; urgency=low
+univention-user-group-sync-dest (2.0.0-6) unstable; urgency=low
 
-  * Removed OU mapping mechanism
+  * Rename package #12769
+  * Get user input through debconf during the installation
+  * Renamed pickle file folder to /var/lib/univention-user-group-sync
+  * Changed package structure
+  * Use a service user for data transfer
+  * Use a cron job to import all transfered changes
+
+ -- Hendrik Peter <hpeter@univention.de>  Fri, 26 Oct 2018 16:11:30 +0200
+
+univention-user-group-sync-dest (2.0.0-5) unstable; urgency=low
+
+  * Removed OU mapping mechanism #12769
 
  -- Hendrik Peter <hpeter@univention.de>  Wed, 24 Oct 2018 13:13:08 +0200
 
-univention-user-group-sync-sink (2.0.0-4) unstable; urgency=low
+univention-user-group-sync-dest (2.0.0-4) unstable; urgency=low
 
   * Migration to Cool Solution #12769
   * Readded delete functions #12769
 
  -- Hendrik Peter <hpeter@univention.de>  Mon, 22 Oct 2018 16:41:18 +0200
 
-univention-user-group-sync-sink (1.0.0-3) unstable; urgency=medium
+univention-user-group-sync-dest (1.0.0-3) unstable; urgency=medium
 
   * Fork to individual package #11449
   * Add mechanism to change LDAP base of objects before import
@@ -24,7 +35,7 @@ univention-user-group-sync-sink (1.0.0-3) unstable; urgency=medium
 
  -- Valentin Heidelberger <heidelberger@univention.de>  Fri, 20 Jul 2018 11:14:14 +0200
 
-univention-user-group-sync-sink (1.0.0-2) unstable; urgency=medium
+univention-user-group-sync-dest (1.0.0-2) unstable; urgency=medium
 
   * Fork from xxx-user-group-sync #11448
   * Update for UCS 4.3
@@ -34,7 +45,7 @@ univention-user-group-sync-sink (1.0.0-2) unstable; urgency=medium
 
  -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 10 Jul 2018 10:00:56 +0200
 
-univention-user-group-sync-sink (1.0.0-1) unstable; urgency=low
+univention-user-group-sync-dest (1.0.0-1) unstable; urgency=low
 
   * Initial release.
 

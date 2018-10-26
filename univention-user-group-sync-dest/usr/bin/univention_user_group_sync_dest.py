@@ -1,7 +1,7 @@
 #!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 #
-"""user group sync sink
+"""user group sync dest
     data import program"""
 #
 # Copyright 2013-2018 Univention GmbH
@@ -42,7 +42,7 @@ import univention.admin.objects
 import univention.admin.uldap
 import univention.config_registry
 
-DB_PATH = '/var/lib/univention-user-group-sync-sink'
+DB_PATH = '/var/lib/univention-user-group-sync'
 DB_ENTRY_FORMAT = re.compile('^[0-9]{11}[.][0-9]{7}$')
 LOCK_FD = open(sys.argv[0], 'rb')
 
