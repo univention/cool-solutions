@@ -136,8 +136,14 @@ def handler(object_dn, new_attributes, _, command):
     data = _format_data(object_dn, new_attributes)
     ldap = _connect_ldap()
 
+    # Filter. Only accept users and groups
     if not ldap.search(filter=filter, base=object_dn):
         return
+    
+    # Don't synchronize the system user
+    if ldap.search(filter="uid=ucs-sync", base=object_dn):
+        return
+    
     _write_file(filename, DB_BASE_PATH, data)
     handler.last_time = timestamp
 handler.last_time = 1300000000
