@@ -31,6 +31,7 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
+__package__ = '' # workaround for PEP 366, pylint: disable-msg=W0622
 import cPickle as pickle
 import pwd
 import grp
@@ -42,13 +43,12 @@ import univention.uldap
 import univention.config_registry
 import listener
 
-name = 'univention_user_group_sync_source_generate' # API, pylint: disable-msg=C0103
-description = 'Store user and group information to be transferred to another system.' # API, pylint: disable-msg=C0103
-attributes = [] # API, pylint: disable-msg=C0103
-modrdn = '1' # API, pylint: disable-msg=C0103
+name = 'univention_user_group_sync_source_generate'
+description = 'Store user and group information to be transferred to another system.'
+attributes = []
+modrdn = '1'
 DB_BASE_PATH = '/var/lib/univention-user-group-sync/'
-filter = '(|(&(objectClass=posixGroup)(objectClass=univentionGroup))(objectClass=posixAccount))' # API, pylint: disable-msg=W0622,C0103
-__package__ = '' # workaround for PEP 366, pylint: disable-msg=W0622
+filter = '(|(&(objectClass=posixGroup)(objectClass=univentionGroup))(objectClass=posixAccount))'
 
 owning_user_number = pwd.getpwnam('ucs-sync').pw_uid
 owning_group_number = grp.getgrnam("root").gr_gid
