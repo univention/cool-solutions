@@ -1,3 +1,9 @@
+univention-user-group-sync-dest (2.0.0-8) unstable; urgency=low
+
+  * Fix infinite loop of debconf during installation #12769
+
+ -- Hendrik Peter <hpeter@univention.de>  Mon, 29 Oct 2018 17:01:34 +0100
+
 univention-user-group-sync-dest (2.0.0-7) unstable; urgency=low
 
   * Adjusted notes for the ucs-sync password #12769

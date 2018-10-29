@@ -60,7 +60,8 @@ case "$1" in
         --set unixhome=/var/lib/univention-user-group-sync
         ucr set auth/sshd/user/ucs-sync=yes
 
-        exit 0
+        # Fix: debconf infinite loop (can't figure out when the script terminates)
+        db_stop
     ;;
 
     upgrade|abort-upgrade)
