@@ -35,6 +35,10 @@ case "$1" in
         ;;
 
     remove)
+        # Restart the directory listener to unload our module
+		echo "Restarting univention-directory-listener Service"
+		systemctl restart univention-directory-listener.service
+
         # Remove service user
         udm users/user remove --ignore_not_exists --dn "uid=ucs-sync,cn=users,$(ucr get ldap/base)"
         
@@ -44,7 +48,15 @@ case "$1" in
         # Unset all package ucr variables and the cronjob
         ucr unset ldap/sync/filter ldap/sync/destination || true
         ucr unset cron/ldap-sync-src/time cron/ldap-sync-src/user cron/ldap-sync-src/command cron/ldap-sync-src/description || true
+		
+       
+		# Temporary fix for Bug #48062
+		echo "Restarting cron Service"
+		systemctl restart cron.service
 
+        # 
+		echo "Reloading systemd daemon"
+		systemctl daemon-reload	
         ;;
     upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
         ;;

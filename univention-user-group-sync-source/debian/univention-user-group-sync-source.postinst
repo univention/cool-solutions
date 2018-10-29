@@ -46,10 +46,16 @@ case "$1" in
 		cron/ldap-sync-src/description="Synchronize all existing ldap-diff files to the target host set in the ldap/sync/destination variable"
 
 		# Restart the directory listener to load our module
+		echo "Restarting univention-directory-listener Service"
 		systemctl restart univention-directory-listener.service
 
 		# Temporary fix for Bug #48062
+		echo "Restarting cron Service"
 		systemctl restart cron.service
+
+		# Fix for Warning "cron.service changed on disk"
+		echo "Reloading systemd daemon"
+		systemctl daemon-reload		
 		;;
 
 	abort-upgrade|abort-remove|abort-deconfigure)
