@@ -1,3 +1,12 @@
+univention-user-group-sync-source (2.0.0-8) unstable; urgency=low
+
+  * Restart univention-directory-listener after removal, to unload the module #12769
+  * Fix infinite loop of debconf during installation
+  * Prevent synchronization of the service user
+  * Workaround for PEP 366, pylint: disable-msg=W0622
+
+ -- Hendrik Peter <hpeter@univention.de>  Mon, 29 Oct 2018 17:01:26 +0100
+
 univention-user-group-sync-source (2.0.0-7) unstable; urgency=low
 
   * Adjusted notes for the ucs-sync password #12769
