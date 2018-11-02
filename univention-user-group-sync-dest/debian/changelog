@@ -1,3 +1,10 @@
+univention-user-group-sync-dest (2.0.0-9) unstable; urgency=low
+
+  * Catch failed LDAP requests #12769
+  * Add Log file
+
+ -- Hendrik Peter <hpeter@univention.de>  Fri, 02 Nov 2018 16:18:14 +0100
+
 univention-user-group-sync-dest (2.0.0-8) unstable; urgency=low
 
   * Fix infinite loop of debconf during installation #12769

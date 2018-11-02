@@ -36,15 +36,18 @@ import fcntl
 import os
 import re
 import sys
+import time
 import univention.admin.config as config
 import univention.admin.modules as udm
 import univention.admin.objects
 import univention.admin.uldap
 import univention.config_registry
+import traceback
 
 DB_PATH = '/var/lib/univention-user-group-sync'
 DB_ENTRY_FORMAT = re.compile('^[0-9]{11}[.][0-9]{7}$')
 LOCK_FD = open(sys.argv[0], 'rb')
+LOG_PATH = '/var/log/univention/user-group-sync.log'
 
 ucr = univention.config_registry.ConfigRegistry()
 ucr.load()
@@ -57,6 +60,13 @@ def _take_lock():
 def _release_lock():
     '''Unlock this script'''
     fcntl.flock(LOCK_FD, fcntl.LOCK_UN) # UNlock
+
+def _log_message(message):
+    '''Write a Log Message'''
+    t = time.time()
+    t_str = time.strftime('%b %d %H:%M:%S', time.localtime(t))
+    with open(LOG_PATH, 'a+') as f:
+            f.write("%s: %s\n" % (t_str, message, ))
 
 # Initialize by creating an LDAP connection and getting UCR configuration
 def getLdapConnection():
@@ -84,6 +94,7 @@ def _process_files():
     '''Process the first <_process_files.limit> files'''
     for (_, path, filename, ) in sorted(_find_files())[:_process_files.limit]:
         _process_file(path, filename)
+
 _process_files.limit = 1000
 
 def _find_files():
@@ -104,19 +115,12 @@ def _process_file(path, filename):
     data = _read_file(path)
     _import(data)
     os.remove(path)
-    #_write_file("%s/meta.delete" % DB_PATH, "%s\n" % filename, True) # Important to remove the remote file too
-    print filename
+    #print filename # Debug
 
 def _read_file(path, append=False):
     '''Read the pickle file found under given path'''
     raw_data = open(path, 'rb').read()
     return _decode_data(raw_data)
-
-#def _write_file(path, text, append=False):
-    #'''Write a (meta) file found under given path'''
-    #
-    #with open(path, "a") as file:
-        #file.write(text)
 
 def _decode_data(raw):
     '''Decode the given pickle data'''
@@ -160,30 +164,46 @@ def createUser(position, attributes):
         (attribute, values, )= _translate_user(attribute, values)
         if attribute is not None:
             user[attribute] = values
-    user.create()
+    try:
+        user.create()
+    except:
+        _log_message("E: During User.create: %s" % traceback.format_exc())
+        print "E: During User.create: %s" % traceback.format_exc()
+        exit()
 
 # Delete the given User/Group
 def _delete(object_dn):
     '''Delete the given User/Group'''
     if object_dn.startswith('uid='):
+        _log_message("Delete User: %r" % object_dn)
         return _delete_user(object_dn)
     if object_dn.startswith('cn='):
+        _log_message("Delete Group: %r\n" % object_dn)
         return _delete_group(object_dn)
-    print 'E: Unknown object type (d): %r' % (object_dn, )
+    _log_message("E: Unknown object type (d): %r" % (object_dn, ))
+    print "E: Unknown object type (d): %r" % (object_dn, )
 
 def _delete_user(user_dn):
     '''Delete the given User'''
     uid = user_dn.split(',', 1)[0].split('=', 1)[1]
     search_filter = univention.admin.filter.expression('uid', uid)
     for existing_user in user_module.lookup(co, lo, search_filter):
-        existing_user.remove()
+        try:
+            existing_user.remove()
+        except:
+            _log_message("E: During User.remove: %s" % traceback.format_exc())
+            print "E: During User.remove: %s" % traceback.format_exc()
 
 def _delete_group(group_dn):
     '''Delete the given Group'''
     cn = group_dn.split(',', 1)[0].split('=', 1)[1]
     search_filter = univention.admin.filter.expression('cn', cn)
     for existing_group in group_module.lookup(co, lo, search_filter):
-        existing_group.remove()
+        try:
+            existing_group.remove()
+        except:
+            _log_message("E: During Group.remove: %s" % traceback.format_exc())
+            print "E: During Group.remove: %s" % traceback.format_exc()
 
 # Check, xxx
 def _user_should_be_updated(existing_user, attributes, user_position):
@@ -197,6 +217,7 @@ def _translate_user(attribute, value):
     if translate is not None:
         value = translate(value)
     return (attribute, value, )
+
 _translate_user.mapping = {
     'givenName': ('firstname', univention.admin.mapping.ListToString, ),
     'sn': ('lastname', univention.admin.mapping.ListToString, ),
@@ -214,6 +235,7 @@ def _translate_user_update(attribute, value):
     if attribute in _translate_user_update.ignore:
         return (None, None, )
     return _translate_user(attribute, value)
+
 _translate_user_update.ignore = frozenset((
     'userPassword',
 ))
@@ -230,14 +252,25 @@ def _update_user(user, attributes):
                 user[attribute] = values
                 changes = True
     if changes:
-        user.modify()
+        try:
+            user.modify()
+        except:
+            _log_message('E: During User.modify_changes: %s' % traceback.format_exc())
+            print 'E: During User.modify_changes: %s' % traceback.format_exc()
+            exit()
     modlist = []
     for (attribute, new_values, ) in attributes.items():
         if attribute in _update_user.direct:
             old_values = user.oldattr.get(attribute, [])
             if new_values != old_values:
                 modlist.append((attribute, old_values, new_values, ))
-    lo.modify(user.position.getDn(), modlist)
+    try:
+        lo.modify(user.position.getDn(), modlist)
+    except:
+        _log_message("E: During User.modify_ldap: %s" % traceback.format_exc())
+        print "E: During User.modify_ldap: %s" % traceback.format_exc()
+        exit()
+
 _update_user.direct = frozenset((
     'krb5Key',
     'pwhistory',
@@ -252,17 +285,18 @@ def _import_user(user_dn, attributes):
     '''Imports a new User or updates an existent User'''
     existing_user = _user_exists(attributes)
     user_position = getPosition(user_dn)
-    with open('/var/log/univention-user-group-sync.log', 'a') as f:
-        f.write(user_position)
     user_position_obj = univention.admin.uldap.position(base)
     user_position_obj.setDn(user_position)
     if existing_user is None:
+        _log_message("Create User: %r" % user_dn)
         createUser(user_position_obj, attributes)
         existing_user = _user_exists(attributes)
     if _user_should_be_updated(existing_user, attributes, user_position):
+        _log_message("Modify User: %r" % user_dn)
         _update_user(existing_user, attributes)
     else:
-        print 'I: Ignoring new %r for existing %r' % (user_dn, existing_user.position.getDn(), )
+        _log_message("I: Ignoring new %r for existing %r" % (user_dn, existing_user.position.getDn(), ))
+        print "I: Ignoring new %r for existing %r" % (user_dn, existing_user.position.getDn(), )
 
 
 # Check, if the given DN is a Group
@@ -291,7 +325,12 @@ def _create_group(position, attributes):
         (attribute, values, )= _translate_group(attribute, values)
         if attribute is not None:
             group[attribute] = values
-    group.create()
+    try:
+        group.create()
+    except:
+        _log_message("E: During Group.create: %s" % traceback.format_exc())
+        print "E: During Group.create: %s" % traceback.format_exc()
+        exit()
 
 # Check, xxx
 def _group_should_be_updated(existing_group, attributes, group_dn):
@@ -316,6 +355,7 @@ def _translate_group(attribute, value):
     if translate is not None:
         value = translate(value)
     return (attribute, value, )
+
 _translate_group.mapping = {
     'cn': ('name', univention.admin.mapping.ListToString, ),
     'description': ('description', univention.admin.mapping.ListToString, ),
@@ -327,6 +367,7 @@ def _translate_group_update(attribute, value):
     if attribute in _translate_group_update.ignore:
         return (None, None, )
     return _translate_group(attribute, value)
+
 _translate_group_update.ignore = frozenset((
 ))
 
@@ -342,37 +383,43 @@ def _update_group(group, attributes):
                 group[attribute] = values
                 changes = True
     if changes:
-        group.modify()
+        try:
+            group.modify()
+        except:
+            _log_message("E: During Group.modify_changes: %s" % traceback.format_exc())
+            print "E: During Group.modify_changes: %s" % traceback.format_exc()
+            exit()
 
 # Import a non-existent Group
 def _import_group(group_dn, attributes):
     '''Imports a new Group or updates an existent Group'''
     existing_group = _group_exists(attributes)
     group_position = getPosition(group_dn)
-    with open('/var/log/univention-user-group-sync.log', 'a') as f:
-        f.write(group_position)
     group_position_obj = univention.admin.uldap.position(base)
     group_position_obj.setDn(group_position)
     if existing_group is None:
+        _log_message("Create Group: %r" % group_dn)
         _create_group(group_position_obj, attributes)
         existing_group = _group_exists(attributes)
     if _group_should_be_updated(existing_group, attributes, group_position):
+        _log_message("Modify Group: %r" % group_dn)
         _update_group(existing_group, attributes)
     else:
-        print 'I: Ignoring new %r for existing %r' % (group_dn, existing_group.position.getDn(), )
+        _log_message("I: Ignoring new %r for existing %r "% (group_dn, existing_group.position.getDn(), ))
+        print "I: Ignoring new %r for existing %r" % (group_dn, existing_group.position.getDn(), )
 
 # Imports the given object
 def _import(data):
     '''check object type and dispatch to specific import method'''
     (object_dn, attributes, ) = data
     object_position = getPosition(object_dn)
-
     if attributes: # create/modify
         if _is_user(object_dn, attributes):
             return _import_user(object_dn, attributes)
         if _is_group(object_dn, attributes):
             return _import_group(object_dn, attributes)
-        print 'E: Unknown object type (c/m): %r' % (object_dn, )
+        _log_message("E: Unknown object type (c/m): %r" % object_dn)
+        print "E: Unknown object type (c/m): %r" % (object_dn, )
     else: # delete
         return _delete(object_dn)
 
