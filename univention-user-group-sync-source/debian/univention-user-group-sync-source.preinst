@@ -66,6 +66,19 @@ case "$1" in
         ssh-copy-id -i /var/lib/univention-user-group-sync/.ssh/id_rsa -o StrictHostKeyChecking=no -o PubkeyAuthentication=no ucs-sync@$destination_host
         ucr set ldap/sync/destination="$destination_host"
         
+        # Input the ldap filter
+        filter="(|(&(objectClass=posixGroup)(objectClass=univentionGroup))(objectClass=posixAccount))"
+        db_set univention-user-group-sync-source/ldap_filter "$filter"
+        db_input high univention-user-group-sync-source/ldap_filter || true
+        db_go || true
+
+        # Get the set ldap filter
+        db_get univention-user-group-sync-source/ldap_filter
+        if [ -z "$RET" ]; then
+            RET="$filter"
+        fi
+        ucr set ldap/sync/filter="$RET"
+
         # Fix: debconf infinite loop (can't figure out when the script terminates)
         db_stop
     ;;
