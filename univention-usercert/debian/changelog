@@ -1,3 +1,10 @@
+univention-usercert (4.1.0-2) unstable; urgency=low
+
+  * Bug #48061: UMC Error on Backup Server in computer Module 
+  * Issue #13287
+
+ -- Alexander Ulpts <ulpts@univention.de>  Fri, 09 Nov 2018 10:43:51 +0100
+
 univention-usercert (4.1.0-1) unstable; urgency=low
 
   * Copyright update and merged to 4.3. Issue #10456
