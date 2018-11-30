@@ -1,0 +1,5 @@
+univention-nextcloud-samba-share-config (1.0.0-0) unstable; urgency=low
+
+  * initial release
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 15 Nov 2018 13:46:17 +0100

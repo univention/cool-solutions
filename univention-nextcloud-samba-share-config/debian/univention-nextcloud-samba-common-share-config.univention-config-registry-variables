@@ -1,0 +1,19 @@
+[nextcloud-samba-share-config/remoteHost]
+Description[de]=Entfernter Nextcloud-Server auf dem die common Samba shares dieses Servers eingebunden werden sollen.
+Description[en]=Remote Nextcloud host to configure mounts of common Samba shares of this server on.
+Type=str
+
+[nextcloud-samba-share-config/remoteUser]
+Description[de]=
+Description[en]=User on remote Nextcloud host to configure mounts of common Samba shares of this server on.
+Type=str
+
+[nextcloud-samba-share-config/remotePwFile]
+Description[de]=
+Description[en]=Path to password file of user on remote Nextcloud host to configure mounts of common Samba shares of this server on.
+Type=str
+
+[nextcloud-samba-share-config/nextcloudGroup]
+Description[de]=
+Description[en]=DN of LDAP group to allow access to mounted common Samba shares in Nextcloud.
+Type=str

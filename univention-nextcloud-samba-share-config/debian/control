@@ -1,0 +1,22 @@
+Source: univention-nextcloud-samba-share-config
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Build-Depends: debhelper (>> 3.0.0), univention-config-dev
+Standards-Version: 3.5.2
+
+Package: univention-nextcloud-samba-group-share-config
+Architecture: all
+Description: directory listener module configuration of Samba share access in Nextcloud
+ This package provides a Univention directory listener module
+ that configures access to Samba shares in Nextcloud.
+
+Package: univention-nextcloud-samba-common-share-config
+Architecture: all
+Description: directory listener module configuration of Samba share access in Nextcloud
+ This package provides a Univention directory listener module
+ that configures access to Samba shares in Nextcloud.
+
+Package: univention-nextcloud-enable-for-classes-and-workgroups
+Architecture: all
+Description: directory listener module enabling Nextcloud for all classes and workgroups
