@@ -45,7 +45,7 @@ ucr.load()
 
 name='nextcloud-samba-share-config'
 description='Configure access to Samba shares in Nextcloud'
-filter='(&(objectClass=ucsschoolGroup)(objectClass=nextcloudGroup)(nextcloudEnabled=1))'
+filter='(&(objectClass=nextcloudGroup)(nextcloudEnabled=1))'
 attributes=[]
 
 def initialize():

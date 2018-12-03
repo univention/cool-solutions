@@ -34,12 +34,13 @@
 __package__='' 	# workaround for PEP 366
 
 import listener
+import re
 import univention.debug
 import univention.admin.uldap
 
 name='nextcloud-enable-for-classes-and-workgroups'
-description='Enable Nextcloud for all classes and workgroups'
-filter='(objectClass=ucsschoolGroup)'
+description='Enable Nextcloud for all classes, workgroups and Domain Users <ou>'
+filter='(|(cn=Domain Users *)(objectClass=ucsschoolGroup))'
 attributes=[]
 
 def initialize():
@@ -48,18 +49,29 @@ def initialize():
 
 def handler(dn, new, old):
 	univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "DN {}".format(dn))
-	#listener.setuid(0)
+	listener.setuid(0)
 	lo, po = univention.admin.uldap.getAdminConnection()
 
-	groupRole = lo.getAttr(dn, 'ucsschoolRole')[0]
+	domainUsersRegex = '^cn=Domain\ Users\ [A-Za-z0-9_]*'
+	domainUsersOuRegex = '^cn=Domain\ Users\ '
+	domainUsersMatch = re.match(domainUsersRegex, dn)
 
-	if groupRole.startswith('school_class:school') or groupRole.startswith('workgroup:school'):
-		#Enable group for nextcloud
-		nextcloudEnabled = lo.getAttr(dn, 'nextcloudEnabled')
-		if not nextcloudEnabled:
-			modlist = [('nextcloudEnabled', '', '1')]
-			lo.modify(dn, modlist)
-			univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, "Enabled Nextcloud for {}".format(dn))
+	try:
+		groupRole = lo.getAttr(dn, 'ucsschoolRole')[0]
+		if not groupRole.startswith('school_class:school') and not groupRole.startswith('workgroup:school'):
+			return
+	except:
+		if not domainUsersMatch:
+			return
+
+	#Enable group for nextcloud
+	nextcloudEnabled = lo.getAttr(dn, 'nextcloudEnabled')
+	if not nextcloudEnabled:
+		modlist = [('objectClass', '', 'nextcloudGroup'), ('nextcloudEnabled', '', '1')]
+		lo.modify(dn, modlist)
+		univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, "Enabled Nextcloud for {}".format(dn))
+
+	listener.unsetuid()
 
 def clean():
 	return

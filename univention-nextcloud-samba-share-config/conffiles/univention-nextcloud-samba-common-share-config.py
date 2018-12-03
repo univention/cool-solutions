@@ -35,6 +35,7 @@
 
 #import listener
 import subprocess
+import sys
 import time
 import univention.debug
 import univention.admin.uldap
@@ -43,8 +44,13 @@ ucr = ConfigRegistry()
 ucr.load()
 lo, po = univention.admin.uldap.getMachineConnection(ldap_master=False)
 
-commonShares = ucr.get('ucsschool/userlogon/commonshares').split(',')
-commonShares.remove('Marktplatz')
+commonShares = ucr.get('ucsschool/userlogon/commonshares')
+if not commonShares:
+	sys.exit(1)
+
+commonShares = commonShares.split(',')
+if 'Marktplatz' in commonShares:
+	commonShares.remove('Marktplatz')
 windomain = ucr.get('windows/domain')
 remoteUser = ucr.get('nextcloud-samba-share-config/remoteUser')
 remotePwFile = ucr.get('nextcloud-samba-share-config/remotePwFile')
@@ -100,4 +106,4 @@ for shareCn in commonShares:
 		else:
 			print("Group {} for share {} was not found in Nextcloud. Check ldapBaseGroups in Nextcloud ldap config.".format(applicableGroup, shareCn))
 	else:
-		print("Nothing to do: no share was found for group {}".format(shareCn))
+		print("Nothing to do: no share was found for CN {}".format(shareCn))

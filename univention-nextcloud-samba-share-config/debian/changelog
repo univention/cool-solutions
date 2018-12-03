@@ -1,5 +1,21 @@
+univention-nextcloud-samba-share-config (1.0.0-2) unstable; urgency=medium
+
+  * use ucsschoolRole to find classes and workgroups
+  * enable Nextcloud for Domain Users <ou> too
+  * handle common shares better
+  * update copyright
+  * Issue #13613
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 03 Dec 2018 12:37:51 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-1) unstable; urgency=medium
+
+  * fix rules file Issue #13613
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Fri, 30 Nov 2018 16:10:05 +0100
+
 univention-nextcloud-samba-share-config (1.0.0-0) unstable; urgency=low
 
-  * initial release #13613
+  * initial release Issue #13613
 
  -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 15 Nov 2018 13:46:17 +0100
