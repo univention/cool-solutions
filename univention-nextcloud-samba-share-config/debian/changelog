@@ -1,3 +1,9 @@
+univention-nextcloud-samba-share-config (1.0.0-3) unstable; urgency=medium
+
+  * Remove unnecessary debian files Issue #13613
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 03 Dec 2018 12:47:04 +0100
+
 univention-nextcloud-samba-share-config (1.0.0-2) unstable; urgency=medium
 
   * use ucsschoolRole to find classes and workgroups
