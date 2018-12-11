@@ -130,7 +130,7 @@ def _decode_data(raw):
 def getPosition(user_dn):
     '''Maps the given DN to the LDAP by replacing the base, if defined'''
     position = re.sub(r'(dc\=.*$)', base, user_dn)
-    position = re.sub(r'^(uid|cn)=[a-zA-Z0-9-_]*,', '', position)
+    position = re.sub(r'^(uid|cn)=[^,]+,', '', position)
     return position
 
 # Temporarily generate a random password
