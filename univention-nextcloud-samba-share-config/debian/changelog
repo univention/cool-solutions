@@ -1,3 +1,11 @@
+univention-nextcloud-samba-share-config (1.0.0-4) unstable; urgency=medium
+
+  * Get mount id correctly from NC
+  * Avoid performance issues in large domains while checking groups
+  * Issue #13613
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 13 Dec 2018 12:31:20 +0100
+
 univention-nextcloud-samba-share-config (1.0.0-3) unstable; urgency=medium
 
   * Remove unnecessary debian files Issue #13613

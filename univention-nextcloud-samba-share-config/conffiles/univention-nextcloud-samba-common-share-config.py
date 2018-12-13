@@ -71,22 +71,26 @@ for shareCn in commonShares:
 		getMountIdCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:list | grep '\/{}' | awk '{{print $2}}'".format(remotePwFile, remoteUser, remoteHost, shareCn)
 
 		try:
-			id, foo = subprocess.check_output(getMountIdCmd, shell=True)
+			mountId = subprocess.check_output(getMountIdCmd, shell=True)
+			mountId = re.search('[0-9]*', mountId).group()
 			print("Mount for {} is already configured. Re-setting config...".format(shareCn))
 		except:
 			print("No mount for {} configured yet. Configuring...".format(shareCn))
 
 			createMountCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:create '/{}' smb 'password::sessioncredentials'".format(remotePwFile, remoteUser, remoteHost, shareCn)
 			subprocess.call(createMountCmd, shell=True)
-			id, foo = subprocess.check_output(getMountIdCmd, shell=True)
+			mountId = subprocess.check_output(getMountIdCmd, shell=True)
+			mountId = re.search('[0-9]*', mountId).group()
 
-		addHostCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} host {}".format(remotePwFile, remoteUser, remoteHost, id, shareHost)
-		addShareRootCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} share '/'".format(remotePwFile, remoteUser, remoteHost, id)
-		addShareNameCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} root '{}'".format(remotePwFile, remoteUser, remoteHost, id, shareCn)
-		addShareDomainCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} domain '{}'".format(remotePwFile, remoteUser, remoteHost, id, windomain)
-		#removeAllApplicableCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --remove-all {}".format(id)
-		checkApplicableGroupCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:list | grep -E '\-\ {}:'".format(remotePwFile, remoteUser, remoteHost, applicableGroup)
-		addApplicableGroupCmd = 'univention-ssh --no-split {} {}@{} "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-group \'{}\' {}"'.format(remotePwFile, remoteUser, remoteHost, applicableGroup, id)
+		addHostCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} host {}".format(remotePwFile, remoteUser, remoteHost, mountId, shareHost)
+		addShareRootCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} share '/'".format(remotePwFile, remoteUser, remoteHost, mountId)
+		addShareNameCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} root '{}'".format(remotePwFile, remoteUser, remoteHost, mountId, shareCn)
+		addShareDomainCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} domain '{}'".format(remotePwFile, remoteUser, remoteHost, mountId, windomain)
+		#removeAllApplicableCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --remove-all {}".format(mountId)
+		#checkApplicableGroupCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:list | grep -E '\-\ {}:'".format(remotePwFile, remoteUser, remoteHost, applicableGroup)
+		checkApplicableGroupCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:adduser '{}' nc_admin".format(remotePwFile, remoteUser, remoteHost, groupCn)
+		cleanupApplicableGroupCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:removeuser '{}' nc_admin".format(remotePwFile, remoteUser, remoteHost, groupCn)
+		addApplicableGroupCmd = 'univention-ssh --no-split {} {}@{} "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-group \'{}\' {}"'.format(remotePwFile, remoteUser, remoteHost, applicableGroup, mountId)
 
 		subprocess.call(addHostCmd, shell=True)
 		subprocess.call(addShareRootCmd, shell=True)
@@ -102,6 +106,7 @@ for shareCn in commonShares:
 				break
 		if ret == 0:
 			subprocess.call(addApplicableGroupCmd, shell=True)
+			subprocess.call(cleanupApplicableGroupCmd, shell=True)
 			print("Finished share mount configuration for share {}".format(shareCn))
 		else:
 			print("Group {} for share {} was not found in Nextcloud. Check ldapBaseGroups in Nextcloud ldap config.".format(applicableGroup, shareCn))

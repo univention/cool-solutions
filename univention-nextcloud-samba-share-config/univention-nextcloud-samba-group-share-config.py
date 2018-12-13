@@ -89,22 +89,25 @@ def handler(dn, new, old):
 		shareSambaName = ''.join(share['univentionShareSambaName'])
 		getMountIdCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:list | grep '\/{}' | awk '{{print $2}}'".format(mountName)
 
-		try:
-			id, foo = subprocess.check_output(getMountIdCmd, shell=True)
+		mountId = subprocess.check_output(getMountIdCmd, shell=True)
+		mountId = re.search('[0-9]*', mountId).group()
+		if mountId:
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Mount for {} is already configured. Re-setting config...".format(groupCn))
-		except:
+		else:
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "No mount for {} configured yet. Configuring...".format(groupCn))
-
 			createMountCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:create '/{}' smb 'password::sessioncredentials'".format(mountName)
 			subprocess.call(createMountCmd, shell=True)
-			id, foo = subprocess.check_output(getMountIdCmd, shell=True)
+			mountId = subprocess.check_output(getMountIdCmd, shell=True)
+			mountId = re.search('[0-9]*', mountId).group()
 
-		addHostCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} host {}".format(id, shareHost)
-		addShareRootCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} share '/'".format(id)
-		addShareNameCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} root '{}'".format(id, shareName)
-		addShareDomainCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} domain '{}'".format(id, windomain)
-		checkApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:list | grep -E '\-\ {}:'".format(groupCn)
-		addApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-group '{}' {}".format(groupCn, id)
+		addHostCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} host {}".format(mountId, shareHost)
+		addShareRootCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} share '/'".format(mountId)
+		addShareNameCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} root '{}'".format(mountId, shareName)
+		addShareDomainCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} domain '{}'".format(mountId, windomain)
+		#checkApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:list | grep -E '\-\ {}:'".format(groupCn)
+		checkApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:adduser '{}' nc_admin".format(groupCn)
+		cleanupApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:removeuser '{}' nc_admin".format(groupCn)
+		addApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-group '{}' {}".format(groupCn, mountId)
 
 		subprocess.call(addHostCmd, shell=True)
 		subprocess.call(addShareRootCmd, shell=True)
@@ -120,6 +123,7 @@ def handler(dn, new, old):
 				break
 		if ret == 0:
 			subprocess.call(addApplicableGroupCmd, shell=True)
+			subprocess.call(cleanupApplicableGroupCmd, shell=True)
 			listener.unsetuid()
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Finished share mount configuration for share {}".format(groupCn))
 		else:
