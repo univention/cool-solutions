@@ -1,3 +1,10 @@
+univention-nextcloud-samba-share-config (1.0.0-5) unstable; urgency=medium
+
+  * Add package to configure mounts for home shares in domains with home shares on school servers
+  * Issue #13613
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 13 Dec 2018 15:53:54 +0100
+
 univention-nextcloud-samba-share-config (1.0.0-4) unstable; urgency=medium
 
   * Get mount id correctly from NC

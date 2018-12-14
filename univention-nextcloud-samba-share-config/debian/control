@@ -15,6 +15,13 @@ Description: directory listener module configuration of Samba share access in Ne
  This package provides a Univention directory listener module
  that configures access to Samba shares in Nextcloud.
 
+ Package: univention-nextcloud-samba-home-share-config
+ Architecture: all
+ Depends: univention-config, ${misc:Depends}
+ Description: directory listener module configuration of Samba share access in Nextcloud
+  This package provides a Univention directory listener module
+  that configures access to Samba shares in Nextcloud.
+
 Package: univention-nextcloud-samba-common-share-config
 Architecture: all
 Depends: univention-config, ${misc:Depends}
