@@ -91,6 +91,7 @@ for shareCn in commonShares:
 		checkApplicableGroupCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:adduser '{}' nc_admin".format(remotePwFile, remoteUser, remoteHost, groupCn)
 		cleanupApplicableGroupCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:removeuser '{}' nc_admin".format(remotePwFile, remoteUser, remoteHost, groupCn)
 		addApplicableGroupCmd = 'univention-ssh --no-split {} {}@{} "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-group \'{}\' {}"'.format(remotePwFile, remoteUser, remoteHost, applicableGroup, mountId)
+		addNcAdminApplicableUserCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-user 'nc_admin' {}".format(mountId)
 
 		subprocess.call(addHostCmd, shell=True)
 		subprocess.call(addShareRootCmd, shell=True)
@@ -109,6 +110,8 @@ for shareCn in commonShares:
 			subprocess.call(cleanupApplicableGroupCmd, shell=True)
 			print("Finished share mount configuration for share {}".format(shareCn))
 		else:
-			print("Group {} for share {} was not found in Nextcloud. Check ldapBaseGroups in Nextcloud ldap config.".format(applicableGroup, shareCn))
+			print("Group {} for share {} was not found in Nextcloud. Check ldapBaseGroups in Nextcloud ldap config. Adding nc_admin as applicable user to hide share mount from all other users".format(applicableGroup, shareCn))
+			subprocess.call(addNcAdminApplicableUserCmd, shell=True)
+
 	else:
 		print("Nothing to do: no share was found for CN {}".format(shareCn))

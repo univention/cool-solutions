@@ -108,6 +108,7 @@ def handler(dn, new, old):
 		checkApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:adduser '{}' nc_admin".format(groupCn)
 		cleanupApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:removeuser '{}' nc_admin".format(groupCn)
 		addApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-group '{}' {}".format(groupCn, mountId)
+		addNcAdminApplicableUserCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-user 'nc_admin' {}".format(mountId)
 
 		subprocess.call(addHostCmd, shell=True)
 		subprocess.call(addShareRootCmd, shell=True)
@@ -127,7 +128,8 @@ def handler(dn, new, old):
 			listener.unsetuid()
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Finished share mount configuration for share {}".format(groupCn))
 		else:
-			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Group {} for share {} was not found in Nextcloud. Check ldapBaseGroups in Nextcloud ldap config.".format(groupCn, shareName))
+			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Group {} for share {} was not found in Nextcloud. Check ldapBaseGroups in Nextcloud ldap config. Adding nc_admin as applicable user to hide share mount from all other users.".format(groupCn, shareName))
+			subprocess.call(addNcAdminApplicableUserCmd, shell=True)
 	else:
 		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Nothing to do: no share was found for group {}".format(groupCn))
 
