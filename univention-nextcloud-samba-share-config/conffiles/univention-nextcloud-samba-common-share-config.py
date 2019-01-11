@@ -97,7 +97,7 @@ for shareCn in commonShares:
 		subprocess.call(addShareNameCmd, shell=True)
 		subprocess.call(addShareDomainCmd, shell=True)
 		ret = subprocess.call(checkApplicableGroupCmd, shell=True)
-		timeout = time.time() + 15
+		timeout = time.time() + 600
 		while ret != 0:
 			print("Group {} does not yet exist in Nextcloud, waiting till it exists with 15s timeout".format(applicableGroup))
 			time.sleep(2)

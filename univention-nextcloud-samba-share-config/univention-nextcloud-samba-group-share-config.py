@@ -43,7 +43,7 @@ from univention.config_registry import ConfigRegistry
 ucr = ConfigRegistry()
 ucr.load()
 
-name='nextcloud-samba-share-config'
+name='nextcloud-samba-group-share-config'
 description='Configure access to Samba shares in Nextcloud'
 filter='(&(objectClass=nextcloudGroup)(nextcloudEnabled=1))'
 attributes=[]
@@ -114,7 +114,7 @@ def handler(dn, new, old):
 		subprocess.call(addShareNameCmd, shell=True)
 		subprocess.call(addShareDomainCmd, shell=True)
 		ret = subprocess.call(checkApplicableGroupCmd, shell=True)
-		timeout = time.time() + 15
+		timeout = time.time() + 600
 		while ret != 0:
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Group {} does not yet exist in Nextcloud, waiting till it exists with 15s timeout".format(groupCn))
 			time.sleep(2)

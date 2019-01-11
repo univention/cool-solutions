@@ -1,3 +1,12 @@
+univention-nextcloud-samba-share-config (1.0.0-7) unstable; urgency=medium
+
+  * Set nc_admin user as only applicable user, if actual applicable group can't be found
+  * Change name of listener module for group shares to distinguishable name
+  * Extend timeout the modules wait for if a group doesn't yet exist in NC to 10 minutes
+  * Fix log output in ...home-share-config.py
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Fri, 11 Jan 2019 15:13:44 +0100
+
 univention-nextcloud-samba-share-config (1.0.0-6) unstable; urgency=medium
 
   * Fix debian control file

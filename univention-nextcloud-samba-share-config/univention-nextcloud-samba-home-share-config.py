@@ -104,7 +104,7 @@ def handler(dn, new, old):
 	subprocess.call(addShareNameCmd, shell=True)
 	subprocess.call(addShareDomainCmd, shell=True)
 	ret = subprocess.call(checkApplicableGroupCmd, shell=True)
-	timeout = time.time() + 15
+	timeout = time.time() + 600
 	while ret != 0:
 		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Group {} does not yet exist in Nextcloud, waiting till it exists with 15s timeout".format(groupCn))
 		time.sleep(2)
@@ -117,7 +117,7 @@ def handler(dn, new, old):
 		listener.unsetuid()
 		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Finished share mount configuration for share {}".format(groupCn))
 	else:
-		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Group {} for share {} was not found in Nextcloud. Check ldapBaseGroups in Nextcloud ldap config.".format(groupCn, shareName))
+		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Group {} for share Home {} was not found in Nextcloud. Check ldapBaseGroups in Nextcloud ldap config.".format(groupCn, ou))
 
 def clean():
 	return
