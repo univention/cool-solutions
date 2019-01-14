@@ -89,6 +89,7 @@ for shareCn in commonShares:
 		#removeAllApplicableCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --remove-all {}".format(mountId)
 		#checkApplicableGroupCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:list | grep -E '\-\ {}:'".format(remotePwFile, remoteUser, remoteHost, applicableGroup)
 		checkApplicableGroupCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:adduser '{}' nc_admin".format(remotePwFile, remoteUser, remoteHost, groupCn)
+		checkLdapApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ ldap:search --group '{}'".format(groupCn)
 		cleanupApplicableGroupCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:removeuser '{}' nc_admin".format(remotePwFile, remoteUser, remoteHost, groupCn)
 		addApplicableGroupCmd = 'univention-ssh --no-split {} {}@{} "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-group \'{}\' {}"'.format(remotePwFile, remoteUser, remoteHost, applicableGroup, mountId)
 		addNcAdminApplicableUserCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-user 'nc_admin' {}".format(mountId)
@@ -100,8 +101,9 @@ for shareCn in commonShares:
 		ret = subprocess.call(checkApplicableGroupCmd, shell=True)
 		timeout = time.time() + 600
 		while ret != 0:
-			print("Group {} does not yet exist in Nextcloud, waiting till it exists with 15s timeout".format(applicableGroup))
+			print("Group {} does not yet exist in Nextcloud, waiting till it exists with 600s timeout".format(applicableGroup))
 			time.sleep(2)
+			subprocess.call(checkLdapApplicableGroupCmd, shell=True)
 			ret = subprocess.call(checkApplicableGroupCmd, shell=True)
 			if time.time() > timeout:
 				break

@@ -106,6 +106,7 @@ def handler(dn, new, old):
 		addShareDomainCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} domain '{}'".format(mountId, windomain)
 		#checkApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:list | grep -E '\-\ {}:'".format(groupCn)
 		checkApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:adduser '{}' nc_admin".format(groupCn)
+		checkLdapApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ ldap:search --group '{}'".format(groupCn)
 		cleanupApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:removeuser '{}' nc_admin".format(groupCn)
 		addApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-group '{}' {}".format(groupCn, mountId)
 		addNcAdminApplicableUserCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-user 'nc_admin' {}".format(mountId)
@@ -117,8 +118,9 @@ def handler(dn, new, old):
 		ret = subprocess.call(checkApplicableGroupCmd, shell=True)
 		timeout = time.time() + 600
 		while ret != 0:
-			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Group {} does not yet exist in Nextcloud, waiting till it exists with 15s timeout".format(groupCn))
+			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Group {} does not yet exist in Nextcloud, waiting till it exists with 600s timeout".format(groupCn))
 			time.sleep(2)
+			subprocess.call(checkLdapApplicableGroupCmd, shell=True)
 			ret = subprocess.call(checkApplicableGroupCmd, shell=True)
 			if time.time() > timeout:
 				break

@@ -1,3 +1,10 @@
+univention-nextcloud-samba-share-config (1.0.0-9) unstable; urgency=medium
+
+  * Fix log message regarding timeout
+  * Check LDAP backend for applicable group if it can't be found immediately
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 14 Jan 2019 14:42:42 +0100
+
 univention-nextcloud-samba-share-config (1.0.0-8) unstable; urgency=medium
 
   * Set nc_admin user as only applicable user, if actual applicable group can't be found
