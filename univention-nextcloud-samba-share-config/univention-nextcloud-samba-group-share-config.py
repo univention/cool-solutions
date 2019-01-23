@@ -71,6 +71,9 @@ def handler(dn, new, old):
 		shareName = "Marktplatz"
 		ou = re.sub(domainUsersOuRegex, '', domainUsersMatch.group())
 		mountName = "Marktplatz {}".format(ou)
+		if ucr.is_true('nextcloud-samba-group-share-config/ignoreMarktplatz'):
+			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "UCR var nextcloud-samba-group-share-config/ignoreDomainUsers is set to true: Not creating mount for share {}".format(mountName))
+			return
 		base = ucr.get('ldap/base')
 		share = lo.get("cn=Marktplatz,cn=shares,ou={},{}".format(ou, base))
 	else:
