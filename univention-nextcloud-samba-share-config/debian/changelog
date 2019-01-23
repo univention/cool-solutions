@@ -1,3 +1,9 @@
+univention-nextcloud-samba-share-config (1.0.0-11) unstable; urgency=medium
+
+  * Fix wrong variable name in log output
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 23 Jan 2019 10:36:51 +0100
+
 univention-nextcloud-samba-share-config (1.0.0-10) unstable; urgency=medium
 
   * Introduce ucr variable to make creation of mounts for Marktplatz shares in univention-nextcloud-samba-group-share-config optional
