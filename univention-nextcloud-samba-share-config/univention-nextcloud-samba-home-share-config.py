@@ -66,7 +66,8 @@ def handler(dn, new, old, command=''):
 	groupCn = common.getGroupCn(dn)
 	domainUsersOuRegex = '^cn=Domain\ Users\ '
 	ou = re.sub(domainUsersOuRegex, '', domainUsersMatch.group())
-	shareName = "Home {}".format(ou)
+	mountName = "Home {}".format(ou)
+	shareName = '$user'
 
 	ouObject = lo.get('ou={},{}'.format(ou, base))
 	shareHostDn = ouObject['ucsschoolHomeShareFileServer'][0]
@@ -74,7 +75,7 @@ def handler(dn, new, old, command=''):
 
 	shareHost = "{}.{}".format(shareHostCn, domain)
 
-	mountId = common.getMountId(shareName)
+	mountId = common.getMountId(mountName)
 
 	common.setMountConfig(mountId, shareHost, shareName, windomain, groupCn)
 
