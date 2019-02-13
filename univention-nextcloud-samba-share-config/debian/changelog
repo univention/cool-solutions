@@ -1,3 +1,9 @@
+univention-nextcloud-samba-share-config (1.0.0-13) unstable; urgency=medium
+
+  * Fix rules/control
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 13 Feb 2019 16:54:42 +0100
+
 univention-nextcloud-samba-share-config (1.0.0-12) unstable; urgency=medium
 
   * Reorganize common code into common package

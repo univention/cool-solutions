@@ -7,8 +7,8 @@ Build-Depends: debhelper (>= 9),
  univention-config-dev,
  ucslint-univention,
  libunivention-config-dev,
- python,
- dh-python
+ python-all,
+ python-support
 
 Package: univention-nextcloud-samba-common
 Architecture: all
