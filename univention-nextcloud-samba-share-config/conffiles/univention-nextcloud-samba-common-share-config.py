@@ -4,7 +4,7 @@
 # Univention Nextcloud Samba share configuration
 # UCR hook
 #
-# Copyright 2018 Univention GmbH
+# Copyright 2018-2019 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -37,11 +37,15 @@
 import subprocess
 import sys
 import time
+import univention.nextcloud_samba.common as common
 import univention.debug
 import univention.admin.uldap
 from univention.config_registry import ConfigRegistry
 ucr = ConfigRegistry()
 ucr.load()
+
+common = common.UniventionNextcloudSambaCommon()
+
 lo, po = univention.admin.uldap.getMachineConnection(ldap_master=False)
 
 commonShares = ucr.get('ucsschool/userlogon/commonshares')
@@ -51,14 +55,16 @@ if not commonShares:
 commonShares = commonShares.split(',')
 if 'Marktplatz' in commonShares:
 	commonShares.remove('Marktplatz')
-windomain = ucr.get('windows/domain')
+windomain = common.getWinDomain()
 remoteUser = ucr.get('nextcloud-samba-share-config/remoteUser')
 remotePwFile = ucr.get('nextcloud-samba-share-config/remotePwFile')
 remoteHost = ucr.get('nextcloud-samba-share-config/remoteHost')
 applicableGroup = ucr.get('nextcloud-samba-share-config/nextcloudGroup')
 
 for shareCn in commonShares:
-	share = lo.search("(&(objectClass=univentionShareSamba)(cn={}))".format(shareCn))
+	#share = lo.search("(&(objectClass=univentionShareSamba)(cn={}))".format(shareCn))
+	shareDn = common.getShareDn(lo, groupCn)
+	share = lo.get(shareDn)
 
 	if share:
 		# Enable files_external Nextcloud app; moved to postinst, too much overhead to do this on every single change
@@ -66,54 +72,12 @@ for shareCn in commonShares:
 		#enableAppCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ app:enable files_external"
 		#subprocess.call(enableAppCmd, shell=True)
 
-		shareHost = ''.join(share[0][1]['univentionShareHost'])
-		shareSambaName = ''.join(share[0][1]['univentionShareSambaName'])
-		getMountIdCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:list | grep '\/{}' | awk '{{print $2}}'".format(remotePwFile, remoteUser, remoteHost, shareCn)
+		#shareHost = ''.join(share[0][1]['univentionShareHost'])
+		#shareSambaName = ''.join(share[0][1]['univentionShareSambaName'])
+		shareHost = common.getShareHost(share)
+		shareSambaName = common.getShareSambaName(share)
+		mountId = common.getMountId(mountName)
 
-		try:
-			mountId = subprocess.check_output(getMountIdCmd, shell=True)
-			mountId = re.search('[0-9]*', mountId).group()
-			print("Mount for {} is already configured. Re-setting config...".format(shareCn))
-		except:
-			print("No mount for {} configured yet. Configuring...".format(shareCn))
-
-			createMountCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:create '/{}' smb 'password::sessioncredentials'".format(remotePwFile, remoteUser, remoteHost, shareCn)
-			subprocess.call(createMountCmd, shell=True)
-			mountId = subprocess.check_output(getMountIdCmd, shell=True)
-			mountId = re.search('[0-9]*', mountId).group()
-
-		addHostCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} host {}".format(remotePwFile, remoteUser, remoteHost, mountId, shareHost)
-		addShareRootCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} share '/'".format(remotePwFile, remoteUser, remoteHost, mountId)
-		addShareNameCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} root '{}'".format(remotePwFile, remoteUser, remoteHost, mountId, shareCn)
-		addShareDomainCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} domain '{}'".format(remotePwFile, remoteUser, remoteHost, mountId, windomain)
-		#removeAllApplicableCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --remove-all {}".format(mountId)
-		#checkApplicableGroupCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:list | grep -E '\-\ {}:'".format(remotePwFile, remoteUser, remoteHost, applicableGroup)
-		checkApplicableGroupCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:adduser '{}' nc_admin".format(remotePwFile, remoteUser, remoteHost, groupCn)
-		checkLdapApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ ldap:search --group '{}'".format(groupCn)
-		cleanupApplicableGroupCmd = "univention-ssh {} {}@{} univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:removeuser '{}' nc_admin".format(remotePwFile, remoteUser, remoteHost, groupCn)
-		addApplicableGroupCmd = 'univention-ssh --no-split {} {}@{} "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-group \'{}\' {}"'.format(remotePwFile, remoteUser, remoteHost, applicableGroup, mountId)
-		addNcAdminApplicableUserCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-user 'nc_admin' {}".format(mountId)
-
-		subprocess.call(addHostCmd, shell=True)
-		subprocess.call(addShareRootCmd, shell=True)
-		subprocess.call(addShareNameCmd, shell=True)
-		subprocess.call(addShareDomainCmd, shell=True)
-		ret = subprocess.call(checkApplicableGroupCmd, shell=True)
-		timeout = time.time() + 600
-		while ret != 0:
-			print("Group {} does not yet exist in Nextcloud, waiting till it exists with 600s timeout".format(applicableGroup))
-			time.sleep(2)
-			subprocess.call(checkLdapApplicableGroupCmd, shell=True)
-			ret = subprocess.call(checkApplicableGroupCmd, shell=True)
-			if time.time() > timeout:
-				break
-		if ret == 0:
-			subprocess.call(addApplicableGroupCmd, shell=True)
-			subprocess.call(cleanupApplicableGroupCmd, shell=True)
-			print("Finished share mount configuration for share {}".format(shareCn))
-		else:
-			print("Group {} for share {} was not found in Nextcloud. Check ldapBaseGroups in Nextcloud ldap config. Adding nc_admin as applicable user to hide share mount from all other users".format(applicableGroup, shareCn))
-			subprocess.call(addNcAdminApplicableUserCmd, shell=True)
-
+		common.setMountConfig(mountId, shareHost, shareName, windomain, applicableGroup)
 	else:
 		print("Nothing to do: no share was found for CN {}".format(shareCn))

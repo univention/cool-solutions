@@ -4,7 +4,7 @@
 # Univention Nextcloud Samba share configuration
 # listener module
 #
-# Copyright 2018 Univention GmbH
+# Copyright 2018-2019 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -34,13 +34,15 @@
 __package__='' 	# workaround for PEP 366
 
 import listener
-import re
 import univention.debug
 import univention.admin.uldap
+import univention.nextcloud_samba.common as common
+
+common = common.UniventionNextcloudSambaCommon()
 
 name='nextcloud-enable-for-classes-and-workgroups'
-description='Enable Nextcloud for all classes, workgroups and Domain Users <ou>'
-filter='(|(cn=Domain Users *)(objectClass=ucsschoolGroup))'
+description='Enable Nextcloud for all classes, workgroups, Domain Users <ou> and lehrer-<ou>'
+filter='(|(cn=Domain Users *)(cn=lehrer-*)(objectClass=ucsschoolGroup))'
 attributes=[]
 
 def initialize():
@@ -52,16 +54,15 @@ def handler(dn, new, old):
 	listener.setuid(0)
 	lo, po = univention.admin.uldap.getAdminConnection()
 
-	domainUsersRegex = '^cn=Domain\ Users\ [A-Za-z0-9_]*'
-	domainUsersOuRegex = '^cn=Domain\ Users\ '
-	domainUsersMatch = re.match(domainUsersRegex, dn)
+	domainUsersMatch = common.isDomainUsersCn(dn)
+	lehrerMatch = common.isLehrerCn(dn)
 
 	try:
 		groupRole = lo.getAttr(dn, 'ucsschoolRole')[0]
 		if not groupRole.startswith('school_class:school') and not groupRole.startswith('workgroup:school'):
 			return
 	except:
-		if not domainUsersMatch:
+		if not domainUsersMatch and not lehrerMatch:
 			return
 
 	#Enable group for nextcloud
@@ -69,7 +70,7 @@ def handler(dn, new, old):
 	if not nextcloudEnabled:
 		modlist = [('objectClass', '', 'nextcloudGroup'), ('nextcloudEnabled', '', '1')]
 		lo.modify(dn, modlist)
-		univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, "Enabled Nextcloud for {}".format(dn))
+		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Enabled Nextcloud for {}".format(dn))
 
 	listener.unsetuid()
 

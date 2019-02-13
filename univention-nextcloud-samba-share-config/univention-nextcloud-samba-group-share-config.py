@@ -4,7 +4,7 @@
 # Univention Nextcloud Samba share configuration
 # listener module
 #
-# Copyright 2018 Univention GmbH
+# Copyright 2018-2019 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -37,106 +37,79 @@ import listener
 import re
 import subprocess
 import time
+import univention.nextcloud_samba.common as common
 import univention.debug
 import univention.admin.uldap
 from univention.config_registry import ConfigRegistry
 ucr = ConfigRegistry()
 ucr.load()
 
+common = common.UniventionNextcloudSambaCommon()
+
 name='nextcloud-samba-group-share-config'
 description='Configure access to Samba shares in Nextcloud'
 filter='(&(objectClass=nextcloudGroup)(nextcloudEnabled=1))'
 attributes=[]
+modrdn="1"
 
 def initialize():
 	univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "{}: initialize".format(name))
 	return
 
-def handler(dn, new, old):
+def handler(dn, new, old, command=''):
 	univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "DN {}".format(dn))
 	listener.setuid(0)
 	lo, po = univention.admin.uldap.getMachineConnection()
 
-	windomain = ucr.get('windows/domain')
+	windomain = common.getWinDomain()
 
-	groupCnRegex = '^cn=([^,]*)'
-	domainUsersRegex = '^cn=Domain\ Users\ [A-Za-z0-9_]*'
-	domainUsersOuRegex = '^cn=Domain\ Users\ '
-	domainUsersMatch = re.match(domainUsersRegex, dn)
+	domainUsersMatch = common.isDomainUsersCn(dn)
+	lehrerMatch = common.isLehrerCn(dn)
 
-	groupCnMatch = re.match(groupCnRegex, dn)
-	groupCn = re.sub('^cn=', '', groupCnMatch.group())
+	groupCn = common.getGroupCn(dn)
 
 	if domainUsersMatch:
 		shareName = "Marktplatz"
+		domainUsersOuRegex = '^cn=Domain\ Users\ '
 		ou = re.sub(domainUsersOuRegex, '', domainUsersMatch.group())
 		mountName = "Marktplatz {}".format(ou)
-		base = ucr.get('ldap/base')
+		base = common.getBase()
 		share = lo.get("cn=Marktplatz,cn=shares,ou={},{}".format(ou, base))
 		if ucr.is_true('nextcloud-samba-group-share-config/ignoreMarktplatz'):
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "UCR var nextcloud-samba-group-share-config/ignoreMarktplatz is set to true: Not creating mount for share {}".format(mountName))
 			return
+	elif lehrerMatch:
+		lehrerOuRegex = '^cn=lehrer-'
+		ou = re.sub(lehrerOuRegex, '', lehrerMatch.group())
+		shareName = "Schueler {}".format(ou)
+		mountName = "schueler-{}".format(ou)
+		base = common.getBase()
+		share = lo.get("cn={},cn=shares,ou={},{}".format(mountName, ou, base))
+		if ucr.is_false('nextcloud-samba-group-share-config/configureRoleshares') or not ucr.has_key('nextcloud-samba-group-share-config/configureRoleshares'):
+			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "UCR var nextcloud-samba-group-share-config/configureRoleshares is not set to true: Not creating mount for share {}".format(mountName))
+			return
 	else:
-		shareDn = lo.search("(&(objectClass=univentionShareSamba)(cn={}))".format(groupCn))
-		share = lo.get(shareDn[0][0])
+		shareDn = common.getShareDn(lo, groupCn)
+		share = lo.get(shareDn)
 		shareName = groupCn
 		mountName = groupCn
+
+	#if command is 'd':
+		#mountId = common.getMountId(mountName)
+		#common.removeMount(mountId)
 
 	if share:
 		# Enable files_external Nextcloud app; moved to postinst, too much overhead to do this on every single change
 		#univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Making sure files_external app is enabled")
 		#enableAppCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ app:enable files_external"
 		#subprocess.call(enableAppCmd, shell=True)
+		shareHost = common.getShareHost(share)
+		shareSambaName = common.getShareSambaName(share)
+		mountId = common.getMountId(mountName)
 
-		shareHost = ''.join(share['univentionShareHost'])
-		shareSambaName = ''.join(share['univentionShareSambaName'])
-		getMountIdCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:list | grep '\/{}' | awk '{{print $2}}'".format(mountName)
-
-		mountId = subprocess.check_output(getMountIdCmd, shell=True)
-		mountId = re.search('[0-9]*', mountId).group()
-		if mountId:
-			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Mount for {} is already configured. Re-setting config...".format(groupCn))
-		else:
-			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "No mount for {} configured yet. Configuring...".format(groupCn))
-			createMountCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:create '/{}' smb 'password::sessioncredentials'".format(mountName)
-			subprocess.call(createMountCmd, shell=True)
-			mountId = subprocess.check_output(getMountIdCmd, shell=True)
-			mountId = re.search('[0-9]*', mountId).group()
-
-		addHostCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} host {}".format(mountId, shareHost)
-		addShareRootCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} share '/'".format(mountId)
-		addShareNameCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} root '{}'".format(mountId, shareName)
-		addShareDomainCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:config {} domain '{}'".format(mountId, windomain)
-		#checkApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:list | grep -E '\-\ {}:'".format(groupCn)
-		checkApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:adduser '{}' nc_admin".format(groupCn)
-		checkLdapApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ ldap:search --group '{}'".format(groupCn)
-		cleanupApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ group:removeuser '{}' nc_admin".format(groupCn)
-		addApplicableGroupCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-group '{}' {}".format(groupCn, mountId)
-		addNcAdminApplicableUserCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-user 'nc_admin' {}".format(mountId)
-
-		subprocess.call(addHostCmd, shell=True)
-		subprocess.call(addShareRootCmd, shell=True)
-		subprocess.call(addShareNameCmd, shell=True)
-		subprocess.call(addShareDomainCmd, shell=True)
-		ret = subprocess.call(checkApplicableGroupCmd, shell=True)
-		timeout = time.time() + 600
-		while ret != 0:
-			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Group {} does not yet exist in Nextcloud, waiting till it exists with 600s timeout".format(groupCn))
-			time.sleep(2)
-			subprocess.call(checkLdapApplicableGroupCmd, shell=True)
-			ret = subprocess.call(checkApplicableGroupCmd, shell=True)
-			if time.time() > timeout:
-				break
-		if ret == 0:
-			subprocess.call(addApplicableGroupCmd, shell=True)
-			subprocess.call(cleanupApplicableGroupCmd, shell=True)
-			listener.unsetuid()
-			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Finished share mount configuration for share {}".format(groupCn))
-		else:
-			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Group {} for share {} was not found in Nextcloud. Check ldapBaseGroups in Nextcloud ldap config. Adding nc_admin as applicable user to hide share mount from all other users.".format(groupCn, shareName))
-			subprocess.call(addNcAdminApplicableUserCmd, shell=True)
+		common.setMountConfig(mountId, shareHost, shareName, windomain, groupCn)
 	else:
-		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Nothing to do: no share was found for group {}".format(groupCn))
+		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Nothing to do: no share was found: {}".format(mountName))
 
 def clean():
 	return

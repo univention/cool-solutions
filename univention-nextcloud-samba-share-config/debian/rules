@@ -3,7 +3,7 @@
 #
 # Univention Nextcloud Samba share configuration
 #
-# Copyright 2018 Univention GmbH
+# Copyright 2018-2019 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -39,4 +39,4 @@ override_dh_auto_build:
 	dh_auto_build
 
 %:
-	dh $@
+	dh $@ --with python2
