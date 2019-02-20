@@ -2,6 +2,7 @@ univention-nextcloud-samba-share-config (1.0.0-15) unstable; urgency=medium
 
   * Add capability to configure "Lehrer-Austausch" mounts, deactivated by default
   * Avoid unnecessary two second sleep
+  * Clean up listener.setuid calls
 
  -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 20 Feb 2019 13:43:37 +0100
 

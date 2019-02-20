@@ -53,6 +53,7 @@ def handler(dn, new, old):
 	univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "DN {}".format(dn))
 	listener.setuid(0)
 	lo, po = univention.admin.uldap.getAdminConnection()
+	listener.unsetuid()
 
 	domainUsersMatch = common.isDomainUsersCn(dn)
 	lehrerMatch = common.isLehrerCn(dn)
@@ -71,8 +72,6 @@ def handler(dn, new, old):
 		modlist = [('objectClass', '', 'nextcloudGroup'), ('nextcloudEnabled', '', '1')]
 		lo.modify(dn, modlist)
 		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Enabled Nextcloud for {}".format(dn))
-
-	listener.unsetuid()
 
 def clean():
 	return

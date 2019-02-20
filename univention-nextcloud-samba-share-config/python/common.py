@@ -89,7 +89,9 @@ class UniventionNextcloudSambaCommon(object):
 
 	def getMountId(self, mountName):
 		getMountIdCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:list | grep '\/{}' | awk '{{print $2}}'".format(mountName)
+		listener.setuid(0)
 		mountId = subprocess.check_output(getMountIdCmd, shell=True)
+		listener.unsetuid()
 		mountId = re.search('[0-9]*', mountId).group()
 		if mountId:
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Mount for {} is already configured. Re-setting config...".format(mountName))
@@ -109,13 +111,13 @@ class UniventionNextcloudSambaCommon(object):
 			sshCommand = ""
 
 		createMountCmd = "{}univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:create '/{}' smb 'password::sessioncredentials'".format(sshCommand, mountName)
+		listener.setuid(0)
 		subprocess.call(createMountCmd, shell=True)
+		listener.unsetuid()
 		mountId = self.getMountId(mountName)
 		return mountId
 
 	def deleteMount(self, mountId, useSSH=False):
-		listener.setuid(0)
-
 		if useSSH == True:
 			sshCommand = self.getSshCommand()
 		else:
@@ -123,12 +125,11 @@ class UniventionNextcloudSambaCommon(object):
 
 		deleteMountCmd = "{}univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:delete --yes {}".format(sshCommand, mountId)
 		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Deleting mount with ID {}".format(mountId))
+		listener.setuid(0)
 		subprocess.call(deleteMountCmd, shell=True)
 		listener.unsetuid()
 
 	def setMountConfig(self, mountId, shareHost, shareName, windomain, groupCn, useSSH=False, remoteUser=None, remotePwFile=None, remoteHost=None, applicableGroup=None):
-		listener.setuid(0)
-
 		if useSSH == True:
 			sshCommand = self.getSshCommand()
 		else:
@@ -145,6 +146,7 @@ class UniventionNextcloudSambaCommon(object):
 		addApplicableGroupCmd = "{}univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-group '{}' {}".format(sshCommand, groupCn, mountId)
 		addNcAdminApplicableUserCmd = "{}univention-app shell nextcloud sudo -u www-data /var/www/html/occ files_external:applicable --add-user 'nc_admin' {}".format(sshCommand, mountId)
 
+		listener.setuid(0)
 		subprocess.call(addHostCmd, shell=True)
 		subprocess.call(addShareRootCmd, shell=True)
 		subprocess.call(addShareNameCmd, shell=True)
@@ -166,3 +168,4 @@ class UniventionNextcloudSambaCommon(object):
 		else:
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Group {} for share {} was not found in Nextcloud. Check ldapBaseGroups in Nextcloud ldap config. Adding nc_admin as applicable user to hide share mount from all other users.".format(groupCn, shareName))
 			subprocess.call(addNcAdminApplicableUserCmd, shell=True)
+			listener.unsetuid()

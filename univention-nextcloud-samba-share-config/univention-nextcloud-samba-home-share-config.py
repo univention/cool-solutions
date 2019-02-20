@@ -56,6 +56,7 @@ def handler(dn, new, old, command=''):
 	univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "DN {}".format(dn))
 	listener.setuid(0)
 	lo, po = univention.admin.uldap.getMachineConnection()
+	listener.unsetuid()
 
 	windomain = common.getWinDomain()
 	domain = common.getDomain()
