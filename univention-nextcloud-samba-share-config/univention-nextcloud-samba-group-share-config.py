@@ -68,6 +68,8 @@ def handler(dn, new, old, command=''):
 
 	groupCn = common.getGroupCn(dn)
 
+	shares = []
+
 	if domainUsersMatch:
 		shareName = "Marktplatz"
 		domainUsersOuRegex = '^cn=Domain\ Users\ '
@@ -75,8 +77,10 @@ def handler(dn, new, old, command=''):
 		mountName = "Marktplatz {}".format(ou)
 		base = common.getBase()
 		share = lo.get("cn=Marktplatz,cn=shares,ou={},{}".format(ou, base))
+		if share:
+			shares.append(share)
 		if ucr.is_true('nextcloud-samba-group-share-config/ignoreMarktplatz'):
-			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "UCR var nextcloud-samba-group-share-config/ignoreMarktplatz is set to true: Not creating mount for share {}".format(mountName))
+			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "UCR var nextcloud-samba-group-share-config/ignoreMarktplatz is true: Not creating mount for share {}".format(mountName))
 			return
 	elif lehrerMatch:
 		lehrerOuRegex = '^cn=lehrer-'
@@ -85,12 +89,23 @@ def handler(dn, new, old, command=''):
 		mountName = "schueler-{}".format(ou)
 		base = common.getBase()
 		share = lo.get("cn={},cn=shares,ou={},{}".format(mountName, ou, base))
-		if ucr.is_false('nextcloud-samba-group-share-config/configureRoleshares') or not ucr.has_key('nextcloud-samba-group-share-config/configureRoleshares'):
-			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "UCR var nextcloud-samba-group-share-config/configureRoleshares is not set to true: Not creating mount for share {}".format(mountName))
-			return
+		if ucr.is_true('nextcloud-samba-group-share-config/configureRoleshares'):
+			if share:
+				shares.append(share)
+		else:
+			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "UCR var nextcloud-samba-group-share-config/configureRoleshares is not true: Not creating mount for share {}".format(mountName))
+
+		if ucr.is_true('nextcloud-samba-group-share-config/configureLehreraustausch'):
+			shareName = "Lehrer-Austausch"
+			mountName = "Lehrer-Austausch {}".format(ou)
+			share = lo.get("cn={},cn=shares,ou={},{}".format(shareName, ou, base))
+			if share:
+				shares.append(share)
 	else:
 		shareDn = common.getShareDn(lo, groupCn)
 		share = lo.get(shareDn)
+		if share:
+			shares.append(share)
 		shareName = groupCn
 		mountName = groupCn
 
@@ -98,18 +113,19 @@ def handler(dn, new, old, command=''):
 		#mountId = common.getMountId(mountName)
 		#common.removeMount(mountId)
 
-	if share:
-		# Enable files_external Nextcloud app; moved to postinst, too much overhead to do this on every single change
-		#univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Making sure files_external app is enabled")
-		#enableAppCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ app:enable files_external"
-		#subprocess.call(enableAppCmd, shell=True)
-		shareHost = common.getShareHost(share)
-		shareSambaName = common.getShareSambaName(share)
-		mountId = common.getMountId(mountName)
+	if shares:
+		for share in shares:
+			# Enable files_external Nextcloud app; moved to postinst, too much overhead to do this on every single change
+			#univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Making sure files_external app is enabled")
+			#enableAppCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ app:enable files_external"
+			#subprocess.call(enableAppCmd, shell=True)
+			shareHost = common.getShareHost(share)
+			shareSambaName = common.getShareSambaName(share)
+			mountId = common.getMountId(mountName)
 
-		common.setMountConfig(mountId, shareHost, shareName, windomain, groupCn)
+			common.setMountConfig(mountId, shareHost, shareName, windomain, groupCn)
 	else:
-		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Nothing to do: no share was found: {}".format(mountName))
+		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Nothing to do: no shares were found: {}".format(mountName))
 
 def clean():
 	return

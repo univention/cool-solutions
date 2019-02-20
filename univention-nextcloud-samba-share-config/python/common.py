@@ -153,7 +153,6 @@ class UniventionNextcloudSambaCommon(object):
 		timeout = time.time() + 600
 		while ret != 0:
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Group {} does not yet exist in Nextcloud, waiting until it exists with 600s timeout".format(groupCn))
-			time.sleep(2)
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Performing LDAP search via occ for group {} to make Nextcloud aware of it".format(groupCn))
 			subprocess.call(checkLdapApplicableGroupCmd, shell=True)
 			ret = subprocess.call(checkApplicableGroupCmd, shell=True)
