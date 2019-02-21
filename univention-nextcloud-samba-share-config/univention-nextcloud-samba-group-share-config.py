@@ -69,7 +69,7 @@ def handler(dn, new, old, command=''):
 
 	groupCn = common.getGroupCn(dn)
 
-	shares = []
+	shares = {}
 
 	if domainUsersMatch:
 		shareName = "Marktplatz"
@@ -79,20 +79,24 @@ def handler(dn, new, old, command=''):
 		base = common.getBase()
 		share = lo.get("cn=Marktplatz,cn=shares,ou={},{}".format(ou, base))
 		if share:
-			shares.append(share)
+			shares[mountName] = []
+			shares[mountName].append(share)
+			shares[mountName].append(shareName)
 		if ucr.is_true('nextcloud-samba-group-share-config/ignoreMarktplatz'):
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "UCR var nextcloud-samba-group-share-config/ignoreMarktplatz is true: Not creating mount for share {}".format(mountName))
 			return
 	elif lehrerMatch:
 		lehrerOuRegex = '^cn=lehrer-'
 		ou = re.sub(lehrerOuRegex, '', lehrerMatch.group())
-		shareName = "Schueler {}".format(ou)
-		mountName = "schueler-{}".format(ou)
+		mountName = "Schueler {}".format(ou)
+		shareName = "schueler-{}".format(ou)
 		base = common.getBase()
-		share = lo.get("cn={},cn=shares,ou={},{}".format(mountName, ou, base))
+		share = lo.get("cn={},cn=shares,ou={},{}".format(shareName, ou, base))
 		if ucr.is_true('nextcloud-samba-group-share-config/configureRoleshares'):
 			if share:
-				shares.append(share)
+				shares[mountName] = []
+				shares[mountName].append(share)
+				shares[mountName].append(shareName)
 		else:
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "UCR var nextcloud-samba-group-share-config/configureRoleshares is not true: Not creating mount for share {}".format(mountName))
 
@@ -101,25 +105,31 @@ def handler(dn, new, old, command=''):
 			mountName = "Lehrer-Austausch {}".format(ou)
 			share = lo.get("cn={},cn=shares,ou={},{}".format(shareName, ou, base))
 			if share:
-				shares.append(share)
+				shares[mountName] = []
+				shares[mountName].append(share)
+				shares[mountName].append(shareName)
 	else:
 		shareDn = common.getShareDn(lo, groupCn)
 		share = lo.get(shareDn)
-		if share:
-			shares.append(share)
 		shareName = groupCn
 		mountName = groupCn
+		if share:
+			shares[mountName] = []
+			shares[mountName].append(share)
+			shares[mountName].append(shareName)
 
 	#if command is 'd':
 		#mountId = common.getMountId(mountName)
 		#common.removeMount(mountId)
 
 	if shares:
-		for share in shares:
+		for mountName in shares:
 			# Enable files_external Nextcloud app; moved to postinst, too much overhead to do this on every single change
 			#univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Making sure files_external app is enabled")
 			#enableAppCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ app:enable files_external"
 			#subprocess.call(enableAppCmd, shell=True)
+			share = shares[mountName][0]
+			shareName = shares[mountName][1]
 			shareHost = common.getShareHost(share)
 			shareSambaName = common.getShareSambaName(share)
 			mountId = common.getMountId(mountName)

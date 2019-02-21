@@ -1,3 +1,9 @@
+univention-nextcloud-samba-share-config (1.0.0-16) unstable; urgency=medium
+
+  * Fix incomplete processing of shares
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 21 Feb 2019 17:09:23 +0100
+
 univention-nextcloud-samba-share-config (1.0.0-15) unstable; urgency=medium
 
   * Add capability to configure "Lehrer-Austausch" mounts, deactivated by default
