@@ -48,7 +48,7 @@ FN_CACHE = '/var/cache/univention-usercert/univention-usercert.pickle'
 
 name = 'manageusercertificate'
 description = 'Manage User Certificates'
-filter = '(|(objectClass=posixAccount)(objectClass=univentionWindows))'
+filter = '(|(objectClass=posixAccount)(objectClass=univentionWindows)(objectClass=simpleSecurityObject))'
 attributes = []
 ssl = "/usr/sbin/univention-certificate-user"
 runparts = "/usr/lib/univention-ssl-usercert/"
