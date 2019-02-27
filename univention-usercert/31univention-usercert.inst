@@ -117,8 +117,8 @@ univention-directory-manager settings/extended_attribute create "$@" --ignore_ex
 	--set longDescription="Activate to create, deactivate to revoke certificate" \
 	--set 'translationShortDescription="de_DE" "Zertifikat erstellen/zurückziehen"' \
 	--set 'translationLongDescription="de_DE" "Aktivieren um Zertifikat zu erstellen, deaktivieren um Zertifikat zurückzuziehen"' \
-	--set tabName="Certificate" \
-	--set 'translationTabName="de_DE" "Zertifikat"' \
+	--set tabName="User Certificate" \
+	--set 'translationTabName="de_DE" "Benutzerzertifikat"' \
 	--set tabPosition=1 \
 	--set module="users/ldap" \
 	--set syntax="boolean" \
@@ -138,8 +138,8 @@ univention-directory-manager settings/extended_attribute create "$@" --ignore_ex
 	--set longDescription="Activate to renew the certificate" \
 	--set 'translationShortDescription="de_DE" "Zertifikat erneuern"' \
 	--set 'translationLongDescription="de_DE" "Aktivieren um Zertifikat zu erneuern"' \
-	--set tabName="Certificate" \
-	--set 'translationTabName="de_DE" "Zertifikat"' \
+	--set tabName="User Certificate" \
+	--set 'translationTabName="de_DE" "Benutzerzertifikat"' \
 	--set tabPosition=3 \
 	--set module="users/ldap" \
 	--set syntax="boolean" \
@@ -159,8 +159,8 @@ univention-directory-manager settings/extended_attribute create "$@" --ignore_ex
 	--set longDescription="Number of days a new created certificate is valid" \
 	--set 'translationShortDescription="de_DE" "Gültigkeitsdauer des Zertifikat in Tagen"' \
 	--set 'translationLongDescription="de_DE" "Anzahl der Tage, die ein neu erstelltes Zertifikat gültig ist"' \
-	--set tabName="Certificate" \
-	--set 'translationTabName="de_DE" "Zertifikat"' \
+	--set tabName="User Certificate" \
+	--set 'translationTabName="de_DE" "Benutzerzertifikat"' \
 	--set tabPosition=5 \
 	--set module="users/ldap" \
 	--set syntax="integer" \
@@ -183,8 +183,8 @@ univention-directory-manager settings/extended_attribute create "$@" --ignore_ex
 	--set 'translationShortDescription="de_DE" "DER-kodiertes Einfaches Authentisierungskonto-Zertifikat"' \
 	--set 'translationLongDescription="de_DE" "Das Einfaches Authentisierungskonto-Zertifikat muss DER-kodiert
 	hochgeladen werden."' \
-	--set tabName="Certificate" \
-	--set 'translationTabName="de_DE" "Zertifikat"' \
+	--set tabName="User Certificate" \
+	--set 'translationTabName="de_DE" "Benutzerzertifikat"' \
 	--set tabPosition=7 \
 	--set module="users/ldap" \
 	--set syntax="Base64Upload" \
@@ -206,8 +206,8 @@ univention-directory-manager settings/extended_attribute create "$@" --ignore_ex
 	--set longDescription="Certificate Subject Common Name" \
 	--set 'translationShortDescription="de_DE" "Inhaber Allgemeiner Name"' \
 	--set 'translationLongDescription="de_DE" "Allgemeiner Name des Zertifikat-Inhaber"' \
-	--set tabName="Certificate" \
-	--set 'translationTabName="de_DE" "Zertifikat"' \
+	--set tabName="User Certificate" \
+	--set 'translationTabName="de_DE" "Benutzerzertifikat"' \
 	--set tabPosition=7 \
 	--set module="users/ldap" \
 	--set syntax="string" \
@@ -228,8 +228,8 @@ univention-directory-manager settings/extended_attribute create "$@" --ignore_ex
 	--set longDescription="Certificate Issuer Common Name" \
 	--set 'translationShortDescription="de_DE" "Herausgeber Allgemeiner Name"' \
 	--set 'translationLongDescription="de_DE" "Allgemeiner Name des Zertifikat-Herausgebers"' \
-	--set tabName="Certificate" \
-	--set 'translationTabName="de_DE" "Zertifikat"' \
+	--set tabName="User Certificate" \
+	--set 'translationTabName="de_DE" "Benutzerzertifikat"' \
 	--set tabPosition=8 \
 	--set module="users/ldap" \
 	--set syntax="string" \
@@ -250,8 +250,8 @@ univention-directory-manager settings/extended_attribute create "$@" --ignore_ex
 	--set longDescription="Certificate valid from" \
 	--set 'translationShortDescription="de_DE" "Gültig ab"' \
 	--set 'translationLongDescription="de_DE" "Das Zertifikat ist gültig ab dem Zeitpunkt"' \
-	--set tabName="Certificate" \
-	--set 'translationTabName="de_DE" "Zertifikat"' \
+	--set tabName="User Certificate" \
+	--set 'translationTabName="de_DE" "Benutzerzertifikat"' \
 	--set tabPosition=9 \
 	--set module="users/ldap" \
 	--set syntax="string" \
@@ -272,8 +272,8 @@ univention-directory-manager settings/extended_attribute create "$@" --ignore_ex
 	--set longDescription="Certificate valid until" \
 	--set 'translationShortDescription="de_DE" "Gültig bis"' \
 	--set 'translationLongDescription="de_DE" "Das Zertifikat ist gültig bis zu dem Zeitpunkt"' \
-	--set tabName="Certificate" \
-	--set 'translationTabName="de_DE" "Zertifikat"' \
+	--set tabName="User Certificate" \
+	--set 'translationTabName="de_DE" "Benutzerzertifikat"' \
 	--set tabPosition=10 \
 	--set module="users/ldap" \
 	--set syntax="string" \

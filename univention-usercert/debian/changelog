@@ -1,4 +1,11 @@
-univention-usercert (4.2.0-4) unstable; urgency=low
+univention-usercert (4.2.0-5) unstable; urgency=low
+
+  * Adjusted Simple Authentication Account Tab Names
+  * Issue #14962
+
+ -- Hendrik Peter <hpeter@univention.de>  Wed, 27 Feb 2019 16:24:23 +0100
+ 
+ univention-usercert (4.2.0-4) unstable; urgency=low
 
   * Added certificates for Simple Authentication Accounts
   * Issue #14962
