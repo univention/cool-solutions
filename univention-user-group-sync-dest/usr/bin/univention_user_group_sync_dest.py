@@ -71,12 +71,14 @@ def _log_message(message):
 # Initialize by creating an LDAP connection and getting UCR configuration
 def getLdapConnection():
     '''Create an LDAP connection and initialize UDM User and Group modules'''
-    global lo, po, user_module, group_module
+    global lo, po, user_module, simpleauth_module, group_module
     lo, po = univention.admin.uldap.getAdminConnection()
     udm.update()
     user_module = udm.get('users/user')
+    simpleauth_module = udm.get('users/ldap')
     group_module = udm.get('groups/group')
     udm.init(lo, po, user_module)
+    udm.init(lo, po, simpleauth_module)
     udm.init(lo, po, group_module)
 
 def getConfig():
@@ -88,6 +90,11 @@ def getUCRV():
     '''Returns the LDAP base'''
     global base
     base = ucr.get('ldap/base')
+
+def getUCRCertificatesEnabled():
+    '''Returns the LDAP base'''
+    global certificatesEnabled
+    certificatesEnabled = ucr.is_true('ldap/sync/certificates')
 
 # Process all files in the DB_PATH location
 def _process_files():
@@ -138,6 +145,12 @@ def _random_password(_):
     '''Generates and returns a random password'''
     return os.urandom(33).encode('base64').strip()
 
+# Temporarily generate a random password
+def _encode_certificate(certificate):
+    '''Encode the given certificate'''
+    return certificate.encode('base64').strip()
+
+
 # Check, if the given DN is a User
 def _is_user(object_dn, attributes):
     '''Return whether the object is a user'''
@@ -145,11 +158,28 @@ def _is_user(object_dn, attributes):
         return True
     return user_module.identify(object_dn, attributes)
 
+# Check, if the given DN is a Simple Authentication Account
+def _is_simpleauth(object_dn, attributes):
+    '''Return whether the object is a user'''
+    if 'users/ldap' in attributes.get('univentionObjectType', []):
+        return True
+    return simpleauth_module.identify(object_dn, attributes)
+
 # Check, if the given User UID exists in our LDAP
 def _user_exists(attributes):
     '''Check, if the given User UID exists in our LDAP'''
     search_filter = univention.admin.filter.expression('uid', attributes['uid'][0])
     result = user_module.lookup(co, lo, search_filter)
+    if not result:
+        return None
+    else:
+        return result[0]
+
+# Check, if the given Simple Authentication Account UID exists in our LDAP
+def _simpleauth_exists(attributes):
+    '''Check, if the given User UID exists in our LDAP'''
+    search_filter = univention.admin.filter.expression('uid', attributes['uid'][0])
+    result = simpleauth_module.lookup(co, lo, search_filter)
     if not result:
         return None
     else:
@@ -171,6 +201,22 @@ def createUser(position, attributes):
         print "E: During User.create: %s" % traceback.format_exc()
         exit()
 
+# Create a new User, if it doesn't exist yet
+def createSimpleAuth(position, attributes):
+    '''Creates a new user based on the given attributes'''
+    simpleauth = simpleauth_module.object(co, lo, position)
+    simpleauth.open()
+    for (attribute, values, ) in attributes.items():
+        (attribute, values, )= _translate_simpleauth(attribute, values)
+        if attribute is not None:
+            simpleauth[attribute] = values
+    try:
+        simpleauth.create()
+    except:
+        _log_message("E: During SimpleAuth.create: %s" % traceback.format_exc())
+        print "E: During SimpleAuth.create: %s" % traceback.format_exc()
+        exit()
+
 # Delete the given User/Group
 def _delete(object_dn):
     '''Delete the given User/Group'''
@@ -187,12 +233,13 @@ def _delete_user(user_dn):
     '''Delete the given User'''
     uid = user_dn.split(',', 1)[0].split('=', 1)[1]
     search_filter = univention.admin.filter.expression('uid', uid)
-    for existing_user in user_module.lookup(co, lo, search_filter):
-        try:
-            existing_user.remove()
-        except:
-            _log_message("E: During User.remove: %s" % traceback.format_exc())
-            print "E: During User.remove: %s" % traceback.format_exc()
+    for lists in user_module.lookup(co, lo, search_filter), simpleauth_module.lookup(co, lo, search_filter):
+        for existing_user in lists:
+            try:
+                existing_user.remove()
+            except:
+                _log_message("E: During User.remove: %s" % traceback.format_exc())
+                print "E: During User.remove: %s" % traceback.format_exc()
 
 def _delete_group(group_dn):
     '''Delete the given Group'''
@@ -228,6 +275,8 @@ _translate_user.mapping = {
     'displayName': ('displayName', univention.admin.mapping.ListToString, ),
     'univentionBirthday': ('birthday', univention.admin.mapping.ListToString, ),
     'userPassword': ('password', _random_password, ),
+    'userCertificate;binary': ('simpleAuthCertificate', _encode_certificate, ),
+    'univentionCertificateDays': ('certificateDaysSimpleAuth', univention.admin.mapping.ListToString, ),
 }
 
 def _translate_user_update(attribute, value):
@@ -298,6 +347,85 @@ def _import_user(user_dn, attributes):
         _log_message("I: Ignoring new %r for existing %r" % (user_dn, existing_user.position.getDn(), ))
         print "I: Ignoring new %r for existing %r" % (user_dn, existing_user.position.getDn(), )
 
+# Maps LDAP and UDM attributes
+def _translate_simpleauth(attribute, value):
+    '''Maps LDAP attributes to UDM'''
+    (attribute, translate, ) = _translate_simpleauth.mapping.get(attribute, (None, None, ))
+    if translate is not None:
+        value = translate(value)
+    return (attribute, value, )
+
+_translate_simpleauth.mapping = {
+    'uid': ('username', univention.admin.mapping.ListToString, ),
+    'description': ('description', univention.admin.mapping.ListToString, ),
+    'userPassword': ('password', _random_password, ),
+    'userCertificate;binary': ('simpleAuthCertificate', _encode_certificate, ),
+    'univentionCertificateDays': ('certificateDaysSimpleAuth', univention.admin.mapping.ListToString, ),
+}
+
+def _translate_simpleauth_update(attribute, value):
+    '''Maps LDAP attributes to UDM'''
+    if attribute in _translate_simpleauth_update.ignore:
+        return (None, None, )
+    return _translate_simpleauth(attribute, value)
+
+_translate_simpleauth_update.ignore = frozenset((
+    'userPassword',
+))
+
+# Update Simple Authentication Account object
+def _update_simpleauth(user, attributes):
+    '''Updates existing simple authentication account based on changes'''
+    changes = False
+    user.open()
+    for (attribute, values, ) in attributes.items():
+        (attribute, values, )= _translate_simpleauth_update(attribute, values)
+        if attribute is not None:
+            if user[attribute] != values:
+                user[attribute] = values
+                changes = True
+    if changes:
+        try:
+            user.modify()
+        except:
+            _log_message('E: During SimpleAuth.modify_changes: %s' % traceback.format_exc())
+            print 'E: During SimpleAuth.modify_changes: %s' % traceback.format_exc()
+            exit()
+    modlist = []
+    for (attribute, new_values, ) in attributes.items():
+        if attribute in _update_simpleauth.direct:
+            old_values = user.oldattr.get(attribute, [])
+            if new_values != old_values:
+                modlist.append((attribute, old_values, new_values, ))
+    try:
+        lo.modify(user.position.getDn(), modlist)
+    except:
+        _log_message("E: During SimpleAuth.modify_ldap: %s" % traceback.format_exc())
+        print "E: During SimpleAuth.modify_ldap: %s" % traceback.format_exc()
+        exit()
+
+_update_simpleauth.direct = frozenset((
+    'pwhistory',
+    'userPassword',
+))
+
+# Import a non-existent Simple Authentication Account
+def _import_simpleauth(user_dn, attributes):
+    '''Imports a new Simple Authentication Account or updates an existent Simple Authentication Account'''
+    existing_user = _simpleauth_exists(attributes)
+    user_position = getPosition(user_dn)
+    user_position_obj = univention.admin.uldap.position(base)
+    user_position_obj.setDn(user_position)
+    if existing_user is None:
+        _log_message("Create Simple Authentication Account: %r" % user_dn)
+        createSimpleAuth(user_position_obj, attributes)
+        existing_user = _simpleauth_exists(attributes)
+    if _user_should_be_updated(existing_user, attributes, user_position):
+        _log_message("Modify Simple Authentication Account: %r" % user_dn)
+        _update_simpleauth(existing_user, attributes)
+    else:
+        _log_message("I: Ignoring new %r for existing %r" % (user_dn, existing_user.position.getDn(), ))
+        print "I: Ignoring new %r for existing %r" % (user_dn, existing_user.position.getDn(), )
 
 # Check, if the given DN is a Group
 def _is_group(object_dn, attributes):
@@ -413,9 +541,20 @@ def _import(data):
     '''check object type and dispatch to specific import method'''
     (object_dn, attributes, ) = data
     object_position = getPosition(object_dn)
+
+    # Ignore Certificate attributes, if not enabled
+    if attributes and not certificatesEnabled:
+        attributes.pop('userCertificate;binary', None)
+        attributes.pop('univentionCertificateDays', None)
+        attributes.pop('univentionCreateRevokeCertificate', None)
+        attributes.pop('univentionRenewCertificate', None)
+        if attributes.has_key('objectClass') and 'univentionManageCertificates' in attributes['objectClass']:
+            attributes['objectClass'].remove('univentionManageCertificates')
     if attributes: # create/modify
         if _is_user(object_dn, attributes):
             return _import_user(object_dn, attributes)
+        if _is_simpleauth(object_dn, attributes):
+            return _import_simpleauth(object_dn, attributes)
         if _is_group(object_dn, attributes):
             return _import_group(object_dn, attributes)
         _log_message("E: Unknown object type (c/m): %r" % object_dn)
@@ -429,6 +568,7 @@ def main():
     getLdapConnection()
     getConfig()
     getUCRV()
+    getUCRCertificatesEnabled()
     _process_files()
     _release_lock()
 

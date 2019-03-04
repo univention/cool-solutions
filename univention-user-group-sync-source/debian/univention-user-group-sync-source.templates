@@ -6,5 +6,6 @@ Description: The FQDN or IP of the destination host
 
 Template: univention-user-group-sync-source/ldap_filter
 Type: string
-Description: By default, all user and group objects below the LDAP base will be synchronized.
+Description: This field is optional. By default, all user and group objects below the LDAP base will be synchronized.
  Please enter a correct LDAP filter to restrict the synchronization to specific containers.
+ This won't overwrite but append to the default LDAP filter.

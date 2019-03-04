@@ -34,6 +34,9 @@
 
 case "$1" in
 	configure)
+		# Disable User certificate synchronization by default
+		ucr set ldap/sync/certificates?0
+
 		# 
 		echo "Creating a synchronization cron job"
 		ucr set cron/ldap-sync-dest/command="univention_user_group_sync_dest.py" \

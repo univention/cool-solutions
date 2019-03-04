@@ -48,7 +48,25 @@ description = 'Store user and group information to be transferred to another sys
 attributes = []
 modrdn = '1'
 DB_BASE_PATH = '/var/lib/univention-user-group-sync/'
-filter = '(|(&(objectClass=posixGroup)(objectClass=univentionGroup))(objectClass=posixAccount))'
+filter = """\
+(&
+    (|
+        (&
+            (objectClass=posixAccount)
+            (objectClass=shadowAccount)
+        )
+        (objectClass=univentionMail)
+        (objectClass=sambaSamAccount)
+        (objectClass=simpleSecurityObject)
+        (objectClass=inetOrgPerson)
+        (objectClass=univentionGroup)
+    )
+    (!(objectClass=univentionHost))
+    (!(univentionObjectFlag=hidden))
+    (!(uidNumber=0))
+    (!(uid=*$))
+)""".translate(None, '\t\n\r ')
+filter_custom = ""
 
 owning_user_number = pwd.getpwnam('ucs-sync').pw_uid
 owning_group_number = grp.getgrnam("root").gr_gid
@@ -58,9 +76,7 @@ ucr.load()
 
 #
 def ucr_map_identifier():
-    filt = ucr.get('ldap/sync/filter')
-    if filt:
-        filter = filt
+    filter_custom = ucr.get('ldap/sync/filter')
 ucr_map_identifier()
 
 # Log Messages
@@ -142,6 +158,10 @@ def handler(object_dn, new_attributes, _, command):
     
     # Don't synchronize the system user
     if ldap.search(filter="uid=ucs-sync", base=object_dn):
+        return
+    
+    # Apply custom filter, if set
+    if filter_custom.strip() and not ldap.search(filter=filter_custom, base=object_dn):
         return
     
     _write_file(filename, DB_BASE_PATH, data)

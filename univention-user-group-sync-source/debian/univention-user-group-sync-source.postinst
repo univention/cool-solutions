@@ -55,7 +55,12 @@ case "$1" in
 
 		# Fix for Warning "cron.service changed on disk"
 		echo "Reloading systemd daemon"
-		systemctl daemon-reload		
+		systemctl daemon-reload
+
+		# Reset the Notifier IDs on reinstallations with existing Notifier IDs
+		if [ -z "$2" ]; then
+			univention-directory-listener-ctrl resync univention_user_group_sync_source_generate
+		fi
 		;;
 
 	abort-upgrade|abort-remove|abort-deconfigure)
