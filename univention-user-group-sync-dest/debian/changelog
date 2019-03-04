@@ -1,4 +1,4 @@
-univention-user-group-sync-dest (2.1.0-1) unstable; urgency=low
+univention-user-group-sync-dest (2.1.0-2) unstable; urgency=low
 
   * Added Simple Authentication Account synchronization
   * Added User Certificate synchronization
