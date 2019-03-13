@@ -1,3 +1,11 @@
+univention-homedir-autocreate (4.0.0-2) unstable; urgency=low
+
+  * Update to UCS 4.4 cool-solutions
+  * Updated Copyright
+  * Issue #15437
+
+ -- Alexander Ulpts <ulpts@univention.de>  Wed, 13 Mar 2019 12:26:09 +0100
+
 univention-homedir-autocreate (4.0.0-1) precise; urgency=low
 
   * ported to UCS 2.3

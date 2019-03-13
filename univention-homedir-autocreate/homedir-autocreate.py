@@ -3,7 +3,7 @@
 # Univention homedir autocreation
 #  listener module
 #
-# Copyright (C) 2009-2010 Univention GmbH
+# Copyright (C) 2009-2019 Univention GmbH
 #
 # http://www.univention.de/
 #
