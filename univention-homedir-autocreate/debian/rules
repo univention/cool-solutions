@@ -48,7 +48,7 @@ clean:
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 	dh_installdirs
 
 	install -m 755 homedir-autocreate.py ${D}/usr/lib/univention-directory-listener/system
