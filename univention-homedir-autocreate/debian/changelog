@@ -2,6 +2,7 @@ univention-homedir-autocreate (4.0.0-2) unstable; urgency=low
 
   * Update to UCS 4.4 cool-solutions
   * Updated Copyright
+  * Updated debhelper and add compat file
   * Issue #15437
 
  -- Alexander Ulpts <ulpts@univention.de>  Wed, 13 Mar 2019 12:26:09 +0100
