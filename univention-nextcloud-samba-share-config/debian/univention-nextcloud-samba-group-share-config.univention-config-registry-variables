@@ -1,0 +1,9 @@
+[nextcloud-samba-group-share-config/ignoreMarktplatz]
+Description[de]=Auf true setzen, wenn univention-nextcloud-samba-group-share-config keine Einbindungen von Marktplatz-Freigaben konfigurieren soll
+Description[en]=Set to true to stop univention-nextcloud-samba-group-share-config from creating mounts for Marktplatz shares
+Type=bool
+
+[nextcloud-samba-group-share-config/configureRoleshares]
+Description[de]=Auf true setzen, wenn univention-nextcloud-samba-group-share-config Einbindungen für Roleshare-Freigaben konfigurieren soll
+Description[en]=Set to true to make univention-nextcloud-samba-group-share-config create mounts for roleshares
+Type=bool

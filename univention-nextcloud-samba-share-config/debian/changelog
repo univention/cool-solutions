@@ -1,0 +1,116 @@
+univention-nextcloud-samba-share-config (1.0.0-16) unstable; urgency=medium
+
+  * Fix incomplete processing of shares
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 21 Feb 2019 17:09:23 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-15) unstable; urgency=medium
+
+  * Add capability to configure "Lehrer-Austausch" mounts, deactivated by default
+  * Avoid unnecessary two second sleep
+  * Clean up listener.setuid calls
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 20 Feb 2019 13:43:37 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-14) unstable; urgency=medium
+
+  * Fix wrong shareName in home-share-config.py
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 13 Feb 2019 17:44:03 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-13) unstable; urgency=medium
+
+  * Fix rules/control
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 13 Feb 2019 16:54:42 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-12) unstable; urgency=medium
+
+  * Reorganize common code into common package
+  * Add capability to configure mounts for schueler-<OU> roleshares
+  * Update copyright
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 23 Jan 2019 16:36:24 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-11) unstable; urgency=medium
+
+  * Fix wrong variable name in log output
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 23 Jan 2019 10:36:51 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-10) unstable; urgency=medium
+
+  * Introduce ucr variable to make creation of mounts for Marktplatz shares in univention-nextcloud-samba-group-share-config optional
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 23 Jan 2019 10:16:45 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-9) unstable; urgency=medium
+
+  * Fix log message regarding timeout
+  * Check LDAP backend for applicable group if it can't be found immediately
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 14 Jan 2019 14:42:42 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-8) unstable; urgency=medium
+
+  * Set nc_admin user as only applicable user, if actual applicable group can't be found
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Fri, 11 Jan 2019 15:26:57 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-7) unstable; urgency=medium
+
+  * Change name of listener module for group shares to distinguishable name
+  * Extend timeout the modules wait for if a group doesn't yet exist in NC to 10 minutes
+  * Fix log output in ...home-share-config.py
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Fri, 11 Jan 2019 15:13:44 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-6) unstable; urgency=medium
+
+  * Fix debian control file
+  * Issue #13613
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Fri, 14 Dec 2018 22:26:05 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-5) unstable; urgency=medium
+
+  * Add package to configure mounts for home shares in domains with home shares on school servers
+  * Issue #13613
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 13 Dec 2018 15:53:54 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-4) unstable; urgency=medium
+
+  * Get mount id correctly from NC
+  * Avoid performance issues in large domains while checking groups
+  * Issue #13613
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 13 Dec 2018 12:31:20 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-3) unstable; urgency=medium
+
+  * Remove unnecessary debian files Issue #13613
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 03 Dec 2018 12:47:04 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-2) unstable; urgency=medium
+
+  * use ucsschoolRole to find classes and workgroups
+  * enable Nextcloud for Domain Users <ou> too
+  * handle common shares better
+  * update copyright
+  * Issue #13613
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 03 Dec 2018 12:37:51 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-1) unstable; urgency=medium
+
+  * fix rules file Issue #13613
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Fri, 30 Nov 2018 16:10:05 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-0) unstable; urgency=low
+
+  * initial release Issue #13613
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 15 Nov 2018 13:46:17 +0100

@@ -1,3 +1,24 @@
+univention-usercert (4.2.0-5) unstable; urgency=low
+
+  * Adjusted Simple Authentication Account Tab Names
+  * Issue #14962
+
+ -- Hendrik Peter <hpeter@univention.de>  Wed, 27 Feb 2019 16:24:23 +0100
+ 
+ univention-usercert (4.2.0-4) unstable; urgency=low
+
+  * Added certificates for Simple Authentication Accounts
+  * Issue #14962
+
+ -- Hendrik Peter <hpeter@univention.de>  Wed, 27 Feb 2019 15:45:02 +0100
+ 
+univention-usercert (4.1.0-2) unstable; urgency=low
+
+  * Bug #48061: UMC Error on Backup Server in computer Module 
+  * Issue #13287
+
+ -- Alexander Ulpts <ulpts@univention.de>  Fri, 09 Nov 2018 10:43:51 +0100
+
 univention-usercert (4.1.0-1) unstable; urgency=low
 
   * Copyright update and merged to 4.3. Issue #10456

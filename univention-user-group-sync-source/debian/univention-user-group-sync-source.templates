@@ -1,0 +1,11 @@
+Template: univention-user-group-sync-source/destination_host
+Type: string
+Description: The FQDN or IP of the destination host
+ A SSH connection to the destination host has to be created once during the package installation
+ to validate a possible synchronization connection to the destination.
+
+Template: univention-user-group-sync-source/ldap_filter
+Type: string
+Description: This field is optional. By default, all user and group objects below the LDAP base will be synchronized.
+ Please enter a correct LDAP filter to restrict the synchronization to specific containers.
+ This won't overwrite but append to the default LDAP filter.

@@ -1,0 +1,42 @@
+Source: univention-nextcloud-samba-share-config
+Maintainer: Univention GmbH <packages@univention.de>
+Priority: optional
+Section: univention
+Standards-Version: 3.9.8
+Build-Depends: debhelper (>= 9),
+ univention-config-dev,
+ ucslint-univention,
+ libunivention-config-dev,
+ python-all,
+ python-support
+
+Package: univention-nextcloud-samba-common
+Architecture: all
+Depends: univention-config, ${python:Depends}, ${misc:Depends}
+Description: common files for other univention-nextcloud-samba* packages
+
+Package: univention-nextcloud-samba-group-share-config
+Architecture: all
+Depends: univention-config, univention-nextcloud-samba-common, ${misc:Depends}
+Description: directory listener module configuration of Samba share access in Nextcloud
+ This package provides a Univention directory listener module
+ that configures access to Samba shares in Nextcloud.
+
+Package: univention-nextcloud-samba-home-share-config
+Architecture: all
+Depends: univention-config, univention-nextcloud-samba-common, ${misc:Depends}
+Description: directory listener module configuration of Samba share access in Nextcloud
+ This package provides a Univention directory listener module
+ that configures access to Samba shares in Nextcloud.
+
+Package: univention-nextcloud-samba-common-share-config
+Architecture: all
+Depends: univention-config, univention-nextcloud-samba-common, ${misc:Depends}
+Description: directory listener module configuration of Samba share access in Nextcloud
+ This package provides a Univention directory listener module
+ that configures access to Samba shares in Nextcloud.
+
+Package: univention-nextcloud-enable-for-classes-and-workgroups
+Architecture: all
+Depends: univention-config, univention-nextcloud-samba-common, ${misc:Depends}
+Description: directory listener module enabling Nextcloud for all classes and workgroups

@@ -1,0 +1,75 @@
+#!/bin/sh
+#
+# user group sync source
+#  postinst script
+#
+# Copyright 2013-2018 Univention GmbH
+#
+# http://www.univention.de/
+#
+# All rights reserved.
+#
+# The source code of this program is made available
+# under the terms of the GNU Affero General Public License version 3
+# (GNU AGPL V3) as published by the Free Software Foundation.
+#
+# Binary versions of this program provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention and not subject to the GNU AGPL V3.
+#
+# In the case you use this program under the terms of the GNU AGPL V3,
+# the program is provided in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License with the Debian GNU/Linux or Univention distribution in file
+# /usr/share/common-licenses/AGPL-3; if not, see
+# <http://www.gnu.org/licenses/>.
+
+#DEBHELPER#
+
+case "$1" in
+	configure)
+		# User listener:nogroup needs writing rights
+		chmod 777 /var/lib/univention-user-group-sync
+
+		# 
+		echo "Creating a synchronization cron job"
+		eval "$(ucr shell ldap/sync/destination)"
+		ucr set cron/ldap-sync-src/command="univention_user_group_sync_source_synchronize" \
+		cron/ldap-sync-src/time="*/5 * * * *" \
+		cron/ldap-sync-src/user="ucs-sync" \
+		cron/ldap-sync-src/description="Synchronize all existing ldap-diff files to the target host set in the ldap/sync/destination variable"
+
+		# Restart the directory listener to load our module
+		echo "Restarting univention-directory-listener Service"
+		systemctl restart univention-directory-listener.service
+
+		# Temporary fix for Bug #48062
+		echo "Restarting cron Service"
+		systemctl restart cron.service
+
+		# Fix for Warning "cron.service changed on disk"
+		echo "Reloading systemd daemon"
+		systemctl daemon-reload
+
+		# Reset the Notifier IDs on reinstallations with existing Notifier IDs
+		if [ -z "$2" ]; then
+			univention-directory-listener-ctrl resync univention_user_group_sync_source_generate
+		fi
+		;;
+
+	abort-upgrade|abort-remove|abort-deconfigure)
+		;;
+
+	*)
+		echo "postinst called with unknown argument '$1'" >&2
+		exit 1
+		;;
+esac
+
+exit 0

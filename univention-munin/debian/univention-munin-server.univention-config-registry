@@ -4,6 +4,7 @@ Variables: munin/server/local_address
 
 Type: file
 File: etc/munin/apache24.conf
+Postinst: univention-munin-server-reload.py
 Variables: munin/server/authenticate
 
 Type: file

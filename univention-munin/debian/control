@@ -15,7 +15,7 @@ Description: UCS: munin server support
 
 Package: univention-munin-node
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, munin-node, libnet-cidr-perl
+Depends: ${shlibs:Depends}, ${misc:Depends}, munin-node, libnet-cidr-perl, libsocket6-perl, libio-socket-inet6-perl
 Description: UCS: munin node support
  This package installs required packages to allow client
  to be monitored by munin.

@@ -1,3 +1,24 @@
+univention-munin (1.2.0-5) unstable; urgency=low
+
+  * Removed references to non-existent dependencies. Issue #8147
+
+ -- Hendrik Peter <hpeter@univention.de>  Fri, 03 Aug 2018 14:57:01 +0200
+
+univention-munin (1.2.0-4) unstable; urgency=low
+
+  * Add index.html, if cronjob didn't run yet - Prevents display of
+    'Forbidden'-Error. Issue #8147
+
+ -- Hendrik Peter <hpeter@univention.de>  Mon, 09 Jul 2018 15:30:31 +0200
+
+univention-munin (1.2.0-3) unstable; urgency=low
+
+  * Migrated to UCS 4.3. Issue #11575
+  * Copyright update
+  * Added automated service reload on attribute change
+
+ -- Hendrik Peter <hpeter@univention.de>  Fri, 06 Jul 2018 17:42:07 +0200
+
 univention-munin (1.1.0-1) unstable; urgency=low
 
   * Version Bump #6640

@@ -18,7 +18,7 @@ Categories=SSL
 
 [ssl/windowscert/ca]
 Description[de]=Wurzel CA für Windows-Zertifikate (default: ucsCA)
-Description[en]=Root CA for user certificates (default: ucsCA)
+Description[en]=Root CA for windows certificates (default: ucsCA)
 Type=str
 Categories=SSL
 

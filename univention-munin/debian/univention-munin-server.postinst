@@ -3,7 +3,7 @@
 # univention munin server
 #  postinst script
 #
-# Copyright 2015-2017 Univention GmbH
+# Copyright 2015-2018 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -34,10 +34,10 @@
 
 # set default baseconfig settings
 univention-config-registry set \
-	'munin/server/authenticate?yes' \
-	'auth/munin/restrict?yes' \
+	munin/server/authenticate?'yes' \
+	auth/munin/restrict?'yes' \
 	'auth/munin/group/Domain Admins?yes' \
-	'auth/munin/user/Administrator?yes'
+	auth/munin/user/Administrator?'yes'
 
 # umc overview
 univention-config-registry set \
@@ -79,6 +79,13 @@ if  [ "$1" = 'configure' -a -n "$2" ] && dpkg --compare-versions "$2" lt '1.0.1-
 			apache2_invoke enconf munin.conf
 		fi
 	fi
+fi
+
+# A simple index.html to avoid the 403 error
+if [ ! -f /var/cache/munin/www/index.html ]; then
+    echo '<html><head><title>Munin</title></head><body>Munin has not run yet.  Please try again in a few moments.</body></html>' > /var/cache/munin/www/index.html
+	chmod 644 /var/cache/munin/www/index.html
+	chown munin:munin /var/cache/munin/www/index.html
 fi
 
 # restart apache

@@ -1,0 +1,11 @@
+[ldap/sync/filter]
+Description[de]=LDAP-Filter, welcher alle gewollten Benutzer und Gruppen filtert
+Description[en]=LDAP Filter that filters all wanted users and groups
+Type=str
+Categories=system
+
+[ldap/sync/destination]
+Description[de]=Hostname oder IP zu dem Pickle-Dateien übertragen werden sollen
+Description[en]=Hostname or IP to which pickle files shall be transmitted to
+Type=str
+Categories=system

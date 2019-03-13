@@ -1,0 +1,7 @@
+Template: univention-user-group-sync-dest/password
+Type: password
+Description: A strong password for the data transfer system user 'ucs-sync'
+ This password is only needed once during the initialization of the synchronization connection
+ on the side of the source host. It has to be entered druing the installation of 
+ package univention-user-group-sync-source. It can be changed afterwards. 
+ 

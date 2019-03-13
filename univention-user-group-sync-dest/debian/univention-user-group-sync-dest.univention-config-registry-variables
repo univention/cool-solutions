@@ -1,0 +1,5 @@
+[ldap/sync/certificates]
+Description[de]=Synchronisiere Benutzerzertifikate der Cool Solution 'Creation and management of user and Windows certificates'
+Description[en]=Synchronize user certificates from Cool Solution 'Creation and management of user and Windows certificates'
+Type=bool
+Categories=system

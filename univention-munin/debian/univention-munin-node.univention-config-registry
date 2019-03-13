@@ -1,5 +1,6 @@
 Type: file
 File: etc/munin/munin-node.conf
+Postinst: univention-munin-node-reload.py
 Variables: munin/node/allowedhosts
 Variables: ldap/master
 Variables: hostname

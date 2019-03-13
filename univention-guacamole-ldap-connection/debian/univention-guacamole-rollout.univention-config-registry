@@ -1,3 +1,12 @@
 Type: file
 File: etc/apache2/sites-available/guacamole.conf
+Postinst: univention-guacamole-reload.py
 Variables: guacamole/external/port
+
+Type: script
+Script: univention-guacamole-resync
+Variables: guacamole/user/dn
+Variables: guacamole/config/base/dn
+Variables: guacamole/ldap/username/attribute
+Variables: guacamole/external/port
+Variables: guacamole/ldap/user/searchfilter

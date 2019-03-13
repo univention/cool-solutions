@@ -30,42 +30,42 @@
 # <http://www.gnu.org/licenses/>.
 
 case "$1" in
-	purge)
-		;;
+    purge)
+        ;;
 
-	remove)
-		# Reset license prompts
-		. /usr/share/debconf/confmodule
+    remove)
+        # Reset license prompts
+        . /usr/share/debconf/confmodule
         db_fset univention-shalla-list-downloader/present-shalla-license-v1 seen false
         db_fset univention-shalla-list-downloader/accepted-shalla-license-v1 seen false
         
-		echo "Deleting shalla lists."
-		rm -rf /usr/local/share/univention-shalla-list-downloader
-		rm -rf /var/lib/ucs-school-webproxy/shallalists
-		# Remove the cronjob
-		ucr unset cron/shalla-list-downloader/command cron/shalla-list-downloader/time cron/shalla-list-downloader/description || true
-		
-		#echo "Reload the webproxy and dns server"
-		#. /usr/share/univention-lib/all.sh
+        echo "Deleting shalla lists."
+        rm -rf /usr/local/share/univention-shalla-list-downloader
+        rm -rf /var/lib/ucs-school-webproxy/shallalists
+        # Remove the cronjob
+        ucr unset cron/shalla-list-downloader/command cron/shalla-list-downloader/time cron/shalla-list-downloader/description || true
+        
+        #echo "Reload the webproxy and dns server"
+        #. /usr/share/univention-lib/all.sh
 
-		#eval "$(ucr shell proxy/filter/global/blacklists/domains)"
-		#eval "$(ucr shell proxy/filter/global/blacklists/urls)"
-		#if [[ -n "${proxy_filter_global_blacklists_domains}" || -n "${proxy_filter_global_blacklists_urls}"  ]]; then
-		#	ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"
-		#fi
+        #eval "$(ucr shell proxy/filter/global/blacklists/domains)"
+        #eval "$(ucr shell proxy/filter/global/blacklists/urls)"
+        #if [[ -n "${proxy_filter_global_blacklists_domains}" || -n "${proxy_filter_global_blacklists_urls}"  ]]; then
+        #    ucr set proxy/filter/global/blacklists/domains="${proxy_filter_global_blacklists_domains}"
+        #fi
 
-		#eval "$(ucr shell dns/blacklist/record/domains)"
-		#if [[ -n "${dns_blacklist_record_domains}" ]]; then
-		#	ucr set dns/blacklist/record/domains="${dns_blacklist_record_domains}"
-		#fi
-		;;
-	upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
-		;;
+        #eval "$(ucr shell dns/blacklist/record/domains)"
+        #if [[ -n "${dns_blacklist_record_domains}" ]]; then
+        #    ucr set dns/blacklist/record/domains="${dns_blacklist_record_domains}"
+        #fi
+        ;;
+    upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+        ;;
 
-	*)
-		echo "postrm called with unknown argument \`$1'" >&2
-		exit 1
-		;;
+    *)
+        echo "postrm called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
 esac
 
 # dh_installdeb will replace this with shell code automatically

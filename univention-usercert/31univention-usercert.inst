@@ -30,13 +30,19 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-VERSION=3
+VERSION=5
 . /usr/share/univention-join/joinscripthelper.lib
 joinscript_init
 
+# source LDAP shell library and register LDAP schema extension:
+. /usr/share/univention-lib/ldap.sh
+
+ucs_registerLDAPExtension "$@" --udm_hook /usr/share/pyshared/univention/admin/hooks.d/WindowsCertificateHook.py || die
+ucs_registerLDAPExtension "$@" --udm_hook /usr/share/pyshared/univention/admin/hooks.d/SimpleAuthCertificateHook.py || die
+
 eval "$(univention-config-registry shell)"
 
-# create custom attributes
+# create custom attributes for User Accounts
 univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
  --position "cn=custom attributes,cn=univention,$ldap_base" \
  --set name="createRevokeCertificate" \
@@ -102,6 +108,184 @@ if joinscript_check_specific_version_executed "2"; then
 	--dn "cn=certificateDays,cn=custom attributes,cn=univention,$ldap_base" \
 	--set tabPosition=5
 fi
+
+# create custom attributes for Simple Authentication Accounts
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+	--position "cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="createRevokeCertificateSimpleAuth" \
+	--set shortDescription="Create/Revoke Certificate" \
+	--set longDescription="Activate to create, deactivate to revoke certificate" \
+	--set 'translationShortDescription="de_DE" "Zertifikat erstellen/zurückziehen"' \
+	--set 'translationLongDescription="de_DE" "Aktivieren um Zertifikat zu erstellen, deaktivieren um Zertifikat zurückzuziehen"' \
+	--set tabName="User Certificate" \
+	--set 'translationTabName="de_DE" "Benutzerzertifikat"' \
+	--set tabPosition=1 \
+	--set module="users/ldap" \
+	--set syntax="boolean" \
+	--set multivalue=0 \
+	--set valueRequired=0 \
+	--set mayChange=1 \
+	--set doNotSearch=1 \
+	--set objectClass="univentionManageCertificates" \
+	--set ldapMapping="univentionCreateRevokeCertificate" \
+	--set groupName="General" \
+	--set 'translationGroupName="de_DE" "Allgemein"'
+
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+	--position "cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="renewCertificateSimpleAuth" \
+	--set shortDescription="Renew Certificate" \
+	--set longDescription="Activate to renew the certificate" \
+	--set 'translationShortDescription="de_DE" "Zertifikat erneuern"' \
+	--set 'translationLongDescription="de_DE" "Aktivieren um Zertifikat zu erneuern"' \
+	--set tabName="User Certificate" \
+	--set 'translationTabName="de_DE" "Benutzerzertifikat"' \
+	--set tabPosition=3 \
+	--set module="users/ldap" \
+	--set syntax="boolean" \
+	--set multivalue=0 \
+	--set valueRequired=0 \
+	--set mayChange=1 \
+	--set doNotSearch=1 \
+	--set objectClass="univentionManageCertificates" \
+	--set ldapMapping="univentionRenewCertificate" \
+	--set groupName="General" \
+	--set 'translationGroupName="de_DE" "Allgemein"'
+
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+	--position "cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="certificateDaysSimpleAuth" \
+	--set shortDescription="certificate valid time in days" \
+	--set longDescription="Number of days a new created certificate is valid" \
+	--set 'translationShortDescription="de_DE" "Gültigkeitsdauer des Zertifikat in Tagen"' \
+	--set 'translationLongDescription="de_DE" "Anzahl der Tage, die ein neu erstelltes Zertifikat gültig ist"' \
+	--set tabName="User Certificate" \
+	--set 'translationTabName="de_DE" "Benutzerzertifikat"' \
+	--set tabPosition=5 \
+	--set module="users/ldap" \
+	--set syntax="integer" \
+	--set multivalue=0 \
+	--set valueRequired=0 \
+	--set mayChange=1 \
+	--set doNotSearch=1 \
+	--set objectClass="univentionManageCertificates" \
+	--set ldapMapping="univentionCertificateDays" \
+	--set fullWidth=1 \
+	--set groupName="General" \
+	--set 'translationGroupName="de_DE" "Allgemein"'
+
+
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+	--position "cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="simpleAuthCertificate" \
+	--set shortDescription="Simple authentication account Certificate in DER encoding." \
+	--set longDescription="The Simple authentication account certificate must be uploaded with DER encoding." \
+	--set 'translationShortDescription="de_DE" "DER-kodiertes Einfaches Authentisierungskonto-Zertifikat"' \
+	--set 'translationLongDescription="de_DE" "Das Einfaches Authentisierungskonto-Zertifikat muss DER-kodiert
+	hochgeladen werden."' \
+	--set tabName="User Certificate" \
+	--set 'translationTabName="de_DE" "Benutzerzertifikat"' \
+	--set tabPosition=7 \
+	--set module="users/ldap" \
+	--set syntax="Base64Upload" \
+	--set multivalue=0 \
+	--set valueRequired=0 \
+	--set mayChange=1 \
+	--set doNotSearch=1 \
+	--set objectClass="univentionManageCertificates" \
+	--set ldapMapping="userCertificate;binary" \
+	--set hook="SimpleAuthCertificateHook" \
+	--set fullWidth=1 \
+	--set groupName="General" \
+	--set 'translationGroupName="de_DE" "Allgemein"'
+
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+	--position "cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="certificateSubjectCommonNameSimpleAuth" \
+	--set shortDescription="Subject Common Name" \
+	--set longDescription="Certificate Subject Common Name" \
+	--set 'translationShortDescription="de_DE" "Inhaber Allgemeiner Name"' \
+	--set 'translationLongDescription="de_DE" "Allgemeiner Name des Zertifikat-Inhaber"' \
+	--set tabName="User Certificate" \
+	--set 'translationTabName="de_DE" "Benutzerzertifikat"' \
+	--set tabPosition=7 \
+	--set module="users/ldap" \
+	--set syntax="string" \
+	--set multivalue=0 \
+	--set valueRequired=0 \
+	--set mayChange=0 \
+	--set doNotSearch=1 \
+	--set objectClass="univentionManageCertificates" \
+	--set ldapMapping="dummy2" \
+	--set notEditable=1 \
+	--set groupName="Certificate data" \
+	--set 'translationGroupName="de_DE" "Zertifikats-Daten"'
+
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+	--position "cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="certificateIssuerCommonNameSimpleAuth" \
+	--set shortDescription="Issuer Common Name" \
+	--set longDescription="Certificate Issuer Common Name" \
+	--set 'translationShortDescription="de_DE" "Herausgeber Allgemeiner Name"' \
+	--set 'translationLongDescription="de_DE" "Allgemeiner Name des Zertifikat-Herausgebers"' \
+	--set tabName="User Certificate" \
+	--set 'translationTabName="de_DE" "Benutzerzertifikat"' \
+	--set tabPosition=8 \
+	--set module="users/ldap" \
+	--set syntax="string" \
+	--set multivalue=0 \
+	--set valueRequired=0 \
+	--set mayChange=0 \
+	--set doNotSearch=1 \
+	--set objectClass="univentionManageCertificates" \
+	--set ldapMapping="dummy2" \
+	--set notEditable=1 \
+	--set groupName="Certificate data" \
+	--set 'translationGroupName="de_DE" "Zertifikats-Daten"'
+
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+	--position "cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="certificateDateNotBeforeSimpleAuth" \
+	--set shortDescription="Valid from" \
+	--set longDescription="Certificate valid from" \
+	--set 'translationShortDescription="de_DE" "Gültig ab"' \
+	--set 'translationLongDescription="de_DE" "Das Zertifikat ist gültig ab dem Zeitpunkt"' \
+	--set tabName="User Certificate" \
+	--set 'translationTabName="de_DE" "Benutzerzertifikat"' \
+	--set tabPosition=9 \
+	--set module="users/ldap" \
+	--set syntax="string" \
+	--set multivalue=0 \
+	--set valueRequired=0 \
+	--set mayChange=0 \
+	--set doNotSearch=1 \
+	--set objectClass="univentionManageCertificates" \
+	--set ldapMapping="dummy2" \
+	--set notEditable=1 \
+	--set groupName="Certificate data" \
+	--set 'translationGroupName="de_DE" "Zertifikats-Daten"'
+
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+	--position "cn=custom attributes,cn=univention,$ldap_base" \
+	--set name="certificateDateNotAfterSimpleAuth" \
+	--set shortDescription="Valid until" \
+	--set longDescription="Certificate valid until" \
+	--set 'translationShortDescription="de_DE" "Gültig bis"' \
+	--set 'translationLongDescription="de_DE" "Das Zertifikat ist gültig bis zu dem Zeitpunkt"' \
+	--set tabName="User Certificate" \
+	--set 'translationTabName="de_DE" "Benutzerzertifikat"' \
+	--set tabPosition=10 \
+	--set module="users/ldap" \
+	--set syntax="string" \
+	--set multivalue=0 \
+	--set valueRequired=0 \
+	--set mayChange=0 \
+	--set doNotSearch=1 \
+	--set objectClass="univentionManageCertificates" \
+	--set ldapMapping="dummy2" \
+	--set notEditable=1 \
+	--set groupName="Certificate data" \
+	--set 'translationGroupName="de_DE" "Zertifikats-Daten"'
 
 joinscript_save_current_version
 

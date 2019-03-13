@@ -1,0 +1,3 @@
+Type: script
+Script: univention-nextcloud-samba-common-share-config.py
+Variables: ucsschool/userlogon/commonshares

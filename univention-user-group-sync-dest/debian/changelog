@@ -1,0 +1,85 @@
+univention-user-group-sync-dest (2.1.0-2) unstable; urgency=low
+
+  * Added Simple Authentication Account synchronization
+  * Added User Certificate synchronization
+  * Issue #14963
+
+ -- Hendrik Peter <hpeter@univention.de>  Fri, 01 Mar 2019 13:18:07 +0100
+ 
+univention-user-group-sync-dest (2.0.0-10) unstable; urgency=medium
+
+  * Fix getPosition regex
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 11 Dec 2018 13:22:47 +0100
+
+univention-user-group-sync-dest (2.0.0-9) unstable; urgency=low
+
+  * Catch failed LDAP requests #12769
+  * Add Log file
+
+ -- Hendrik Peter <hpeter@univention.de>  Fri, 02 Nov 2018 16:18:14 +0100
+
+univention-user-group-sync-dest (2.0.0-8) unstable; urgency=low
+
+  * Fix infinite loop of debconf during installation #12769
+
+ -- Hendrik Peter <hpeter@univention.de>  Mon, 29 Oct 2018 17:01:34 +0100
+
+univention-user-group-sync-dest (2.0.0-7) unstable; urgency=low
+
+  * Adjusted notes for the ucs-sync password #12769
+
+ -- Hendrik Peter <hpeter@univention.de>  Fri, 26 Oct 2018 17:23:14 +0200
+
+univention-user-group-sync-dest (2.0.0-6) unstable; urgency=low
+
+  * Rename package #12769
+  * Get user input through debconf during the installation
+  * Renamed pickle file folder to /var/lib/univention-user-group-sync
+  * Changed package structure
+  * Use a service user for data transfer
+  * Use a cron job to import all transfered changes
+
+ -- Hendrik Peter <hpeter@univention.de>  Fri, 26 Oct 2018 16:11:30 +0200
+
+univention-user-group-sync-dest (2.0.0-5) unstable; urgency=low
+
+  * Removed OU mapping mechanism #12769
+
+ -- Hendrik Peter <hpeter@univention.de>  Wed, 24 Oct 2018 13:13:08 +0200
+
+univention-user-group-sync-dest (2.0.0-4) unstable; urgency=low
+
+  * Migration to Cool Solution #12769
+  * Readded delete functions #12769
+
+ -- Hendrik Peter <hpeter@univention.de>  Mon, 22 Oct 2018 16:41:18 +0200
+
+univention-user-group-sync-dest (1.0.0-3) unstable; urgency=medium
+
+  * Fork to individual package #11449
+  * Add mechanism to change LDAP base of objects before import
+  * Add mechanism to apply OU mapping via UCR
+  * Add pull mechanism for pickle files via univention-scp and UCR
+  * Map uid correctly for group memberships
+  * Use univention modules in a more standard way
+  * Call tempfile module correctly
+  * Reorganize code to make it more readable
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Fri, 20 Jul 2018 11:14:14 +0200
+
+univention-user-group-sync-dest (1.0.0-2) unstable; urgency=medium
+
+  * Fork from xxx-user-group-sync #11448
+  * Update for UCS 4.3
+    - Update copyright
+    - Update interpreter version
+  * Add cron mechanism to transfer and import pickle files
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 10 Jul 2018 10:00:56 +0200
+
+univention-user-group-sync-dest (1.0.0-1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Janek Walkenhorst <walkenhorst@univention.de>  Mon, 15 Jul 2013 14:36:43 +0200
