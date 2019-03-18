@@ -1,11 +1,11 @@
-Source: univention-sshauthenticator
+Source: univention-ssh-authenticator
 Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
 Build-Depends: debhelper (>= 7)
 Standards-Version: 3.7.2
 
-Package: univention-sshauthenticator
+Package: univention-ssh-authenticator
 Architecture: all
 Depends: univention-join (>= 5.0.20-1),
  shell-univention-lib (>= 2.0.17-1),

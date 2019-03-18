@@ -4,7 +4,7 @@
 
 if [ "$1" = "remove" ]
 then
-	cp /usr/lib/univention-uninstall/50join-sshauthenticator-uninstall.uinst \
+	cp /usr/lib/univention-uninstall/50join-ssh-authenticator-uninstall.uinst \
 		/usr/lib/univention-install/
 fi
 
