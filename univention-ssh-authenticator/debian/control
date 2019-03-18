@@ -1,0 +1,19 @@
+Source: univention-sshauthenticator
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.7.2
+
+Package: univention-sshauthenticator
+Architecture: all
+Depends: univention-join (>= 5.0.20-1),
+ shell-univention-lib (>= 2.0.17-1),
+ univention-management-console-dev,
+ ${misc:Depends}
+Description: a package adding an attribute to the self-service for 
+ the users public ssh key and allowing the users to modify it. These 
+ keys can be read from LDAP by the SSH daemon for authorization.
+ .
+ For more information about UCS, refer to:
+ http://www.univention.de/

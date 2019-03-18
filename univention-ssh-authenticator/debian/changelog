@@ -1,0 +1,5 @@
+univention-sshauthenticator (1.0-1) UNRELEASED; urgency=low
+
+  * Initial release. (Closes: #XXXXXX)
+
+ -- Lukas Zumvorde <zumvorde@univention>  Mon, 18 Mar 2019 08:54:45 +0100
