@@ -67,7 +67,7 @@ univention-directory-manager settings/extended_attribute create \
     --set syntax="string" \
     --set shortDescription="public ssh key" \
     --set mayChange=1 \
-    --set default="\n"
+    --set default=" "
 
 echo "make the attribute editable through self-service "
 ucr set self-service/ldap_attributes=$(ucr get self-service/ldap_attributes),$ldapname
