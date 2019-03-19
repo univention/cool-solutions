@@ -1,9 +1,9 @@
 Source: univention-ssh-authenticator
 Section: univention
 Priority: optional
-Maintainer: Univention GmbH <packages@univention.de>
+Maintainer: Lukas Zumvorde <packages@univention.de>
 Build-Depends: debhelper (>= 7)
-Standards-Version: 3.7.2
+Standards-Version: 3.9.8
 
 Package: univention-ssh-authenticator
 Architecture: all

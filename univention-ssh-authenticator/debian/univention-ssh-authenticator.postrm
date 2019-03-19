@@ -5,7 +5,7 @@
 if [ "$1" = "remove" ]
 then
 	. /usr/share/univention-lib/all.sh
-	call_unjoinscript 50join-sshauthenticator-uninstall.uinst
+	call_unjoinscript 50join-ssh-authenticator-uninstall.uinst
 fi
 
 exit 0

@@ -4,11 +4,11 @@
 
 if [ "$1" = "configure" ]
 then
-	uinst=/usr/lib/univention-install/50join-sshauthenticator-uninstall.uinst
+	uinst=/usr/lib/univention-install/50join-ssh-authenticator-uninstall.uinst
 	[ -e "$uinst" ] && rm "$uinst"
 fi
 
 . /usr/share/univention-lib/base.sh
-call_joinscript 50join-sshauthenticator.inst
+call_joinscript 50join-ssh-authenticator.inst
 
 exit 0
