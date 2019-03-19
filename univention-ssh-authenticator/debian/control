@@ -9,7 +9,6 @@ Package: univention-ssh-authenticator
 Architecture: all
 Depends: univention-join (>= 5.0.20-1),
  shell-univention-lib (>= 2.0.17-1),
- univention-management-console-dev,
  ${misc:Depends}
 Description: a package adding an attribute to the self-service for 
  the users public ssh key and allowing the users to modify it. These 

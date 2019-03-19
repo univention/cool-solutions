@@ -1,0 +1,7 @@
+#!/bin/sh
+
+eval "$(ucr shell)"
+auth_name=sshAuthenticator
+auth_password=univention
+
+univention-ldapsearch -x -D "uid=$auth_name,cn=users,$ldap_base" -w $auth_password univentionObjectType=users/user | ldapsearch-wrapper | grep sshPublicKey | cut --delimiter=: -f 2- | cut --delimiter=" " -f 2-	
