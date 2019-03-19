@@ -1,4 +1,4 @@
-univention-ssh-authenticator (1.0-3) UNRELEASED; urgency=low
+univention-ssh-authenticator (1.0-4) UNRELEASED; urgency=low
 
   * Initial release. (Issue: #9837)
 
