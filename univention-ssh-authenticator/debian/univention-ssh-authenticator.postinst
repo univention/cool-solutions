@@ -13,6 +13,7 @@ call_joinscript 50join-ssh-authenticator.inst
 
 echo "configure SSH deamon to use the AuthorizedKeysCommand if not already otherwise set"
 ucr set sshd/AuthorizedKeysCommand?/etc/ssh/ldap_auth_keys_search
-ucr set sshd/AuthorizedKeysCommandUser?sshAuthenticator
+ucr set sshd/AuthorizedKeysCommandUser?sshd
+ucr set sshd/UsePAM?no
 
 exit 0

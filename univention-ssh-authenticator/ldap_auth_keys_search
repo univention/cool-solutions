@@ -1,6 +1,6 @@
 #!/bin/sh
 
-eval "$(ucr shell)"
+eval "$(/usr/sbin/ucr shell)"
 auth_name=sshAuthenticator
 auth_password=univention
 
