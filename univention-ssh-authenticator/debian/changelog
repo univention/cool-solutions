@@ -1,5 +1,5 @@
-univention-ssh-authenticator (1.0-1) UNRELEASED; urgency=low
+univention-ssh-authenticator (1.0.0-1) unstable; urgency=low
 
-  * Initial release. (Closes: #XXXXXX)
+  * Initial release. Issue: #9837
 
- -- Lukas Zumvorde <zumvorde@univention>  Mon, 18 Mar 2019 08:54:45 +0100
+ -- Lukas Zumvorde <zumvorde@univention.de>  Tue, 19 Mar 2019 16:45:34 +0100

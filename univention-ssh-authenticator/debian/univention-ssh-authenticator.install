@@ -1,0 +1,4 @@
+50join-ssh-authenticator.inst usr/lib/univention-install/
+50join-ssh-authenticator-uninstall.uinst usr/lib/univention-uninstall/
+openssh-ldap.schema usr/share/univention-ldap/schema/
+ldap_auth_keys_search etc/ssh

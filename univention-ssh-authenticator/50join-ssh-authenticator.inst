@@ -1,0 +1,99 @@
+#!/bin/sh
+# -*- coding: utf-8 -*-
+#
+# Univention ssh authenticator integration
+#  join script
+#
+# Copyright 2017 Univention GmbH
+#
+# http://www.univention.de/
+#
+# All rights reserved.
+#
+# The source code of this program is made available
+# under the terms of the GNU Affero General Public License version 3
+# (GNU AGPL V3) as published by the Free Software Foundation.
+#
+# Binary versions of this program provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention and not subject to the GNU AGPL V3.
+#
+# In the case you use this program under the terms of the GNU AGPL V3,
+# the program is provided in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License with the Debian GNU/Linux or Univention distribution in file
+# /usr/share/common-licenses/AGPL-3; if not, see
+# <http://www.gnu.org/licenses/>.
+
+
+## joinscript api: bindpwdfile
+
+VERSION=1
+. /usr/share/univention-join/joinscripthelper.lib
+joinscript_init
+
+#SERVICE="LDAP-SSH-Authenticator"
+
+eval "$(ucr shell)"
+
+
+echo "register the LDAP schema for openssh public keys"
+. /usr/share/univention-lib/ldap.sh
+ucs_registerLDAPSchema /usr/share/univention-ldap/schema/openssh-ldap.schema
+
+echo "enable users/self"
+ucr unset umc/module/udm/users/self/disabled
+
+udmname=sshPublicKey
+ldapname=sshPublicKey
+objectclassname=ldapPublicKey
+
+echo "add an attribute for the public key to users"
+univention-directory-manager settings/extended_attribute create \
+    --position "cn=custom attributes,cn=univention,$ldap_base" \
+    --set name="$udmname" \
+    --set module="users/user" \
+    --set ldapMapping="$ldapname" \
+    --set objectClass="$objectclassname" \
+    --set longDescription="Public Key that is used by the user for ssh authentification" \
+    --set tabName="Authentification" \
+    --set multivalue=0 \
+    --set syntax="string" \
+    --set shortDescription="public ssh key" \
+    --set mayChange=1 \
+    --set default=" "
+
+echo "make the attribute editable through self-service "
+ucr set self-service/ldap_attributes=$(ucr get self-service/ldap_attributes),$ldapname
+ucr set self-service/udm_attributes=$(ucr get self-service/udm_attributes),$udmname
+
+echo "create user for the SSH deamon to search LDAP with"
+univention-directory-manager users/ldap create \
+	--position "cn=users,$ldap_base" \
+	--set username="sshAuthenticator" \
+	--set password="univention"
+
+
+#. /usr/share/univention-lib/ldap.sh
+#ucs_addServiceToLocalhost "$SERVICE" "$@"
+
+#udm "computers/$server_role" modify "$@" \
+#	--dn "$ldap_hostdn" \
+#  --set reinstall=0 || die
+
+# create container for extended attributes to be placed in
+#udm container/cn create "$@" \
+#	--ignore_exists \
+#  --position "cn=custom attributes,cn=univention,$ldap_base" \
+#	--set name="" || die
+
+# some extended attributes would be added here
+
+joinscript_save_current_version
+exit 0
