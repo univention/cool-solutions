@@ -1,3 +1,16 @@
+univention-user-group-sync-dest (2.1.0-3) unstable; urgency=low
+
+  * Fixed typo: dh_input
+  * Fixed: User certificate can be a list
+  * Fixed: User certificate can be empty
+  * Fixed: Move command implemented
+  * Fixed: Unset attributes will get applied
+  * Command type gets stored in transfered files. No more command guessing
+  * Rewritten Script
+  * Issue #14963
+
+ -- Hendrik Peter <hpeter@univention.de>  Mon, 26 Mar 2019 18:16:46 +0100
+
 univention-user-group-sync-dest (2.1.0-2) unstable; urgency=low
 
   * Added Simple Authentication Account synchronization
