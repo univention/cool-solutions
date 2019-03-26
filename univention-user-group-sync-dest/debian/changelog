@@ -1,9 +1,22 @@
-univention-user-group-sync-dest (2.1.0-3) unstable; urgency=medium
+univention-user-group-sync-dest (2.1.0-4) unstable; urgency=medium
 
   * Add mapping of source LDAP base to destination OU
   * Issue #15608
 
  -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 06 May 2019 16:40:43 +0200
+
+univention-user-group-sync-dest (2.1.0-3) unstable; urgency=low
+
+  * Fixed typo: dh_input
+  * Fixed: User certificate can be a list
+  * Fixed: User certificate can be empty
+  * Fixed: Move command implemented
+  * Fixed: Unset attributes will get applied
+  * Command type gets stored in transfered files. No more command guessing
+  * Rewritten Script
+  * Issue #14963
+
+ -- Hendrik Peter <hpeter@univention.de>  Mon, 26 Mar 2019 18:16:46 +0100
 
 univention-user-group-sync-dest (2.1.0-2) unstable; urgency=low
 
