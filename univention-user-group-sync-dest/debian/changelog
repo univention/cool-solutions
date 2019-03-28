@@ -1,3 +1,11 @@
+univention-user-group-sync-dest (2.1.0-4) unstable; urgency=low
+
+  * Fixed: Class violation error when ldap/sync/certificates is deactivated
+  * Modify existing object on Add command
+  * Issue #14963
+
+ -- Hendrik Peter <hpeter@univention.de>  Thu, 28 Mar 2019 12:25:49 +0100
+
 univention-user-group-sync-dest (2.1.0-3) unstable; urgency=low
 
   * Fixed typo: dh_input
