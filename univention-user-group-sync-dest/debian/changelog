@@ -1,9 +1,17 @@
-univention-user-group-sync-dest (2.1.0-4) unstable; urgency=medium
+univention-user-group-sync-dest (2.1.0-5) unstable; urgency=medium
 
   * Add mapping of source LDAP base to destination OU
   * Issue #15608
 
  -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 06 May 2019 16:40:43 +0200
+
+univention-user-group-sync-dest (2.1.0-4) unstable; urgency=low
+
+  * Fixed: Class violation error when ldap/sync/certificates is deactivated
+  * Modify existing object on Add command
+  * Issue #14963
+
+ -- Hendrik Peter <hpeter@univention.de>  Thu, 28 Mar 2019 12:25:49 +0100
 
 univention-user-group-sync-dest (2.1.0-3) unstable; urgency=low
 
