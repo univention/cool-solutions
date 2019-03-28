@@ -345,9 +345,10 @@ def _create_user(user_dn, attributes):
     '''Creates a new user based on the given attributes'''
     existing_user = _user_exists(attributes)
     if existing_user is not None:
-        _log_message("I: Ignoring new %r for existing %r" % (user_dn, existing_user.position.getDn(), ))
-        print("I: Ignoring new %r for existing %r" % (user_dn, existing_user.position.getDn(), ))
-        return
+        return _modify_user(user_dn, attributes)
+        #_log_message("I: Ignoring new %r for existing %r" % (user_dn, existing_user.position.getDn(), ))
+        #print("I: Ignoring new %r for existing %r" % (user_dn, existing_user.position.getDn(), ))
+        #return
     
     _log_message("Create User: %r" % user_dn)
     user_position = getPosition(user_dn)
@@ -371,9 +372,10 @@ def _create_simpleAuth(simpleauth_dn, attributes):
     '''Creates a new Simple Authentication Account based on the given attributes'''
     existing_simpleauth = _simpleauth_exists(attributes)
     if existing_simpleauth is not None:
-        _log_message("I: Ignoring new %r for existing %r" % (simpleauth_dn, existing_simpleauth.position.getDn(), ))
-        print("I: Ignoring new %r for existing %r" % (simpleauth_dn, existing_simpleauth.position.getDn(), ))
-        return
+        return _modify_simpleAuth(simpleauth_dn, attributes)
+        #_log_message("I: Ignoring new %r for existing %r" % (simpleauth_dn, existing_simpleauth.position.getDn(), ))
+        #print("I: Ignoring new %r for existing %r" % (simpleauth_dn, existing_simpleauth.position.getDn(), ))
+        #return
     
     _log_message("Create User: %r" % simpleauth_dn)
     simpleauth_position = getPosition(simpleauth_dn)
@@ -397,9 +399,10 @@ def _create_group(group_dn, attributes):
     '''Creates a new group based on the given attributes'''
     existing_group = _group_exists(attributes)
     if existing_group is not None:
-        _log_message("I: Ignoring new %r for existing %r" % (group_dn, existing_group.position.getDn(), ))
-        print("I: Ignoring new %r for existing %r" % (group_dn, existing_group.position.getDn(), ))
-        return
+        return _modify_group(group_dn, attributes)
+        #_log_message("I: Ignoring new %r for existing %r" % (group_dn, existing_group.position.getDn(), ))
+        #print("I: Ignoring new %r for existing %r" % (group_dn, existing_group.position.getDn(), ))
+        #return
     
     _log_message("Create User: %r" % group_dn)
     group_position = getPosition(group_dn)
