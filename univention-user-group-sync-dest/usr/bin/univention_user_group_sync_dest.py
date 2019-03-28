@@ -194,10 +194,11 @@ def _group_exists(attributes):
 
 def _unset_certificates(attributes):
     '''Ignore Certificate attributes, if sync isn't enabled'''
-    attributes.pop('userCertificate;binary', None)
-    attributes.pop('univentionCertificateDays', None)
-    attributes.pop('univentionCreateRevokeCertificate', None)
-    attributes.pop('univentionRenewCertificate', None)
+
+    attributes['userCertificate;binary'] = []
+    attributes['univentionCertificateDays'] = []
+    attributes['univentionCreateRevokeCertificate'] = []
+    attributes['univentionRenewCertificate'] = []
     if attributes.has_key('objectClass') and 'univentionManageCertificates' in attributes['objectClass']:
         attributes['objectClass'].remove('univentionManageCertificates')
     return attributes
