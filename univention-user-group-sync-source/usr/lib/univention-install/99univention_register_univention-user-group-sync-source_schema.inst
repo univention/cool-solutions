@@ -41,7 +41,7 @@ ucs_registerLDAPExtension "$@" \
     --schema /var/lib/univention-ldap/local-schema/univentionUserGroupSyncEnabled.schema
 echo -e "Done!"
 
-echo -e "Adding extended attribute for Guacamole protocol... "
+echo -e "Adding extended attribute for univentionUserGroupSyncEnabled... "
 udm settings/extended_attribute create "$@" \
     --position="cn=custom attributes,cn=univention,${ldap_base}" \
     --ignore_exists \
