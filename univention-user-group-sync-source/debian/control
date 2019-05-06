@@ -13,3 +13,11 @@ Depends: ${misc:Depends}
 Description: store user and group information to be transferred
  This package contains a listener module that stores user and group information
  to be transferred to another system.
+
+Package: univention-user-group-sync-source-schema
+Architecture: all
+Pre-Depends: debconf (>= 0.2.17)
+Depends: ${misc:Depends}
+Description: manually select users and groups to be synchronized
+ This package contains a LDAP schema for a boolean attribute to manually select
+ users and groups for synchronization.

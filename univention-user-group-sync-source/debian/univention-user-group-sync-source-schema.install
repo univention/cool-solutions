@@ -1,0 +1,2 @@
+usr/lib/univention-install/99univention_register_univention-user-group-sync-source_schema.inst
+var/lib/univention-ldap/local-schema/univentionUserGroupSyncEnabled.schema

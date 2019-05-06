@@ -130,7 +130,7 @@ def _write_file(filename, path, data):
     os.chmod(filename, 0640)
     listener.unsetuid()
 
-# 
+#
 def _wait_until_after(timestamp):
     """wait until the current (system) time is later than <timestamp>"""
     while time.time() <= timestamp:
@@ -142,7 +142,7 @@ def _format_data(object_dn, new_attributes):
     data = (object_dn, new_attributes, )
     return pickle.dumps(data, protocol=2)
 
-# 
+#
 def handler(object_dn, new_attributes, _, command):
     """called for each uniqueMember-change on a group"""
     _log_debug("handler for: %r %r" % (object_dn, command, ))
@@ -155,15 +155,15 @@ def handler(object_dn, new_attributes, _, command):
     # Filter. Only accept users and groups
     if not ldap.search(filter=filter, base=object_dn):
         return
-    
+
     # Don't synchronize the system user
     if ldap.search(filter="uid=ucs-sync", base=object_dn):
         return
-    
+
     # Apply custom filter, if set
     if filter_custom.strip() and not ldap.search(filter=filter_custom, base=object_dn):
         return
-    
+
     _write_file(filename, DB_BASE_PATH, data)
     handler.last_time = timestamp
 handler.last_time = 1300000000
