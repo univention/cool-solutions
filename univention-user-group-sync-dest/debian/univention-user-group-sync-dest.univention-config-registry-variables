@@ -3,3 +3,9 @@ Description[de]=Synchronisiere Benutzerzertifikate der Cool Solution 'Creation a
 Description[en]=Synchronize user certificates from Cool Solution 'Creation and management of user and Windows certificates'
 Type=bool
 Categories=system
+
+[ldap/sync/mapping/base2ou/*]
+Description[de]=Erstelle Objekte mit Basis x in OU y anstatt nur die Basis zu ersetzen
+Description[en]=Create objects with base x in OU y instead of just replacing the base
+Type=string
+Categories=system

@@ -138,6 +138,11 @@ def getPosition(user_dn):
     '''Maps the given DN to the LDAP by replacing the base, if defined'''
     position = re.sub(r'(dc\=.*$)', base, user_dn)
     position = re.sub(r'^(uid|cn)=[^,]+,', '', position)
+    #Apply OU mapping if configured
+    sourceBase = re.search(r'(dc\=.*$)', dn).group()
+    ou = ucr.get('ldap/sync/mapping/base2ou/{}'.format(sourceBase))
+    if ou:
+        position = re.sub(r'({})'.format(base), 'ou={},{}'.format(ou, base), position)
     return position
 
 # Temporarily generate a random password
@@ -465,7 +470,7 @@ def _group_should_be_updated(existing_group, attributes, group_dn):
     '''xxx'''
     return existing_group.position.getDn().endswith(str(group_dn))
 
-# 
+#
 def _uid_to_dn(uid):
     '''Return the would be DN for <uid>'''
     #Get dn via getPosition
