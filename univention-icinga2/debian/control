@@ -1,0 +1,12 @@
+Source: univention-icinga2
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Build-Depends: debhelper (>=7)
+Standards-Version: 3.9.6
+Homepage: http://www.univention.de/
+
+Package: univention-icinga2
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, icinga2
+Description: Listener module to configure Icinga2 with Nagios objects from UCS LDAP
