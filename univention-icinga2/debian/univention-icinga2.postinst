@@ -1,5 +1,5 @@
 #!/bin/sh
-#Copyright (C) 2016 Univention GmbH
+#Copyright (C) 2019 Univention GmbH
 #
 #http://www.univention.de/
 #
@@ -28,6 +28,16 @@
 #<http://www.gnu.org/licenses/>.
 
 #DEBHELPER#
+. /usr/share/univention-lib/base.sh
+eval "$(ucr shell)"
+
+call_joinscript 99univention_register_univention-icinga2_schema.inst
+
+echo "Adding default Icinga2 check arguments for UNIVENTION_PING... "
+udm nagios/service modify --dn "cn=UNIVENTION_PING,cn=nagios,${ldap_base}" --set univentionIcingaCheckArgs='vars.ping_wrta=50,20%!vars.ping_crta=100,40%' || true
+
+echo "Adding default Icinga2 check arguments for UNIVENTION_NTP... "
+udm nagios/service modify --dn "cn=UNIVENTION_NTP,cn=nagios,${ldap_base}" --set univentionIcingaCheckArgs='vars.ntp_warning=10!vars.ntp_critical=60' || true
 
 ucr set 'icinga2/server/autostart?yes'
 

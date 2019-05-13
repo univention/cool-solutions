@@ -443,13 +443,15 @@ def handleService(dn, new, old):
 						fp.write('    vars.nrpe_command = "{}"\n'.format(new['cn'][0]))
 					else:
 						#TODO
-						if 'univentionNagiosCheckArgs' in new and new['univentionNagiosCheckArgs'] and new['univentionNagiosCheckArgs'][0]:
-							fp.write('    check_command = "%s"\n' % (new['univentionNagiosCheckCommand'][0]))
-							for checkArg in new['univentionNagiosCheckArgs'][0].split('!'):
+						if 'univentionIcingaCheckCommand' in new and 'univentionIcingaCheckArgs' in new and new['univentionIcingaCheckArgs'] and new['univentionIcingaCheckArgs'][0]:
+							fp.write('    check_command = "%s"\n' % (new['univentionIcingaCheckCommand'][0]))
+							for checkArg in new['univentionIcingaCheckArgs'][0].split('!'):
 								checkVar, checkVarValue = checkArg.split('=')
 								fp.write('   {} = "{}"\n'.format(checkVar, checkVarValue))
+						if 'univentionIcingaCheckCommand' in new:
+							fp.write('    check_command = "%s"\n' % new['univentionIcingaCheckCommand'][0])
 						else:
-							fp.write('    check_command = "%s"\n' % new['univentionNagiosCheckCommand'][0])
+							univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, 'ICINGA2-SERVER: No check command was set for {} - icinga2 will report an error'.format(new['cn'][0]))
 
 					fp.write('    check_interval = "%s"\n' % new['univentionNagiosNormalCheckInterval'][0])
 					fp.write('    retry_interval = "%s"\n' % new['univentionNagiosRetryCheckInterval'][0])

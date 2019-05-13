@@ -1,0 +1,97 @@
+#!/bin/bash
+# installation joinscript for univention-user-group-sync-source schema
+#
+# Copyright (C) 2019 Univention GmbH
+#
+# http://www.univention.de/
+#
+# All rights reserved.
+#
+# The source code of this program is made available
+# under the terms of the GNU Affero General Public License version 3
+# (GNU AGPL V3) as published by the Free Software Foundation.
+#
+# Binary versions of this program provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention and not subject to the GNU AGPL V3.
+#
+# In the case you use this program under the terms of the GNU AGPL V3,
+# the program is provided in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License with the Debian GNU/Linux or Univention distribution in file
+# /usr/share/common-licenses/AGPL-3; if not, see
+# <http://www.gnu.org/licenses/>.
+
+VERSION=1
+
+eval "$(ucr shell)"
+
+. /usr/share/univention-join/joinscripthelper.lib
+. /usr/share/univention-lib/ldap.sh
+joinscript_init
+
+echo -e "Registering univention-icinga2 schema... "
+ucs_registerLDAPExtension "$@" \
+    --schema /var/lib/univention-ldap/local-schema/univention-icinga2.schema
+echo -e "Done!"
+
+echo -e "Adding extended attribute for univentionIcingaCheckCommand... "
+udm settings/extended_attribute create "$@" \
+    --position="cn=custom attributes,cn=univention,${ldap_base}" \
+    --ignore_exists \
+    --set name="univentionIcingaCheckCommand" \
+    --set objectClass="univentionIcingaServiceClass" \
+    --set ldapMapping="univentionIcingaCheckCommand" \
+    --set overwriteTab=0 \
+    --set tabName="Allgemein" \
+    --set translationTabName='"en_US" "General"' \
+    --set groupName="General Icinga2 service settings" \
+    --set groupPosition=2 \
+    --set CLIName="univentionIcingaCheckCommand" \
+    --set tabAdvanced=0 \
+    --set mayChange=1 \
+    --set multivalue=0 \
+    --set deleteObjectClass=1 \
+    --set shortDescription="Plugin command for Icinga2 (leave empty when using NRPE)" \
+    --set translationShortDescription='"de_DE" "Plugin-Kommando für Icinga2 (leer lassen, wenn NRPE genutzt wird)"' \
+    --set longDescription="Plugin command for Icinga2 (leave empty when using NRPE)" \
+    --set translationLongDescription='"de_DE" "Plugin-Kommando für Icinga2 (leer lassen, wenn NRPE genutzt wird)"' \
+    --set tabPosition=1 \
+    --set syntax="string" \
+    --append module="nagios/service"
+echo -e "Done!"
+
+echo -e "Adding extended attribute for univentionIcingaCheckArgs... "
+udm settings/extended_attribute create "$@" \
+    --position="cn=custom attributes,cn=univention,${ldap_base}" \
+    --ignore_exists \
+    --set name="univentionIcingaCheckArgs" \
+    --set objectClass="univentionIcingaServiceClass" \
+    --set ldapMapping="univentionIcingaCheckArgs" \
+    --set overwriteTab=0 \
+    --set tabName="Allgemein" \
+    --set translationTabName='"en_US" "General"' \
+    --set groupName="General Icinga2 service settings" \
+    --set groupPosition=2 \
+    --set CLIName="univentionIcingaCheckArgs" \
+    --set tabAdvanced=0 \
+    --set mayChange=1 \
+    --set multivalue=0 \
+    --set deleteObjectClass=1 \
+    --set shortDescription="Plugin command arguments for Icinga2" \
+    --set translationShortDescription='"de_DE" "Plugin-Kommando-Parameter für Icinga2"' \
+    --set longDescription="Plugin command arguments for Icinga2" \
+    --set translationLongDescription='"de_DE" "Plugin-Kommando-Parameter für Icinga2"' \
+    --set tabPosition=2 \
+    --set syntax="string" \
+    --append module="nagios/service"
+echo -e "Done!"
+
+joinscript_save_current_version
+exit 0

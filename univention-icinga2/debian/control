@@ -8,5 +8,5 @@ Homepage: http://www.univention.de/
 
 Package: univention-icinga2
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, icinga2
+Depends: ${misc:Depends}, icinga2
 Description: Listener module to configure Icinga2 with Nagios objects from UCS LDAP
