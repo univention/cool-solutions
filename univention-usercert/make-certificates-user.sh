@@ -241,6 +241,9 @@ renew_cert () {
 
 	# move the new certificate to its place
 	move_cert ${CA}/newcerts/*
+
+	find $path -type f | xargs chmod 400
+	find $path -type d | xargs chmod 500
 	cd "$OPWD"
 }
 
@@ -278,7 +281,7 @@ gencert () {
 	fi
 
 	# generate a key pair
-	mkdir -pm 700 $path
+	mkdir -pm 500 $path
 	mk_config "$path/openssl.cnf" "" $days "$cn" "$email" "$organizationalunit" "$country" "$state" "$locality" "$organization"
 	openssl genrsa -out "$path/private.key" "$DEFAULT_BITS"
 	openssl req -batch -config "$path/openssl.cnf" -new -key "$path/private.key" -out "$path/req.pem"
@@ -303,7 +306,7 @@ gencert () {
 	# move the new certificate to its place
 	move_cert ${CA}/newcerts/*
 
-	find $path -type f | xargs chmod 600
-	find $path -type d | xargs chmod 700
+	find $path -type f | xargs chmod 400
+	find $path -type d | xargs chmod 500
 	cd "$OPWD"
 }
