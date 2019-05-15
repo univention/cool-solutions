@@ -1,2 +1,3 @@
 usr/lib/univention-install/99univention_register_univention-user-group-sync-source_schema.inst
 var/lib/univention-ldap/local-schema/univentionUserGroupSyncEnabled.schema
+usr/share/pyshared/univention/admin/hooks.d/resync_listener_if_univentionUserGroupSyncEnabled_is_set.py

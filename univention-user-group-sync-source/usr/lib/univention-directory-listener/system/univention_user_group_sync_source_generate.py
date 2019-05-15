@@ -78,6 +78,9 @@ ucr.load()
 #
 def ucr_map_identifier():
     filter_custom = ucr.get('ldap/sync/filter')
+    if not filter_custom:
+        filter_custom = ""
+    return filter_custom
 ucr_map_identifier()
 
 # Log Messages
@@ -131,7 +134,7 @@ def _write_file(filename, path, data):
     os.chmod(filename, 0640)
     listener.unsetuid()
 
-# 
+#
 def _wait_until_after(timestamp):
     """wait until the current (system) time is later than <timestamp>"""
     while time.time() <= timestamp:
@@ -143,13 +146,18 @@ def _format_data(object_dn, new_attributes, command):
     data = (object_dn, command, new_attributes, )
     return pickle.dumps(data, protocol=2)
 
-# 
+#
 def handler(object_dn, new_attributes, old_attributes, command):
     """called for each uniqueMember-change on a group"""
     _log_debug("handler for: %r %r" % (object_dn, command, ))
     _wait_until_after(handler.last_time)
     timestamp = time.time()
     filename = _format_filename(timestamp)
+
+    #Remove univention-user-group-sync attribute and objectClass if set
+    if 'univentionUserGroupSyncEnabled' in new_attributes:
+        new_attributes.pop('univentionUserGroupSyncEnabled')
+        new_attributes['objectClass'].remove('univentionUserGroupSync')
 
     # Deliver removed attributes
     if command == 'm':
@@ -159,11 +167,12 @@ def handler(object_dn, new_attributes, old_attributes, command):
     data = _format_data(object_dn, new_attributes, command)
 
     # Apply custom filter, if set
+    filter_custom = ucr_map_identifier()
     if filter_custom.strip() and command != 'd':
         ldap = _connect_ldap()
         if not ldap.search(filter=filter_custom, base=object_dn):
             return
-    
+
     _write_file(filename, DB_BASE_PATH, data)
     handler.last_time = timestamp
 handler.last_time = 1300000000

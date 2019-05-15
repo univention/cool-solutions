@@ -60,9 +60,14 @@ udm settings/extended_attribute create "$@" \
     --set longDescription="Activate for univention-user-group-sync" \
     --set translationLongDescription='"de_DE" "Für univention-user-group-sync aktivieren"' \
     --set tabPosition=1 \
+    --set hook="ResyncListenerModuleIfAttributeIsSet" \
     --set syntax="TrueFalseUp" \
     --append module="groups/group" \
     --append module="users/user"
+echo -e "Done!"
+
+echo -e "Adding udm hook for extended attribute univentionUserGroupSyncEnabled"
+ucs_registerLDAPExtension "$@" --udm_hook /usr/share/pyshared/univention/admin/hooks.d/resync_listener_if_univentionUserGroupSyncEnabled_is_set.py || die
 echo -e "Done!"
 
 joinscript_save_current_version
