@@ -1,3 +1,10 @@
+univention-usercert (4.2.0-6) unstable; urgency=low
+
+  * Set certificates and location to read-only
+  * Issue #14962
+
+ -- Hendrik Peter <hpeter@univention.de>  Wed, 15 May 2019 12:05:52 +0200
+
 univention-usercert (4.2.0-5) unstable; urgency=low
 
   * Adjusted Simple Authentication Account Tab Names
