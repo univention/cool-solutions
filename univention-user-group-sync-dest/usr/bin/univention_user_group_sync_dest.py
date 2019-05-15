@@ -113,8 +113,10 @@ def getPosition(user_dn):
     position = re.sub(r'(dc\=.*$)', base, user_dn)
     position = re.sub(r'^(uid|cn)=[^,]+,', '', position)
     #Apply OU mapping if configured
-    sourceBase = re.search(r'(dc\=.*$)', dn).group()
-    ou = ucr.get('ldap/sync/mapping/base2ou/{}'.format(sourceBase))
+    sourceBase = re.search(r'(dc\=.*$)', user_dn).group()
+    sourceBase = re.sub(r'^dc\=', '', sourceBase)
+    sourceBase = re.sub(r',dc\=', '.', sourceBase)
+    ou = ucr.get('ldap/sync/mapping/domainname2ou/{}'.format(sourceBase))
     if ou:
         position = re.sub(r'({})'.format(base), 'ou={},{}'.format(ou, base), position)
     return position
@@ -353,7 +355,7 @@ def _create_user(user_dn, attributes):
         _log_message("I: Ignoring new %r for existing %r" % (user_dn, existing_user.position.getDn(), ))
         print("I: Ignoring new %r for existing %r" % (user_dn, existing_user.position.getDn(), ))
         return
-    
+
     _log_message("Create User: %r" % user_dn)
     user_position = getPosition(user_dn)
     user_position_obj = univention.admin.uldap.position(base)
@@ -379,7 +381,7 @@ def _create_simpleAuth(simpleauth_dn, attributes):
         _log_message("I: Ignoring new %r for existing %r" % (simpleauth_dn, existing_simpleauth.position.getDn(), ))
         print("I: Ignoring new %r for existing %r" % (simpleauth_dn, existing_simpleauth.position.getDn(), ))
         return
-    
+
     _log_message("Create User: %r" % simpleauth_dn)
     simpleauth_position = getPosition(simpleauth_dn)
     simpleauth_position_obj = univention.admin.uldap.position(base)
@@ -405,7 +407,7 @@ def _create_group(group_dn, attributes):
         _log_message("I: Ignoring new %r for existing %r" % (group_dn, existing_group.position.getDn(), ))
         print("I: Ignoring new %r for existing %r" % (group_dn, existing_group.position.getDn(), ))
         return
-    
+
     _log_message("Create User: %r" % group_dn)
     group_position = getPosition(group_dn)
     group_position_obj = univention.admin.uldap.position(base)
@@ -463,7 +465,7 @@ def _modify_user(user_dn, attributes):
         _log_message("I: Ignoring modify for non-existent %r" % user_dn)
         print("I: Ignoring modify for non-existent %r" % user_dn)
         return
-    
+
     _log_message("Modify User: %r" % user_dn)
     changes = False
     user.open()
@@ -501,7 +503,7 @@ def _modify_simpleAuth(simpleauth_dn, attributes):
         _log_message("I: Ignoring modify for non-existent %r" % simpleauth_dn)
         print("I: Ignoring modify for non-existent %r" % simpleauth_dn)
         return
-    
+
     _log_message("Modify SimpleAuth: %r" % simpleauth_dn)
     changes = False
     simpleauth.open()
@@ -531,115 +533,15 @@ def _modify_simpleAuth(simpleauth_dn, attributes):
         print "E: During SimpleAuth.modify_ldap: %s" % traceback.format_exc()
         exit()
 
-<<<<<<< HEAD
-_update_simpleauth.direct = frozenset((
-    'pwhistory',
-    'userPassword',
-))
-
-# Import a non-existent Simple Authentication Account
-def _import_simpleauth(user_dn, attributes):
-    '''Imports a new Simple Authentication Account or updates an existent Simple Authentication Account'''
-    existing_user = _simpleauth_exists(attributes)
-    user_position = getPosition(user_dn)
-    user_position_obj = univention.admin.uldap.position(base)
-    user_position_obj.setDn(user_position)
-    if existing_user is None:
-        _log_message("Create Simple Authentication Account: %r" % user_dn)
-        createSimpleAuth(user_position_obj, attributes)
-        existing_user = _simpleauth_exists(attributes)
-    if _user_should_be_updated(existing_user, attributes, user_position):
-        _log_message("Modify Simple Authentication Account: %r" % user_dn)
-        _update_simpleauth(existing_user, attributes)
-    else:
-        _log_message("I: Ignoring new %r for existing %r" % (user_dn, existing_user.position.getDn(), ))
-        print "I: Ignoring new %r for existing %r" % (user_dn, existing_user.position.getDn(), )
-
-# Check, if the given DN is a Group
-def _is_group(object_dn, attributes):
-    '''Return whether the object is a group'''
-    if 'groups/group' in attributes.get('univentionObjectType', []):
-        return True
-    return group_module.identify(object_dn, attributes)
-
-# Check, if the given Group CN exists in our LDAP
-def _group_exists(attributes):
-    '''Check, if the given Group CN exists in our LDAP'''
-    search_filter = univention.admin.filter.expression('cn', attributes['cn'][0])
-    result = group_module.lookup(co, lo, search_filter)
-    if not result:
-        return None
-    else:
-        return result[0]
-
-# Create a new Group, if it doesn't exist yet
-def _create_group(position, attributes):
-    '''Creates a new group based on the given attributes'''
-    group = group_module.object(co, lo, position)
-    group.open()
-    for (attribute, values, ) in attributes.items():
-        (attribute, values, )= _translate_group(attribute, values)
-        if attribute is not None:
-            group[attribute] = values
-    try:
-        group.create()
-    except:
-        _log_message("E: During Group.create: %s" % traceback.format_exc())
-        print "E: During Group.create: %s" % traceback.format_exc()
-        exit()
-
-# Check, xxx
-def _group_should_be_updated(existing_group, attributes, group_dn):
-    '''xxx'''
-    return existing_group.position.getDn().endswith(str(group_dn))
-
-#
-def _uid_to_dn(uid):
-    '''Return the would be DN for <uid>'''
-    #Get dn via getPosition
-    userid = re.sub(r',cn.*', r'', uid)
-    return '{},{}'.format(userid, getPosition(uid))
-
-def _uids_to_dns(uids):
-    '''xxx'''
-    return map(_uid_to_dn, uids)
-
-# Maps LDAP and UDM attributes
-def _translate_group(attribute, value):
-    '''Maps LDAP attributes to UDM'''
-    (attribute, translate, ) = _translate_group.mapping.get(attribute, (None, None, ))
-    if translate is not None:
-        value = translate(value)
-    return (attribute, value, )
-
-_translate_group.mapping = {
-    'cn': ('name', univention.admin.mapping.ListToString, ),
-    'description': ('description', univention.admin.mapping.ListToString, ),
-    'uniqueMember': ('users', _uids_to_dns ),
-}
-
-def _translate_group_update(attribute, value):
-    '''Maps LDAP attributes to UDM'''
-    if attribute in _translate_group_update.ignore:
-        return (None, None, )
-    return _translate_group(attribute, value)
-
-_translate_group_update.ignore = frozenset((
-))
-
-# Update Group object
-def _update_group(group, attributes):
-=======
 ## Modify a Group
 def _modify_group(group_dn, attributes):
->>>>>>> b54f702... user-group-sync-dest: Rewritten script. Fixed different problems #14963
     '''Updates existing Group based on changes'''
     group = _group_exists(attributes)
     if group is None:
         _log_message("I: Ignoring modify for non-existent %r" % group_dn)
         print("I: Ignoring modify for non-existent %r" % group_dn)
         return
-    
+
     _log_message("Modify Group: %r" % group_dn)
     changes = False
     group.open()
@@ -666,7 +568,7 @@ def _import(data):
     # Ignore Certificate attributes, if not enabled
     if attributes and not certificatesEnabled:
         attributes = _unset_certificates(attributes)
-    
+
     if command == 'a' or command == 'n': # Add
         if _is_user(object_dn, attributes):
             return _create_user(object_dn, attributes)

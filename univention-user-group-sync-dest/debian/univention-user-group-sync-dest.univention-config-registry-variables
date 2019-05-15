@@ -4,8 +4,8 @@ Description[en]=Synchronize user certificates from Cool Solution 'Creation and m
 Type=bool
 Categories=system
 
-[ldap/sync/mapping/base2ou/*]
-Description[de]=Erstelle Objekte mit Basis x in OU y anstatt nur die Basis zu ersetzen
-Description[en]=Create objects with base x in OU y instead of just replacing the base
+[ldap/sync/mapping/domainname2ou/*]
+Description[de]=Erstelle Objekte mit Domainname x in OU y anstatt nur die Basis zu ersetzen
+Description[en]=Create objects with domain name x in OU y instead of just replacing the base
 Type=string
 Categories=system
