@@ -1,3 +1,9 @@
+univention-icinga2 (1.0.0-1) unstable; urgency=medium
+
+  * Set univentionIcingaCheckCommand for UNIVENTION_PING and UNIVENTION_NTP in postinst #15705
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 21 May 2019 17:25:53 +0200
+
 univention-icinga2 (1.0.0-0) unstable; urgency=medium
 
   * Initial release Issue #15705
