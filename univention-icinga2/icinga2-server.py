@@ -205,10 +205,10 @@ def hostDeleted(new, old):
 	if not new:
 		# host object has been deleted
 		return True
-	if old and old.get('univentionNagiosEnabled', ['0'])[0] == '1':
+	if old and old.get('univentionIcingaEnabled', ['0'])[0] == 'TRUE':
 		# old host object had enabled nagios support
 
-		if not new.get('univentionNagiosEnabled', ['0'])[0] == '1':
+		if not new.get('univentionIcingaEnabled', ['0'])[0] == 'TRUE':
 			# new host object is not enabled ==> delete nagios host config
 			return True
 		if not new.get('aRecord'):
@@ -717,7 +717,7 @@ def handler(dn, new, old):
 	elif ((old and 'objectClass' in old and 'univentionNagiosHostClass' in old['objectClass']) or
 		(new and 'objectClass' in new and 'univentionNagiosHostClass' in new['objectClass'])):
 		# check if the nagios related attributes were changed
-		for attr in ['aRecord', 'associatedDomain', 'uid', 'cn', 'description', 'univentionNagiosParent', 'univentionNagiosEnabled', 'univentionNagiosEmail']:
+		for attr in ['aRecord', 'associatedDomain', 'uid', 'cn', 'description', 'univentionNagiosParent', 'univentionIcingaEnabled', 'univentionNagiosEmail']:
 			if not (new.get(attr, None) == old.get(attr, None)):
 				handleHost(dn, new, old)
 				__reload = True
