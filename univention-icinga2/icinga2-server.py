@@ -40,7 +40,7 @@ import subprocess
 
 name = 'icinga2-server'
 description = 'Create configuration for Icinga2 server'
-filter = '(|(objectClass=univentionNagiosServiceClass)(objectClass=univentionNagiosTimeperiodClass)(objectClass=univentionHost))'
+filter = '(&(univentionIcingaEnabled=TRUE)(|(objectClass=univentionNagiosServiceClass)(objectClass=univentionNagiosTimeperiodClass)(objectClass=univentionHost)))'
 
 __predefinedTimeperiod = 'Univention-Predefined-24x7'
 __fallbackContact = 'root@localhost'

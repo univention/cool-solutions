@@ -33,9 +33,17 @@ attributetype ( 1.3.6.1.4.1.10176.99999.00424.4
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256}
 	)
 
+attributetype ( 1.3.6.1.4.1.10176.99999.00424.6
+    NAME 'univentionIcingaEnabled'
+    DESC 'Activate object for Icinga2'
+    EQUALITY booleanMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
+    SINGLE-VALUE
+    )
+
 objectClass ( 1.3.6.1.4.1.10176.99999.00424.5
 	NAME 'univentionIcingaServiceClass'
 	DESC 'univention-icinga2'
 	AUXILIARY
-	MAY ( univentionIcingaCheckCommand $ univentionIcingaCheckArgs )
+	MAY ( univentionIcingaCheckCommand $ univentionIcingaCheckArgs $ univentionIcingaEnabled )
 	)

@@ -41,6 +41,32 @@ ucs_registerLDAPExtension "$@" \
     --schema /var/lib/univention-ldap/local-schema/univention-icinga2.schema
 echo -e "Done!"
 
+echo -e "Adding extended attribute for univentionIcingaEnabled... "
+udm settings/extended_attribute create "$@" \
+    --position="cn=custom attributes,cn=univention,${ldap_base}" \
+    --ignore_exists \
+    --set name="univentionIcingaEnabled" \
+    --set objectClass="univentionIcingaServiceClass" \
+    --set ldapMapping="univentionIcingaEnabled" \
+    --set overwriteTab=0 \
+    --set tabName="Allgemein" \
+    --set translationTabName='"en_US" "General"' \
+    --set groupName="General Icinga2 service settings" \
+    --set groupPosition=2 \
+    --set CLIName="univentionIcingaEnabled" \
+    --set tabAdvanced=0 \
+    --set mayChange=1 \
+    --set multivalue=0 \
+    --set deleteObjectClass=1 \
+    --set shortDescription="Activate for Icinga2" \
+    --set translationShortDescription='"de_DE" "Für Icinga2 aktivieren"' \
+    --set longDescription="Activate for Icinga2 and create configuration file below /etc/icinga2/conf.univention.d" \
+    --set translationLongDescription='"de_DE" "Für Icinga2 aktivieren und Konfigurationsdatei unter /etc/icinga2/conf.univention.d anlegen"' \
+    --set tabPosition=1 \
+    --set syntax="TrueFalseUp" \
+    --append module="nagios/service"
+echo -e "Done!"
+
 echo -e "Adding extended attribute for univentionIcingaCheckCommand... "
 udm settings/extended_attribute create "$@" \
     --position="cn=custom attributes,cn=univention,${ldap_base}" \
@@ -62,7 +88,7 @@ udm settings/extended_attribute create "$@" \
     --set translationShortDescription='"de_DE" "Plugin-Kommando für Icinga2 (leer lassen, wenn NRPE genutzt wird)"' \
     --set longDescription="Plugin command for Icinga2 (leave empty when using NRPE)" \
     --set translationLongDescription='"de_DE" "Plugin-Kommando für Icinga2 (leer lassen, wenn NRPE genutzt wird)"' \
-    --set tabPosition=1 \
+    --set tabPosition=2 \
     --set syntax="string" \
     --append module="nagios/service"
 echo -e "Done!"
@@ -88,10 +114,22 @@ udm settings/extended_attribute create "$@" \
     --set translationShortDescription='"de_DE" "Plugin-Kommando-Parameter für Icinga2"' \
     --set longDescription="Plugin command arguments for Icinga2" \
     --set translationLongDescription='"de_DE" "Plugin-Kommando-Parameter für Icinga2"' \
-    --set tabPosition=2 \
+    --set tabPosition=3 \
     --set syntax="string" \
     --append module="nagios/service"
 echo -e "Done!"
+
+echo "Adding default Icinga2 check arguments for UNIVENTION_PING... "
+udm nagios/service modify "$@" \
+--dn "cn=UNIVENTION_PING,cn=nagios,${ldap_base}" \
+--set univentionIcingaCheckCommand='ping'\
+ --set univentionIcingaCheckArgs='vars.ping_wrta=50,20%!vars.ping_crta=100,40%'
+
+echo "Adding default Icinga2 check arguments for UNIVENTION_NTP... "
+udm nagios/service modify "$@" \
+--dn "cn=UNIVENTION_NTP,cn=nagios,${ldap_base}" \
+--set univentionIcingaCheckCommand='ntp_time' \
+--set univentionIcingaCheckArgs='vars.ntp_warning=10!vars.ntp_critical=60'
 
 joinscript_save_current_version
 exit 0
