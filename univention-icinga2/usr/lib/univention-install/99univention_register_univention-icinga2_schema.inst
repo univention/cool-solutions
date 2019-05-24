@@ -91,6 +91,7 @@ udm settings/extended_attribute create "$@" \
     --set tabPosition=1 \
     --set fullWidth=1 \
     --set syntax="TrueFalseUp" \
+    --append module="computers/computer" \
     --append module="computers/domaincontroller_backup" \
     --append module="computers/domaincontroller_master" \
     --append module="computers/domaincontroller_slave" \

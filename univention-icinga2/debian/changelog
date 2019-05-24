@@ -1,3 +1,11 @@
+univention-icinga2 (1.0.0-3) unstable; urgency=medium
+
+  * Set check_interval and retry_interval to minutes by default
+  * Add univentionIcingaHostEnabled to module computers/computer as well
+  * Task #15705
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Fri, 24 May 2019 16:13:38 +0200
+
 univention-icinga2 (1.0.0-2) unstable; urgency=medium
 
   * Add attribute univentionIcingaEnabled #15705

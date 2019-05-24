@@ -453,8 +453,8 @@ def handleService(dn, new, old):
 						else:
 							univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, 'ICINGA2-SERVER: No check command was set for {} - icinga2 will report an error'.format(new['cn'][0]))
 
-					fp.write('    check_interval = "%s"\n' % new['univentionNagiosNormalCheckInterval'][0])
-					fp.write('    retry_interval = "%s"\n' % new['univentionNagiosRetryCheckInterval'][0])
+					fp.write('    check_interval = %sm\n' % new['univentionNagiosNormalCheckInterval'][0])
+					fp.write('    retry_interval = %sm\n' % new['univentionNagiosRetryCheckInterval'][0])
 					fp.write('    max_check_attempts = "%s"\n' % new['univentionNagiosMaxCheckAttempts'][0])
 					fp.write('    check_period = "%s"\n' % new['univentionNagiosCheckPeriod'][0])
 					#fp.write('    notification_interval = "%s"\n' % new['univentionNagiosNotificationInterval'][0])
