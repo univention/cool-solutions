@@ -4,8 +4,8 @@ Description[en]=Synchronize user certificates from Cool Solution 'Creation and m
 Type=bool
 Categories=system
 
-[ldap/sync/mapping/domainname2ou/*]
-Description[de]=Erstelle Objekte mit Domainname x in OU y anstatt nur die Basis zu ersetzen
-Description[en]=Create objects with domain name x in OU y instead of just replacing the base
+[ldap/sync/mapping/base2ou/*]
+Description[de]=Erstelle Objekte mit LDAP-Basis x in OU y. dc= muss entfernt und ,dc= muss durch Punkt ersetzt werden. Z.B.: dc=ucs,dc=foobar wird zu ucs.foobar
+Description[en]=Create objects with ldap base x in OU y. dc= must be removed and ,dc= must be changed to a dot. E.g.: dc=ucs,dc=foobar becomes ucs.foobar
 Type=string
 Categories=system

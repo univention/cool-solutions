@@ -1,3 +1,10 @@
+univention-user-group-sync-dest (2.1.0-8) unstable; urgency=medium
+
+  * Switch mapping of source LDAP to destination OU to source LDAP base with dots
+  * Issue #15608
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 27 May 2019 14:18:34 +0200
+
 univention-user-group-sync-dest (2.1.0-7) unstable; urgency=medium
 
   * Remove interactive configuration

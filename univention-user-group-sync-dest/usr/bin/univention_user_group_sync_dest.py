@@ -116,7 +116,7 @@ def getPosition(user_dn):
     sourceBase = re.search(r'(dc\=.*$)', user_dn).group()
     sourceBase = re.sub(r'^dc\=', '', sourceBase)
     sourceBase = re.sub(r',dc\=', '.', sourceBase)
-    ou = ucr.get('ldap/sync/mapping/domainname2ou/{}'.format(sourceBase))
+    ou = ucr.get('ldap/sync/mapping/base2ou/{}'.format(sourceBase))
     if ou:
         position = re.sub(r'({})'.format(base), 'ou={},{}'.format(ou, base), position)
     return position
