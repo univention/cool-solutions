@@ -33,25 +33,14 @@ set -e
 
 case "$1" in
     install)
-        # Source debconf library.
-        . /usr/share/debconf/confmodule
+        password_local=$(pwgen -Bv 40 1)
 
-        # Input the service user ucr-sync password
-        db_reset univention-user-group-sync-dest/password
-        db_input critical univention-user-group-sync-dest/password || true
-        db_go || true
-        
+        echo $password_local > /etc/univention-user-group-sync-dest.secret
+        chmod 600 /etc/univention-user-group-sync-dest.secret
+
         # Generate local service user
         echo "Creating local service user"
         ldap_base=$(ucr get ldap/base)
-
-        db_get univention-user-group-sync-dest/password || true
-        password_local="$RET"
-                
-        if [ -z $password_local ]; then
-            echo "Error: No password entered."
-            exit 1
-        fi
 
         # TODO: Already exists
         udm users/user create --position "cn=users,$ldap_base" --ignore_exists \
@@ -59,9 +48,6 @@ case "$1" in
         --set uidNumber=342 --set primaryGroup="cn=Domain Users,cn=groups,$ldap_base" \
         --set unixhome=/var/lib/univention-user-group-sync
         ucr set auth/sshd/user/ucs-sync=yes
-
-        # Fix: debconf infinite loop (can't figure out when the script terminates)
-        db_stop
     ;;
 
     upgrade|abort-upgrade)

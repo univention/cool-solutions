@@ -8,7 +8,6 @@ Standards-Version: 3.5.5
 
 Package: univention-user-group-sync-dest
 Architecture: all
-Pre-Depends: debconf (>= 0.2.17)
 Depends: ${misc:Depends}
 Description: import transferred user and group information
  This package contains a program to import the stored user and group information
