@@ -1,3 +1,10 @@
+univention-user-group-sync-source (2.1.0-8) unstable; urgency=medium
+
+  * Enhance comment
+  * Issue #15608
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 27 May 2019 14:22:53 +0200
+
 univention-user-group-sync-source (2.1.0-7) unstable; urgency=medium
 
   * Fix moving of objects in the LDAP tree on destination system with active custom filter on source

@@ -166,7 +166,7 @@ def handler(object_dn, new_attributes, old_attributes, command):
                 new_attributes[attribute] = []
     data = _format_data(object_dn, new_attributes, command)
 
-    # Apply custom filter, if set
+    # Apply custom filter, if set and command is not delete or rename
     filter_custom = ucr_map_identifier()
     if filter_custom.strip() and command != 'd' and command != 'r':
         ldap = _connect_ldap()
