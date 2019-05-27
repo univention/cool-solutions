@@ -168,7 +168,7 @@ def handler(object_dn, new_attributes, old_attributes, command):
 
     # Apply custom filter, if set
     filter_custom = ucr_map_identifier()
-    if filter_custom.strip() and command != 'd':
+    if filter_custom.strip() and command != 'd' and command != 'r':
         ldap = _connect_ldap()
         if not ldap.search(filter=filter_custom, base=object_dn):
             return
