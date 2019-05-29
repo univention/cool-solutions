@@ -63,7 +63,8 @@ udm settings/extended_attribute create "$@" \
     --set hook="ResyncListenerModuleIfAttributeIsSet" \
     --set syntax="TrueFalseUp" \
     --append module="groups/group" \
-    --append module="users/user"
+    --append module="users/user" \
+    --append module="users/ldap"
 echo -e "Done!"
 
 echo -e "Adding udm hook for extended attribute univentionUserGroupSyncEnabled"

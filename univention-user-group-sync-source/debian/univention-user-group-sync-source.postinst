@@ -37,11 +37,11 @@ case "$1" in
 		# User listener:nogroup needs writing rights
 		chmod 777 /var/lib/univention-user-group-sync
 
-		# 
+		#
 		echo "Creating a synchronization cron job"
 		eval "$(ucr shell ldap/sync/destination)"
 		ucr set cron/ldap-sync-src/command="univention_user_group_sync_source_synchronize" \
-		cron/ldap-sync-src/time="*/5 * * * *" \
+		cron/ldap-sync-src/time?"*/5 * * * *" \
 		cron/ldap-sync-src/user="ucs-sync" \
 		cron/ldap-sync-src/description="Synchronize all existing ldap-diff files to the target host set in the ldap/sync/destination variable"
 
