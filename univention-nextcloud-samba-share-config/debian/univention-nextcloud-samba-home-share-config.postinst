@@ -38,6 +38,9 @@ univention-app shell nextcloud sudo -u www-data /var/www/html/occ ldap:set-confi
 echo "Enabling files_external Nextcloud app"
 univention-app shell nextcloud sudo -u www-data /var/www/html/occ app:enable files_external
 
+echo "Setting filesystem_check_changes to 1 in Nextcloud"
+univention-app shell nextcloud sudo -u www-data /var/www/html/occ config:system:set filesystem_check_changes --value 1
+
 # restart directory listener due to new listener module
 if [ -f "/etc/init.d/univention-directory-listener" ] ; then
    /etc/init.d/univention-directory-listener crestart
