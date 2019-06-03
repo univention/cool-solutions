@@ -51,6 +51,12 @@ class UniventionNextcloudSambaCommon(object):
 		domainUsersMatch = re.match(domainUsersRegex, dn)
 		return domainUsersMatch
 
+	def isSchuelerCn(self, dn):
+		schuelerRegex = '^cn=schueler-[A-Za-z0-9_]*'
+		schuelerOuRegex = '^cn=schueler-'
+		schuelerMatch = re.match(schuelerRegex, dn)
+		return schuelerMatch
+
 	def isLehrerCn(self, dn):
 		lehrerRegex = '^cn=lehrer-[A-Za-z0-9_]*'
 		lehrerOuRegex = '^cn=lehrer-'
@@ -64,7 +70,14 @@ class UniventionNextcloudSambaCommon(object):
 		return groupCn
 
 	def getShareDn(self, lo, cn):
+		timeout = time.time() + 30
 		shareObj = lo.search("(&(objectClass=univentionShareSamba)(cn={}))".format(cn))
+		while not shareObj:
+			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Share {} does not yet exist in LDAP, waiting until it exists with 30s timeout".format(cn))
+			shareObj = lo.search("(&(objectClass=univentionShareSamba)(cn={}))".format(cn))
+			if time.time() > timeout:
+				univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Share {} does not exist in LDAP after 30s timeout. Share mount won't be created".format(cn))
+				break
 		return shareObj[0][0]
 
 	def getShareHost(self, share):

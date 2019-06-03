@@ -1,3 +1,10 @@
+univention-nextcloud-samba-share-config (1.0.0-17) unstable; urgency=medium
+
+  * Set Nextcloud config parameter filesystem_check_changes to 1
+  * Wait with 30s timeout if a share corresponding to a group does not yet exist after the group has been activated for Nextcloud
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 29 May 2019 14:14:38 +0200
+
 univention-nextcloud-samba-share-config (1.0.0-16) unstable; urgency=medium
 
   * Fix incomplete processing of shares
