@@ -78,6 +78,11 @@ def handler(dn, new, old, command=''):
 
 	mountId = common.getMountId(mountName)
 
+	if command == 'd':
+		mountId = common.getMountId(mountName)
+		common.deleteMount(mountId)
+		return
+
 	common.setMountConfig(mountId, shareHost, shareName, windomain, groupCn)
 
 def clean():

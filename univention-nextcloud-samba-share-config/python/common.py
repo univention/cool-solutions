@@ -107,7 +107,7 @@ class UniventionNextcloudSambaCommon(object):
 		listener.unsetuid()
 		mountId = re.search('[0-9]*', mountId).group()
 		if mountId:
-			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Mount for {} is already configured. Re-setting config...".format(mountName))
+			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Mount for {} is already configured. Re-setting config if command is not delete...".format(mountName))
 		else:
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "No mount for {} configured yet. Configuring...".format(mountName))
 			mountId = self.createMount(mountName)

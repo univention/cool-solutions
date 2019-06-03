@@ -66,6 +66,7 @@ def handler(dn, new, old, command=''):
 
 	domainUsersMatch = common.isDomainUsersCn(dn)
 	lehrerMatch = common.isLehrerCn(dn)
+	schuelerMatch = common.isSchuelerCn(dn)
 
 	groupCn = common.getGroupCn(dn)
 
@@ -85,9 +86,14 @@ def handler(dn, new, old, command=''):
 		if ucr.is_true('nextcloud-samba-group-share-config/ignoreMarktplatz'):
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "UCR var nextcloud-samba-group-share-config/ignoreMarktplatz is true: Not creating mount for share {}".format(mountName))
 			return
-	elif lehrerMatch:
+	elif lehrerMatch or schuelerMatch:
 		lehrerOuRegex = '^cn=lehrer-'
-		ou = re.sub(lehrerOuRegex, '', lehrerMatch.group())
+		schuelerOuRegex = '^cn=schueler-'
+		if lehrerMatch:
+			ou = re.sub(lehrerOuRegex, '', lehrerMatch.group())
+		elif schuelerMatch:
+			ou = re.sub(schuelerOuRegex, '', schuelerMatch.group())
+			groupCn = 'lehrer-{}'.format(ou)
 		mountName = "Schueler {}".format(ou)
 		shareName = "schueler-{}".format(ou)
 		base = common.getBase()
@@ -118,9 +124,10 @@ def handler(dn, new, old, command=''):
 			shares[mountName].append(share)
 			shares[mountName].append(shareName)
 
-	#if command is 'd':
-		#mountId = common.getMountId(mountName)
-		#common.removeMount(mountId)
+	if command == 'd':
+		mountId = common.getMountId(mountName)
+		common.deleteMount(mountId)
+		return
 
 	if shares:
 		for mountName in shares:
