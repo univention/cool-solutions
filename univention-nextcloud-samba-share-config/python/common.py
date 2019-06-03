@@ -105,7 +105,7 @@ class UniventionNextcloudSambaCommon(object):
 		listener.setuid(0)
 		mountId = subprocess.check_output(getMountIdCmd, shell=True)
 		listener.unsetuid()
-		mountId = re.search('[0-9]*', mountId).group()
+		mountId = re.search('[0-9]+', mountId).group()
 		if mountId:
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Mount for {} is already configured. Re-setting config if command is not delete...".format(mountName))
 		else:
