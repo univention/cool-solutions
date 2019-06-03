@@ -1,3 +1,9 @@
+univention-nextcloud-samba-share-config (1.0.0-18) unstable; urgency=medium
+
+  * Actually handle delete operations
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 03 Jun 2019 19:43:46 +0200
+
 univention-nextcloud-samba-share-config (1.0.0-17) unstable; urgency=medium
 
   * Set Nextcloud config parameter filesystem_check_changes to 1
