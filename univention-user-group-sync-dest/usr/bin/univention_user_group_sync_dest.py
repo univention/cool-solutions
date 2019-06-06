@@ -346,7 +346,7 @@ def _translate_group_update(attribute, value):
     return _translate_group(attribute, value)
 
 ## Run direct update
-def _direct_update(attributes, mapping):
+def _direct_update(attributes, mapping, user_dn):
     user = _user_exists(attributes)
     if user is None:
         _log_message("I: Ignoring modify for non-existent %r" % user_dn)
@@ -389,7 +389,7 @@ def _create_user(user_dn, attributes):
             user[attribute] = values
     try:
         user.create()
-        _direct_update(attributes, _translate_user_mapping_direct)
+        _direct_update(attributes, _translate_user_mapping_direct, user_dn)
     except:
         _log_message("E: During User.create: %s" % traceback.format_exc())
         print("E: During User.create: %s" % traceback.format_exc())
@@ -416,7 +416,7 @@ def _create_simpleAuth(simpleauth_dn, attributes):
             simpleauth[attribute] = values
     try:
         simpleauth.create()
-        _direct_update(attributes, _translate_simpleauth_mapping_direct)
+        _direct_update(attributes, _translate_simpleauth_mapping_direct, simpleauth_dn)
     except:
         _log_message("E: During SimpleAuth.create: %s" % traceback.format_exc())
         print("E: During SimpleAuth.create: %s" % traceback.format_exc())
@@ -505,7 +505,7 @@ def _modify_user(user_dn, attributes):
             _log_message('E: During User.modify_changes: %s' % traceback.format_exc())
             print 'E: During User.modify_changes: %s' % traceback.format_exc()
             exit()
-    _direct_update(attributes, _translate_user_mapping_direct)
+    _direct_update(attributes, _translate_user_mapping_direct, user_dn)
 
 ## Modify a Simple Authentication Account
 def _modify_simpleAuth(simpleauth_dn, attributes):
@@ -532,7 +532,7 @@ def _modify_simpleAuth(simpleauth_dn, attributes):
             _log_message('E: During SimpleAuth.modify_changes: %s' % traceback.format_exc())
             print 'E: During SimpleAuth.modify_changes: %s' % traceback.format_exc()
             exit()
-    _direct_update(attributes, _translate_simpleauth_mapping_direct)
+    _direct_update(attributes, _translate_simpleauth_mapping_direct, simpleauth_dn)
 
 ## Modify a Group
 def _modify_group(group_dn, attributes):

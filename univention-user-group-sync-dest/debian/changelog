@@ -1,3 +1,10 @@
+univention-user-group-sync-dest (2.1.0-10) unstable; urgency=medium
+
+  * Pass object dn to _direct_update
+  * Issue #15608
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 06 Jun 2019 19:34:31 +0200
+
 univention-user-group-sync-dest (2.1.0-9) unstable; urgency=low
 
   * Added: Missing synchronization of direct attributes on initial Sync
