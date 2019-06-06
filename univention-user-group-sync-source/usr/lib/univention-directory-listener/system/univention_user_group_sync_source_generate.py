@@ -146,6 +146,16 @@ def _format_data(object_dn, new_attributes, command):
     data = (object_dn, command, new_attributes, )
     return pickle.dumps(data, protocol=2)
 
+# Get attributes and objectClasses to be removed from objects from UCR
+def _get_remove_config():
+    attributes = ucr.get('ldap/sync/remove/attribute')
+    if attributes:
+        attributes = attributes.split(',')
+    objectClasses = ucr.get('ldap/sync/remove/objectClass')
+    if objectClasses:
+        objectClasses = objectClasses.split(',')
+    return attributes, objectClasses
+
 #
 def handler(object_dn, new_attributes, old_attributes, command):
     """called for each uniqueMember-change on a group"""
@@ -158,6 +168,17 @@ def handler(object_dn, new_attributes, old_attributes, command):
     if 'univentionUserGroupSyncEnabled' in new_attributes:
         new_attributes.pop('univentionUserGroupSyncEnabled')
         new_attributes['objectClass'].remove('univentionUserGroupSync')
+
+    #Remove other attributes and objectClass specified via ucr
+    remove_attributes, remove_objectClasses = _get_remove_config()
+    if remove_attributes:
+        for attribute in remove_attributes:
+            if attribute in new_attributes:
+                new_attributes.pop(attribute)
+    if remove_objectClasses:
+        for objectClass in remove_objectClasses:
+            if objectClass in new_attributes['objectClass']:
+                new_attributes['objectClass'].remove(objectClass)
 
     # Deliver removed attributes
     if command == 'm':

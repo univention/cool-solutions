@@ -9,3 +9,15 @@ Description[de]=Hostname oder IP zu dem Pickle-Dateien übertragen werden sollen
 Description[en]=Hostname or IP to which pickle files shall be transmitted to
 Type=str
 Categories=system
+
+[ldap/sync/remove/objectClass]
+Description[de]=Kommaseparierte Objektklassen, die vor dem Sync von Objekten entfernt werden sollen
+Description[en]=Comma-separated object classes to be removed before sync
+Type=str
+Categories=system
+
+[ldap/sync/remove/attribute]
+Description[de]=Kommaseparierte Attribute, die vor dem Sync von Objekten entfernt werden sollen
+Description[en]=Comma-separated attributes to be removed before sync
+Type=str
+Categories=system
