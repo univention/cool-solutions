@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # univention-ro-wo-group-dirs
-# Create Abgabe and Lehrmaterial directories in class and workgroup shares
+# Create Abgabe and Lernmaterial directories in class and workgroup shares
 #
 # Copyright 2019 Univention GmbH
 #
@@ -67,10 +67,10 @@ def main(dn, path, groupName):
 	ou = re.search(r'ou=[a-zA-Z0-9_]*', dn).group()
 	ou = re.sub(r'ou=', '', ou)
 
-	#Lehrmaterial
+	#Lernmaterial
 	roName = ucr.get('group-dirs/ro/name')
 	if not roName:
-		roName = "Lehrmaterial"
+		roName = "Lernmaterial"
 	dir = '{}/{}'.format(path, roName)
 	ownerGroup = 'lehrer-{}'.format(ou)
 	ownerGidNumber = int(lo.search('cn={}'.format(ownerGroup))[0][1]['gidNumber'][0])
