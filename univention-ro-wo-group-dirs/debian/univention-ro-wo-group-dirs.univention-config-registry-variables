@@ -1,0 +1,11 @@
+[group-dirs/ro/name]
+Description[de]=Name für von univention-ro-wo-group-dirs in Klassen- und Arbeitsgruppen-Shares erstellten Read-Only Ordner
+Description[en]=Name for read-only dir create in class and workgroup shares by univention-ro-wo-group-dirs
+Type=str
+Categories=system
+
+[group-dirs/wo/name]
+Description[de]=Name für von univention-ro-wo-group-dirs in Klassen- und Arbeitsgruppen-Shares erstellten Write-Only Ordner
+Description[en]=Name for write-only dir create in class and workgroup shares by univention-ro-wo-group-dirs
+Type=str
+Categories=system

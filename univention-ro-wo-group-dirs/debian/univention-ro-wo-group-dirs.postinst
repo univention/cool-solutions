@@ -40,6 +40,9 @@ cron/univention-ro-wo-group-dirs/time="*/5 * * * *" \
 cron/univention-ro-wo-group-dirs/user="root" \
 cron/univention-ro-wo-group-dirs/description="Create Abgabe and Lehrmaterial directories in class and workgroup shares"
 
+echo "Setting default names for write-only and read-only dirs"
+ucr set group-dirs/ro/name?"Lehrmaterial" group-dirs/wo/name?"Abgabe"
+
 # Temporary fix for Bug #48062
 echo "Restarting cron Service"
 systemctl restart cron.service

@@ -40,6 +40,11 @@ import univention.admin.uldap
 from univention.config_registry import ConfigRegistry
 from univention.config_registry.frontend import ucr_update
 
+ucr = ConfigRegistry()
+ucr.load()
+
+lo, po = univention.admin.uldap.getMachineConnection()
+
 def createDir(path, dir, ownerGroup, mode, acl):
 	#univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "PATH: {} ; ownerGroup: {} ; mode: {} ; acl: {}".format(path, ownerGroup, mode, acl))
 	timeout = time.time() + 30
@@ -58,12 +63,15 @@ def createDir(path, dir, ownerGroup, mode, acl):
 		os.chmod(dir, mode)
 		subprocess.call(['setfacl', '-bm', acl, dir])
 
-def main(dn, path, groupName, lo):
+def main(dn, path, groupName):
 	ou = re.search(r'ou=[a-zA-Z0-9_]*', dn).group()
 	ou = re.sub(r'ou=', '', ou)
 
 	#Lehrmaterial
-	dir = '{}/Lehrmaterial'.format(path)
+	roName = ucr.get('group-dirs/ro/name')
+	if not roName:
+		roName = "Lehrmaterial"
+	dir = '{}/{}'.format(path, roName)
 	ownerGroup = 'lehrer-{}'.format(ou)
 	ownerGidNumber = int(lo.search('cn={}'.format(ownerGroup))[0][1]['gidNumber'][0])
 	mode = 775
@@ -71,7 +79,10 @@ def main(dn, path, groupName, lo):
 	createDir(path, dir, ownerGidNumber, mode, acl)
 
 	#Abgabe
-	dir = '{}/Abgabe'.format(path)
+	woName = ucr.get('group-dirs/wo/name')
+	if not woName:
+		woName = "Abgabe"
+	dir = '{}/{}'.format(path, woName)
 	ownerGroup = 'lehrer-{}'.format(ou)
 	ownerGidNumber = int(lo.search('cn={}'.format(ownerGroup))[0][1]['gidNumber'][0])
 	mode = 775
@@ -81,8 +92,6 @@ def main(dn, path, groupName, lo):
 if __name__ == '__main__':
 	filter = '(|(ucsschoolRole=school_class_share:school:*)(ucsschoolRole=workgroup_share:school:*))'
 
-	ucr = ConfigRegistry()
-	ucr.load()
 	if ucr.is_true('cron/univention-ro-wo-group-dirs/running'):
 		print('univention-ro-wo-group-dirs.py is already running, exiting')
 		sys.exit(0)
@@ -90,15 +99,13 @@ if __name__ == '__main__':
 		changes = {"cron/univention-ro-wo-group-dirs/running": "true"}
 		ucr_update(ucr, changes)
 
-	lo, po = univention.admin.uldap.getMachineConnection()
-
 	shares = lo.search(filter)
 	for share in shares:
 		dn = share[0]
 		sharePath = share[1]['univentionSharePath'][0]
 		groupName = share[1]['cn'][0]
 		try:
-			main(dn, sharePath, groupName, lo)
+			main(dn, sharePath, groupName)
 		except Exception as e:
 			print('univention-ro-wo-group-dirs.py: Error while processing DN: {} with sharePath: {} and groupName: {} Exception was: {}'.format(dn, sharePath, groupName, e))
 			continue
