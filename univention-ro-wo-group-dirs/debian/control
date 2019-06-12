@@ -1,0 +1,12 @@
+Source: univention-ro-wo-group-dirs
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Build-Depends: debhelper (>=7)
+Standards-Version: 3.9.6
+Homepage: http://www.univention.de/
+
+Package: univention-ro-wo-group-dirs
+Architecture: all
+Depends: ${misc:Depends}
+Description: Listener module to configure read-only and write-only folders in class and workgroup shares

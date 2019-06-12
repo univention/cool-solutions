@@ -1,0 +1,5 @@
+univention-ro-wo-group-dirs (1.0.0-0) unstable; urgency=medium
+
+  * Initial release Issue #16394
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 13 May 2019 13:46:43 +0200
