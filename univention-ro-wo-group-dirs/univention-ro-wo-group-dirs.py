@@ -92,11 +92,11 @@ def main(dn, path, groupName):
 if __name__ == '__main__':
 	filter = '(|(ucsschoolRole=school_class_share:school:*)(ucsschoolRole=workgroup_share:school:*))'
 
-	if ucr.is_true('cron/univention-ro-wo-group-dirs/running'):
+	if ucr.is_true('group-dirs/running'):
 		print('univention-ro-wo-group-dirs.py is already running, exiting')
 		sys.exit(0)
 	else:
-		changes = {"cron/univention-ro-wo-group-dirs/running": "true"}
+		changes = {"group-dirs/running": "true"}
 		ucr_update(ucr, changes)
 
 	shares = lo.search(filter)
@@ -109,6 +109,6 @@ if __name__ == '__main__':
 		except Exception as e:
 			print('univention-ro-wo-group-dirs.py: Error while processing DN: {} with sharePath: {} and groupName: {} Exception was: {}'.format(dn, sharePath, groupName, e))
 			continue
-	changes = {"cron/univention-ro-wo-group-dirs/running": "false"}
+	changes = {"group-dirs/running": "false"}
 	ucr_update(ucr, changes)
 	sys.exit(0)
