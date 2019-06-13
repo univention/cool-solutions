@@ -352,10 +352,15 @@ def readHostGroup(grpname):
 		fp = open(grp_filename, 'r')
 		content = fp.read()
 		fp.close()
-		res = re.search(r'\W+members\W+(.*?)\W*$', content, re.MULTILINE)
+		res = re.findall(r'match\(\"(?:(?:[a-zA-Z]|[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]).)*(?:[A-Za-z]|[A-Za-z][A-Za-z0-9-]*[A-Za-z0-9])"', content)
+		members = []
 		if res:
-			return res.group(1).split(', ')
-		return []
+			members = []
+			for member in res:
+				member = re.sub(r'match\(', '', member)
+				member = re.sub(r'\"', '', member)
+				members.append(member)
+		return members
 	finally:
 		listener.unsetuid()
 
@@ -370,7 +375,8 @@ def writeHostGroup(grpname, members):
 		fp.write('object HostGroup "%s" {\n' % grpname)
 		fp.write('    display_name = "%s"\n' % grpname)
 		#fp.write('    alias              Hostgroup %s\n' % grpname)
-		fp.write('    assign where match("%s", host.name)\n' % ', '.join(members))
+		for member in members:
+			fp.write('    assign where match("{}", host.name)\n'.format(member))
 		fp.write('}')
 		fp.close()
 	finally:
@@ -442,12 +448,14 @@ def handleService(dn, new, old):
 						fp.write('    check_command = "nrpe"\n')
 						fp.write('    vars.nrpe_command = "{}"\n'.format(new['cn'][0]))
 					else:
-						#TODO
 						if 'univentionIcingaCheckCommand' in new and 'univentionIcingaCheckArgs' in new and new['univentionIcingaCheckArgs'] and new['univentionIcingaCheckArgs'][0]:
 							fp.write('    check_command = "%s"\n' % (new['univentionIcingaCheckCommand'][0]))
-							for checkArg in new['univentionIcingaCheckArgs'][0].split('!'):
-								checkVar, checkVarValue = checkArg.split('=')
-								fp.write('   {} = "{}"\n'.format(checkVar, checkVarValue))
+							for checkArg in new['univentionIcingaCheckArgs']:
+								try:
+									checkVar, checkVarValue = checkArg.split('=')
+									fp.write('    {} = "{}"\n'.format(checkVar, checkVarValue))
+								except Exception as e:
+									univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, 'ICINGA2-SERVER: Could not write CheckArgs for service {} CheckArgs: {} Exception: {}'.format(new['cn'], new['univentionIcingaCheckArgs'], e))
 						if 'univentionIcingaCheckCommand' in new:
 							fp.write('    check_command = "%s"\n' % new['univentionIcingaCheckCommand'][0])
 						else:
@@ -676,6 +684,14 @@ def handleHost(dn, new, old):
 			fp.write('    max_check_attempts = "10"\n')
 			#fp.write('    contact_groups          cg-%s\n' % newfqdn)
 
+			if 'univentionIcingaHostVars' in new:
+				for hostVar in new['univentionIcingaHostVars']:
+					try:
+						hostVar, hostVarValue = hostVar.split('=')
+						fp.write('    {} = "{}"\n'.format(hostVar, hostVarValue))
+					except Exception as e:
+						univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, 'ICINGA2-SERVER: Could not write hostVars for host {} hostVars: {} Exception: {}'.format(new['cn'], new['univentionIcingaHostVars'], e))
+
 			notification_interval = 0
 			if "nagios/server/hostcheck/notificationinterval" in listener.baseConfig and listener.baseConfig["nagios/server/hostcheck/notificationinterval"]:
 				notification_interval = listener.baseConfig["nagios/server/hostcheck/notificationinterval"]
@@ -717,7 +733,7 @@ def handler(dn, new, old):
 	elif ((old and 'objectClass' in old and 'univentionNagiosHostClass' in old['objectClass']) or
 		(new and 'objectClass' in new and 'univentionNagiosHostClass' in new['objectClass'])):
 		# check if the nagios related attributes were changed
-		for attr in ['aRecord', 'associatedDomain', 'uid', 'cn', 'description', 'univentionNagiosParent', 'univentionIcingaEnabled', 'univentionNagiosEmail']:
+		for attr in ['aRecord', 'associatedDomain', 'uid', 'cn', 'description', 'univentionNagiosParent', 'univentionIcingaEnabled', 'univentionIcingaCheckArgs', 'univentionIcingaHostEnabled', 'univentionIcingaHostVars', 'univentionNagiosEmail']:
 			if not (new.get(attr, None) == old.get(attr, None)):
 				handleHost(dn, new, old)
 				__reload = True

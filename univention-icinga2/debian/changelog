@@ -1,3 +1,12 @@
+univention-icinga2 (1.0.0-4) unstable; urgency=medium
+
+  * Make univentionIcingaCheckArgs multi-value
+  * Add univentionIcingaHostVars
+  * Write hostgroup members correctly
+  * Task #15705
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 13 Jun 2019 11:27:10 +0200
+
 univention-icinga2 (1.0.0-3) unstable; urgency=medium
 
   * Set check_interval and retry_interval to minutes by default

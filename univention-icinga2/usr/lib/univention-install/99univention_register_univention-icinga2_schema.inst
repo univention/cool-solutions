@@ -91,7 +91,6 @@ udm settings/extended_attribute create "$@" \
     --set tabPosition=1 \
     --set fullWidth=1 \
     --set syntax="TrueFalseUp" \
-    --append module="computers/computer" \
     --append module="computers/domaincontroller_backup" \
     --append module="computers/domaincontroller_master" \
     --append module="computers/domaincontroller_slave" \
@@ -156,17 +155,53 @@ udm settings/extended_attribute create "$@" \
     --append module="nagios/service"
 echo -e "Done!"
 
+echo -e "Adding extended attribute for univentionIcingaHostVars... "
+udm settings/extended_attribute create "$@" \
+    --position="cn=custom attributes,cn=univention,${ldap_base}" \
+    --ignore_exists \
+    --set name="univentionIcingaHostVars" \
+    --set objectClass="univentionIcingaServiceClass" \
+    --set ldapMapping="univentionIcingaHostVars" \
+    --set overwriteTab=0 \
+    --set tabName="Allgemein" \
+    --set translationTabName='"en_US" "Icinga2"' \
+    --set CLIName="univentionIcingaHostVars" \
+    --set tabAdvanced=1 \
+    --set mayChange=1 \
+    --set multivalue=1 \
+    --set deleteObjectClass=1 \
+    --set shortDescription="Variables for host object in Icinga2" \
+    --set translationShortDescription='"de_DE" "Variablen für Host-Objekt in Icinga2"' \
+    --set longDescription="Variables for host object in Icinga2" \
+    --set translationLongDescription='"de_DE" "Variablen für Host-Objekt in Icinga2"' \
+    --set tabPosition=2 \
+    --set fullWidth=1 \
+    --set syntax="string" \
+    --append module="computers/domaincontroller_backup" \
+    --append module="computers/domaincontroller_master" \
+    --append module="computers/domaincontroller_slave" \
+    --append module="computers/ipmanagedclient" \
+    --append module="computers/linux" \
+    --append module="computers/macos" \
+    --append module="computers/memberserver" \
+    --append module="computers/ubuntu" \
+    --append module="computers/windows" \
+    --append module="computers/windows_domaincontroller"
+echo -e "Done!"
+
 echo "Adding default Icinga2 check arguments for UNIVENTION_PING... "
 udm nagios/service modify "$@" \
 --dn "cn=UNIVENTION_PING,cn=nagios,${ldap_base}" \
---set univentionIcingaCheckCommand='ping'\
- --set univentionIcingaCheckArgs='vars.ping_wrta=50,20%!vars.ping_crta=100,40%'
+--set univentionIcingaCheckCommand='ping' \
+--append univentionIcingaCheckArgs='vars.ping_wrta=50,20%' \
+--append univentionIcingaCheckArgs='vars.ping_crta=100,40%'
 
 echo "Adding default Icinga2 check arguments for UNIVENTION_NTP... "
 udm nagios/service modify "$@" \
 --dn "cn=UNIVENTION_NTP,cn=nagios,${ldap_base}" \
 --set univentionIcingaCheckCommand='ntp_time' \
---set univentionIcingaCheckArgs='vars.ntp_warning=10!vars.ntp_critical=60'
+--append univentionIcingaCheckArgs='vars.ntp_warning=10' \
+--append univentionIcingaCheckArgs='vars.ntp_critical=60'
 
 echo "Setting univentionIcingaEnabled=TRUE for default Univention nagios checks"
 for service in "UNIVENTION_PING" "UNIVENTION_NTP" "UNIVENTION_PING" "UNIVENTION_DISK_ROOT" "UNIVENTION_DNS" "UNIVENTION_SWAP" "UNIVENTION_LDAP_AUTH" "UNIVENTION_NTP" "UNIVENTION_SMTP2" "UNIVENTION_SSL" "UNIVENTION_LOAD" "UNIVENTION_REPLICATION" "UNIVENTION_NSCD" "UNIVENTION_NSCD2" "UNIVENTION_KPASSWDD" "UNIVENTION_WINBIND" "UNIVENTION_SMBD" "UNIVENTION_NMBD" "UNIVENTION_JOINSTATUS" "UNIVENTION_PACKAGE_STATUS" "UNIVENTION_SLAPD_MDB_MAXSIZE"
