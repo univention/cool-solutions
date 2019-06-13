@@ -144,7 +144,7 @@ udm settings/extended_attribute create "$@" \
     --set CLIName="univentionIcingaCheckArgs" \
     --set tabAdvanced=0 \
     --set mayChange=1 \
-    --set multivalue=0 \
+    --set multivalue=1 \
     --set deleteObjectClass=1 \
     --set shortDescription="Plugin command arguments for Icinga2" \
     --set translationShortDescription='"de_DE" "Plugin-Kommando-Parameter für Icinga2"' \
