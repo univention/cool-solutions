@@ -69,16 +69,17 @@ class UniventionNextcloudSambaCommon(object):
 		groupCn = re.sub('^cn=', '', groupCnMatch.group())
 		return groupCn
 
-	def getShareDn(self, lo, cn):
+	def getShareObj(self, lo, cn):
 		timeout = time.time() + 30
 		shareObj = lo.search("(&(objectClass=univentionShareSamba)(cn={}))".format(cn))
 		while not shareObj:
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Share {} does not yet exist in LDAP, waiting until it exists with 30s timeout".format(cn))
 			shareObj = lo.search("(&(objectClass=univentionShareSamba)(cn={}))".format(cn))
+			time.sleep(1)
 			if time.time() > timeout:
 				univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Share {} does not exist in LDAP after 30s timeout. Share mount won't be created".format(cn))
-				break
-		return shareObj[0][0]
+				return False
+		return shareObj[0][1]
 
 	def getShareHost(self, share):
 		shareHost = ''.join(share['univentionShareHost'])
@@ -105,8 +106,9 @@ class UniventionNextcloudSambaCommon(object):
 		listener.setuid(0)
 		mountId = subprocess.check_output(getMountIdCmd, shell=True)
 		listener.unsetuid()
-		mountId = re.search('[0-9]+', mountId).group()
+		mountId = re.search('[0-9]+', mountId)
 		if mountId:
+			mountId = mountId.group()
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Mount for {} is already configured. Re-setting config if command is not delete...".format(mountName))
 		else:
 			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "No mount for {} configured yet. Configuring...".format(mountName))
@@ -141,6 +143,7 @@ class UniventionNextcloudSambaCommon(object):
 		listener.setuid(0)
 		subprocess.call(deleteMountCmd, shell=True)
 		listener.unsetuid()
+		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Deleted mount with ID {}".format(mountId))
 
 	def setMountConfig(self, mountId, shareHost, shareName, windomain, groupCn, useSSH=False, remoteUser=None, remotePwFile=None, remoteHost=None, applicableGroup=None):
 		if useSSH == True:

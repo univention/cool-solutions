@@ -71,6 +71,7 @@ def handler(dn, new, old, command=''):
 	groupCn = common.getGroupCn(dn)
 
 	shares = {}
+	share = None
 
 	if domainUsersMatch:
 		shareName = "Marktplatz"
@@ -91,11 +92,13 @@ def handler(dn, new, old, command=''):
 		schuelerOuRegex = '^cn=schueler-'
 		if lehrerMatch:
 			ou = re.sub(lehrerOuRegex, '', lehrerMatch.group())
+			mountName = "Lehrer {}".format(ou)
+			shareName = "lehrer-{}".format(ou)
 		elif schuelerMatch:
 			ou = re.sub(schuelerOuRegex, '', schuelerMatch.group())
 			groupCn = 'lehrer-{}'.format(ou)
-		mountName = "Schueler {}".format(ou)
-		shareName = "schueler-{}".format(ou)
+			mountName = "Schueler {}".format(ou)
+			shareName = "schueler-{}".format(ou)
 		base = common.getBase()
 		share = lo.get("cn={},cn=shares,ou={},{}".format(shareName, ou, base))
 		if ucr.is_true('nextcloud-samba-group-share-config/configureRoleshares'):
@@ -115,8 +118,10 @@ def handler(dn, new, old, command=''):
 				shares[mountName].append(share)
 				shares[mountName].append(shareName)
 	else:
-		shareDn = common.getShareDn(lo, groupCn)
-		share = lo.get(shareDn)
+		if command != 'd':
+			share = common.getShareObj(lo, groupCn)
+			if share is False:
+				return
 		shareName = groupCn
 		mountName = groupCn
 		if share:

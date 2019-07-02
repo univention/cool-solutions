@@ -38,5 +38,5 @@ Description: directory listener module configuration of Samba share access in Ne
 
 Package: univention-nextcloud-enable-for-classes-and-workgroups
 Architecture: all
-Depends: univention-config, univention-nextcloud-samba-common, ${misc:Depends}
+Depends: univention-config, ${misc:Depends}
 Description: directory listener module enabling Nextcloud for all classes and workgroups

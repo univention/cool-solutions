@@ -1,3 +1,17 @@
+univention-nextcloud-samba-share-config (1.0.0-19) unstable; urgency=medium
+
+  * Sleep 1 second in waiting for share to exist in LDAP
+  * Directly return share obj instead of DN in getShare
+  * Don't fail with Traceback if share does not exist in LDAP
+  * Don't try to find LDAP object of share if it was just deleted
+  * Remove filtering for classes and workgroups in ucsschoolRole from univention-enable-...
+    * Remove dependency on common package from univention-enable-...
+  * Use ucsschoolRole substring search
+  * Activate and configure schueler-<ou> shares
+  * Handle deletes better
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 02 Jul 2019 14:42:20 +0200
+
 univention-nextcloud-samba-share-config (1.0.0-18) unstable; urgency=medium
 
   * Actually handle delete operations

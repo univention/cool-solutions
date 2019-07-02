@@ -36,35 +36,24 @@ __package__='' 	# workaround for PEP 366
 import listener
 import univention.debug
 import univention.admin.uldap
-import univention.nextcloud_samba.common as common
-
-common = common.UniventionNextcloudSambaCommon()
 
 name='nextcloud-enable-for-classes-and-workgroups'
-description='Enable Nextcloud for all classes, workgroups, Domain Users <ou> and lehrer-<ou>'
-filter='(|(cn=Domain Users *)(cn=lehrer-*)(objectClass=ucsschoolGroup))'
+description='Enable Nextcloud for all classes, workgroups, Domain Users <ou>, lehrer-<ou> and schueler-<ou>'
+filter='(|(cn=Domain Users *)(cn=lehrer-*)(cn=schueler-*)(ucsschoolRole=school_class:school:*)(ucsschoolRole=workgroup:school:*))'
 attributes=[]
+modrdn="1"
 
 def initialize():
 	univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "{}: initialize".format(name))
 	return
 
-def handler(dn, new, old):
+def handler(dn, new, old, command=''):
+	if command == 'd':
+		return
 	univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "DN {}".format(dn))
 	listener.setuid(0)
 	lo, po = univention.admin.uldap.getAdminConnection()
 	listener.unsetuid()
-
-	domainUsersMatch = common.isDomainUsersCn(dn)
-	lehrerMatch = common.isLehrerCn(dn)
-
-	try:
-		groupRole = lo.getAttr(dn, 'ucsschoolRole')[0]
-		if not groupRole.startswith('school_class:school') and not groupRole.startswith('workgroup:school'):
-			return
-	except:
-		if not domainUsersMatch and not lehrerMatch:
-			return
 
 	#Enable group for nextcloud
 	nextcloudEnabled = lo.getAttr(dn, 'nextcloudEnabled')

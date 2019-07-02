@@ -63,8 +63,9 @@ applicableGroup = ucr.get('nextcloud-samba-share-config/nextcloudGroup')
 
 for shareCn in commonShares:
 	#share = lo.search("(&(objectClass=univentionShareSamba)(cn={}))".format(shareCn))
-	shareDn = common.getShareDn(lo, groupCn)
-	share = lo.get(shareDn)
+	shareDn = common.getShareObj(lo, groupCn)
+	if share is False:
+		return
 
 	if share:
 		# Enable files_external Nextcloud app; moved to postinst, too much overhead to do this on every single change
