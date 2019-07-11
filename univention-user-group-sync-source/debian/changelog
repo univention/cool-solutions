@@ -1,3 +1,11 @@
+univention-user-group-sync-source (2.1.0-11) unstable; urgency=medium
+
+  * Don't check for object classes to be removed if the object doesn't have any
+  * Replace hook resync mechanism with cronjob
+  * Issue #15608
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 11 Jul 2019 10:36:39 +0200
+
 univention-user-group-sync-source (2.1.0-10) unstable; urgency=medium
 
   * Remove objectClasses and attributes specified via UCR

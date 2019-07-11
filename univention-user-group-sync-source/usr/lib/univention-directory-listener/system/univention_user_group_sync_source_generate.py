@@ -69,6 +69,7 @@ filter = """\
 )""".translate(None, '\t\n\r ')
 filter_custom = ""
 
+#TODO: getpwnam seems to fail at least sometimes
 owning_user_number = pwd.getpwnam('ucs-sync').pw_uid
 owning_group_number = grp.getgrnam("root").gr_gid
 
@@ -175,7 +176,7 @@ def handler(object_dn, new_attributes, old_attributes, command):
         for attribute in remove_attributes:
             if attribute in new_attributes:
                 new_attributes.pop(attribute)
-    if remove_objectClasses:
+    if remove_objectClasses and 'objectClass' in new_attributes:
         for objectClass in remove_objectClasses:
             if objectClass in new_attributes['objectClass']:
                 new_attributes['objectClass'].remove(objectClass)
