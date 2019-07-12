@@ -453,7 +453,10 @@ def handleService(dn, new, old):
 							for checkArg in new['univentionIcingaCheckArgs']:
 								try:
 									checkVar, checkVarValue = checkArg.split('=')
-									fp.write('    {} = "{}"\n'.format(checkVar, checkVarValue))
+									if checkVarValue == 'true' or checkVarValue == 'false':
+										fp.write('    {} = {}\n'.format(checkVar, checkVarValue))
+									else:
+										fp.write('    {} = "{}"\n'.format(checkVar, checkVarValue))
 								except Exception as e:
 									univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, 'ICINGA2-SERVER: Could not write CheckArgs for service {} CheckArgs: {} Exception: {}'.format(new['cn'], new['univentionIcingaCheckArgs'], e))
 						if 'univentionIcingaCheckCommand' in new:
@@ -688,7 +691,10 @@ def handleHost(dn, new, old):
 				for hostVar in new['univentionIcingaHostVars']:
 					try:
 						hostVar, hostVarValue = hostVar.split('=')
-						fp.write('    {} = "{}"\n'.format(hostVar, hostVarValue))
+						if hostVarValue == 'true' or hostVarValue == 'false':
+							fp.write('    {} = {}\n'.format(hostVar, hostVarValue))
+						else:
+							fp.write('    {} = "{}"\n'.format(hostVar, hostVarValue))
 					except Exception as e:
 						univention.debug.debug(univention.debug.LISTENER, univention.debug.ERROR, 'ICINGA2-SERVER: Could not write hostVars for host {} hostVars: {} Exception: {}'.format(new['cn'], new['univentionIcingaHostVars'], e))
 
@@ -753,12 +759,14 @@ def initialize():
 	for dir in dirs:
 		dirname = os.path.join('/etc/icinga2/conf.d/conf.univention.d/', dir)
 		univention.debug.debug(univention.debug.LISTENER, univention.debug.INFO, 'ICINGA2-SERVER: creating dir: %s' % dirname)
+		listener.setuid(0)
 		if not os.path.exists(dirname):
-			listener.setuid(0)
 			try:
 				os.mkdir(dirname)
 			finally:
 				listener.unsetuid()
+		else:
+			listener.unsetuid()
 
 
 def deleteTree(dirname):

@@ -1,3 +1,12 @@
+univention-icinga2 (1.0.0-6) unstable; urgency=medium
+
+  * Print boolean checVarValue and hostVarValue without quotes
+  * Set univentionIcingaHostEnabled for all univentionNagiosEnabled computer objects in joinscript
+  * Fix OSError while creating config path: Set uid before checking whether config path exists
+  * Task #15705
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Fri, 12 Jul 2019 12:42:12 +0200
+
 univention-icinga2 (1.0.0-5) unstable; urgency=medium
 
   * Make extended attribute univentionIcingaCheckArgs also multi-value

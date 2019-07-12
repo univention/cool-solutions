@@ -163,7 +163,7 @@ udm settings/extended_attribute create "$@" \
     --set objectClass="univentionIcingaServiceClass" \
     --set ldapMapping="univentionIcingaHostVars" \
     --set overwriteTab=0 \
-    --set tabName="Allgemein" \
+    --set tabName="Icinga2" \
     --set translationTabName='"en_US" "Icinga2"' \
     --set CLIName="univentionIcingaHostVars" \
     --set tabAdvanced=1 \
@@ -217,6 +217,13 @@ do
 udm nagios/timeperiod modify "$@" \
 --dn "cn=${timeperiod},cn=nagios,${ldap_base}" \
 --set univentionIcingaEnabled='TRUE'
+done
+
+echo "Setting univentionIcingaHostEnabled=TRUE for all univentionNagiosEnabled computer objects"
+for computer in $(univention-ldapsearch -LLL "(&(objectClass=univentionHost)(univentionNagiosEnabled=1))" dn | grep dn: | sed 's/dn:\ //')
+do
+objectType=$(univention-ldapsearch -LLL -b "${computer}" "objectClass=univentionHost" univentionObjectType | grep univentionObjectType: | sed 's/univentionObjectType:\ //')
+udm ${objectType} modify --dn ${computer}  --set univentionIcingaHostEnabled='TRUE'
 done
 
 joinscript_save_current_version
