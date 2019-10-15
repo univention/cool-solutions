@@ -36,6 +36,7 @@ import cPickle as pickle
 import pwd
 import grp
 import os
+import re
 import tempfile
 import time
 import univention.debug
@@ -157,6 +158,109 @@ def _get_remove_config():
         objectClasses = objectClasses.split(',')
     return attributes, objectClasses
 
+def _get_prefix():
+    prefix = ucr.get('ldap/sync/prefix')
+    return prefix
+
+def _get_prefix_custom_attrs(attrs, object_type):
+    custom_attrs = ucr.get('ldap/sync/prefix/{}/attributes'.format(object_type))
+    if custom_attrs:
+        for attr in custom_attrs.split(','):
+            if not attr in attrs:
+                attrs.append(attr)
+    return attrs
+
+# Get prefix to be appended to users and custom attributes to be taken into consideration
+def _get_username_prefix_config():
+    # Attributes which contain the uid of the object in some way
+    attrs = ['uid', 'krb5PrincipalName', 'homeDirectory', 'entryDN']
+    # Attributes which contain DNs other than the DN of the object itself
+    other_dn_attrs = ['memberOf', 'creatorsName', 'modifiersName']
+    attrs = _get_prefix_custom_attrs(attrs, 'username')
+    return attrs, other_dn_attrs
+
+# Get prefix to be appended to groups and custom attributes to be taken into consideration
+def _get_group_name_prefix_config():
+    # Attributes which contain the cn of the object in some way
+    attrs = ['cn', 'entryDN']
+    # Attributes which contain DNs other than the DN of the object itself
+    other_dn_attrs = ['uniqueMember', 'creatorsName', 'modifiersName']
+    # Attributes to which the prefix can just be added
+    other_attrs = ['memberUid']
+    attrs = _get_prefix_custom_attrs(attrs, 'group')
+    return attrs, other_dn_attrs, other_attrs
+
+def _add_prefix_to_attrs(name, new_attributes, prefix, attrs, object_dn):
+    prefixed_new_attributes = {}
+    for attr in attrs:
+        if attr in new_attributes:
+            prefixed_new_attributes[attr] = []
+            for attr_item in new_attributes[attr]:
+                prefixed_attr_item = re.sub(name, '{}{}'.format(prefix, name), attr_item)
+                prefixed_new_attributes[attr].append(prefixed_attr_item)
+            new_attributes[attr] = prefixed_new_attributes[attr]
+        else:
+            _log_warn("Couldn't remove non-existent attribute '{}' from object with DN {}".format(attr, object_dn))
+    return new_attributes
+
+# Apply prefix to DNs different from the one of the edited object itself
+def _add_prefix_to_dns(new_attributes, prefix, attrs, get_regex, remove_regex, name_attr, object_dn):
+    prefixed_new_attributes = {}
+    for attr in attrs:
+        if attr in new_attributes:
+            prefixed_new_attributes[attr] = []
+            for attr_item in new_attributes[attr]:
+                other_dn_id_match = re.match(get_regex, attr_item)
+                if other_dn_id_match:
+                    other_dn_id = re.sub(remove_regex, '', other_dn_id_match.group())
+                    other_dn_with_prefix = re.sub(get_regex, '{}={}{}'.format(name_attr, prefix, other_dn_id), attr_item)
+                    prefixed_new_attributes[attr].append(other_dn_with_prefix)
+            new_attributes[attr] = prefixed_new_attributes[attr]
+        else:
+            _log_warn("Couldn't remove non-existent attribute '{}' from object with DN {}".format(attr, object_dn))
+    return new_attributes
+
+# Just apply prefix to given attributes without any regex matching
+def _just_add_prefix(new_attributes, prefix, attrs, object_dn):
+    prefixed_new_attributes = {}
+    for attr in attrs:
+        if attr in new_attributes:
+            prefixed_new_attributes[attr] = []
+            for attr_item in new_attributes[attr]:
+                prefixed_attr_item = prefix + attr_item
+                prefixed_new_attributes[attr].append(prefixed_attr_item)
+            new_attributes[attr] = prefixed_new_attributes[attr]
+        else:
+            _log_warn("Couldn't remove non-existent attribute '{}' from object with DN {}".format(attr, object_dn))
+    return new_attributes
+
+# Apply prefix to user
+def _add_prefix_to_user(object_dn_with_prefix, new_attributes, prefix, command, old_attributes, attrs, other_dn_attrs, object_dn):
+    uid_regex = '^uid=[a-zA-Z0-9-_.]*'
+    if command == 'd' or command == 'r':
+        object_dn_with_prefix = re.sub(uid_regex, 'uid={}{}'.format(prefix, old_attributes['uid'][0]), object_dn_with_prefix)
+        return object_dn_with_prefix, new_attributes
+    else:
+        username = new_attributes['uid'][0]
+        object_dn_with_prefix = re.sub(uid_regex, 'uid={}{}'.format(prefix, new_attributes['uid'][0]), object_dn_with_prefix)
+        new_attributes = _add_prefix_to_attrs(username, new_attributes, prefix, attrs, object_dn)
+        new_attributes = _add_prefix_to_dns(new_attributes, prefix, other_dn_attrs, '^cn=[a-zA-Z0-9-_.]*', '^cn=', 'cn', object_dn)
+    return object_dn_with_prefix, new_attributes
+
+# Apply prefix to group
+def _add_prefix_to_group(object_dn_with_prefix, new_attributes, prefix, command, old_attributes, attrs, other_dn_attrs, other_attrs, object_dn):
+    cn_regex = '^cn=[a-zA-Z0-9-_.]*'
+    if command == 'd' or command == 'r':
+        object_dn_with_prefix = re.sub(cn_regex, 'cn={}{}'.format(prefix, old_attributes['cn'][0]), object_dn_with_prefix)
+        return object_dn_with_prefix, new_attributes
+    else:
+        group_name = new_attributes['cn'][0]
+        object_dn_with_prefix = re.sub(cn_regex, 'cn={}{}'.format(prefix, new_attributes['cn'][0]), object_dn_with_prefix)
+        new_attributes = _add_prefix_to_attrs(group_name, new_attributes, prefix, attrs, object_dn)
+        new_attributes = _add_prefix_to_dns(new_attributes, prefix, other_dn_attrs, '^uid=[a-zA-Z0-9-_.]*', '^uid=', 'uid', object_dn)
+        new_attributes = _just_add_prefix(new_attributes, prefix, other_attrs, object_dn)
+    return object_dn_with_prefix, new_attributes
+
 #
 def handler(object_dn, new_attributes, old_attributes, command):
     """called for each uniqueMember-change on a group"""
@@ -164,6 +268,13 @@ def handler(object_dn, new_attributes, old_attributes, command):
     _wait_until_after(handler.last_time)
     timestamp = time.time()
     filename = _format_filename(timestamp)
+
+    # Apply custom filter, if set and command is not delete or rename
+    filter_custom = ucr_map_identifier()
+    if filter_custom.strip() and command != 'd' and command != 'r':
+        ldap = _connect_ldap()
+        if not ldap.search(filter=filter_custom, base=object_dn):
+            return
 
     #Remove univention-user-group-sync attribute and objectClass if set
     if 'univentionUserGroupSyncEnabled' in new_attributes:
@@ -181,19 +292,23 @@ def handler(object_dn, new_attributes, old_attributes, command):
             if objectClass in new_attributes['objectClass']:
                 new_attributes['objectClass'].remove(objectClass)
 
+    # Apply prefix specified via ucr
+    object_dn_with_prefix = object_dn
+    prefix = _get_prefix()
+    user_prefix_attrs, user_other_dn_attrs = _get_username_prefix_config()
+    group_prefix_attrs, group_other_dn_attrs, group_other_attrs = _get_group_name_prefix_config()
+    if prefix:
+        if object_dn.startswith('uid='):
+            object_dn_with_prefix, new_attributes = _add_prefix_to_user(object_dn_with_prefix, new_attributes, prefix, command, old_attributes, user_prefix_attrs, user_other_dn_attrs, object_dn)
+        elif object_dn.startswith('cn='):
+            object_dn_with_prefix, new_attributes = _add_prefix_to_group(object_dn_with_prefix, new_attributes, prefix, command, old_attributes, group_prefix_attrs, group_other_dn_attrs, group_other_attrs, object_dn)
+
     # Deliver removed attributes
     if command == 'm':
         for attribute in old_attributes:
             if attribute not in new_attributes:
                 new_attributes[attribute] = []
-    data = _format_data(object_dn, new_attributes, command)
-
-    # Apply custom filter, if set and command is not delete or rename
-    filter_custom = ucr_map_identifier()
-    if filter_custom.strip() and command != 'd' and command != 'r':
-        ldap = _connect_ldap()
-        if not ldap.search(filter=filter_custom, base=object_dn):
-            return
+    data = _format_data(object_dn_with_prefix, new_attributes, command)
 
     _write_file(filename, DB_BASE_PATH, data)
     handler.last_time = timestamp

@@ -1,3 +1,11 @@
+univention-user-group-sync-source (2.1.0-13) unstable; urgency=medium
+
+  * Add user/group name prefix mechanism
+  * Add ucslint
+  * Issue #22646
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 14 Oct 2019 14:01:35 +0200
+
 univention-user-group-sync-source (2.1.0-12) unstable; urgency=medium
 
   * Wait 10 seconds before resync to allow ssh transmission to continue
