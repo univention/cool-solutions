@@ -1,3 +1,11 @@
+univention-user-group-sync-source (2.1.0-14) unstable; urgency=medium
+
+  * Fix regex for group CNs
+  * Enhance comments
+  * Issue #22646
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 16 Oct 2019 15:48:34 +0200
+
 univention-user-group-sync-source (2.1.0-13) unstable; urgency=medium
 
   * Add user/group name prefix mechanism

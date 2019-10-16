@@ -158,10 +158,12 @@ def _get_remove_config():
         objectClasses = objectClasses.split(',')
     return attributes, objectClasses
 
+# Get prefix from UCR
 def _get_prefix():
     prefix = ucr.get('ldap/sync/prefix')
     return prefix
 
+# Get custom attributes to be modified
 def _get_prefix_custom_attrs(attrs, object_type):
     custom_attrs = ucr.get('ldap/sync/prefix/{}/attributes'.format(object_type))
     if custom_attrs:
@@ -170,7 +172,7 @@ def _get_prefix_custom_attrs(attrs, object_type):
                 attrs.append(attr)
     return attrs
 
-# Get prefix to be appended to users and custom attributes to be taken into consideration
+# Get user attributes to be taken into consideration
 def _get_username_prefix_config():
     # Attributes which contain the uid of the object in some way
     attrs = ['uid', 'krb5PrincipalName', 'homeDirectory', 'entryDN']
@@ -179,7 +181,7 @@ def _get_username_prefix_config():
     attrs = _get_prefix_custom_attrs(attrs, 'username')
     return attrs, other_dn_attrs
 
-# Get prefix to be appended to groups and custom attributes to be taken into consideration
+# Get group attributes to be taken into consideration
 def _get_group_name_prefix_config():
     # Attributes which contain the cn of the object in some way
     attrs = ['cn', 'entryDN']
@@ -190,6 +192,7 @@ def _get_group_name_prefix_config():
     attrs = _get_prefix_custom_attrs(attrs, 'group')
     return attrs, other_dn_attrs, other_attrs
 
+# Apply prefix to attributes which contain the uid or cn of the current object
 def _add_prefix_to_attrs(name, new_attributes, prefix, attrs, object_dn):
     prefixed_new_attributes = {}
     for attr in attrs:
@@ -244,12 +247,12 @@ def _add_prefix_to_user(object_dn_with_prefix, new_attributes, prefix, command, 
         username = new_attributes['uid'][0]
         object_dn_with_prefix = re.sub(uid_regex, 'uid={}{}'.format(prefix, new_attributes['uid'][0]), object_dn_with_prefix)
         new_attributes = _add_prefix_to_attrs(username, new_attributes, prefix, attrs, object_dn)
-        new_attributes = _add_prefix_to_dns(new_attributes, prefix, other_dn_attrs, '^cn=[a-zA-Z0-9-_.]*', '^cn=', 'cn', object_dn)
+        new_attributes = _add_prefix_to_dns(new_attributes, prefix, other_dn_attrs, '^cn=[a-zA-Z0-9-_. ]*', '^cn=', 'cn', object_dn)
     return object_dn_with_prefix, new_attributes
 
 # Apply prefix to group
 def _add_prefix_to_group(object_dn_with_prefix, new_attributes, prefix, command, old_attributes, attrs, other_dn_attrs, other_attrs, object_dn):
-    cn_regex = '^cn=[a-zA-Z0-9-_.]*'
+    cn_regex = '^cn=[a-zA-Z0-9-_. ]*'
     if command == 'd' or command == 'r':
         object_dn_with_prefix = re.sub(cn_regex, 'cn={}{}'.format(prefix, old_attributes['cn'][0]), object_dn_with_prefix)
         return object_dn_with_prefix, new_attributes
