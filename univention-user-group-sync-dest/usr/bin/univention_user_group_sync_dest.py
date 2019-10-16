@@ -347,7 +347,13 @@ def _translate_group_update(attribute, value):
 
 ## Run direct update
 def _direct_update(attributes, mapping, user_dn):
-    user = _user_exists(attributes)
+    if _is_user(user_dn, attributes):
+        user = _user_exists(attributes)
+    elif _is_simpleauth(user_dn, attributes):
+        user = _simpleauth_exists(attributes)
+    else:
+        _log_message('E: During _direct_update. Unknown user type: %s %s' % (command, object_dn))
+        exit()
     if user is None:
         _log_message("I: Ignoring modify for non-existent %r" % user_dn)
         print("I: Ignoring modify for non-existent %r" % user_dn)

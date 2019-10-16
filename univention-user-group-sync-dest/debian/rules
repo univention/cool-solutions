@@ -31,6 +31,7 @@
 # <http://www.gnu.org/licenses/>.
 
 override_dh_install:
+	ucslint
 	dh_install
 	univention-install-config-registry
 	univention-install-config-registry-info

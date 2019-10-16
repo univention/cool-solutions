@@ -1,3 +1,11 @@
+univention-user-group-sync-dest (2.1.0-14) unstable; urgency=medium
+
+  * Lookup users correctly in _direct_update
+  * Add ucslint
+  * Issue #22646
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 16 Oct 2019 15:45:41 +0200
+
 univention-user-group-sync-dest (2.1.0-10) unstable; urgency=medium
 
   * Pass object dn to _direct_update
