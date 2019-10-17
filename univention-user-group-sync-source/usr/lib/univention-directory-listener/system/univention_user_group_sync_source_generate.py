@@ -178,7 +178,7 @@ def _get_username_prefix_config():
     attrs = ['uid', 'krb5PrincipalName', 'homeDirectory', 'entryDN']
     # Attributes which contain DNs other than the DN of the object itself
     other_dn_attrs = ['memberOf', 'creatorsName', 'modifiersName']
-    attrs = _get_prefix_custom_attrs(attrs, 'username')
+    attrs = _get_prefix_custom_attrs(attrs, 'user')
     return attrs, other_dn_attrs
 
 # Get group attributes to be taken into consideration

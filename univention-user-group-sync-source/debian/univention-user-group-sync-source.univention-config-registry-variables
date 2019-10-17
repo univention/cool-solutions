@@ -23,12 +23,12 @@ Type=str
 Categories=system
 
 [ldap/sync/prefix]
-Description[de]=Prefix, das durch univention-user-group-sync zu Benutzer- und Gruppennamen hinzugefügt werden soll
-Description[en]=Prefix to be added to user and group names by univention-user-group-sync
+Description[de]=Prefix, das durch univention-user-group-sync zu Benutzer- und Gruppennamen hinzugefügt werden soll. Es darf nur folgende Zeichen enthalten: a-z A-Z 0-9 . - _
+Description[en]=Prefix to be added to user and group names by univention-user-group-sync. It must only contain the following space-separated characters: a-z A-Z 0-9 . - _
 Type=str
 Categories=system
 
-[ldap/sync/prefix/username/attributes]
+[ldap/sync/prefix/user/attributes]
 Description[de]=Kommaseparierte Attribute, an die das Prefix aus ldap/sync/prefix angefügt werden soll. "uid", "krb5PrincipalName", "homeDirectory", "entryDN" und "memberOf" werden immer angepasst. Diese Einstellung ist für Attribute darüber hinaus, welche auch immer den Usernamen enthalten, gedacht.
 Description[en]=Comma-separated attributes to which the prefix defined in ldap/sync/prefix shall be added. "uid", "krb5PrincipalName", "homeDirectory", "entryDN" and "memberOf" are always modified. This setting is meant for attributes beyond these, which also always contain the username.
 Type=str
