@@ -33,6 +33,7 @@
 
 import cPickle as pickle
 import fcntl
+import ldap
 import os
 import re
 import sys
@@ -49,6 +50,7 @@ DB_ENTRY_FORMAT = re.compile('^[0-9]{11}[.][0-9]{7}$')
 LOCK_FD = open(sys.argv[0], 'rb')
 LOG_PATH = '/var/log/univention/user-group-sync.log'
 PROCESS_FILES_LIMIT = 1000
+cool_solution_link = "https://help.univention.com/t/cool-solution-sync-users-and-groups-into-a-second-domain/"
 
 ucr = univention.config_registry.ConfigRegistry()
 ucr.load()
@@ -104,6 +106,8 @@ def _decode_data(raw):
 
 def _read_file(path, append=False):
     '''Read the pickle file found under given path'''
+    _log_message("Reading file {}".format(path))
+    print("Reading file {}".format(path))
     raw_data = open(path, 'rb').read()
     return _decode_data(raw_data)
 
@@ -374,6 +378,12 @@ def _direct_update(attributes, mapping, user_dn):
 
 
 # CREATE
+## Handle ldap.DECODING_ERROR
+def _ldap_decoding_error(object_type, operation, object_dn):
+    _log_message("E: LDAP DECODING_ERROR during {}.{}. There might be an illegal character in the DN. Please refer to the cool solution for allowed characters: {}\n\n{}\n\n{}".format(object_type, operation, cool_solution_link, object_dn, traceback.format_exc()))
+    print("E: LDAP DECODING_ERROR during {}.{}. There might be an illegal character in the DN. Please refer to the cool solution for allowed characters: {}\n\n{}\n\n{}".format(object_type, operation, cool_solution_link, object_dn, traceback.format_exc()))
+    exit()
+
 ## Create a non-existent User
 def _create_user(user_dn, attributes):
     '''Creates a new user based on the given attributes'''
@@ -386,7 +396,10 @@ def _create_user(user_dn, attributes):
     _log_message("Create User: %r" % user_dn)
     user_position = getPosition(user_dn)
     user_position_obj = univention.admin.uldap.position(base)
-    user_position_obj.setDn(user_position)
+    try:
+        user_position_obj.setDn(user_position)
+    except ldap.DECODING_ERROR:
+        _ldap_decoding_error("User", "Create", user_position)
     user = user_module.object(co, lo, user_position_obj)
     user.open()
     for (attribute, values, ) in attributes.items():
@@ -413,7 +426,10 @@ def _create_simpleAuth(simpleauth_dn, attributes):
     _log_message("Create User: %r" % simpleauth_dn)
     simpleauth_position = getPosition(simpleauth_dn)
     simpleauth_position_obj = univention.admin.uldap.position(base)
-    simpleauth_position_obj.setDn(simpleauth_position)
+    try:
+        simpleauth_position_obj.setDn(simpleauth_position)
+    except ldap.DECODING_ERROR:
+        _ldap_decoding_error("SimpleAuth", "Create", simpleauth_position)
     simpleauth = simpleauth_module.object(co, lo, simpleauth_position_obj)
     simpleauth.open()
     for (attribute, values, ) in attributes.items():
@@ -440,7 +456,10 @@ def _create_group(group_dn, attributes):
     _log_message("Create User: %r" % group_dn)
     group_position = getPosition(group_dn)
     group_position_obj = univention.admin.uldap.position(base)
-    group_position_obj.setDn(group_position)
+    try:
+        group_position_obj.setDn(group_position)
+    except ldap.DECODING_ERROR:
+        _ldap_decoding_error("Group", "Create", group_position)
 
     group = group_module.object(co, lo, group_position_obj)
     group.open()
