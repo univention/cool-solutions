@@ -31,7 +31,7 @@ class WindowsCertificateHook(simpleHook):
 				module.info["certificateIssuerCommonNameWindows"] = issuer.CN
 				module.info["certificateDateNotBeforeWindows"] = str(notBefore)
 				module.info["certificateDateNotAfterWindows"] = str(notAfter)
-			except Exception, e:
+			except Exception as e:
 				ud.debug(
 					ud.ADMIN,
 					ud.ERROR,
