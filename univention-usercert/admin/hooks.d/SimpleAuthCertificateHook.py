@@ -31,7 +31,7 @@ class SimpleAuthCertificateHook(simpleHook):
 				module.info["certificateIssuerCommonNameSimpleAuth"] = issuer.CN
 				module.info["certificateDateNotBeforeSimpleAuth"] = str(notBefore)
 				module.info["certificateDateNotAfterSimpleAuth"] = str(notAfter)
-			except Exception, e:
+			except Exception as e:
 				ud.debug(
 					ud.ADMIN,
 					ud.ERROR,
