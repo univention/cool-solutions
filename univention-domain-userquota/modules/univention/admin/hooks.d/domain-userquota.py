@@ -1,9 +1,11 @@
+import univention.debug as ud
 from univention.admin.hook import simpleHook
+
 
 class DomainUserQuotaHook(simpleHook):
 	type = 'DomainUserQuotaHook'
 
-	univention.debug.debug(univention.debug.ADMIN, univention.debug.INFO, 'domain_userquota:')
+	ud.debug(ud.ADMIN, ud.INFO, 'domain_userquota:')
 
 	def __merge_quota_settings(self, module, ml):
 		if module.hasChanged('domainquota'):
@@ -23,8 +25,8 @@ class DomainUserQuotaHook(simpleHook):
 				quotas))
 
 			ml = newml
-			
-		univention.debug.debug(univention.debug.ADMIN, univention.debug.INFO, 'set module:%s' % str(ml))
+
+		ud.debug(ud.ADMIN, ud.INFO, 'set module:%s' % str(ml))
 		return ml
 
 	def hook_open(self, module):
@@ -34,9 +36,10 @@ class DomainUserQuotaHook(simpleHook):
 			for quotasetting in quotasettings:
 				if not isinstance(quotasetting, (list, tuple)):
 					module['domainquota'].append(quotasetting.split('$$'))
-		univention.debug.debug(univention.debug.ADMIN, univention.debug.INFO, 'open: module:%s' % str(module))
+		ud.debug(ud.ADMIN, ud.INFO, 'open: module:%s' % str(module))
 
 	def hook_ldap_modlist(self, module, ml=[]):
 		return self.__merge_quota_settings(module, ml)
+
 	def hook_ldap_addlist(self, module, ml=[]):
 		return self.__merge_quota_settings(module, ml)

@@ -33,8 +33,11 @@
 import univention.admin.localization
 import univention.admin.syntax
 
-translation=univention.admin.localization.translation('univention.admin.syntax.domainquota')
-_=translation.translate
+from univention.admin.syntay import UCS_Server
+
+translation = univention.admin.localization.translation('univention.admin.syntax.domainquota')
+_ = translation.translate
+
 
 class siprefix(univention.admin.syntax.select):
 	size = 'OneThird'
@@ -42,7 +45,7 @@ class siprefix(univention.admin.syntax.select):
 		('MiB', _('MiB')),
 		('GiB', _('GiB')),
 	]
-	default='GiB'
+	default = 'GiB'
 
 
 class OneThirdAbsolutePath(univention.admin.syntax.absolutePath):
@@ -51,16 +54,15 @@ class OneThirdAbsolutePath(univention.admin.syntax.absolutePath):
 
 class OneThirdInteger(univention.admin.syntax.integer):
 	size = "OneThird"
-	max_length=3
+	max_length = 3
+
 	@classmethod
 	def parse(self, text):
 		if len(text) > self.max_length:
-			raise univention.admin.uexceptions.valueError, _("Maximum length for Quota is %s characters") % self.max_length
-		super(integer, self).parse(text)
-		return text
+			raise univention.admin.uexceptions.valueError(_("Maximum length for Quota is %s characters") % self.max_length)
+		return super(univention.admin.syntax.integer, self).parse(text)
 
 
 class domainquota(complex):
-	subsyntaxes = (( _( 'Host' ), UCS_Server), (_( 'Path' ), OneThirdAbsolutePath), (_( 'Quota' ), OneThirdInteger), (_( 'Unit' ), siprefix))
+	subsyntaxes = ((_('Host'), UCS_Server), (_('Path'), OneThirdAbsolutePath), (_('Quota'), OneThirdInteger), (_('Unit'), siprefix))
 	all_required = True
-
