@@ -37,66 +37,53 @@ translation = univention.admin.localization.translation('univention.admin.handle
 _ = translation.translate
 
 module = 'sudo/rule'
-superordinate='settings/cn'
-childs = 0
+superordinate = 'settings/cn'
+childs = False
 short_description = _(u'sudo rule')
 long_description = _(u'Rules to control sudo-ldap behaviour')
 operations = ['add', 'edit', 'remove', 'search']
 
 options = {
+	'default': univention.admin.option(
+		short_description='',
+		objectClasses=['top', 'sudoRole'],
+	),
 }
 
 property_descriptions = {
 	'name': univention.admin.property(
-			short_description = _(u'Name'),
-			long_description = _(u'Unique name for the rule'),
-			syntax = univention.admin.syntax.string,
-			multivalue = False,
-			options = [],
-			required = True,
-			may_change = True,
-			identifies = True,
-		),
+		short_description=_(u'Name'),
+		long_description=_(u'Unique name for the rule'),
+		syntax=univention.admin.syntax.string,
+		required=True,
+		identifies=True,
+	),
 	'description': univention.admin.property(
-			short_description = _(u'Description'),
-			long_description = _(u'Description of the rule'),
-			syntax = univention.admin.syntax.string,
-			multivalue = False,
-			options = [],
-			required = False,
-			may_change = True,
-			identifies = False,
-		),
+		short_description=_(u'Description'),
+		long_description=_(u'Description of the rule'),
+		syntax=univention.admin.syntax.string,
+	),
 	'users': univention.admin.property(
-			short_description = _(u'Users'),
-			long_description = _(u'Users and groups this rule is for'),
-			syntax = univention.admin.syntax.string,
-			multivalue = True,
-			options = [],
-			required = True,
-			may_change = True,
-			identifies = False,
-		),
+		short_description=_(u'Users'),
+		long_description=_(u'Users and groups this rule is for'),
+		syntax=univention.admin.syntax.string,
+		multivalue=True,
+		required=True,
+	),
 	'hosts': univention.admin.property(
-			short_description = _(u'Hosts'),
-			long_description = _(u'Hostnames this rule is for'),
-			syntax = univention.admin.syntax.string,
-			multivalue = True,
-			options = [],
-			required = True,
-			may_change = True,
-			identifies = False,
-		),
+		short_description=_(u'Hosts'),
+		long_description=_(u'Hostnames this rule is for'),
+		syntax=univention.admin.syntax.string,
+		multivalue=True,
+		required=True,
+	),
 	'command': univention.admin.property(
-			short_description = _(u'Command'),
-			long_description = _(u'Commands allowed/refused by this rule'),
-			syntax = univention.admin.syntax.string,
-			multivalue = True,
-			options = [],
-			required = True,
-			may_change = True,
-			identifies = False,
-		),
+		short_description=_(u'Command'),
+		long_description=_(u'Commands allowed/refused by this rule'),
+		syntax=univention.admin.syntax.string,
+		multivalue=True,
+		required=True,
+	),
 }
 
 layout = [
@@ -125,59 +112,36 @@ mapping.register('command', 'sudoCommand')
 class object(univention.admin.handlers.simpleLdap):
 	module = module
 
-	def __init__(self, co, lo, position, dn='', superordinate=None, attributes=None):
-		self.co = co
-		self.lo = lo
-		self.dn = dn
-		self.position = position
-		self.mapping = mapping
-		self.descriptions = property_descriptions
-		univention.admin.handlers.simpleLdap.__init__(self, co, lo, position, dn, superordinate)
-		self.options = []
+	if not hasattr(univention.admin.handlers.simpleLdap, '_ldap_dn'):
+		def _ldap_pre_create(self):
+			self.dn = '%s=%s,%s' % (mapping.mapName('name'), mapping.mapValue('name', self.info['name']), self.position.getDn())
 
-	def open(self):
-		univention.admin.handlers.simpleLdap.open(self)
-		self.save()
+		def _ldap_addlist(self):
+			al = [('objectClass', ['top', 'sudoRole'])]
+			return al
 
-	def _ldap_pre_create(self):
-		self.dn = '%s=%s,%s' % (mapping.mapName('name'), mapping.mapValue('name', self.info['name']), self.position.getDn())
 
-	def _ldap_post_create(self):
-		pass
+try:
+	lookup = object.lookup
+except AttributeError:
+	def lookup(co, lo, filter_s, base='', superordinate=None, scope='sub', unique=0, required=0, timeout=-1, sizelimit=0):
+		searchfilter = univention.admin.filter.conjunction('&', [
+			univention.admin.filter.expression('objectClass', 'sudoRole'),
+		])
 
-	def _ldap_pre_modify(self):
-		pass
+		if filter_s:
+			filter_p = univention.admin.filter.parse(filter_s)
+			univention.admin.filter.walk(filter_p, univention.admin.mapping.mapRewrite, arg=mapping)
+			searchfilter.expressions.append(filter_p)
 
-	def _ldap_post_modify(self):
-		pass
+		res = []
+		for dn in lo.searchDn(unicode(searchfilter), base, scope, unique, required, timeout, sizelimit):
+			res.append(object(co, lo, None, dn))
+		return res
 
-	def _ldap_pre_remove(self):
-		pass
 
-	def _ldap_post_remove(self):
-		pass
-
-	def _update_policies(self):
-		pass
-
-	def _ldap_addlist(self):
-		al = [('objectClass', ['top', 'sudoRole' ])]
-		return al
-
-def lookup(co, lo, filter_s, base='', superordinate=None, scope='sub', unique=0, required=0, timeout=-1, sizelimit=0):
-	searchfilter = univention.admin.filter.conjunction('&', [
-				univention.admin.filter.expression('objectClass', 'sudoRole'),
-				])
-
-	if filter_s:
-		filter_p = univention.admin.filter.parse(filter_s)
-		univention.admin.filter.walk(filter_p, univention.admin.mapping.mapRewrite, arg=mapping)
-		searchfilter.expressions.append(filter_p)
-
-	res = []
-	for dn in lo.searchDn(unicode(searchfilter), base, scope, unique, required, timeout, sizelimit):
-		res.append(object(co, lo, None, dn))
-	return res
-
-def identify(distinguished_name, attributes, canonical=False):
-	return 'sudoRole' in attributes.get('objectClass', [])
+try:
+	identify = object.identify
+except AttributeError:
+	def identify(distinguished_name, attributes, canonical=False):
+		return 'sudoRole' in attributes.get('objectClass', [])
