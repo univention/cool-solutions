@@ -1,3 +1,17 @@
+univention-user-group-sync-source (2.1.0-16) unstable; urgency=low
+
+  * Version bump
+
+ -- Timo Hollwedel <hollwedel@univention.de>  Fri, 29 Nov 2019 10:22:53 +0100
+
+univention-user-group-sync-source (2.1.0-15) unstable; urgency=medium
+
+  * Rename UCR variable
+  * Specify allowed characters for prefix
+  * Issue #22646
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 17 Oct 2019 13:32:19 +0200
+
 univention-user-group-sync-source (2.1.0-14) unstable; urgency=medium
 
   * Fix regex for group CNs
