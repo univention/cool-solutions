@@ -134,7 +134,8 @@ def _process_file(path, filename):
 def _uid_to_dn(uid):
     '''Return the would be DN for <uid>'''
     #Get dn via getPosition
-    userid = re.sub(r',cn.*', r'', uid)
+    explode_dn=ldap.dn.str2dn(uid)
+    userid='='.join((explode_dn[0][0][0], explode_dn[0][0][1]))
     return '{},{}'.format(userid, getPosition(uid))
 
 def _uids_to_dns(uids):
