@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # user_group_sync_source
 # Synchronize all existing ldap-diff files to the target host set in the ldap/sync/destination variable
@@ -47,7 +47,7 @@ if [ -z ${ldap_sync_destination} ]; then
     echo "No destination host defined"
     exit
 fi
-rsync -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" -q --remove-source-files --ignore-missing-args --exclude="*/" --exclude=".*" ${FILE_BASE}/* ucs-sync@${ldap_sync_destination}:${FILE_BASE}/
+/usr/bin/rsync -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" -q --remove-source-files --ignore-missing-args --exclude="*/" --exclude=".*" ${FILE_BASE}/* ucs-sync@${ldap_sync_destination}:${FILE_BASE}/
 
 # Remove the lockfile
 rm -f ${LOCKFILE}

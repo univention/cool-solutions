@@ -1,3 +1,11 @@
+univention-user-group-sync-source (2.1.0-17) unstable; urgency=medium
+
+  * Customer feedback:
+    * Use bash in synchronize
+    * Absolute path for rsync
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Fri, 06 Dec 2019 11:34:46 +0100
+
 univention-user-group-sync-source (2.1.0-16) unstable; urgency=low
 
   * Version bump
