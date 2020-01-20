@@ -1,3 +1,11 @@
+univention-user-group-sync-source (2.1.0-18) unstable; urgency=medium
+
+  * Customer feedback:
+    * Move sync user creation to joinscript
+  * Add dependencies
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 20 Jan 2020 11:09:08 +0100
+
 univention-user-group-sync-source (2.1.0-17) unstable; urgency=medium
 
   * Customer feedback:

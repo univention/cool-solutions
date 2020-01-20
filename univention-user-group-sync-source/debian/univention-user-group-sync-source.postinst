@@ -32,10 +32,15 @@
 
 #DEBHELPER#
 
+. /usr/share/univention-lib/base.sh
+eval "$(ucr shell)"
+
 case "$1" in
 	configure)
 		# User listener:nogroup needs writing rights
 		chmod 777 /var/lib/univention-user-group-sync
+
+    call_joinscript 99univention-user-group-sync-source_add-ucs-sync.inst
 
 		#
 		echo "Creating a synchronization cron job"

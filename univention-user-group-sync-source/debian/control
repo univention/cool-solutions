@@ -9,7 +9,7 @@ Standards-Version: 3.5.5
 
 Package: univention-user-group-sync-source
 Architecture: all
-Depends: ${misc:Depends}
+Depends: ${misc:Depends}, pwgen, rsync
 Description: store user and group information to be transferred
  This package contains a listener module that stores user and group information
  to be transferred to another system.
