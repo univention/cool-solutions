@@ -1,3 +1,9 @@
+univention-ro-wo-group-dirs (1.0.0-4) unstable; urgency=medium
+
+  * Also check for workgroup objects
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 05 Feb 2020 15:25:58 +0100
+
 univention-ro-wo-group-dirs (1.0.0-3) unstable; urgency=medium
 
   * Fix wrong variable name

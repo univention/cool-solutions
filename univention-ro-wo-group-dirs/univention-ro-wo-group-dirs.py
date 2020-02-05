@@ -102,7 +102,7 @@ if __name__ == '__main__':
 	shares = lo.search(filter)
 	for share in shares:
 		groupName = share[1]['cn'][0]
-		group_filter = '(&(ucsschoolRole=school_class:*)(cn={}))'.format(groupName)
+		group_filter = '(&(|(ucsschoolRole=workgroup:*)(ucsschoolRole=school_class:*))(cn={}))'.format(groupName)
 		if not lo.search(group_filter):
 			print('No group found for share object with same name {}, can not set ACLs'.format(groupName))
 			continue
