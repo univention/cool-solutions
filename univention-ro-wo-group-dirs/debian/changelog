@@ -1,3 +1,9 @@
+univention-ro-wo-group-dirs (1.0.0-2) unstable; urgency=medium
+
+  * Don't run if no group object is present for share object
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 05 Feb 2020 15:03:59 +0100
+
 univention-ro-wo-group-dirs (1.0.0-1) unstable; urgency=medium
 
   * Lehrmaterial -> Lernmaterial

@@ -101,9 +101,14 @@ if __name__ == '__main__':
 
 	shares = lo.search(filter)
 	for share in shares:
+		groupName = share[1]['cn'][0]
+		group_filter = '(&(ucsschoolRole=school_class:*)(cn={}))'.format(groupName)
+		if not lo.search(group_filter):
+			print('No group found for share object with same name {}, can not set ACLs'.format(ownerGroup))
+			continue
+
 		dn = share[0]
 		sharePath = share[1]['univentionSharePath'][0]
-		groupName = share[1]['cn'][0]
 		try:
 			main(dn, sharePath, groupName)
 		except Exception as e:
