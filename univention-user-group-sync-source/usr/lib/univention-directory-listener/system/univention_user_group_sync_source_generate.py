@@ -158,6 +158,94 @@ def _get_remove_config():
         objectClasses = objectClasses.split(',')
     return attributes, objectClasses
 
+def _get_whitelist_config():
+    apply_whitelist = ucr.is_true('ldap/sync/whitelist')
+
+    keep_attributes = [
+    # USER
+    'cn',
+    'createTimestamp',
+    'creatorsName',
+    'description',
+    'displayName',
+    'entryCSN',
+    'entryDN',
+    'entryUUID',
+    'gecos',
+    'gidNumber',
+    'givenName',
+    'hasSubordinates',
+    'homeDirectory',
+    'krb5KDCFlags',
+    'krb5Key',
+    'krb5KeyVersionNumber',
+    'krb5MaxLife',
+    'krb5MaxRenew',
+    'krb5PrincipalName',
+    'loginShell',
+    'memberOf',
+    'modifiersName',
+    'modifyTimestamp',
+    'objectClass',
+    'pwhistory',
+    'sambaAcctFlags',
+    'sambaBadPasswordCount',
+    'sambaBadPasswordTime',
+    'sambaNTPassword',
+    'sambaPasswordHistory',
+    'sambaPrimaryGroupSID',
+    'sambaPwdLastSet',
+    'sambaSID',
+    'shadowLastChange',
+    'sn',
+    'structuralObjectClass',
+    'subschemaSubentry',
+    'uid',
+    'uidNumber',
+    'univentionObjectType',
+    'userPassword',
+
+    # GROUP
+    'memberUid',
+    'sambaGroupType',
+    'uniqueMember',
+    'univentionGroupType'
+    ]
+    #keep_attributes = ['uid', 'givenName', 'sn', 'displayName', 'title', 'mailPrimaryAddress', 'description', 'univentionBirthday', 'objectClass', 'userPassword', 'pwhistory']
+    attributes = ucr.get('ldap/sync/whitelist/attribute')
+    if attributes:
+        attributes = attributes.split(',')
+        for attr in attributes:
+            keep_attributes.append(attr)
+
+    keep_objectClasses = [
+    # USER
+    'automount',
+    'sambaSamAccount',
+    'univentionMail',
+    'univentionPerson',
+    'krb5KDCEntry',
+    'organizationalPerson',
+    'top',
+    'inetOrgPerson',
+    'person',
+    'univentionPWHistory',
+    'univentionObject',
+    'krb5Principal',
+    'shadowAccount',
+    'posixAccount',
+
+    # GROUP
+    'sambaGroupMapping'
+    ]
+    objectClasses = ucr.get('ldap/sync/whitelist/objectClass')
+    if objectClasses:
+        objectClasses = objectClasses.split(',')
+        for objectClass in objectClasses:
+            keep_objectClasses.append(objectClass)
+
+    return apply_whitelist, keep_attributes, keep_objectClasses
+
 # Get prefix from UCR
 def _get_prefix():
     prefix = ucr.get('ldap/sync/prefix')
@@ -284,6 +372,18 @@ def handler(object_dn, new_attributes, old_attributes, command):
         new_attributes.pop('univentionUserGroupSyncEnabled')
         new_attributes['objectClass'].remove('univentionUserGroupSync')
 
+    #Remove attributes and objectClasses not present in whitelist, if whitelist exists
+    apply_whitelist, keep_attributes, keep_objectClasses = _get_whitelist_config()
+    if apply_whitelist:
+        if keep_attributes:
+            for attribute in new_attributes.keys():
+                if not attribute in keep_attributes:
+                    new_attributes.pop(attribute)
+        if keep_objectClasses and 'objectClass' in new_attributes:
+            for objectClass in new_attributes['objectClass']:
+                if objectClass not in keep_objectClasses:
+                    new_attributes['objectClass'].remove(objectClass)
+
     #Remove other attributes and objectClass specified via ucr
     remove_attributes, remove_objectClasses = _get_remove_config()
     if remove_attributes:
@@ -312,8 +412,13 @@ def handler(object_dn, new_attributes, old_attributes, command):
             if attribute not in new_attributes:
                 new_attributes[attribute] = []
     data = _format_data(object_dn_with_prefix, new_attributes, command)
-
     _write_file(filename, DB_BASE_PATH, data)
+
+    if command == 'n':
+        timestamp = time.time()
+        filename = _format_filename(timestamp)
+        data = _format_data(object_dn_with_prefix, new_attributes, 'm')
+        _write_file(filename, DB_BASE_PATH, data)
     handler.last_time = timestamp
 handler.last_time = 1300000000
 

@@ -1,3 +1,10 @@
+univention-user-group-sync-source (2.1.0-19) unstable; urgency=medium
+
+  * Add whitelist mechanism for attributes and object classes
+  * Also generate file with modify operation in resync to make sure changes get synced if dest was stuck
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 06 Feb 2020 12:33:15 +0100
+
 univention-user-group-sync-source (2.1.0-18) unstable; urgency=medium
 
   * Customer feedback:

@@ -10,6 +10,24 @@ Description[en]=Hostname or IP to which pickle files shall be transmitted to
 Type=str
 Categories=system
 
+[ldap/sync/whitelist]
+Description[de]=Whitelist für sync aktivieren
+Description[en]=Activate whitelist for sync
+Type=str
+Categories=system
+
+[ldap/sync/whitelist/attribute]
+Description[de]=Kommaseparierte Attribute, die im Sync beibehalten werden sollen
+Description[en]=Comma-separated attributes to be kept during sync
+Type=str
+Categories=system
+
+[ldap/sync/whitelist/objectClass]
+Description[de]=Kommaseparierte Objektklassen, die im Sync beibehalten werden sollen
+Description[en]=Comma-separated object classes to be kept during sync
+Type=str
+Categories=system
+
 [ldap/sync/remove/objectClass]
 Description[de]=Kommaseparierte Objektklassen, die vor dem Sync von Objekten entfernt werden sollen
 Description[en]=Comma-separated object classes to be removed before sync
