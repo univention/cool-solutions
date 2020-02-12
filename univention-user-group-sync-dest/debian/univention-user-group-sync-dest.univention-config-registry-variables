@@ -9,3 +9,9 @@ Description[de]=Erstelle Objekte mit LDAP-Basis x in OU y. dc= muss entfernt und
 Description[en]=Create objects with ldap base x in OU y. dc= must be removed and ,dc= must be changed to a dot. E.g.: dc=ucs,dc=foobar becomes ucs.foobar
 Type=string
 Categories=system
+
+[ldap/sync/ignore_error/no_such_object]
+Description[de]=Ignoriere Fehler und entferne synchronisierte Datei, wenn Erstellung des darin enthaltenen Objekts mit LDAP-Error "No such object" fehlschlägt. Default: false
+Description[en]=Ignore error and remove synced file if creation of object from that file results in LDAP error "No such object". Default: false
+Type=bool
+Categories=system

@@ -1,3 +1,11 @@
+univention-user-group-sync-dest (2.1.0-17) unstable; urgency=medium
+
+  * Add logrotate config
+  * Add config to ignore certain LDAP errors
+  * Fix description of getUCRCertificatesEnabled
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 12 Feb 2020 12:58:02 +0100
+
 univention-user-group-sync-dest (2.1.0-16) unstable; urgency=low
 
   * Fixed _uid_to_dn handling

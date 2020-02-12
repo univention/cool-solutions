@@ -246,10 +246,14 @@ def getUCRV():
     base = ucr.get('ldap/base')
 
 def getUCRCertificatesEnabled():
-    '''Returns the LDAP base'''
+    '''Returns whether certificates shall be imported'''
     global certificatesEnabled
     certificatesEnabled = ucr.is_true('ldap/sync/certificates')
 
+def get_ignore_error():
+    '''Returns whether certain errors during import shall be ignored and files causing them removed'''
+    global ignore_error_no_such_object
+    ignore_error_no_such_object = ucr.is_true('ldap/sync/ignore_error/no_such_object')
 
 # LDAP TO UDM MAPPING
 ## User
@@ -410,6 +414,11 @@ def _create_user(user_dn, attributes):
     try:
         user.create()
         _direct_update(attributes, _translate_user_mapping_direct, user_dn)
+    except ldap.NO_SUCH_OBJECT:
+        _log_message("E: 'No such object' during User.create. Check if the object's position exists: {}\n{}".format(user_position, traceback.format_exc()))
+        print("E: 'No such object' during User.create. Check if the object's position exists: {}\n{}".format(user_position, traceback.format_exc()))
+        if not ignore_error_no_such_object:
+            exit()
     except:
         _log_message("E: During User.create: %s" % traceback.format_exc())
         print("E: During User.create: %s" % traceback.format_exc())
@@ -440,6 +449,11 @@ def _create_simpleAuth(simpleauth_dn, attributes):
     try:
         simpleauth.create()
         _direct_update(attributes, _translate_simpleauth_mapping_direct, simpleauth_dn)
+    except ldap.NO_SUCH_OBJECT:
+        _log_message("E: 'No such object' during SimpleAuth.create. Check if the object's position exists: {}\n{}".format(user_position, traceback.format_exc()))
+        print("E: 'No such object' during SimpleAuth.create. Check if the object's position exists: {}\n{}".format(user_position, traceback.format_exc()))
+        if not ignore_error_no_such_object:
+            exit()
     except:
         _log_message("E: During SimpleAuth.create: %s" % traceback.format_exc())
         print("E: During SimpleAuth.create: %s" % traceback.format_exc())
@@ -470,6 +484,11 @@ def _create_group(group_dn, attributes):
             group[attribute] = values
     try:
         group.create()
+    except ldap.NO_SUCH_OBJECT:
+        _log_message("E: 'No such object' during Group.create. Check if the object's position exists: {}\n{}".format(user_position, traceback.format_exc()))
+        print("E: 'No such object' during Group.create. Check if the object's position exists: {}\n{}".format(user_position, traceback.format_exc()))
+        if not ignore_error_no_such_object:
+            exit()
     except:
         _log_message("E: During Group.create: %s" % traceback.format_exc())
         print("E: During Group.create: %s" % traceback.format_exc())
@@ -646,6 +665,7 @@ def main():
     getConfig()
     getUCRV()
     getUCRCertificatesEnabled()
+    get_ignore_error()
     _process_files()
     _release_lock()
 
