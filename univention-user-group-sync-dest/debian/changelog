@@ -1,3 +1,10 @@
+univention-user-group-sync-dest (2.1.0-18) unstable; urgency=medium
+
+  * Check if object's position exists before creation
+  * Use correct ignore_mapping for user updates
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 13 Feb 2020 10:53:04 +0100
+
 univention-user-group-sync-dest (2.1.0-17) unstable; urgency=medium
 
   * Add logrotate config

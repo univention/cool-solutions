@@ -10,8 +10,8 @@ Description[en]=Create objects with ldap base x in OU y. dc= must be removed and
 Type=string
 Categories=system
 
-[ldap/sync/ignore_error/no_such_object]
-Description[de]=Ignoriere Fehler und entferne synchronisierte Datei, wenn Erstellung des darin enthaltenen Objekts mit LDAP-Error "No such object" fehlschlägt. Default: false
-Description[en]=Ignore error and remove synced file if creation of object from that file results in LDAP error "No such object". Default: false
+[ldap/sync/ignore_error/missing_position]
+Description[de]=Ignoriere Fehler und entferne synchronisierte Datei, wenn Erstellung des darin enthaltenen Objekts fehlschlägt, weil dessen Position im LDAP fehlt. Default: false
+Description[en]=Ignore error and remove synced file if creation of object from that file fails because the object's position is missing. Default: false
 Type=bool
 Categories=system

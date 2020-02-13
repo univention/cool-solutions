@@ -252,8 +252,15 @@ def getUCRCertificatesEnabled():
 
 def get_ignore_error():
     '''Returns whether certain errors during import shall be ignored and files causing them removed'''
-    global ignore_error_no_such_object
-    ignore_error_no_such_object = ucr.is_true('ldap/sync/ignore_error/no_such_object')
+    global ignore_error_missing_position, ignore_error_missing_position_var
+    ignore_error_missing_position_var = 'ldap/sync/ignore_error/missing_position'
+    ignore_error_missing_position = ucr.is_true(ignore_error_missing_position_var)
+
+def _log_ignore_error(ignore_error_var):
+    '''Returns whether certain errors during import shall be ignored and files causing them removed'''
+    if ignore_error_var == ignore_error_missing_position_var:
+        _log_message("Skipping and removing file which contains DN with missing LDAP position because {} is true\n".format(ignore_error_var))
+        print("Skipping and removing file which contains DN with missing LDAP position because {} is true\n".format(ignore_error_var))
 
 # LDAP TO UDM MAPPING
 ## User
@@ -320,7 +327,7 @@ def _translate_user(attribute, value):
 ## Maps User LDAP and UDM attributes
 def _translate_user_update(attribute, value):
     '''Maps LDAP attributes to UDM'''
-    if attribute in _translate_simpleauth_mapping_ignore:
+    if attribute in _translate_user_mapping_ignore:
         return (None, None, )
     return _translate_user(attribute, value)
 
@@ -414,14 +421,16 @@ def _create_user(user_dn, attributes):
     try:
         user.create()
         _direct_update(attributes, _translate_user_mapping_direct, user_dn)
-    except ldap.NO_SUCH_OBJECT:
-        _log_message("E: 'No such object' during User.create. Check if the object's position exists: {}\n{}".format(user_position, traceback.format_exc()))
-        print("E: 'No such object' during User.create. Check if the object's position exists: {}\n{}".format(user_position, traceback.format_exc()))
-        if not ignore_error_no_such_object:
-            exit()
     except:
-        _log_message("E: During User.create: %s" % traceback.format_exc())
-        print("E: During User.create: %s" % traceback.format_exc())
+        if lo.get(user_position):
+            _log_message("E: During User.create: %s" % traceback.format_exc())
+            print("E: During User.create: %s" % traceback.format_exc())
+        else:
+            _log_message("E: during User.create. The object's position does not exist: {}\n{}".format(user_position, traceback.format_exc()))
+            print("E: during User.create. The object's position does not exist: {}\n{}".format(user_position, traceback.format_exc()))
+            if ignore_error_missing_position:
+                _log_ignore_error(ignore_error_missing_position_var)
+                return
         exit()
 
 ## Create a new Simple Authentication Account, if it doesn't exist yet
@@ -449,14 +458,16 @@ def _create_simpleAuth(simpleauth_dn, attributes):
     try:
         simpleauth.create()
         _direct_update(attributes, _translate_simpleauth_mapping_direct, simpleauth_dn)
-    except ldap.NO_SUCH_OBJECT:
-        _log_message("E: 'No such object' during SimpleAuth.create. Check if the object's position exists: {}\n{}".format(user_position, traceback.format_exc()))
-        print("E: 'No such object' during SimpleAuth.create. Check if the object's position exists: {}\n{}".format(user_position, traceback.format_exc()))
-        if not ignore_error_no_such_object:
-            exit()
     except:
-        _log_message("E: During SimpleAuth.create: %s" % traceback.format_exc())
-        print("E: During SimpleAuth.create: %s" % traceback.format_exc())
+        if lo.get(user_position):
+            _log_message("E: During SimpleAuth.create: %s" % traceback.format_exc())
+            print("E: During SimpleAuth.create: %s" % traceback.format_exc())
+        else:
+            _log_message("E: during SimpleAuth.create. The object's position does not exist: {}\n{}".format(user_position, traceback.format_exc()))
+            print("E: during SimpleAuth.create. The object's position does not exist: {}\n{}".format(user_position, traceback.format_exc()))
+            if ignore_error_missing_position:
+                _log_ignore_error(ignore_error_missing_position_var)
+                return
         exit()
 
 ## Create a new Group, if it doesn't exist yet
@@ -484,14 +495,16 @@ def _create_group(group_dn, attributes):
             group[attribute] = values
     try:
         group.create()
-    except ldap.NO_SUCH_OBJECT:
-        _log_message("E: 'No such object' during Group.create. Check if the object's position exists: {}\n{}".format(user_position, traceback.format_exc()))
-        print("E: 'No such object' during Group.create. Check if the object's position exists: {}\n{}".format(user_position, traceback.format_exc()))
-        if not ignore_error_no_such_object:
-            exit()
     except:
-        _log_message("E: During Group.create: %s" % traceback.format_exc())
-        print("E: During Group.create: %s" % traceback.format_exc())
+        if lo.get(user_position):
+            _log_message("E: During Group.create: %s" % traceback.format_exc())
+            print("E: During Group.create: %s" % traceback.format_exc())
+        else:
+            _log_message("E: during Group.create. The object's position does not exist: {}\n{}".format(user_position, traceback.format_exc()))
+            print("E: during Group.create. The object's position does not exist: {}\n{}".format(user_position, traceback.format_exc()))
+            if ignore_error_missing_position:
+                _log_ignore_error(ignore_error_missing_position_var)
+                return
         exit()
 
 
