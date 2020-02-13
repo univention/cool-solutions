@@ -1,3 +1,9 @@
+univention-user-group-sync-source (2.1.0-20) unstable; urgency=medium
+
+  * Wait for sync user to be present in local passwd after creation via UDM
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 12 Feb 2020 15:22:17 +0100
+
 univention-user-group-sync-source (2.1.0-19) unstable; urgency=medium
 
   * Add whitelist mechanism for attributes and object classes

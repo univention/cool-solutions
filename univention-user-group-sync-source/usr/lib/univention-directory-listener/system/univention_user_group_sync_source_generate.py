@@ -204,6 +204,7 @@ def _get_whitelist_config():
     'uidNumber',
     'univentionObjectType',
     'userPassword',
+    'univentionPolicyReference',
 
     # GROUP
     'memberUid',
@@ -234,6 +235,7 @@ def _get_whitelist_config():
     'krb5Principal',
     'shadowAccount',
     'posixAccount',
+    'univentionPolicyReference',
 
     # GROUP
     'sambaGroupMapping'
