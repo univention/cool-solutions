@@ -1,3 +1,9 @@
+univention-user-group-sync-source (2.1.0-21) unstable; urgency=medium
+
+  * Add univentionSAMLEnabled to default whitelist
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 18 Feb 2020 14:52:09 +0100
+
 univention-user-group-sync-source (2.1.0-20) unstable; urgency=medium
 
   * Wait for sync user to be present in local passwd after creation via UDM

@@ -236,6 +236,7 @@ def _get_whitelist_config():
     'shadowAccount',
     'posixAccount',
     'univentionPolicyReference',
+    'univentionSAMLEnabled',
 
     # GROUP
     'sambaGroupMapping'
