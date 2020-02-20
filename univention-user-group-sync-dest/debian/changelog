@@ -1,3 +1,9 @@
+univention-user-group-sync-dest (2.1.0-20) unstable; urgency=medium
+
+  * Only split objectClass_difference if it is set
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 20 Feb 2020 16:22:12 +0100
+
 univention-user-group-sync-dest (2.1.0-19) unstable; urgency=medium
 
   * Add ldap/sync/ignore_error/objectClass_difference

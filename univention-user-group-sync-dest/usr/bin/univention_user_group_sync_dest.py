@@ -258,7 +258,9 @@ def get_ignore_error():
     ignore_error_missing_position = ucr.is_true(ignore_error_missing_position_var)
 
     ignore_error_objectClass_difference_var = 'ldap/sync/ignore_error/objectClass_difference'
-    ignore_error_objectClass_difference = ucr.get(ignore_error_objectClass_difference_var).split(',')
+    ignore_error_objectClass_difference = ucr.get(ignore_error_objectClass_difference_var)
+    if ignore_error_objectClass_difference:
+        ignore_error_objectClass_difference.split(',')
 
 def _log_ignore_error(ignore_error_var):
     '''Returns whether certain errors during import shall be ignored and files causing them removed'''
