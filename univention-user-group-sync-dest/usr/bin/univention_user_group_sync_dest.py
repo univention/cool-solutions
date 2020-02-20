@@ -252,9 +252,13 @@ def getUCRCertificatesEnabled():
 
 def get_ignore_error():
     '''Returns whether certain errors during import shall be ignored and files causing them removed'''
-    global ignore_error_missing_position, ignore_error_missing_position_var
+    global ignore_error_missing_position, ignore_error_missing_position_var, ignore_error_objectClass_difference, ignore_error_objectClass_difference_var
+
     ignore_error_missing_position_var = 'ldap/sync/ignore_error/missing_position'
     ignore_error_missing_position = ucr.is_true(ignore_error_missing_position_var)
+
+    ignore_error_objectClass_difference_var = 'ldap/sync/ignore_error/objectClass_difference'
+    ignore_error_objectClass_difference = ucr.get(ignore_error_objectClass_difference_var).split(',')
 
 def _log_ignore_error(ignore_error_var):
     '''Returns whether certain errors during import shall be ignored and files causing them removed'''
@@ -380,6 +384,19 @@ def _direct_update(attributes, mapping, user_dn):
         if attribute in mapping:
             old_values = user.oldattr.get(attribute, [])
             if new_values != old_values:
+                if attribute == 'objectClass':
+                    _log_message("W: Different objectClasses detected NEW {} vs. OLD {}".format(new_values, old_values))
+                    print("W: Different objectClasses detected NEW {} vs. OLD {}".format(new_values, old_values))
+                    if ignore_error_objectClass_difference:
+                        for objectClass in ignore_error_objectClass_difference:
+                            if objectClass in new_values and objectClass not in old_values:
+                                _log_message("W: Ignoring difference in objectClass as specified in {} : {}".format(ignore_error_objectClass_difference_var, objectClass))
+                                print("W: Ignoring difference in objectClass as specified in {} : {}".format(ignore_error_objectClass_difference_var, objectClass))
+                                new_values.remove(objectClass)
+                            elif objectClass in old_values and not objectClass in new_values:
+                                _log_message("W: Ignoring difference in objectClass as specified in {} : {}".format(ignore_error_objectClass_difference_var, objectClass))
+                                print("W: Ignoring difference in objectClass as specified in {} : {}".format(ignore_error_objectClass_difference_var, objectClass))
+                                new_values.append(objectClass)
                 modlist.append((attribute, old_values, new_values, ))
     try:
         lo.modify(user.position.getDn(), modlist)

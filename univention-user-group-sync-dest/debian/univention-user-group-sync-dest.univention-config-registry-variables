@@ -15,3 +15,9 @@ Description[de]=Ignoriere Fehler und entferne synchronisierte Datei, wenn Erstel
 Description[en]=Ignore error and remove synced file if creation of object from that file fails because the object's position is missing. Default: false
 Type=bool
 Categories=system
+
+[ldap/sync/ignore_error/objectClass_difference]
+Description[de]=Liste von kommaseparierten Objektklassen, die bei Differenz zwischen Pickle-Datei und LDAP auf dem LDAP-Stand belassen werden sollen
+Description[en]=List of comma-separated object classes, which shall be kept as they are in LDAP, if there's a difference between pickle file and LDAP
+Type=bool
+Categories=system

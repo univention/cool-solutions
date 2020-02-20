@@ -37,11 +37,13 @@ case "$1" in
 		# Disable User certificate synchronization by default
 		ucr set ldap/sync/certificates?0
 
-		# 
+		#
 		echo "Creating a synchronization cron job"
 		ucr set cron/ldap-sync-dest/command="univention_user_group_sync_dest.py" \
 		cron/ldap-sync-dest/time="*/5 * * * *" \
 		cron/ldap-sync-dest/description="Import all existing ldap-diff files to this host existent in the folder /var/lib/univention-user-group-sync"
+
+		ucr set ldap/sync/ignore_error/objectClass_difference?"univentionSAMLEnabled,univentionPolicyReference,univentionPerson,univentionFreeAttributes"
 
 		;;
 
