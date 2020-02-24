@@ -1,3 +1,9 @@
+univention-user-group-sync-source (2.1.0-22) unstable; urgency=medium
+
+  * Add ucr var to remove objects on dest if univentionUserGroupSyncEnabled was deactivated
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 19 Feb 2020 13:16:50 +0100
+
 univention-user-group-sync-source (2.1.0-21) unstable; urgency=medium
 
   * Add univentionSAMLEnabled to default whitelist

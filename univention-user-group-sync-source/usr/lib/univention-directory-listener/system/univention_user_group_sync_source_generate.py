@@ -183,6 +183,7 @@ def _get_whitelist_config():
     'krb5MaxRenew',
     'krb5PrincipalName',
     'loginShell',
+    'mailPrimaryAddress',
     'memberOf',
     'modifiersName',
     'modifyTimestamp',
@@ -200,8 +201,10 @@ def _get_whitelist_config():
     'sn',
     'structuralObjectClass',
     'subschemaSubentry',
+    'title',
     'uid',
     'uidNumber',
+    'univentionBirthday',
     'univentionObjectType',
     'userPassword',
     'univentionPolicyReference',
@@ -282,6 +285,9 @@ def _get_group_name_prefix_config():
     other_attrs = ['memberUid']
     attrs = _get_prefix_custom_attrs(attrs, 'group')
     return attrs, other_dn_attrs, other_attrs
+
+def _get_remove_if_univentionUserGroupSyncEnabled_removed_config():
+    return ucr.is_true('ldap/sync/remove/deactivated_user')
 
 # Apply prefix to attributes which contain the uid or cn of the current object
 def _add_prefix_to_attrs(name, new_attributes, prefix, attrs, object_dn):
@@ -414,6 +420,18 @@ def handler(object_dn, new_attributes, old_attributes, command):
         for attribute in old_attributes:
             if attribute not in new_attributes:
                 new_attributes[attribute] = []
+
+    remove_if_univentionUserGroupSyncEnabled_removed = _get_remove_if_univentionUserGroupSyncEnabled_removed_config()
+
+    if remove_if_univentionUserGroupSyncEnabled_removed:
+        if 'univentionUserGroupSyncEnabled' in new_attributes and 'univentionUserGroupSyncEnabled' in old_attributes:
+            if not new_attributes['univentionUserGroupSyncEnabled'] and old_attributes['univentionUserGroupSyncEnabled'] == ['TRUE']:
+                _log_warn('User was deactivated for sync, deleting in destination...')
+                command = 'd'
+            if not new_attributes['univentionUserGroupSyncEnabled'] and old_attributes['univentionUserGroupSyncEnabled'] == ['FALSE']:
+                _log_warn('User was activated for sync, adding in destination...')
+                command = 'n'
+
     data = _format_data(object_dn_with_prefix, new_attributes, command)
     _write_file(filename, DB_BASE_PATH, data)
 

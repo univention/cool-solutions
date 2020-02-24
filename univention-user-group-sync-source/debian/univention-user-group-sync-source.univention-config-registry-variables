@@ -40,6 +40,12 @@ Description[en]=Comma-separated attributes to be removed before sync
 Type=str
 Categories=system
 
+[ldap/sync/remove/deactivated_user]
+Description[de]=Definiert, ob für den Sync deaktivierte Benutzer im Ziel-LDAP gelöscht werden sollen. Default: false
+Description[en]=Defines whether users deactivated for sync shall be deleted in the destination LDAP. Default: false
+Type=str
+Categories=system
+
 [ldap/sync/prefix]
 Description[de]=Prefix, das durch univention-user-group-sync zu Benutzer- und Gruppennamen hinzugefügt werden soll. Es darf nur folgende Zeichen enthalten: a-z A-Z 0-9 . - _
 Description[en]=Prefix to be added to user and group names by univention-user-group-sync. It must only contain the following space-separated characters: a-z A-Z 0-9 . - _
