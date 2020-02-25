@@ -21,3 +21,9 @@ Description[de]=Liste von kommaseparierten Objektklassen, die bei Differenz zwis
 Description[en]=List of comma-separated object classes, which shall be kept as they are in LDAP, if there's a difference between pickle file and LDAP
 Type=bool
 Categories=system
+
+[ldap/sync/process_files_limit]
+Description[de]=Limit an in einer Ausführung von univention_user_group_sync_dest bearbeiteten Dateien anpassen. Default: 1000
+Description[en]=Change limit of files processed in one execution of univention_user_group_sync_dest. Default: 1000
+Type=bool
+Categories=system

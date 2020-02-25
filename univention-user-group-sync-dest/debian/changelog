@@ -1,3 +1,9 @@
+univention-user-group-sync-dest (2.1.0-22) unstable; urgency=medium
+
+  * Add custom PROCESS_FILES_LIMIT via UCR
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 25 Feb 2020 15:57:50 +0100
+
 univention-user-group-sync-dest (2.1.0-21) unstable; urgency=medium
 
   * Only split objectClass_difference if it is set

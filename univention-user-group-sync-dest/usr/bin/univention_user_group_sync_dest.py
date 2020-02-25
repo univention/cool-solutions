@@ -250,6 +250,17 @@ def getUCRCertificatesEnabled():
     global certificatesEnabled
     certificatesEnabled = ucr.is_true('ldap/sync/certificates')
 
+def get_ucr_process_files_limit():
+    '''Apply custom PROCESS_FILES_LIMIT from UCR'''
+    global PROCESS_FILES_LIMIT
+    ucr_process_files_limit = ucr.get('ldap/sync/process_files_limit')
+    if ucr_process_files_limit:
+        try:
+            PROCESS_FILES_LIMIT = int(ucr_process_files_limit)
+        except:
+            _log_message('Value specified in UCR variable ldap/sync/process_files_limit is not an integer, ignoring.')
+            print('Value specified in UCR variable ldap/sync/process_files_limit is not an integer, ignoring.')
+
 def get_ignore_error():
     '''Returns whether certain errors during import shall be ignored and files causing them removed'''
     global ignore_error_missing_position, ignore_error_missing_position_var, ignore_error_objectClass_difference, ignore_error_objectClass_difference_var
@@ -697,6 +708,7 @@ def main():
     getConfig()
     getUCRV()
     getUCRCertificatesEnabled()
+    get_ucr_process_files_limit()
     get_ignore_error()
     _process_files()
     _release_lock()
