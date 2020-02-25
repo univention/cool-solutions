@@ -1,3 +1,10 @@
+univention-user-group-sync-source (2.1.0-23) unstable; urgency=medium
+
+  * Restart listener for all relevant UCR vars
+  * Remove UDL resync workaround
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Tue, 25 Feb 2020 15:42:41 +0100
+
 univention-user-group-sync-source (2.1.0-22) unstable; urgency=medium
 
   * Add ucr var to remove objects on dest if univentionUserGroupSyncEnabled was deactivated

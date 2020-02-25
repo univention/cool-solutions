@@ -35,10 +35,6 @@
 
 call_joinscript 99univention_register_univention-user-group-sync-source_schema.inst
 
-echo "Creating a resync cron job"
-ucr set cron/ldap-sync-src-resync/command="sleep 10; /usr/sbin/univention-directory-listener-ctrl resync univention_user_group_sync_source_generate" \
-cron/ldap-sync-src-resync/time="*/5 * * * *" \
-cron/ldap-sync-src-resync/user="root" \
-cron/ldap-sync-src-resync/description="Resync to catch newly activated objects"
+ucr unset cron/ldap-sync-src-resync/command cron/ldap-sync-src-resync/time cron/ldap-sync-src-resync/user cron/ldap-sync-src-resync/description
 
 exit 0

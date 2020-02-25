@@ -369,6 +369,16 @@ def handler(object_dn, new_attributes, old_attributes, command):
     timestamp = time.time()
     filename = _format_filename(timestamp)
 
+    remove_if_univentionUserGroupSyncEnabled_removed = _get_remove_if_univentionUserGroupSyncEnabled_removed_config()
+    if 'univentionUserGroupSyncEnabled' in new_attributes and 'univentionUserGroupSyncEnabled' in old_attributes:
+        if remove_if_univentionUserGroupSyncEnabled_removed:
+            if new_attributes['univentionUserGroupSyncEnabled'] == ['FALSE'] and old_attributes['univentionUserGroupSyncEnabled'] == ['TRUE']:
+                _log_warn('User was deactivated for sync, deleting in destination...')
+                command = 'd'
+        if new_attributes['univentionUserGroupSyncEnabled'] == ['TRUE'] and old_attributes['univentionUserGroupSyncEnabled'] == ['FALSE'] or new_attributes['univentionUserGroupSyncEnabled'] == ['TRUE'] and not old_attributes['univentionUserGroupSyncEnabled']:
+            _log_warn('User was activated for sync, adding in destination...')
+            command = 'n'
+
     # Apply custom filter, if set and command is not delete or rename
     filter_custom = ucr_map_identifier()
     if filter_custom.strip() and command != 'd' and command != 'r':
@@ -421,16 +431,6 @@ def handler(object_dn, new_attributes, old_attributes, command):
             if attribute not in new_attributes:
                 new_attributes[attribute] = []
 
-    remove_if_univentionUserGroupSyncEnabled_removed = _get_remove_if_univentionUserGroupSyncEnabled_removed_config()
-
-    if remove_if_univentionUserGroupSyncEnabled_removed:
-        if 'univentionUserGroupSyncEnabled' in new_attributes and 'univentionUserGroupSyncEnabled' in old_attributes:
-            if not new_attributes['univentionUserGroupSyncEnabled'] and old_attributes['univentionUserGroupSyncEnabled'] == ['TRUE']:
-                _log_warn('User was deactivated for sync, deleting in destination...')
-                command = 'd'
-            if not new_attributes['univentionUserGroupSyncEnabled'] and old_attributes['univentionUserGroupSyncEnabled'] == ['FALSE']:
-                _log_warn('User was activated for sync, adding in destination...')
-                command = 'n'
 
     data = _format_data(object_dn_with_prefix, new_attributes, command)
     _write_file(filename, DB_BASE_PATH, data)

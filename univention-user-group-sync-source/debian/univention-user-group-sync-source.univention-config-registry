@@ -1,3 +1,12 @@
 Type: script
 Script: restart-listener
 Variables: ldap/sync/filter
+Variables: ldap/sync/remove/deactivated_user
+Variables: ldap/sync/remove/objectClass
+Variables: ldap/sync/remove/attribute
+Variables: ldap/sync/whitelist
+Variables: ldap/sync/whitelist/attribute
+Variables: ldap/sync/whitelist/objectClass
+Variables: ldap/sync/prefix
+Variables: ldap/sync/prefix/user/attributes
+Variables: ldap/sync/prefix/group/attributes
