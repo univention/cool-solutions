@@ -43,7 +43,7 @@ case "$1" in
 		cron/ldap-sync-dest/time="*/5 * * * *" \
 		cron/ldap-sync-dest/description="Import all existing ldap-diff files to this host existent in the folder /var/lib/univention-user-group-sync"
 
-		ucr set ldap/sync/ignore_error/objectClass_difference?"univentionSAMLEnabled,univentionPolicyReference,univentionPerson,univentionFreeAttributes"
+		ucr set ldap/sync/ignore_error/objectClass_difference?"univentionSAMLEnabled,univentionPolicyReference,univentionPerson,univentionFreeAttributes,univentionObject"
 
 		;;
 
