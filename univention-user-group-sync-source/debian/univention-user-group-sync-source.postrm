@@ -31,32 +31,22 @@
 # <http://www.gnu.org/licenses/>.
 
 case "$1" in
-    purge)
-        ;;
+#    purge)
+#        ;;
 
-    remove)
+    remove|purge)
+        /usr/lib/univention-uninstall/99univention-user-group-sync-source_remove-ucs-sync.uinst
         # Restart the directory listener to unload our module
-		echo "Restarting univention-directory-listener Service"
-		systemctl restart univention-directory-listener.service
+	echo "Restarting univention-directory-listener Service"
+	systemctl restart univention-directory-listener.service
 
-        # Remove service user
-        udm users/user remove --ignore_not_exists --dn "uid=ucs-sync,cn=users,$(ucr get ldap/base)"
-        
-        # Remove the home directory
-        rm -rf /var/lib/univention-user-group-sync
+    	# Temporary fix for Bug #48062
+    	echo "Restarting cron Service"
+    	systemctl restart cron.service
 
-        # Unset all package ucr variables and the cronjob
-        ucr unset ldap/sync/filter ldap/sync/destination || true
-        ucr unset cron/ldap-sync-src/time cron/ldap-sync-src/user cron/ldap-sync-src/command cron/ldap-sync-src/description || true
-		
-       
-		# Temporary fix for Bug #48062
-		echo "Restarting cron Service"
-		systemctl restart cron.service
-
-        # 
-		echo "Reloading systemd daemon"
-		systemctl daemon-reload	
+        #
+    	echo "Reloading systemd daemon"
+    	systemctl daemon-reload
         ;;
     upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
         ;;

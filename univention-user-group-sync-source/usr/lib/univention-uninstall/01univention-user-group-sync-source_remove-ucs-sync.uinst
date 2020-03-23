@@ -1,5 +1,5 @@
 #!/bin/bash
-# installation joinscript for univention-user-group-sync-source
+# removal unjoinscript for univention-user-group-sync-source
 #
 # Copyright (C) 2020 Univention GmbH
 #
@@ -30,7 +30,7 @@
 
 ## joinscript api: bindpwdfile
 
-VERSION=3
+VERSION=1
 
 eval "$(ucr shell)"
 
@@ -39,39 +39,19 @@ eval "$(ucr shell)"
 joinscript_init
 
 # Generate local service user
-echo -e "Creating local service user"
+echo -e "Removing local service user"
 
-ldap_base=$(ucr get ldap/base)
-password_local=$(pwgen 20 1)
+# Remove service user
+udm users/user remove "$@" \
+--ignore_not_exists \
+--dn "uid=ucs-sync,cn=users,$ldap_base"
 
-udm users/user create "$@" \
---position "cn=users,$ldap_base" \
---ignore_exists \
---option posix \
---set username=ucs-sync \
---set lastname=ucs-sync \
---set password=$password_local \
---set uidNumber=342 \
---set unixhome=/var/lib/univention-user-group-sync
+# Remove the home directory
+rm -rf /var/lib/univention-user-group-sync
 
-getent passwd ucs-sync > /dev/null
-retries=0
-while [ $? -ne 0 ]
-do
-  if [ $retries -ge 5 ]; then
-    echo -e "Local service user ucs-sync did not exist after 50 seconds. Exiting..."
-    exit 1
-  fi
-  echo -e "Local service user ucs-sync does not yet exist on local system. Waiting..."
-  sleep 10
-  getent passwd ucs-sync > /dev/null
-  (( retries++ ))
-done
-echo -e "Local service user ucs-sync exists now."
-
-if [ ! -f /var/lib/univention-user-group-sync/.ssh/id_rsa ]; then
-    su - ucs-sync -c "ssh-keygen -q -f ~/.ssh/id_rsa -t rsa -N ''"
-fi
+# Unset all package ucr variables and the cronjob
+ucr unset ldap/sync/filter ldap/sync/destination || true
+ucr unset cron/ldap-sync-src/time cron/ldap-sync-src/user cron/ldap-sync-src/command cron/ldap-sync-src/description || true
 
 echo -e "Done!"
 

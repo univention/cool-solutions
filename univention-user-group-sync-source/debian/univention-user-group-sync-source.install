@@ -2,3 +2,4 @@ etc/systemd/system/cron.service.d/after_nscd.conf etc/systemd/system/cron.servic
 usr/bin/univention_user_group_sync_source_synchronize usr/bin
 usr/lib/univention-directory-listener/system/univention_user_group_sync_source_generate.py usr/lib/univention-directory-listener/system
 usr/lib/univention-install/99univention-user-group-sync-source_add-ucs-sync.inst
+usr/lib/univention-uninstall/01univention-user-group-sync-source_remove-ucs-sync.uinst
