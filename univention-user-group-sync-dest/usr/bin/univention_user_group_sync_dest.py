@@ -250,6 +250,19 @@ def getUCRCertificatesEnabled():
     global certificatesEnabled
     certificatesEnabled = ucr.is_true('ldap/sync/certificates')
 
+def get_additional_user_mapping():
+    '''Apply additional user attribute mapping from UCR'''
+    global _translate_user_mapping
+    attributes = ucr.get('ldap/sync/add/user/attribute')
+    if not attributes:
+        return
+    
+    #tempvariable = "univentionFreeAttribute1:CarLicense,univentionFreeAttribute2:coconut"
+    for attr in attributes.split(','):
+        keep_attribute = attr.split(':', 2)
+        if len(keep_attribute) == 2:
+            _translate_user_mapping[keep_attribute[0]] = (keep_attribute[1], univention.admin.mapping.ListToString, )
+
 def get_ucr_process_files_limit():
     '''Apply custom PROCESS_FILES_LIMIT from UCR'''
     global PROCESS_FILES_LIMIT
@@ -708,6 +721,7 @@ def main():
     getConfig()
     getUCRV()
     getUCRCertificatesEnabled()
+    get_additional_user_mapping()
     get_ucr_process_files_limit()
     get_ignore_error()
     _process_files()

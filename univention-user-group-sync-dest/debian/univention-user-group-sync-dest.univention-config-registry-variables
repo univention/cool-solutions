@@ -27,3 +27,7 @@ Description[de]=Limit an in einer Ausführung von univention_user_group_sync_des
 Description[en]=Change limit of files processed in one execution of univention_user_group_sync_dest. Default: 1000
 Type=bool
 Categories=system
+
+[ldap/sync/add/user/attribute]
+Description[de]=Kommasepariertes LDAP-zu-UDM Attribute mapping, für weitere zu Synchronisierende Benutzerattribute. Z.B.: "LDAPName:UDMVName,o:organisation"
+Description[en]=Comma-separated LDAP-to-UDM attribute mapping for further User-Attributes to be synchronised. E.g.: "LDAPName:UDMVName,o:organisation"
