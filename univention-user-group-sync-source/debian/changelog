@@ -1,3 +1,9 @@
+univention-user-group-sync-source (2.1.0-24) unstable; urgency=medium
+
+  * Wait for listener to notice that module import was successful
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Wed, 25 Mar 2020 16:33:01 +0100
+
 univention-user-group-sync-source (2.1.0-23) unstable; urgency=medium
 
   * Restart listener for all relevant UCR vars

@@ -52,17 +52,18 @@ udm users/user create \
 --set uidNumber=342 \
 --set unixhome=/var/lib/univention-user-group-sync
 
-getent passwd ucs-sync > /dev/null
+user_exists_python=1
 retries=0
-while [ $? -ne 0 ]
+while [ $user_exists_python -ne 0 ]
 do
-  if [ $retries -ge 5 ]; then
-    echo -e "Local service user ucs-sync did not exist after 50 seconds. Exiting..."
+  if [ $retries -ge 12 ]; then
+    echo -e "Local service user ucs-sync did not exist after 120 seconds. Exiting..."
     exit 1
   fi
   echo -e "Local service user ucs-sync does not yet exist on local system. Waiting..."
   sleep 10
-  getent passwd ucs-sync > /dev/null
+  python -c "import pwd;owning_user_number = pwd.getpwnam('ucs-sync').pw_uid" > /dev/null 2>&1
+  user_exists_python=$?
   (( retries++ ))
 done
 echo -e "Local service user ucs-sync exists now."
