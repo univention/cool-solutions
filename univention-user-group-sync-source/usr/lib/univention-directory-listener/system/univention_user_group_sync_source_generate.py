@@ -373,10 +373,14 @@ def handler(object_dn, new_attributes, old_attributes, command):
     if 'univentionUserGroupSyncEnabled' in new_attributes and 'univentionUserGroupSyncEnabled' in old_attributes:
         if remove_if_univentionUserGroupSyncEnabled_removed:
             if new_attributes['univentionUserGroupSyncEnabled'] == ['FALSE'] and old_attributes['univentionUserGroupSyncEnabled'] == ['TRUE']:
-                _log_warn('User was deactivated for sync, deleting in destination...')
+                _log_warn('Object was deactivated for sync, deleting in destination...')
                 command = 'd'
-        if new_attributes['univentionUserGroupSyncEnabled'] == ['TRUE'] and old_attributes['univentionUserGroupSyncEnabled'] == ['FALSE'] or new_attributes['univentionUserGroupSyncEnabled'] == ['TRUE'] and not old_attributes['univentionUserGroupSyncEnabled']:
-            _log_warn('User was activated for sync, adding in destination...')
+        if new_attributes['univentionUserGroupSyncEnabled'] == ['TRUE'] and old_attributes['univentionUserGroupSyncEnabled'] == ['FALSE']:
+            _log_warn('Object was activated for sync, adding in destination...')
+            command = 'n'
+    elif 'univentionUserGroupSyncEnabled' in new_attributes and not 'univentionUserGroupSyncEnabled' in old_attributes:
+        if new_attributes['univentionUserGroupSyncEnabled'] == ['TRUE']:
+            _log_warn('Object was activated for sync, adding in destination...')
             command = 'n'
 
     # Apply custom filter, if set and command is not delete or rename
