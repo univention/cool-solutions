@@ -1,3 +1,9 @@
+univention-user-group-sync-source (2.1.0-26) unstable; urgency=medium
+
+  * Add all newly activated objects
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Fri, 03 Apr 2020 17:17:39 +0200
+
 univention-user-group-sync-source (2.1.0-25) unstable; urgency=medium
 
   * Wait for listener to notice that module import was successful
