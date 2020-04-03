@@ -1,4 +1,4 @@
-univention-user-group-sync-dest (2.1.0-24); urgency=medium
+univention-user-group-sync-dest (2.1.0-24) unstable; urgency=medium
 
   * Catch traceback on non-existing UDM-Attribute #24156
 
