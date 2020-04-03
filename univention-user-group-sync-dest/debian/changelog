@@ -1,3 +1,15 @@
+univention-user-group-sync-dest (2.1.0-24); urgency=medium
+
+  * Catch traceback on non-existing UDM-Attribute #24156
+
+ -- Hendrik Peter <hpeter@univention.de>  Thu, 02 Apr 2020 15:57:26 +0200
+
+univention-user-group-sync-dest (2.1.0-23) unstable; urgency=medium
+
+  * Every User UDM-Attribute is now synchronisable #24156
+
+ -- Hendrik Peter <hpeter@univention.de>  Mon, 23 Mar 2020 14:07:51 +0100
+
 univention-user-group-sync-dest (2.1.0-22) unstable; urgency=medium
 
   * Add custom PROCESS_FILES_LIMIT via UCR

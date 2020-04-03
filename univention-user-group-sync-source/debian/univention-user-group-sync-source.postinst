@@ -62,6 +62,9 @@ case "$1" in
 		echo "Reloading systemd daemon"
 		systemctl daemon-reload
 
+		# Wait a little for the listener to notice that univention_user_group_sync_source_generate was imported sucessfully. The initial import fails because ucs-sync does not yet exist on the local system.
+		sleep 10
+
 		# Reset the Notifier IDs on reinstallations with existing Notifier IDs
 		if [ -z "$2" ]; then
 			univention-directory-listener-ctrl resync univention_user_group_sync_source_generate

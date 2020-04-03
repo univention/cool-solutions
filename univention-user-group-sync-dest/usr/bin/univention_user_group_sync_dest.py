@@ -250,6 +250,31 @@ def getUCRCertificatesEnabled():
     global certificatesEnabled
     certificatesEnabled = ucr.is_true('ldap/sync/certificates')
 
+def get_additional_user_mapping():
+    '''Apply additional user attribute mapping from UCR'''
+    global _translate_user_mapping
+    ucr_attributes = ucr.get('ldap/sync/add/user/attribute')
+    if not ucr_attributes:
+        return
+    
+    # Get all available UDM Module attributes
+    module_attributes = udm.attributes(user_module)
+    
+    #tempvariable = "univentionFreeAttribute1:CarLicense,univentionFreeAttribute2:coconut"
+    for attr in ucr_attributes.split(','):
+        keep_attribute = attr.split(':', 2)
+        if not len(keep_attribute) == 2:
+            continue
+
+        # Check if given UDM attribute exists (case-sensitive)
+        if not any(attribute['name'] == keep_attribute[1] for attribute in module_attributes): 
+            _log_message("W: UDM attribute of additional mapping {} doesn't exist. Ignoring mapping".format(keep_attribute))
+            print("W: UDM attribute of additional mapping {} doesn't exist. Ignoring mapping".format(keep_attribute))
+            continue
+        
+        # Add given attribute to mapping
+        _translate_user_mapping[keep_attribute[0]] = (keep_attribute[1], univention.admin.mapping.ListToString, )
+
 def get_ucr_process_files_limit():
     '''Apply custom PROCESS_FILES_LIMIT from UCR'''
     global PROCESS_FILES_LIMIT
@@ -708,6 +733,7 @@ def main():
     getConfig()
     getUCRV()
     getUCRCertificatesEnabled()
+    get_additional_user_mapping()
     get_ucr_process_files_limit()
     get_ignore_error()
     _process_files()

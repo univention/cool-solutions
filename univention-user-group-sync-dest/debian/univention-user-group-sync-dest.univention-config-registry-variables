@@ -19,11 +19,17 @@ Categories=system
 [ldap/sync/ignore_error/objectClass_difference]
 Description[de]=Liste von kommaseparierten Objektklassen, die bei Differenz zwischen Pickle-Datei und LDAP auf dem LDAP-Stand belassen werden sollen
 Description[en]=List of comma-separated object classes, which shall be kept as they are in LDAP, if there's a difference between pickle file and LDAP
-Type=bool
+Type=string
 Categories=system
 
 [ldap/sync/process_files_limit]
 Description[de]=Limit an in einer Ausführung von univention_user_group_sync_dest bearbeiteten Dateien anpassen. Default: 1000
 Description[en]=Change limit of files processed in one execution of univention_user_group_sync_dest. Default: 1000
-Type=bool
+Type=string
+Categories=system
+
+[ldap/sync/add/user/attribute]
+Description[de]=Kommasepariertes LDAP-zu-UDM Attribute mapping, für weitere zu Synchronisierende Benutzerattribute. Z.B.: "LDAPName:UDMVName,o:organisation"
+Description[en]=Comma-separated LDAP-to-UDM attribute mapping for further User-Attributes to be synchronised. E.g.: "LDAPName:UDMVName,o:organisation"
+Type=string
 Categories=system
