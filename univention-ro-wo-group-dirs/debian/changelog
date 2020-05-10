@@ -1,3 +1,9 @@
+univention-ro-wo-group-dirs (1.0.0-5) unstable; urgency=medium
+
+  * Fix running check
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Sun, 10 May 2020 12:51:43 +0200
+
 univention-ro-wo-group-dirs (1.0.0-4) unstable; urgency=medium
 
   * Also check for workgroup objects
