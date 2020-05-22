@@ -36,7 +36,7 @@
 #
 echo "Creating a cron job for univention-ro-wo-group-dirs"
 ucr set cron/univention-ro-wo-group-dirs/command='ps aux | grep "univention-ro-wo-group-dirs.py" | grep -v grep; if [ $? -eq 1 ]; then /usr/bin/univention-ro-wo-group-dirs.py; fi' \
-cron/univention-ro-wo-group-dirs/time="0 */1 * * *" \
+cron/univention-ro-wo-group-dirs/time?"0 */1 * * *" \
 cron/univention-ro-wo-group-dirs/user="root" \
 cron/univention-ro-wo-group-dirs/description="Create Abgabe and Lehrmaterial directories in class and workgroup shares"
 
