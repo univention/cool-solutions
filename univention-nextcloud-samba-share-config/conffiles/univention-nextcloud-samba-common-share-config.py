@@ -44,8 +44,6 @@ from univention.config_registry import ConfigRegistry
 ucr = ConfigRegistry()
 ucr.load()
 
-common = common.UniventionNextcloudSambaCommon()
-
 lo, po = univention.admin.uldap.getMachineConnection(ldap_master=False)
 
 commonShares = ucr.get('ucsschool/userlogon/commonshares')
@@ -78,6 +76,9 @@ for shareCn in commonShares:
 		shareHost = common.getShareHost(share)
 		shareSambaName = common.getShareSambaName(share)
 		mountId = common.getMountId(mountName)
+		if not mountId:
+			print("Creating new mount {} ...".format(mountName))
+			mountId = common.createMount(mountName)
 
 		common.setMountConfig(mountId, shareHost, shareName, windomain, applicableGroup)
 	else:

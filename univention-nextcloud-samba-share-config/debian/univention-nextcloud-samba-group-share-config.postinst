@@ -28,18 +28,6 @@
 # <http://www.gnu.org/licenses/>.A
 
 #DEBHELPER#
-base=$(ucr get ldap/base)
-
-echo "Setting Nextcloud LDAP group base to ${base}"
-
-ucr set nextcloud/ldap/baseGroups="${base}"
-univention-app shell nextcloud sudo -u www-data /var/www/html/occ ldap:set-config s01 ldapBaseGroups "${base}"
-
-echo "Enabling files_external Nextcloud app"
-univention-app shell nextcloud sudo -u www-data /var/www/html/occ app:enable files_external
-
-echo "Setting filesystem_check_changes to 1 in Nextcloud"
-univention-app shell nextcloud sudo -u www-data /var/www/html/occ config:system:set filesystem_check_changes --value 1
 
 # restart directory listener due to new listener module
 if [ -f "/etc/init.d/univention-directory-listener" ] ; then

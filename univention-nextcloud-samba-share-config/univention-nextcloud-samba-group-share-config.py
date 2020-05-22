@@ -44,8 +44,6 @@ from univention.config_registry import ConfigRegistry
 ucr = ConfigRegistry()
 ucr.load()
 
-common = common.UniventionNextcloudSambaCommon()
-
 name='nextcloud-samba-group-share-config'
 description='Configure access to Samba shares in Nextcloud'
 filter='(&(objectClass=nextcloudGroup)(nextcloudEnabled=1))'
@@ -145,6 +143,12 @@ def handler(dn, new, old, command=''):
 			shareHost = common.getShareHost(share)
 			shareSambaName = common.getShareSambaName(share)
 			mountId = common.getMountId(mountName)
+			if not mountId:
+				univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Creating new mount {} ...".format(mountName))
+				mountId = common.createMount(mountName)
+			if not mountId:
+				univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "New mount {} could not be created. Check if Nextcloud container is running or nextcloud-samba-common/occ_path is set correctly in UCR if you are not using an App Center Nextcloud...".format(mountName))
+				continue
 
 			common.setMountConfig(mountId, shareHost, shareName, windomain, groupCn)
 	else:

@@ -40,7 +40,6 @@ import time
 import univention.nextcloud_samba.common as common
 import univention.debug
 import univention.admin.uldap
-common = common.UniventionNextcloudSambaCommon()
 
 name='nextcloud-samba-home-share-config'
 description='Configure access to Samba home shares in Nextcloud'
@@ -77,6 +76,9 @@ def handler(dn, new, old, command=''):
 	shareHost = "{}.{}".format(shareHostCn, domain)
 
 	mountId = common.getMountId(mountName)
+	if not mountId:
+		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Creating new mount {} ...".format(mountName))
+		mountId = common.createMount(mountName)
 
 	if command == 'd':
 		mountId = common.getMountId(mountName)

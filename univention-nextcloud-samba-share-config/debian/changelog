@@ -1,3 +1,10 @@
+univention-nextcloud-samba-share-config (1.0.0-20) unstable; urgency=medium
+
+  * Add compatibility with non-App Center nextcloud
+  * Cleanup
+
+ -- Valentin Heidelberger <heidelberger@univention.de>  Fri, 22 May 2020 12:09:40 +0200
+
 univention-nextcloud-samba-share-config (1.0.0-19) unstable; urgency=medium
 
   * Sleep 1 second in waiting for share to exist in LDAP
