@@ -8,3 +8,11 @@ repo_admin.py -G "git@univention.plan.io:univention/00000-intern.cool-solution.g
 
 b44-scope cool-solutions univention-nextcloud-groupfolders-sync
  
+
+-> univention-nextcloud-groupfolders-sync list
+-> univention-nextcloud-groupfolders-sync create myfolder mygroup
+-> univention-nextcloud-groupfolders-sync list
+(u'17', {u'mount_point': u'myfolder', u'manage': [], u'quota': -3, u'acl': False, u'groups': {u'mygroup': 31}, u'id': 17, u'size': 0})
+-> univention-nextcloud-groupfolders-sync delete myfolder
+-> univention-nextcloud-groupfolders-sync list
+

@@ -116,8 +116,8 @@ class NextCloudGroupFolderSync(object):
 		nc_base_uri = self.ucr.get('nextcloud/groupfolders/sync/base_uri', 'https://{}.{}/nextcloud/'.format(self.ucr.get('hostname'), self.ucr.get('domainname')))
 		nc_admin_pwfile = self.ucr.get('nextcloud/groupfolders/sync/admin_pwfile', '/var/lib/univention-appcenter/apps/nextcloud/data/integration/admin.secret')
 		nc_admin = self.ucr.get('nextcloud/groupfolders/sync/admin', 'nc_admin')
-		usage = '%(prog)s'
-		description = 'desc'
+		usage = 'usage: %(prog)s [options] command <arguments>'
+		description = 'create/delete and list groupfolders folder in nextcloud'
 		parser = ArgumentParser(usage=usage, description=description)
 		parser.add_argument('-n', '--dry-run', action='store_true', help='Just check, do not sync (%(default)s)')
 		parser.add_argument('-d', dest='level', choices=['error', 'warn', 'info', 'debug'], help="debug level (%(default)s)", default='error')
@@ -126,7 +126,7 @@ class NextCloudGroupFolderSync(object):
 		parser.add_argument('-p', dest='nc_admin_pwfile', help='nextcloud admin account password file (%(default)s)', default=nc_admin_pwfile)
 		parser.add_argument('-b', dest='nc_base_uri', help='nextcloud admin account (%(default)s)', default=nc_base_uri)
 		subparsers = parser.add_subparsers(title='commands', dest='command', help='command')
-		list_parser = subparsers.add_parser('list', help='List folders')
+		list_parser = subparsers.add_parser('list', help='list folders')
 		list_parser.set_defaults(func=self.list)
 		create_parser = subparsers.add_parser('create', help='create folders')
 		create_parser.set_defaults(func=self.create)
@@ -157,8 +157,10 @@ class NextCloudGroupFolderSync(object):
 		return logger
 
 	def list(self):
-		for folder in self.folders().iteritems():
-			print(folder)
+		folders = self.folders()
+		if folders:
+			for folder in folders.iteritems():
+				print(folder)
 
 	def create(self):
 		self.share_create(self.args.name, self.args.group)
