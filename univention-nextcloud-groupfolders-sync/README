@@ -1,0 +1,10 @@
+Build:
+
+repo_admin.py -G "git@univention.plan.io:univention/00000-intern.cool-solution.git" \
+ -p univention-nextcloud-groupfolders-sync \
+ -b "ucs-4.4/master" \
+ -P univention-nextcloud-groupfolders-sync \
+ -s cool-solutions -r 4.4-0-0
+
+b44-scope cool-solutions univention-nextcloud-groupfolders-sync
+ 
