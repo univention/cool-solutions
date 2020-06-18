@@ -1,0 +1,2 @@
+univention-nextcloud-groupfolders-sync usr/sbin
+listener/univention-nextcloud-groupfolders-sync.py usr/lib/univention-directory-listener/system

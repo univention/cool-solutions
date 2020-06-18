@@ -1,0 +1,182 @@
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
+#
+# Univention App Center
+#  univention-app
+#
+# Copyright 2020 Univention GmbH
+#
+# https://www.univention.de/
+#
+# All rights reserved.
+#
+# The source code of this program is made available
+# under the terms of the GNU Affero General Public License version 3
+# (GNU AGPL V3) as published by the Free Software Foundation.
+#
+# Binary versions of this program provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention and not subject to the GNU AGPL V3.
+#
+# In the case you use this program under the terms of the GNU AGPL V3,
+# the program is provided in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License with the Debian GNU/Linux or Univention distribution in file
+# /usr/share/common-licenses/AGPL-3; if not, see
+# <https://www.gnu.org/licenses/>.
+
+from __future__ import print_function
+from univention.config_registry import ConfigRegistry
+from argparse import ArgumentParser
+import requests
+import logging
+import six
+import sys
+
+
+class NextCloudGroupFolderSync(object):
+
+	def __init__(self):
+		self.ucr = ConfigRegistry()
+		self.ucr.load()
+		self.args = self.get_args()
+		self.logger = self.get_logger()
+		with open(self.args.nc_admin_pwfile, 'r') as fd:
+			self.nc_admin_pw = fd.read().strip()
+		self.logger.debug('args: {}'.format(self.args))
+
+	def nc_request(self, api_path, req, params=None):
+		uri = '{}/{}'.format(self.args.nc_base_uri, api_path)
+		self.logger.debug('{} request: {}'.format(req, uri))
+		headers = {
+			'OCS-APIREQUEST': 'true',
+			'Accept': 'application/json',
+		}
+		r = getattr(requests, req)(uri, auth=(self.args.nc_admin, self.nc_admin_pw), headers=headers, data=params)
+		r.raise_for_status()
+		j = r.json()
+		if not j['ocs']['meta']['status'].lower() == 'ok':
+			raise Exception('OCS Request failed: {}'.format(r.text))
+		self.logger.debug('response: {}'.format(r.text))
+		return r.json()
+
+	def folders(self):
+		self.logger.info('folders:')
+		resp = self.nc_request('apps/groupfolders/folders', 'get')
+		return resp['ocs']['data']
+
+	def apps(self):
+		apps = self.nc_request('ocs/v2.php/cloud/apps', 'get')
+		return apps['ocs']['data']['apps']
+
+	def check_groupfolder_app(self):
+		if 'groupfolders' not in self.apps():
+			raise Exception('groupfolders app is not installed')
+
+	def folder_create(self, name):
+		self.logger.info('folder_create: {}'.format(name))
+		params = {'mountpoint': name}
+		resp = self.nc_request('apps/groupfolders/folders', 'post', params=params)
+		return resp['ocs']['data']['id']
+
+	def folder_group_add(self, fid, group):
+		self.logger.info('folder_group_add: {} {}'.format(fid, group))
+		params = {'group': group}
+		self.nc_request('apps/groupfolders/folders/{}/groups'.format(fid), 'post', params=params)
+
+	def share_create(self, name, group):
+		self.logger.info('share_create: {} {}'.format(name, group))
+		fid = self.folder_create(name)
+		self.folder_group_add(fid, group)
+		return fid
+
+	def lookup_shareid(self, name):
+		self.logger.info('lookup_shareid: {}'.format(name))
+		folders = self.folders()
+		for fid, folder in folders.iteritems():
+			if folder['mount_point'] == name:
+				return folder['id']
+		return None
+
+	def share_delete(self, name):
+		self.logger.info('share_delete: {}'.format(name))
+		fid = self.lookup_shareid(name)
+		if fid:
+			self.nc_request('apps/groupfolders/folders/{}'.format(fid), 'delete')
+		else:
+			self.logger.warn('share_delete: folder {} not found'.format(name))
+
+	def get_args(self):
+		nc_base_uri = self.ucr.get('nextcloud/groupfolders/sync/base_uri', 'https://{}.{}/nextcloud/'.format(self.ucr.get('hostname'), self.ucr.get('domainname')))
+		nc_admin_pwfile = self.ucr.get('nextcloud/groupfolders/sync/admin_pwfile', '/var/lib/univention-appcenter/apps/nextcloud/data/integration/admin.secret')
+		nc_admin = self.ucr.get('nextcloud/groupfolders/sync/admin', 'nc_admin')
+		usage = '%(prog)s'
+		description = 'desc'
+		parser = ArgumentParser(usage=usage, description=description)
+		parser.add_argument('-n', '--dry-run', action='store_true', help='Just check, do not sync (%(default)s)')
+		parser.add_argument('-d', dest='level', choices=['error', 'warn', 'info', 'debug'], help="debug level (%(default)s)", default='error')
+		parser.add_argument('-l', dest='logfile', help="logfile or - for stdout (%(default)s)", default='/var/log/univention/nextcloud-groupshare-sync.log')
+		parser.add_argument('-u', dest='nc_admin', help='nextcloud admin account (%(default)s)', default=nc_admin)
+		parser.add_argument('-p', dest='nc_admin_pwfile', help='nextcloud admin account password file (%(default)s)', default=nc_admin_pwfile)
+		parser.add_argument('-b', dest='nc_base_uri', help='nextcloud admin account (%(default)s)', default=nc_base_uri)
+		subparsers = parser.add_subparsers(title='commands', dest='command', help='command')
+		list_parser = subparsers.add_parser('list', help='List folders')
+		list_parser.set_defaults(func=self.list)
+		create_parser = subparsers.add_parser('create', help='create folders')
+		create_parser.set_defaults(func=self.create)
+		create_parser.add_argument('name', help='name of folder to create')
+		create_parser.add_argument('group', help='group for folder')
+		delete_parser = subparsers.add_parser('delete', help='delete folders')
+		delete_parser.set_defaults(func=self.delete)
+		delete_parser.add_argument('name', help='name of folder to remove')
+		args = parser.parse_args()
+		return args
+
+	def get_logger(self):
+		level = logging.ERROR
+		if self.args.level == 'error':
+			level = logging.ERROR
+		if self.args.level == 'warn':
+			level = logging.WARN
+		if self.args.level == 'info':
+			level = logging.INFO
+		if self.args.level == 'debug':
+			level = logging.DEBUG
+		logger = logging.getLogger('nextcloud-groupfolders-sync')
+		formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+		handler = logging.StreamHandler() if self.args.logfile == '-' else logging.FileHandler(self.args.logfile)
+		handler.setFormatter(formatter)
+		logger.addHandler(handler)
+		logger.setLevel(level)
+		return logger
+
+	def list(self):
+		for folder in self.folders().iteritems():
+			print(folder)
+
+	def create(self):
+		self.share_create(self.args.name, self.args.group)
+
+	def delete(self):
+		self.share_delete(self.args.name)
+
+	def main(self):
+		exc_info = None
+		try:
+			self.args.func()
+		except Exception:
+			self.logger.exception('Error:')
+			exc_info = sys.exc_info()
+		if exc_info and self.args.logfile != '-':
+			six.reraise(*exc_info)
+
+
+if __name__ == '__main__':
+	ncgf = NextCloudGroupFolderSync()
+	ncgf.main()

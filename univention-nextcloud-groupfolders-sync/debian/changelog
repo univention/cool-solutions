@@ -1,0 +1,5 @@
+univention-nextcloud-groupfolders-sync (0.1.0-1) unstable; urgency=medium
+
+  * Task #25854: init 
+
+ -- Felix Botner <botner@univention.de>  Thu, 18 Jun 2020 12:21:28 +0200

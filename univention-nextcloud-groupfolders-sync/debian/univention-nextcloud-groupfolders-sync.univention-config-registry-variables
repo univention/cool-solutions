@@ -1,0 +1,17 @@
+[nextcloud/groupfolders/sync/base_uri]
+Description[de]=URL der Nextcloud-Installation (https://hostname.domainname/nextcloud/)
+Description[en]=URL of the nextcloud installation (https://hostname.domainname/nextcloud/)
+Type=str
+Categories=system
+
+[nextcloud/groupfolders/sync/admin_pwfile]
+Description[de]=Passwortdatei für den Nextcloud Admin Zugang (/var/lib/univention-appcenter/apps/nextcloud/data/integration/admin.secret)
+Description[en]=Password file to the nextcloud admin account (/var/lib/univention-appcenter/apps/nextcloud/data/integration/admin.secret)
+Type=str
+Categories=system
+
+[nextcloud/groupfolders/sync/admin]
+Description[de]=Nextcloud Admin Zugang (nc_admin)
+Description[en]=Nextcloud admin account (nc_admin)
+Type=str
+Categories=system
