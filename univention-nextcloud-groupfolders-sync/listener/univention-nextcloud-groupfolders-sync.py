@@ -27,5 +27,42 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <https://www.gnu.org/licenses/>.
 
-__package__ = ''  # workaround for PEP 366
+__package__ = ""  # workaround for PEP 366
+import subprocess
 
+name = "univention-nextcloud-groupfolders-sync"
+description = "creates and removes folders from nextcloud when adding/removing claases or working groups in schools"
+filter = "(objectClass=ucsschoolGroup)"
+attribute = ["cn"]
+
+
+def handler(dn, new, old):
+    """ the mandatory handler for ldap listeners """
+
+    if new and not old:
+        handler_add(dn, new)
+    elif new and old:
+        handler_modify(dn, old, new)
+    elif not new and old:
+        handler_remove(dn, old)
+    else:
+        pass  # ignore
+
+
+def handler_add(dn, new):
+    """Handle addition of object."""
+    subprocess.check_call(
+        ["/usr/sbin/univention-nextcloud-groupfolders-sync", "create", new]
+    )
+
+
+def handler_modify(dn, old, new):
+    """Handle modification of object."""
+    pass  # replace this
+
+
+def handler_remove(dn, old):
+    """Handle removal of object."""
+    subprocess.check_call(
+        ["/usr/sbin/univention-nextcloud-groupfolders-sync", "delete", old]
+    )
