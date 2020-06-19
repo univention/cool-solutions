@@ -37,32 +37,35 @@ attribute = ["cn"]
 
 
 def handler(dn, new, old):
-    """ the mandatory handler for ldap listeners """
+	""" the mandatory handler for ldap listeners """
 
-    if new and not old:
-        handler_add(dn, new)
-    elif new and old:
-        handler_modify(dn, old, new)
-    elif not new and old:
-        handler_remove(dn, old)
-    else:
-        pass  # ignore
+	if new and not old:
+		handler_add(dn, new)
+	elif new and old:
+		handler_modify(dn, old, new)
+	elif not new and old:
+		handler_remove(dn, old)
+	else:
+		pass  # ignore
 
 
 def handler_add(dn, new):
-    """Handle addition of object."""
-    subprocess.check_call(
-        ["/usr/sbin/univention-nextcloud-groupfolders-sync", "create", new]
-    )
+	"""Handle addition of object."""
+	(school, objname) = new['cn'][0].split('-', 1)
+	cmd = ["/usr/sbin/univention-nextcloud-groupfolders-sync", "create", school, objname]
+	ud.debug(ud.LISTENER, ud.INFO, '%s: command"%s"' % (__file__, cmd))
+	subprocess.check_call(cmd)
 
 
 def handler_modify(dn, old, new):
-    """Handle modification of object."""
-    pass  # replace this
+	"""Handle modification of object."""
+	pass  # replace this
 
 
 def handler_remove(dn, old):
-    """Handle removal of object."""
-    subprocess.check_call(
-        ["/usr/sbin/univention-nextcloud-groupfolders-sync", "delete", old]
-    )
+	"""Handle removal of object."""
+	oldcn = new['cn'][0]
+	ud.debug(ud.LISTENER, ud.ERROR, 'New group "%s"' % oldcn)
+	subprocess.check_call(
+		["/usr/sbin/univention-nextcloud-groupfolders-sync", "delete", oldcn]
+	)
