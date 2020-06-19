@@ -33,7 +33,6 @@
 
 from __future__ import print_function
 from univention.config_registry import ConfigRegistry
-from univention.listener.handler_logging import get_logger
 from argparse import ArgumentParser
 import requests
 import logging
@@ -122,7 +121,7 @@ class NextCloudGroupFolderSync(object):
 		parser = ArgumentParser(usage=usage, description=description)
 		parser.add_argument('-n', '--dry-run', action='store_true', help='Just check, do not sync (%(default)s)')
 		parser.add_argument('-d', dest='level', choices=['error', 'warn', 'info', 'debug'], help="debug level (%(default)s)", default='error')
-		parser.add_argument('-l', dest='logfile', help="logfile or - for stdout (%(default)s)", default='/var/log/univention/listener_modules/nextcloud-groupshare-sync.log')
+		parser.add_argument('-l', dest='logfile', help="logfile or - for stdout (%(default)s)", default='/var/log/univention/nextcloud-groupshare-sync.log')
 		parser.add_argument('-u', dest='nc_admin', help='nextcloud admin account (%(default)s)', default=nc_admin)
 		parser.add_argument('-p', dest='nc_admin_pwfile', help='nextcloud admin account password file (%(default)s)', default=nc_admin_pwfile)
 		parser.add_argument('-b', dest='nc_base_uri', help='nextcloud admin account (%(default)s)', default=nc_base_uri)
@@ -149,9 +148,13 @@ class NextCloudGroupFolderSync(object):
 			level = logging.INFO
 		if self.args.level == 'debug':
 			level = logging.DEBUG
-		self.logger = get_logger('nextcloud-groupfolders-sync')
-		self.logger.setLevel(level)
-		return self.logger
+		logger = logging.getLogger('nextcloud-groupfolders-sync')
+		formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+		handler = logging.StreamHandler() if self.args.logfile == '-' else logging.FileHandler(self.args.logfile)
+		handler.setFormatter(formatter)
+		logger.addHandler(handler)
+		logger.setLevel(level)
+		return logger
 
 	def list(self):
 		folders = self.folders()

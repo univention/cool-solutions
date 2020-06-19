@@ -29,6 +29,7 @@
 
 __package__ = ""  # workaround for PEP 366
 import subprocess
+import listener
 
 name = "univention-nextcloud-groupfolders-sync"
 description = "creates and removes folders from nextcloud when adding/removing claases or working groups in schools"
@@ -36,36 +37,50 @@ filter = "(objectClass=ucsschoolGroup)"
 attribute = ["cn"]
 
 
-def handler(dn, new, old):
-	""" the mandatory handler for ldap listeners """
+class AsRoot(object):
+	"""
+	Temporarily change effective UID to 'root'.
+	"""
 
-	if new and not old:
-		handler_add(dn, new)
-	elif new and old:
-		handler_modify(dn, old, new)
-	elif not new and old:
-		handler_remove(dn, old)
-	else:
-		pass  # ignore
+	def __enter__(self):
+		listener.setuid(0)
+
+	def __exit__(self, exc_type, exc_value, traceback):
+		listener.unsetuid()
+
+def handler(dn, new, old):
+		""" the mandatory handler for ldap listeners """
+
+		if new and not old:
+				handler_add(dn, new)
+		elif new and old:
+				handler_modify(dn, old, new)
+		elif not new and old:
+				handler_remove(dn, old)
+		else:
+				pass  # ignore
 
 
 def handler_add(dn, new):
-	"""Handle addition of object."""
-	(school, objname) = new['cn'][0].split('-', 1)
-	cmd = ["/usr/sbin/univention-nextcloud-groupfolders-sync", "create", school, objname]
-	ud.debug(ud.LISTENER, ud.INFO, '%s: command"%s"' % (__file__, cmd))
-	subprocess.check_call(cmd)
+		"""Handle addition of object."""
+
+		(school, objname) = new['cn'][0].split('-', 1)
+		cmd = ["/usr/sbin/univention-nextcloud-groupfolders-sync", "create", school, objname]
+
+		with AsRoot():
+			subprocess.check_call(cmd)
 
 
 def handler_modify(dn, old, new):
-	"""Handle modification of object."""
-	pass  # replace this
+		"""Handle modification of object."""
+		pass  # replace this
 
 
 def handler_remove(dn, old):
-	"""Handle removal of object."""
-	oldcn = new['cn'][0]
-	ud.debug(ud.LISTENER, ud.ERROR, 'New group "%s"' % oldcn)
-	subprocess.check_call(
-		["/usr/sbin/univention-nextcloud-groupfolders-sync", "delete", oldcn]
-	)
+		"""Handle removal of object."""
+		oldcn = new['cn'][0]
+
+		with AsRoot():
+			subprocess.check_call(
+					["/usr/sbin/univention-nextcloud-groupfolders-sync", "delete", oldcn]
+			)
