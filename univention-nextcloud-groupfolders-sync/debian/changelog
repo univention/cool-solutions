@@ -1,3 +1,9 @@
+univention-nextcloud-groupfolders-sync (0.1.0-3) unstable; urgency=medium
+
+  * Task #25854: Added listener
+
+ -- Max Christian Pohle <pohle@univention.de>  Fri, 19 Jun 2020 10:40:05 +0200
+
 univention-nextcloud-groupfolders-sync (0.1.0-2) unstable; urgency=medium
 
   * Task #25854: init 
