@@ -1,3 +1,9 @@
+univention-nextcloud-groupfolders-sync (0.1.0-7) unstable; urgency=medium
+
+  * Task #25854: Changed ldap filter and group source
+
+ -- Max Christian Pohle <pohle@univention.de>  Mon, 22 Jun 2020 11:57:00 +0200
+
 univention-nextcloud-groupfolders-sync (0.1.0-6) unstable; urgency=medium
 
   * Task #25854: check groupfolders apps

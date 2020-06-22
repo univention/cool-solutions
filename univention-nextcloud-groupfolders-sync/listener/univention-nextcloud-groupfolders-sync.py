@@ -33,7 +33,8 @@ import listener
 
 name = "univention-nextcloud-groupfolders-sync"
 description = "creates and removes folders from nextcloud when adding/removing claases or working groups in schools"
-filter = "(objectClass=ucsschoolGroup)"
+# search explicitly for all ucsschoolGroups with either classes or workgroups
+filter = "(&(objectClass=ucsschoolGroup)(|(ucsschoolRole=school_class:school:*)(ucsschoolRole=workgroup:school:*)))"
 attribute = ["cn"]
 
 
@@ -64,8 +65,8 @@ def handler(dn, new, old):
 def handler_add(dn, new):
 		"""Handle addition of object."""
 
-		(school, objname) = new['cn'][0].split('-', 1)
-		cmd = ["/usr/sbin/univention-nextcloud-groupfolders-sync", "create", school, objname]
+                name = new['cn'][0]
+		cmd = ["/usr/sbin/univention-nextcloud-groupfolders-sync", "create", name, name]
 
 		with AsRoot():
 			subprocess.check_call(cmd)
