@@ -1,3 +1,9 @@
+univention-nextcloud-groupfolders-sync (0.1.0-9) unstable; urgency=medium
+
+  * Task #25854: Fixed error when deleting folders
+
+ -- Max Christian Pohle <pohle@univention.de>  Mon, 22 Jun 2020 16:35:00 +0200
+
 univention-nextcloud-groupfolders-sync (0.1.0-8) unstable; urgency=medium
 
   * Task #25854: Fixed coding style, error messages, debug output

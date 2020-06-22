@@ -87,7 +87,7 @@ def handler_modify(dn, old, new):
 def handler_remove(dn, old):
 	"""Handle removal of object."""
 
-	name = new['cn'][0]
+	name = old['cn'][0]
 	cmd = ["/usr/sbin/univention-nextcloud-groupfolders-sync", "delete", name]
 
 	with AsRoot():
