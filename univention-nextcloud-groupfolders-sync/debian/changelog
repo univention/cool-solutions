@@ -1,3 +1,9 @@
+univention-nextcloud-groupfolders-sync (0.1.0-6) unstable; urgency=medium
+
+  * Task #25854: check groupfolders apps
+
+ -- Felix Botner <botner@univention.de>  Mon, 22 Jun 2020 11:45:46 +0200
+
 univention-nextcloud-groupfolders-sync (0.1.0-5) unstable; urgency=medium
 
   * Task #25854: Integrated newest findings and reverted last change

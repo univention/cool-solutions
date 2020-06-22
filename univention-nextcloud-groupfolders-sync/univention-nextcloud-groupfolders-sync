@@ -60,7 +60,11 @@ class NextCloudGroupFolderSync(object):
 		}
 		r = getattr(requests, req)(uri, auth=(self.args.nc_admin, self.nc_admin_pw), headers=headers, data=params)
 		r.raise_for_status()
-		j = r.json()
+		try:
+			j = r.json()
+		except ValueError:
+			self.check_groupfolders_app()
+			raise
 		if not j['ocs']['meta']['status'].lower() == 'ok':
 			raise Exception('OCS Request failed: {}'.format(r.text))
 		self.logger.debug('response: {}'.format(r.text))
@@ -75,9 +79,9 @@ class NextCloudGroupFolderSync(object):
 		apps = self.nc_request('ocs/v2.php/cloud/apps', 'get')
 		return apps['ocs']['data']['apps']
 
-	def check_groupfolder_app(self):
+	def check_groupfolders_app(self):
 		if 'groupfolders' not in self.apps():
-			raise Exception('groupfolders app is not installed')
+			raise Exception('groupfolders app is not installed in nextcloud')
 
 	def folder_create(self, name):
 		self.logger.info('folder_create: {}'.format(name))

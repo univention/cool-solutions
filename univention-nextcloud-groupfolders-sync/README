@@ -9,6 +9,10 @@ repo_admin.py -G "git@univention.plan.io:univention/00000-intern.cool-solution.g
 
 dimma:
 b44-scope cool-solutions univention-nextcloud-groupfolders-sync
+
+/etc/apt/sources.list:
+deb [trusted=yes] http://192.168.0.10/build2/ ucs_4.4-0-cool-solutions/all/
+deb [trusted=yes] http://192.168.0.10/build2/ ucs_4.4-0-cool-solutions/$(ARCH)/
  
 
 -> univention-nextcloud-groupfolders-sync list
