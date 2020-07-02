@@ -476,6 +476,15 @@ def _create_user(user_dn, attributes):
     try:
         user.create()
         _direct_update(attributes, _translate_user_mapping_direct, user_dn)
+
+        # Re-Add restored user to his previous groups
+        if "univentionUserGroupSyncEnabled" in attributes and attributes["univentionUserGroupSyncEnabled"] == ["TRUE"] and "memberOf" in attributes:
+            for source_group_dn in attributes['memberOf']:
+                source_group_cn = ldap.dn.str2dn(source_group_dn)[0][0][1]
+                source_group_attributes = {'cn': [source_group_cn], 
+                    'uniqueMember': [ user_dn ],
+                    'univentionUserGroupSyncResync': [ 'TRUE' ]}
+                _modify_group(source_group_dn, source_group_attributes)
     except:
         if lo.get(user_position):
             _log_message("E: During User.create: %s" % traceback.format_exc())
@@ -659,6 +668,12 @@ def _modify_group(group_dn, attributes):
     _log_message("Modify Group: %r" % group_dn)
     changes = False
     group.open()
+
+    # If called by _create_user. Re-Add restored user to a previous group
+    if 'univentionUserGroupSyncResync' in attributes:
+        attributes['uniqueMember'].extend(group['users'])
+        attributes.pop('univentionUserGroupSyncResync')
+    
     for (attribute, values, ) in attributes.items():
         (attribute, values, )= _translate_group_update(attribute, values)
         if attribute is not None:

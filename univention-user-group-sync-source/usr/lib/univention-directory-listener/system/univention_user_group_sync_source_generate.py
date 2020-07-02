@@ -208,6 +208,7 @@ def _get_whitelist_config():
     'univentionObjectType',
     'userPassword',
     'univentionPolicyReference',
+    'univentionUserGroupSyncEnabled',
 
     # GROUP
     'memberUid',
@@ -370,6 +371,7 @@ def handler(object_dn, new_attributes, old_attributes, command):
     filename = _format_filename(timestamp)
 
     remove_if_univentionUserGroupSyncEnabled_removed = _get_remove_if_univentionUserGroupSyncEnabled_removed_config()
+    resync = False
     if 'univentionUserGroupSyncEnabled' in new_attributes and 'univentionUserGroupSyncEnabled' in old_attributes:
         if remove_if_univentionUserGroupSyncEnabled_removed:
             if new_attributes['univentionUserGroupSyncEnabled'] == ['FALSE'] and old_attributes['univentionUserGroupSyncEnabled'] == ['TRUE']:
@@ -378,6 +380,7 @@ def handler(object_dn, new_attributes, old_attributes, command):
         if new_attributes['univentionUserGroupSyncEnabled'] == ['TRUE'] and old_attributes['univentionUserGroupSyncEnabled'] == ['FALSE']:
             _log_warn('Object was activated for sync, adding in destination...')
             command = 'n'
+            resync = True
     elif 'univentionUserGroupSyncEnabled' in new_attributes and not 'univentionUserGroupSyncEnabled' in old_attributes:
         if new_attributes['univentionUserGroupSyncEnabled'] == ['TRUE']:
             _log_warn('Object was activated for sync, adding in destination...')
@@ -392,8 +395,9 @@ def handler(object_dn, new_attributes, old_attributes, command):
 
     #Remove univention-user-group-sync attribute and objectClass if set
     if 'univentionUserGroupSyncEnabled' in new_attributes:
-        new_attributes.pop('univentionUserGroupSyncEnabled')
         new_attributes['objectClass'].remove('univentionUserGroupSync')
+        if not resync:
+            new_attributes.pop('univentionUserGroupSyncEnabled')
 
     #Remove attributes and objectClasses not present in whitelist, if whitelist exists
     apply_whitelist, keep_attributes, keep_objectClasses = _get_whitelist_config()
