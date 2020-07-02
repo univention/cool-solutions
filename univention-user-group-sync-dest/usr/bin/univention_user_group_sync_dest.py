@@ -534,7 +534,7 @@ def _create_group(group_dn, attributes):
         print("I: Ignoring new %r for existing %r" % (group_dn, existing_group.position.getDn(), ))
         return
 
-    _log_message("Create User: %r" % group_dn)
+    _log_message("Create Group: %r" % group_dn)
     group_position = getPosition(group_dn)
     group_position_obj = univention.admin.uldap.position(base)
     try:
