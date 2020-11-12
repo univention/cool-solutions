@@ -30,34 +30,42 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-__package__=''  # workaround for PEP 366
+
+from __future__ import absolute_import
+
 import listener
 import univention.debug as ud
 import subprocess
 
-name='univention-domain-userquota'
-description='Management of domain wide user quota settings'
-filter='(objectClass=domainquotauser)'
+name = 'univention-domain-userquota'
+description = 'Management of domain wide user quota settings'
+filter = '(objectClass=domainquotauser)'
 
-fqdn = "%s.%s" % (listener.configRegistry.get('hostname', ''), listener.configRegistry.get('domainname', '') )
+fqdn = "%s.%s" % (listener.configRegistry.get('hostname', ''), listener.configRegistry.get('domainname', ''))
 delimiter = '$$'
 softlimit_percent = int(listener.configRegistry.get('quota/domainuser/softlimitpercent', '5'))
+
 
 def get_quotas_for_this_host(userobj):
 	# check if quota setting applies to this host
 	quotas = []
 	for quota in userobj.get('domainquota'):
+		quota = quota.decode('UTF-8')
 		if quota.split(delimiter)[0] == fqdn:
 			quotas.append(quota)
 	return quotas
 
+
 def remove_user_quota(username, quota):
 	mountpoint = quota.split(delimiter)[1]
-	exec_array = ['/usr/sbin/setquota', '-u', '%s' % username, '0', '0', '0', '0', '%s' % mountpoint]
+	exec_array = ['/usr/sbin/setquota', '-u', username, '0', '0', '0', '0', mountpoint]
 	ud.debug(ud.LISTENER, ud.INFO, "remove_user_quota running %s" % exec_array)
 	listener.setuid(0)
-	subprocess.call(exec_array)
-	listener.unsetuid()
+	try:
+		subprocess.call(exec_array)
+	finally:
+		listener.unsetuid()
+
 
 def set_user_quota(username, quota):
 	unit = quota.split(delimiter)[3]
@@ -71,22 +79,24 @@ def set_user_quota(username, quota):
 	softlimit = hardlimit - int(round(((hardlimit / 100.0) * softlimit_percent)))
 	mountpoint = quota.split(delimiter)[1]
 
-	exec_array = ['/usr/sbin/setquota', '-u', '%s' % username, '%s' % softlimit, '%s' % hardlimit, '0', '0', '%s' % mountpoint]
+	exec_array = ['/usr/sbin/setquota', '-u', username, '%s' % softlimit, '%s' % hardlimit, '0', '0', mountpoint]
 	ud.debug(ud.LISTENER, ud.INFO, "set_user_quota running %s" % exec_array)
 	listener.setuid(0)
-	subprocess.call(exec_array)
-	listener.unsetuid()
+	try:
+		subprocess.call(exec_array)
+	finally:
+		listener.unsetuid()
+
 
 def handler(dn, new, old):
 	if old.get('domainquota'):
 		old_quotas = get_quotas_for_this_host(old)
 		ud.debug(ud.LISTENER, ud.INFO, "old quotas: %s" % old_quotas)
 		for quota in old_quotas:
-			remove_user_quota(old.get('uid')[0], quota)
-		
+			remove_user_quota(old.get('uid')[0].decode('UTF-8'), quota)
+
 	if new.get('domainquota'):
 		new_quotas = get_quotas_for_this_host(new)
 		ud.debug(ud.LISTENER, ud.INFO, "new quotas: %s" % new_quotas)
 		for quota in new_quotas:
-			set_user_quota(new.get('uid')[0], quota)
-
+			set_user_quota(new.get('uid')[0].decode('UTF-8'), quota)

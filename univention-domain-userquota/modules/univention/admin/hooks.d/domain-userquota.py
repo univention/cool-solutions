@@ -17,7 +17,7 @@ class DomainUserQuotaHook(simpleHook):
 			quotas = []
 			if module.get('domainquota'):
 				for quota in module.get('domainquota'):
-					quotas.append('$$'.join(quota))
+					quotas.append('$$'.join(quota).encode('UTF-8'))
 
 			newml.append((
 				'domainquota',
@@ -26,7 +26,7 @@ class DomainUserQuotaHook(simpleHook):
 
 			ml = newml
 
-		ud.debug(ud.ADMIN, ud.INFO, 'set module:%s' % str(ml))
+		ud.debug(ud.ADMIN, ud.INFO, 'set module: %r' % (ml,))
 		return ml
 
 	def hook_open(self, module):
