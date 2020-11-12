@@ -3,5 +3,7 @@ manageusercertificate.py usr/lib/univention-directory-listener/system/
 univention-usercert-expiry usr/share/univention-directory-manager-tools/
 make-certificates-user.sh usr/share/univention-ssl/
 univention-certificate-user usr/sbin/
+admin/hooks.d/WindowsCertificateHook.py usr/lib/python2.7/dist-packages/univention/admin/hooks.d/
+admin/hooks.d/SimpleAuthCertificateHook.py usr/lib/python2.7/dist-packages/univention/admin/hooks.d/
 admin/hooks.d/WindowsCertificateHook.py usr/lib/python3/dist-packages/univention/admin/hooks.d/
 admin/hooks.d/SimpleAuthCertificateHook.py usr/lib/python3/dist-packages/univention/admin/hooks.d/
