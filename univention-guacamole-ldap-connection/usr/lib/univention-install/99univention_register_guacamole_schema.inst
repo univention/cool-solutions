@@ -43,7 +43,7 @@ echo -e "Done!"
 
 echo -e "Registering Guacamole protocol options... "
 ucs_registerLDAPExtension "$@" \
-    --udm_syntax /usr/share/pyshared/univention/admin/syntax.d/guacamole_protocol.py
+    --udm_syntax /usr/lib/python2.7/dist-packages/univention/admin/syntax.d/guacamole_protocol.py
 echo -e "Done!"
 
 echo -e "Adding extended attribute for Guacamole protocol... "
