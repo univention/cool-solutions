@@ -117,13 +117,18 @@ class object(univention.admin.handlers.simpleLdap):
 			self.dn = '%s=%s,%s' % (mapping.mapName('name'), mapping.mapValue('name', self.info['name']), self.position.getDn())
 
 		def _ldap_addlist(self):
-			al = [('objectClass', ['top', 'sudoRole'])]
+			al = [('objectClass', [b'top', b'sudoRole'])]
 			return al
 
 
 try:
 	lookup = object.lookup
-except AttributeError:
+except AttributeError:  # TODO: remove; which UCS version needs to be supported?
+	try:
+		unicode
+	except NameError:
+		unicode = str
+
 	def lookup(co, lo, filter_s, base='', superordinate=None, scope='sub', unique=0, required=0, timeout=-1, sizelimit=0):
 		searchfilter = univention.admin.filter.conjunction('&', [
 			univention.admin.filter.expression('objectClass', 'sudoRole'),
@@ -144,4 +149,4 @@ try:
 	identify = object.identify
 except AttributeError:
 	def identify(distinguished_name, attributes, canonical=False):
-		return 'sudoRole' in attributes.get('objectClass', [])
+		return b'sudoRole' in attributes.get('objectClass', [])
