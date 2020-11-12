@@ -14,8 +14,8 @@ class SimpleAuthCertificateHook(simpleHook):
 			newml = [mod for mod in ml if mod[0] != "userCertificate;binary"]
 			newml.append((
 				"userCertificate;binary",
-				module.oldattr.get("userCertificate;binary", [""])[0],
-				base64.decodestring(module["simpleAuthCertificate"])))
+				module.oldattr.get("userCertificate;binary", [b""])[0],
+				base64.b64decode(module["simpleAuthCertificate"].encode('UTF-8'))))
 			ml = newml
 		return ml
 
@@ -31,13 +31,9 @@ class SimpleAuthCertificateHook(simpleHook):
 				module.info["certificateIssuerCommonNameSimpleAuth"] = issuer.CN
 				module.info["certificateDateNotBeforeSimpleAuth"] = str(notBefore)
 				module.info["certificateDateNotAfterSimpleAuth"] = str(notAfter)
-			except Exception as e:
-				ud.debug(
-					ud.ADMIN,
-					ud.ERROR,
-					"SimpleAuthCertificateHook: x509 parsing failed (%s)" % str(e)
-				)
-			module["simpleAuthCertificate"] = base64.encodestring(module["simpleAuthCertificate"])
+			except Exception as exc:
+				ud.debug(ud.ADMIN, ud.ERROR, "SimpleAuthCertificateHook: x509 parsing failed (%s)" % (exc,))
+			module["simpleAuthCertificate"] = base64.b64encode(module["simpleAuthCertificate"].encode('UTF-8')).decode('ASCII')
 
 	def hook_ldap_modlist(self, module, ml=[]):
 		return self.__mapCertificate(module, ml)
