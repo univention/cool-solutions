@@ -39,8 +39,8 @@ joinscript_init
 # source LDAP shell library and register LDAP schema extension:
 . /usr/share/univention-lib/ldap.sh
 
-ucs_registerLDAPExtension "$@" --udm_hook /usr/share/pyshared/univention/admin/hooks.d/WindowsCertificateHook.py || die
-ucs_registerLDAPExtension "$@" --udm_hook /usr/share/pyshared/univention/admin/hooks.d/SimpleAuthCertificateHook.py || die
+ucs_registerLDAPExtension "$@" --udm_hook /usr/lib/python2.7/dist-packages/univention/admin/hooks.d/WindowsCertificateHook.py || die
+ucs_registerLDAPExtension "$@" --udm_hook /usr/lib/python2.7/dist-packages/univention/admin/hooks.d/SimpleAuthCertificateHook.py || die
 
 eval "$(univention-config-registry shell)"
 

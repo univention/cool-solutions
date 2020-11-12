@@ -14,8 +14,8 @@ class WindowsCertificateHook(simpleHook):
 			newml = [mod for mod in ml if mod[0] != "userCertificate;binary"]
 			newml.append((
 				"userCertificate;binary",
-				module.oldattr.get("userCertificate;binary", [""])[0],
-				base64.decodestring(module["windowsCertificate"])))
+				module.oldattr.get("userCertificate;binary", [b""])[0],
+				base64.b64decode(module["windowsCertificate"].encode('UTF-8'))))
 			ml = newml
 		return ml
 
@@ -31,13 +31,9 @@ class WindowsCertificateHook(simpleHook):
 				module.info["certificateIssuerCommonNameWindows"] = issuer.CN
 				module.info["certificateDateNotBeforeWindows"] = str(notBefore)
 				module.info["certificateDateNotAfterWindows"] = str(notAfter)
-			except Exception as e:
-				ud.debug(
-					ud.ADMIN,
-					ud.ERROR,
-					"WindowsCertificateHook: x509 parsing failed (%s)" % str(e)
-				)
-			module["windowsCertificate"] = base64.encodestring(module["windowsCertificate"])
+			except Exception as exc:
+				ud.debug(ud.ADMIN, ud.ERROR, "WindowsCertificateHook: x509 parsing failed (%s)" % (exc,))
+			module["windowsCertificate"] = base64.b64encode(module["windowsCertificate"].encode('UTF-8')).decode('ASCII')
 
 	def hook_ldap_modlist(self, module, ml=[]):
 		return self.__mapCertificate(module, ml)
