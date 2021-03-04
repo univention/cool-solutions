@@ -256,10 +256,10 @@ def get_additional_user_mapping():
     ucr_attributes = ucr.get('ldap/sync/add/user/attribute')
     if not ucr_attributes:
         return
-    
+
     # Get all available UDM Module attributes
     module_attributes = udm.attributes(user_module)
-    
+
     #tempvariable = "univentionFreeAttribute1:CarLicense,univentionFreeAttribute2:coconut"
     for attr in ucr_attributes.split(','):
         keep_attribute = attr.split(':', 2)
@@ -267,11 +267,11 @@ def get_additional_user_mapping():
             continue
 
         # Check if given UDM attribute exists (case-sensitive)
-        if not any(attribute['name'] == keep_attribute[1] for attribute in module_attributes): 
+        if not any(attribute['name'] == keep_attribute[1] for attribute in module_attributes):
             _log_message("W: UDM attribute of additional mapping {} doesn't exist. Ignoring mapping".format(keep_attribute))
             print("W: UDM attribute of additional mapping {} doesn't exist. Ignoring mapping".format(keep_attribute))
             continue
-        
+
         # Add given attribute to mapping
         _translate_user_mapping[keep_attribute[0]] = (keep_attribute[1], univention.admin.mapping.ListToString, )
 
@@ -481,7 +481,7 @@ def _create_user(user_dn, attributes):
         if "univentionUserGroupSyncEnabled" in attributes and attributes["univentionUserGroupSyncEnabled"] == ["TRUE"] and "memberOf" in attributes:
             for source_group_dn in attributes['memberOf']:
                 source_group_cn = ldap.dn.str2dn(source_group_dn)[0][0][1]
-                source_group_attributes = {'cn': [source_group_cn], 
+                source_group_attributes = {'cn': [source_group_cn],
                     'uniqueMember': [ user_dn ],
                     'univentionUserGroupSyncResync': [ 'TRUE' ]}
                 _modify_group(source_group_dn, source_group_attributes)
@@ -673,7 +673,7 @@ def _modify_group(group_dn, attributes):
     if 'univentionUserGroupSyncResync' in attributes:
         attributes['uniqueMember'].extend(group['users'])
         attributes.pop('univentionUserGroupSyncResync')
-    
+
     for (attribute, values, ) in attributes.items():
         (attribute, values, )= _translate_group_update(attribute, values)
         if attribute is not None:
