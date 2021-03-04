@@ -523,12 +523,12 @@ def _create_simpleAuth(simpleauth_dn, attributes):
         simpleauth.create()
         _direct_update(attributes, _translate_simpleauth_mapping_direct, simpleauth_dn)
     except:
-        if lo.get(user_position):
+        if lo.get(simpleauth_position):
             _log_message("E: During SimpleAuth.create: %s" % traceback.format_exc())
             print("E: During SimpleAuth.create: %s" % traceback.format_exc())
         else:
-            _log_message("E: during SimpleAuth.create. The object's position does not exist: {}\n{}".format(user_position, traceback.format_exc()))
-            print("E: during SimpleAuth.create. The object's position does not exist: {}\n{}".format(user_position, traceback.format_exc()))
+            _log_message("E: during SimpleAuth.create. The object's position does not exist: {}\n{}".format(simpleauth_position, traceback.format_exc()))
+            print("E: during SimpleAuth.create. The object's position does not exist: {}\n{}".format(simpleauth_position, traceback.format_exc()))
             if ignore_error_missing_position:
                 _log_ignore_error(ignore_error_missing_position_var)
                 return
@@ -560,12 +560,12 @@ def _create_group(group_dn, attributes):
     try:
         group.create()
     except:
-        if lo.get(user_position):
+        if lo.get(group_position):
             _log_message("E: During Group.create: %s" % traceback.format_exc())
             print("E: During Group.create: %s" % traceback.format_exc())
         else:
-            _log_message("E: during Group.create. The object's position does not exist: {}\n{}".format(user_position, traceback.format_exc()))
-            print("E: during Group.create. The object's position does not exist: {}\n{}".format(user_position, traceback.format_exc()))
+            _log_message("E: during Group.create. The object's position does not exist: {}\n{}".format(group_position, traceback.format_exc()))
+            print("E: during Group.create. The object's position does not exist: {}\n{}".format(group_position, traceback.format_exc()))
             if ignore_error_missing_position:
                 _log_ignore_error(ignore_error_missing_position_var)
                 return
