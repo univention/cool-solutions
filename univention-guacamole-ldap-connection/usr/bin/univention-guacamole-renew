@@ -81,7 +81,7 @@ echo -n "Creating new Guacd container... "
 /usr/bin/docker run \
     --name guacd \
     --restart=always \
-    -d guacamole/guacd:0.9.13-incubating > /dev/null
+    -d guacamole/guacd:1.3.0 > /dev/null
 echo -e "Done!"
 
 
@@ -117,7 +117,7 @@ echo -n "Creating new Guacamole container... "
     -e LDAP_SEARCH_BIND_DN="uid=guacamole-${hostname},cn=users,${ldap_base}" \
     -e LDAP_SEARCH_BIND_PASSWORD="$(cat /etc/guacamole.secret)" \
     -e LDAP_USER_SEARCH_FILTER="${guacamole_ldap_user_searchfilter}" \
-    -d -p "${guacamole_external_port}":8080 guacamole/guacamole:0.9.13-incubating > /dev/null
+    -d -p "${guacamole_external_port}":8080 guacamole/guacamole:1.3.0 > /dev/null
 /usr/bin/docker cp /usr/share/guacamole/guacamole-auth-ldap-* guacamole:/opt/guacamole/ldap/
 /usr/bin/docker cp /usr/share/guacamole/start.sh guacamole:/opt/guacamole/bin
 /usr/bin/docker restart guacamole > /dev/null
