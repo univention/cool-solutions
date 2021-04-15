@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Univention Guacamole UCR Module - apache2 reload
-# Copyright 2017-2018 Univention GmbH
+# Copyright 2017-2021 Univention GmbH
 #
 # http://www.univention.de/
 #
