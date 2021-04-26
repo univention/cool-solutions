@@ -36,6 +36,9 @@ eval "$(ucr shell)"
 . /usr/share/univention-lib/ldap.sh
 joinscript_init
 
+packagename="univention-guacamole"
+packageversion="1.3.0-univention"
+
 echo -e "Registering Guacamole schema... "
 ucs_registerLDAPExtension "$@" \
     --schema /var/lib/univention-ldap/local-schema/guacConfigGroup.schema
@@ -44,6 +47,22 @@ echo -e "Done!"
 echo -e "Registering Guacamole protocol options... "
 ucs_registerLDAPExtension "$@" \
     --udm_syntax /usr/share/pyshared/univention/admin/syntax.d/guacamole_protocol.py
+echo -e "Done!"
+
+echo -e "Registering Guacamole Extension..."
+ucs_registerLDAPExtension "$@" \
+    --packagename $packagename --packageversion $packageversion \
+    --udm_module /usr/share/guacamole/guacamole.py \
+    --icon /usr/share/guacamole/guacamole_50.png \
+    --icon /usr/share/guacamole/guacamole_16.png \
+    --messagecatalog /usr/share/guacamole/de.mo || die
+echo -e "Done!"
+
+echo -e "Creating Guacamole Configuration container... "
+udm container/cn create "$@" --ignore_exists \
+    --position="$ldap_base" \
+    --set name="guacamole" \
+    --set description="Container for Guacamole configuration objects" || die
 echo -e "Done!"
 
 echo -e "Adding extended attribute for Guacamole protocol... "
@@ -90,6 +109,10 @@ udm settings/extended_attribute create "$@" \
     --set translationLongDescription='"de_DE" "Verbindungs-Parameter nach dem Schema foo=bar"' \
     --set tabPosition=2
 echo -e "Done!"
+
+# Terminate UDM server to force module reload
+. /usr/share/univention-lib/base.sh
+stop_udm_cli_server
 
 joinscript_save_current_version
 exit 0

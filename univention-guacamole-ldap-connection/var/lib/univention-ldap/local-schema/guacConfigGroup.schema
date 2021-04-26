@@ -29,12 +29,25 @@ attributetype ( 1.3.6.1.4.1.38971.1.1.2 NAME 'guacConfigParameter'
 	SUBSTR caseIgnoreSubstringsMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
 
+attributetype ( 1.3.6.1.4.1.10176.99998.5000.9992 NAME 'guacamoleActivated'
+	DESC 'Guacamole activated for user'
+	EQUALITY booleanMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.7 )
+
+objectClass ( 1.3.6.1.4.1.10176.99998.5000.9991 NAME 'guacamoleUser'
+	DESC 'Guacamole user'
+	SUP top AUXILIARY
+	MAY ( guacamoleActivated )
+	)
+
 objectClass ( 1.3.6.1.4.1.38971.1.2.1 NAME 'guacConfigGroup'
-	DESC 'Guacamole configuration group'
-	SUP univentionGroup
-	AUXILIARY
+	DESC 'Guacamole configuration'
+	STRUCTURAL
+	MUST ( cn $ guacConfigProtocol )
 	MAY (
-		guacConfigProtocol $
+		description $
+		uniqueMember $
 		guacConfigParameter
 		)
 	)
