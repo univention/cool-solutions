@@ -34,9 +34,10 @@ eval "$(ucr shell ldap/base)"
 
 # Pre-set Guacamole UCR variables
 /usr/sbin/univention-config-registry set \
-    guacamole/config/base/dn?"cn=groups,${ldap_base}" \
+    guacamole/config/base/dn?"cn=guacamole,${ldap_base}" \
     guacamole/external/port?"8080" \
     guacamole/ldap/username/attribute?"uid" \
+    guacamole/ldap/member/attribute?"uniqueMember" \
     guacamole/ldap/user/searchfilter?"(objectClass=*)" \
     guacamole/user/dn?"cn=users,${ldap_base}"
 
@@ -46,6 +47,7 @@ echo -e "\t* guacamole/config/base/dn"
 echo -e "\t* guacamole/external/port"
 echo -e "\t* guacamole/ldap/user/searchfilter"
 echo -e "\t* guacamole/ldap/username/attribute"
+echo -e "\t* guacamole/ldap/member/attribute"
 echo -e "\t* guacamole/user/dn"
 echo -e "---------------"
 
