@@ -10,3 +10,4 @@ Variables: guacamole/config/base/dn
 Variables: guacamole/ldap/username/attribute
 Variables: guacamole/external/port
 Variables: guacamole/ldap/user/searchfilter
+Variables: guacamole/ldap/member/attribute

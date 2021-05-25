@@ -27,3 +27,9 @@ Description[de]=Filter um die Suche nach Benutzern einzuschränken, standardmä�
 Description[en]=Filter to limit search for users, default is (objectClass=*)
 Type=str
 Categories=Guacamole
+
+[guacamole/ldap/member/attribute]
+Description[de]=LDAP-Attribut mit dem die Zugehörigkeit zu einer Guacamole-Konfiguration überprüft wird.
+Description[en]=LDAP attribute with which the affiliation to a Guacamole configuration is checked.
+Type=str
+Categories=Guacamole
