@@ -105,8 +105,8 @@ def parse_certificate(certificate):
 # ldap certificates
 try:
 	lo = univention.uldap.getMachineConnection()
-except Exception, e:
-	print 'ERROR: authentication error: %s' % str(e)
+except Exception as e:
+	print('ERROR: authentication error: %s' % str(e))
 	sys.exit(1)
 
 results = lo.search(filter='(&(userCertificate;binary=*)(uid=*)(cn=*))', attr=['userCertificate;binary', 'uid', 'cn'])
@@ -133,7 +133,7 @@ for path in [certpath, hostCertPath]:
 					certificates[cn_cert] = rec
 
 FMT = '{cn_cert:20}{cn_ldap:20}{uid_ldap:20}{not_after:20}{delta:>23}{serial:>7} {valid:8}'
-print FMT.format(
+print(FMT.format(
 	cn_cert="CN (cert)",
 	cn_ldap="CN (ldap)",
 	uid_ldap="UID",
@@ -141,6 +141,6 @@ print FMT.format(
 	delta="Days until expiration",
 	serial="Serial",
 	valid="Valid",
-)
-for cn, cert in sorted(certificates.iteritems()):
-	print FMT.format(**cert)
+))
+for cn, cert in sorted(certificates.items()):
+	print(FMT.format(**cert))
