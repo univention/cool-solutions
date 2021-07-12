@@ -41,7 +41,7 @@ import os
 import subprocess
 import ldap
 import copy
-import cPickle
+import pickle
 from pipes import quote
 
 FN_CACHE = '/var/cache/univention-usercert/univention-usercert.pickle'
@@ -83,9 +83,9 @@ def handler(dn, new, old, command):
 		listener.setuid(0)
 		try:
 			with open(FN_CACHE, 'w+') as f:
-				os.chmod(FN_CACHE, 0600)
-				cPickle.dump(old, f)
-		except Exception, e:
+				os.chmod(FN_CACHE, 0o600)
+				pickle.dump(old, f)
+		except Exception as e:
 			ud.debug(
 				ud.LISTENER,
 				ud.ERROR,
@@ -98,15 +98,15 @@ def handler(dn, new, old, command):
 		listener.setuid(0)
 		try:
 			with open(FN_CACHE, 'r') as f:
-				old = cPickle.load(f)
-		except Exception, e:
+				old = pickle.load(f)
+		except Exception as e:
 			ud.debug(
 				ud.LISTENER,
 				ud.ERROR,
 				'manageusercertificate: failed to open/read pickle file: %s' % str(e))
 		try:
 			os.remove(FN_CACHE)
-		except Exception, e:
+		except Exception as e:
 			ud.debug(
 				ud.LISTENER,
 				ud.ERROR,
@@ -276,7 +276,7 @@ def saveCert(dn, cfg, ldapObject, delete=False):
 			except ldap.NO_SUCH_OBJECT:
 				# object was probably deleted
 				pass
-		except Exception, e:
+		except Exception as e:
 			ud.debug(
 				ud.LISTENER,
 				ud.ERROR,
@@ -382,7 +382,7 @@ def doit(action, object, dn, cr):
 			modlist = [('univentionRenewCertificate', object['univentionRenewCertificate'][0], 0)]
 			lo.modify(dn, modlist)
 			ud.debug(ud.LISTENER, ud.INFO, 'manageusercertificate: reset univentionRenewCertificate successfully')
-		except Exception, e:
+		except Exception as e:
 			ud.debug(ud.LISTENER, ud.ERROR, 'manageusercertificate: cannot reset univentionRenewCertificate in LDAP (%s): %s' % (dn, str(e)))
 			return 1
 		finally:
