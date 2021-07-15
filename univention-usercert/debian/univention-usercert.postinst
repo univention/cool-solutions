@@ -57,9 +57,7 @@ univention-config-registry set \
 	ssl/usercert/pkcs12/chain?"yes"
 
 if [ "$1" = "configure" ]; then
-	if test -f /etc/init.d/univention-directory-listener; then
-		/etc/init.d/univention-directory-listener crestart || true
-	fi
+	systemctl try-restart univention-directory-listener || true
 fi
 
 call_joinscript 31univention-usercert.inst
