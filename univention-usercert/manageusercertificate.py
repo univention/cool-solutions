@@ -60,7 +60,7 @@ def initialize():
 
 
 def handler(dn, new, old, command):
-	ud.debug(ud.LISTENER, ud.INFO, 'manageusercertificate: handler')
+	ud.debug(ud.LISTENER, ud.INFO, 'manageusercertificate: handler %s' % locals())
 
 	# load config registry
 	cr = univention.config_registry.ConfigRegistry()
@@ -152,6 +152,7 @@ def handler(dn, new, old, command):
 
 # create config config
 def create_config(object, dn, cr):
+	ud.debug(ud.LISTENER, ud.INFO, 'manageusercertificate: create_config %s' % locals())
 	if not os.path.isfile(ssl):
 		ud.debug(ud.LISTENER, ud.ERROR, 'manageusercertificate: could not find %s' % ssl)
 		return 0
@@ -261,6 +262,7 @@ def create_config(object, dn, cr):
 
 
 def saveCert(dn, cfg, ldapObject, delete=False):
+	ud.debug(ud.LISTENER, ud.INFO, 'manageusercertificate: saveCert %s' % locals())
 	if cfg["ldapimport"].lower() in ("true", "yes"):
 		listener.setuid(0)
 		try:
@@ -288,6 +290,7 @@ def saveCert(dn, cfg, ldapObject, delete=False):
 
 # manage certificates
 def doit(action, object, dn, cr):
+	ud.debug(ud.LISTENER, ud.INFO, 'manageusercertificate: doit %s' % locals())
 	cfg = create_config(object, dn, cr)
 
 	if not cfg:
@@ -440,6 +443,7 @@ def doit(action, object, dn, cr):
 
 # run a given command as root and return the exit code
 def run_cmd(command, *expected_retvals):
+	ud.debug(ud.LISTENER, ud.INFO, 'manageusercertificate: run_cmd %s' % locals())
 	cmd = ' '.join(quote(arg) for arg in command)
 	ud.debug(ud.LISTENER, ud.INFO, "manageusercertificate: run %s" % cmd)
 	listener.setuid(0)
