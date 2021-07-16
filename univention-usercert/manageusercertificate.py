@@ -33,7 +33,6 @@ __package__ = ''         # workaround for PEP 366
 
 import listener
 import univention.debug as ud
-import univention.misc
 import univention.config_registry
 import univention.uldap
 
@@ -125,12 +124,12 @@ def handler(dn, new, old, command):
 	if old and not new:
 		retval = doit("revoke", old, dn, cr)
 	# pki option deleted
-	elif old and new and "pkiUser" in old.get('objectClass', []) and "pkiUser" not in new.get("objectClass", []):
+	elif old and new and b"pkiUser" in old.get('objectClass', []) and b"pkiUser" not in new.get("objectClass", []):
 		retval = doit("revoke", new, dn, cr)
 	# object created/changed
 	else:
-		old_cert = old.get('univentionCreateRevokeCertificate', [""])[0] == "1"
-		new_cert = new.get('univentionCreateRevokeCertificate', [""])[0] == "1"
+		old_cert = old.get('univentionCreateRevokeCertificate', [""])[0] == b"1"
+		new_cert = new.get('univentionCreateRevokeCertificate', [""])[0] == b"1"
 
 		# create cert
 		if new_cert and not old_cert:
@@ -141,7 +140,7 @@ def handler(dn, new, old, command):
 				retval = doit("revoke", new, dn, cr)
 
 		# renew cert
-		if new.get('univentionRenewCertificate', [""])[0] == "1":
+		if new.get('univentionRenewCertificate', [""])[0] == b"1":
 			retval = doit("renew", new, dn, cr)
 	# fin
 	if retval:
@@ -165,7 +164,7 @@ def create_config(object, dn, cr):
 	state = cr.get('ssl/usercert/default/state')
 	country = cr.get('ssl/usercert/default/country')
 
-	host = "univentionWindows" in object.get("objectClass", [])
+	host = b"univentionWindows" in object.get("objectClass", [])
 
 	if host:
 		mapping_cn = cr.get('ssl/windowscert/certldapmapping/cn')
@@ -200,21 +199,21 @@ def create_config(object, dn, cr):
 	cn = None
 	uid = None
 	if mapping_cn in object:
-		cn = object[mapping_cn][0]
+		cn = object[mapping_cn][0].decode('UTF-8')
 	if mapping_email in object:
-		email = object[mapping_email][0]
+		email = object[mapping_email][0].decode('UTF-8')
 	if mapping_organizationalunit in object:
-		organizationalunit = object[mapping_organizationalunit][0]
+		organizationalunit = object[mapping_organizationalunit][0].decode('UTF-8')
 	if mapping_organization in object:
-		organization = object[mapping_organization][0]
+		organization = object[mapping_organization][0].decode('UTF-8')
 	if mapping_locality in object:
-		locality = object[mapping_locality][0]
+		locality = object[mapping_locality][0].decode('UTF-8')
 	if mapping_state in object:
-		state = object[mapping_state][0]
+		state = object[mapping_state][0].decode('UTF-8')
 	if 'uid' in object:
-		uid = object['uid'][0]
+		uid = object['uid'][0].decode('UTF-8')
 	if 'univentionCertificateDays' in object:
-		days = object['univentionCertificateDays'][0]
+		days = object['univentionCertificateDays'][0].decode('UTF-8')
 
 	# get extensions file
 	extFile = cr.get('ssl/usercert/extensionsfile', "")
@@ -268,7 +267,7 @@ def saveCert(dn, cfg, ldapObject, delete=False):
 		try:
 			cert = ""
 			if not delete:
-				with open(os.path.join(cfg["certpath"], cfg["uid"], "cert.cer"), "r") as fd:
+				with open(os.path.join(cfg["certpath"], cfg["uid"], "cert.cer"), "rb") as fd:
 					cert = fd.read()
 			lo = univention.uldap.getAdminConnection()
 			oldValue = ldapObject.get('userCertificate;binary', [""])[0]
