@@ -48,6 +48,7 @@ objectClass ( 1.3.6.1.4.1.38971.1.2.1 NAME 'guacConfigGroup'
 	MAY (
 		description $
 		uniqueMember $
+		seeAlso $
 		guacConfigParameter
 		)
 	)

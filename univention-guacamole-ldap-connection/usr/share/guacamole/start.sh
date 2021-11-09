@@ -306,22 +306,17 @@ END
     set_property          "ldap-user-base-dn"       "$LDAP_USER_BASE_DN"
     set_optional_property "ldap-username-attribute" "$LDAP_USERNAME_ATTRIBUTE"
     #set_optional_property "ldap-member-attribute" 	"uniqueMember"
-    set_optional_property "ldap-member-attribute" 	"memberUid"
-    set_optional_property "ldap-member-attribute-type" "uid"
+    set_optional_property "ldap-member-attribute" 	"$LDAP_MEMBER_ATTRIBUTE"
+    set_optional_property "ldap-member-attribute-type" "$LDAP_MEMBER_ATTRIBUTE_TYPE"
     set_optional_property "ldap-group-base-dn"      "$LDAP_GROUP_BASE_DN"
     set_optional_property "ldap-config-base-dn"     "$LDAP_CONFIG_BASE_DN"
     #set_optional_property "ldap-group-name-attribute" "memberOf"
-    set_optional_property "ldap-group-name-attribute" "cn"
-    set_optional_property "ldap-group-search-filter" "(objectClass=*)"
-    set_optional_property "ldap-group-base-dn" "cn=groups,dc=guacamole,dc=test"
+    set_optional_property "ldap-group-name-attribute" "$LDAP_GROUP_NAME_ATTRIBUTE"
+    set_optional_property "ldap-group-search-filter" "$LDAP_GROUP_SEARCH_FILTER"
 
-    set_optional_property     \
-        "ldap-search-bind-dn" \
-        "$LDAP_SEARCH_BIND_DN"
+    set_optional_property "ldap-search-bind-dn" "$LDAP_SEARCH_BIND_DN"
 
-    set_optional_property           \
-        "ldap-search-bind-password" \
-        "$LDAP_SEARCH_BIND_PASSWORD"
+    set_optional_property "ldap-search-bind-password" "$LDAP_SEARCH_BIND_PASSWORD"
     set_optional_property "ldap-user-search-filter" "$LDAP_USER_SEARCH_FILTER"
 
     # Add required .jar files to GUACAMOLE_EXT

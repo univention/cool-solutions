@@ -145,6 +145,8 @@ mapping.register('name', 'cn', None, univention.admin.mapping.ListToString)
 mapping.register('description', 'description', None, univention.admin.mapping.ListToString)
 mapping.register('guacConfigProtocol', 'guacConfigProtocol', None, univention.admin.mapping.ListToString)
 mapping.register('guacConfigParameter', 'guacConfigParameter')
+mapping.register('users', 'uniqueMember')
+mapping.register('nestedGroup', 'seeAlso')
 
 
 class object(univention.admin.handlers.simpleLdap):
@@ -160,78 +162,11 @@ class object(univention.admin.handlers.simpleLdap):
 		univention.admin.handlers.simpleLdap.__init__(self, co, lo, position, dn, superordinate)
 		self.options = []
 
-	def open(self):
- 		univention.admin.handlers.simpleLdap.open(self)
-
-		if not self.exists():
-			return
-
-		self['users'] = []
-		self['nestedGroup'] = []
-		for i in self.oldattr.get('uniqueMember', []):
-			result = self.lo.getAttr(i, 'objectClass')
-			if result:
-				if 'univentionGroup' in result:
-					self['nestedGroup'].append(i)	
-				elif 'univentionHost' in result:
-					continue
-				else:
-					self['users'].append(i)
-				
-		self.save()
-
 	def _ldap_pre_create(self):
 		self.dn = '%s=%s,%s' % (mapping.mapName('name'), mapping.mapValue('name', self.info['name']), self.position.getDn())
 
-	def _ldap_post_create(self):
-		pass
-
-	def _ldap_pre_modify(self):
-		pass
-
-	def _ldap_post_modify(self):
-		pass
-
-	def _ldap_pre_remove(self):
-		pass
-
-	def _ldap_post_remove(self):
-		pass
-
-	def _update_policies(self):
-		pass
-
 	def _ldap_addlist(self):
 		return [('objectClass', ['top', 'guacConfigGroup',])]
-
-
-	def _ldap_modlist(self):
-		ml = univention.admin.handlers.simpleLdap._ldap_modlist(self)
-
-		# calling keepCase is not necessary as the LDAP server already handles the case when removing elements
-		# TODO: removable?
-		def keepCase(members, oldMembers):
-			mapping = dict((x.lower(), x) for x in oldMembers)
-			return [mapping.get(member.lower(), member) for member in members]
-
-		old = DN.set(self.oldinfo.get('users', []) + self.oldinfo.get('hosts', []) + self.oldinfo.get('nestedGroup', []))
-		new = DN.set(self.info.get('users', []) + self.info.get('hosts', []) + self.info.get('nestedGroup', []))
-		if old != new:
-			# create lists for member entries to be added or removed
-			uniqueMemberAdd = list(DN.values(new - old))
-			uniqueMemberRemove = list(DN.values(old - new))
-			old = list(DN.values(old))
-			new = list(DN.values(new))
-
-			# create lists for member entries to be added or removed
-			if uniqueMemberRemove:
-				uniqueMemberRemove = keepCase(uniqueMemberRemove, old)
-				ml.append(('uniqueMember', uniqueMemberRemove, ''))
-
-			if uniqueMemberAdd:
-				ml.append(('uniqueMember', '', uniqueMemberAdd))
-			
-		return ml
 
 
 def lookup(co, lo, filter_s, base='', superordinate=None, scope='sub', unique=0, required=0, timeout=-1, sizelimit=0):
