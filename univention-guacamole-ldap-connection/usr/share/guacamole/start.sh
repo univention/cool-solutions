@@ -305,9 +305,15 @@ END
     set_optional_property "ldap-encryption-method"  "$LDAP_ENCRYPTION_METHOD"
     set_property          "ldap-user-base-dn"       "$LDAP_USER_BASE_DN"
     set_optional_property "ldap-username-attribute" "$LDAP_USERNAME_ATTRIBUTE"
-    set_optional_property "ldap-member-attribute" 	"$LDAP_MEMBER_ATTRIBUTE"
+    #set_optional_property "ldap-member-attribute" 	"uniqueMember"
+    set_optional_property "ldap-member-attribute" 	"memberUid"
+    set_optional_property "ldap-member-attribute-type" "uid"
     set_optional_property "ldap-group-base-dn"      "$LDAP_GROUP_BASE_DN"
     set_optional_property "ldap-config-base-dn"     "$LDAP_CONFIG_BASE_DN"
+    #set_optional_property "ldap-group-name-attribute" "memberOf"
+    set_optional_property "ldap-group-name-attribute" "cn"
+    set_optional_property "ldap-group-search-filter" "(objectClass=*)"
+    set_optional_property "ldap-group-base-dn" "cn=groups,dc=guacamole,dc=test"
 
     set_optional_property     \
         "ldap-search-bind-dn" \

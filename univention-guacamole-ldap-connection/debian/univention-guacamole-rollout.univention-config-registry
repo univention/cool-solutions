@@ -6,8 +6,13 @@ Variables: guacamole/external/port
 Type: script
 Script: univention-guacamole-resync
 Variables: guacamole/user/dn
-Variables: guacamole/config/base/dn
 Variables: guacamole/ldap/username/attribute
+Variables: guacamole/ldap/group/base/dn
+Variables: guacamole/config/base/dn
+Variables: guacamole/ldap/member/attribute
+Variables: guacamole/ldap/member/attribute/type
+Variables: guacamole/ldap/group/name/attribute
 Variables: guacamole/external/port
 Variables: guacamole/ldap/user/searchfilter
-Variables: guacamole/ldap/member/attribute
+Variables: guacamole/ldap/group/searchfilter
+

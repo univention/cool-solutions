@@ -4,6 +4,30 @@ Description[en]=DN of the top-most container where users are saved.
 Type=str
 Categories=Guacamole
 
+[guacamole/ldap/username/attribute]
+Description[de]= DN des Containers welcher das Username Attribute enthält.
+Description[en]= DN of the container containing the username attribute.
+Type=str
+Categories=Guacamole
+
+[guacamole/ldap/member/attribute]
+Description[de]=LDAP-Attribut mit dem die Zugehörigkeit zu einer Guacamole-Konfiguration überprüft wird.
+Description[en]=LDAP attribute with which the affiliation to a Guacamole configuration is checked.
+Type=str
+Categories=Guacamole
+
+[guacamole/ldap/member/attribute/type]
+Description[de]= DN des Containers welcher den Username Attribute Typ enthält.
+Description[en]= DN of the container containing the username attribute type.
+Type=str
+Categories=Guacamole
+
+[guacamole/ldap/group/base/dn]
+Description[de]= DN des obersten Containers in welchem Gruppen gespeichert sind.
+Description[en]= DN of the top-most container where groups are saved.
+Type=str
+Categories=Guacamole
+
 [guacamole/config/base/dn]
 Description[de]=DN des Containers welcher die Guacamole-Konfigurationen an Gruppen enthält.
 Description[en]=DN of the container where groups are located containing Guacamole configurations.
@@ -13,6 +37,12 @@ Categories=Guacamole
 [guacamole/ldap/username/attribute]
 Description[de]=LDAP-Attribut, welches den Benutzernamen enthält, standardmäßig ist dies uid.
 Description[en]=LDAP attribute containing the username, default is uid.
+Type=str
+Categories=Guacamole
+
+[guacamole/ldap/group/name/attribute]
+Description[de]=LDAP-Attribut, welches den Gruppennamen enthält.
+Description[en]=LDAP attribute containing the groupname.
 Type=str
 Categories=Guacamole
 
@@ -28,8 +58,10 @@ Description[en]=Filter to limit search for users, default is (objectClass=*)
 Type=str
 Categories=Guacamole
 
-[guacamole/ldap/member/attribute]
-Description[de]=LDAP-Attribut mit dem die Zugehörigkeit zu einer Guacamole-Konfiguration überprüft wird.
-Description[en]=LDAP attribute with which the affiliation to a Guacamole configuration is checked.
+[guacamole/ldap/group/searchfilter]
+Description[de]=Filter um die Suche nach Gruppen einzuschränken, standardmäßig ist dies (objectClass=*).
+Description[en]=Filter to limit search for groups, default is (objectClass=*)
 Type=str
 Categories=Guacamole
+
+
