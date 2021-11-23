@@ -38,8 +38,12 @@ eval "$(ucr shell ldap/base)"
     guacamole/external/port?"8080" \
     guacamole/ldap/username/attribute?"uid" \
     guacamole/ldap/member/attribute?"uniqueMember" \
-    guacamole/ldap/user/searchfilter?"(objectClass=*)" \
-    guacamole/user/dn?"cn=users,${ldap_base}"
+    guacamole/ldap/user/searchfilter?"(objectClass=posixAccount)" \
+    guacamole/user/dn?"cn=users,${ldap_base}" \
+	guacamole/ldap/group-base-dn?"cn=groups,${ldap_base}" \
+	guacamole/ldap/group-name-attribute?"memberOf" \
+	guacamole/ldap/group-searchfilter?"(objectClass=posixGroup)" \
+	guacamole/ldap/member/attribute-type?"dn"
 
 echo -e "---------------"
 echo -e "Please check the following UCR variables for correct values before running the script 'univention-guacamole-renew':"
@@ -49,6 +53,10 @@ echo -e "\t* guacamole/ldap/user/searchfilter"
 echo -e "\t* guacamole/ldap/username/attribute"
 echo -e "\t* guacamole/ldap/member/attribute"
 echo -e "\t* guacamole/user/dn"
+echo -e "\t* guacamole/ldap/group-base-dn"
+echo -e "\t* guacamole/ldap/group-name-attribute"
+echo -e "\t* guacamole/ldap/group-searchfilter"
+echo -e "\t* guacamole/ldap/member/attribute-type"
 echo -e "---------------"
 
 set +e

@@ -38,7 +38,11 @@ then
     guacamole/ldap/user/searchfilter \
     guacamole/ldap/username/attribute \
     guacamole/user/dn \
-    guacamole/ldap/member/attribute
+    guacamole/ldap/member/attribute \
+	guacamole/ldap/group-base-dn \
+	guacamole/ldap/group-name-attribute \
+	guacamole/ldap/group-searchfilter \
+	guacamole/ldap/member/attribute-type
 
     . /usr/share/univention-lib/all.sh
     call_unjoinscript 02univention_guacamole_searchuser-uninstall.uinst || true

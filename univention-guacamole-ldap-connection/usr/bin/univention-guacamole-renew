@@ -65,6 +65,30 @@ else
     echo -e "LDAP_USER_SEARCH_FILTER cannot be set, check UCR variables 'guacamole/ldap/user/searchfilter'!"
     exit 1
 fi
+if [ "${guacamole_ldap_group_base_dn}" ]; then
+	echo -e "LDAP_GROUP_BASE_DN can be set"
+else
+	echo -e "LDAP_GROUP_BASE_DN cannot be set, check UCR variables 'guacamole/ldap/group-base-dn'!"
+	exit 1
+fi
+if [ "${guacamole_ldap_group_name_attribute}" ]; then
+	echo -e "LDAP_GROUP_NAME_ATTRIBUTE can be set"
+else
+	echo -e "LDAP_GROUP_NAME_ATTRIBUTE cannot be set, check variables 'guacamole/ldap/group-name-attribute'!"
+	exit 1
+fi
+if [ "${guacamole_ldap_group_searchfilter}" ]; then
+	echo -e "LDAP_GROUP_SEARCH_FILTER can be set"
+else
+	echo -e "LDAP_GROUP_SEARCH_FILTER cannot be set, check variables 'guacamole/ldap/group-searchfilter'!"
+	exit 1
+fi
+if [ "${guacamole_ldap_member_attribute_type}" ]; then
+	echo -e "LDAP_MEMBER_ATTRIBUTE_TYPE can be set"
+else
+	echo -e "LDAP_MEMBER_ATTRIBUTE_TYPE cannot be set, check variables 'guacamole/ldap/member/attribute-type'!"
+	exit 1
+fi
 if [ -e /etc/guacamole.secret ]; then
     echo "Search user can be used"
 else
