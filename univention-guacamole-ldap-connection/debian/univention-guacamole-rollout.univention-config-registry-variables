@@ -5,26 +5,26 @@ Type=str
 Categories=Guacamole
 
 [guacamole/ldap/username-attribute]
-Description[de]= DN des Containers welcher das Username Attribute enthält.
-Description[en]= DN of the container containing the username attribute.
+Description[de]= Das Attribut, das den Benutzernamen in allen Guacamole-Benutzerobjekten im LDAP-Verzeichnis enthält. Standardmäßig ist dies "uid".
+Description[en]= The attribute that contains the username within all Guacamole user objects in the LDAP directory. By default, this will be "uid".
 Type=str
 Categories=Guacamole
 
 [guacamole/ldap/member-attribute]
-Description[de]=LDAP-Attribut mit dem die Zugehörigkeit zu einer Guacamole-Konfiguration überprüft wird.
-Description[en]=LDAP attribute with which the affiliation to a Guacamole configuration is checked.
+Description[de]=Das Attribut, das die Mitglieder in allen Gruppenobjekten im LDAP-Verzeichnis enthält. Standardmäßig ist dies "member".
+Description[en]=The attribute which contains the members within all group objects in the LDAP directory. By default, this will be "member".
 Type=str
 Categories=Guacamole
 
 [guacamole/ldap/member-attribute-type]
-Description[de]= DN des Containers welcher den Username Attribute Typ enthält.
-Description[en]= DN of the container containing the username attribute type.
+Description[de]=Geben Sie an, ob das in "ldap-member-attribute" definierte Attribut (in der Regel "member") ein Gruppenmitglied durch den DN oder durch den Nutzercode identifiziert. Mögliche Werte: "dn" (der Standardwert, wenn nicht angegeben) oder "uid".
+Description[en]=Specify whether the attribute defined in "ldap-member-attribute" (Usually "member") identifies a group member by DN or by usercode. Possible values: "dn" (the default, if not specified) or "uid".
 Type=str
 Categories=Guacamole
 
 [guacamole/ldap/group-base-dn]
-Description[de]= DN des obersten Containers in welchem Gruppen gespeichert sind.
-Description[en]= DN of the top-most container where groups are saved.
+Description[de]=Die Basis des DN für alle Benutzergruppen, die von anderen Erweiterungen verwendet werden können, um Berechtigungen zu definieren, oder die in Guacamole-Konfigurationen mit dem Standardattribut seeAlso referenziert werden können.
+Description[en]=The base of the DN for all user groups that may be used by other extensions to define permissions or that may referenced within Guacamole configurations using the standard seeAlso attribute.
 Type=str
 Categories=Guacamole
 
@@ -35,14 +35,14 @@ Type=str
 Categories=Guacamole
 
 [guacamole/ldap/username/attribute]
-Description[de]=LDAP-Attribut, welches den Benutzernamen enthält, standardmäßig ist dies uid.
-Description[en]=LDAP attribute containing the username, default is uid.
+Description[de]=Das Attribut, das den Benutzernamen in allen Guacamole-Benutzerobjekten im LDAP-Verzeichnis enthält. Standardmäßig ist dies "uid". 
+Description[en]=The attribute that contains the username within all Guacamole user objects in the LDAP directory. By default, this will be "uid". 
 Type=str
 Categories=Guacamole
 
 [guacamole/ldap/group-name-attribute]
-Description[de]=LDAP-Attribut, welches den Gruppennamen enthält.
-Description[en]=LDAP attribute containing the groupname.
+Description[de]=Das Attribut das den eindeutigen Namen der Benutzergruppen im LDAP-Verzeichnis definiert. Standardmäßig ist dies "cn". 
+Description[en]=The attribute that defines the unique name of the user groups in the LDAP directory. By default this is "cn". 
 Type=str
 Categories=Guacamole
 
@@ -58,7 +58,7 @@ Description[en]=Filter to limit search for users, default is (objectClass=*)
 Type=str
 Categories=Guacamole
 
-[guacamole/ldap-group-searchfilter]
+[guacamole/ldap/group-searchfilter]
 Description[de]=Filter um die Suche nach Gruppen einzuschränken, standardmäßig ist dies (objectClass=*).
 Description[en]=Filter to limit search for groups, default is (objectClass=*)
 Type=str
