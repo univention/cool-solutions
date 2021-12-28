@@ -45,6 +45,8 @@ import univention.admin.uldap
 import univention.config_registry
 import traceback
 
+from univention.admin.uexceptions import valueInvalidSyntax
+
 DB_PATH = '/var/lib/univention-user-group-sync'
 DB_ENTRY_FORMAT = re.compile('^[0-9]{11}[.][0-9]{7}$')
 LOCK_FD = open(sys.argv[0], 'rb')
@@ -273,7 +275,8 @@ def get_additional_user_mapping():
             continue
 
         # Add given attribute to mapping
-        _translate_user_mapping[keep_attribute[0]] = (keep_attribute[1], univention.admin.mapping.ListToString, )
+        mapping_func = univention.admin.handlers.users.user.mapping._map[keep_attribute[1]][1]
+        _translate_user_mapping[keep_attribute[0]] = (keep_attribute[1], mapping_func, )
 
 def get_ucr_process_files_limit():
     '''Apply custom PROCESS_FILES_LIMIT from UCR'''
@@ -469,13 +472,17 @@ def _create_user(user_dn, attributes):
         _ldap_decoding_error("User", "Create", user_position)
     user = user_module.object(co, lo, user_position_obj)
     user.open()
+    direct_mapping = set(_translate_user_mapping_direct.copy())
     for (attribute, values, ) in attributes.items():
         (attribute, values, ) = _translate_user(attribute, values)
         if attribute is not None:
-            user[attribute] = values
+            try:
+                user[attribute] = values
+            except valueInvalidSyntax:
+                direct_mapping.add(attribute)
     try:
         user.create()
-        _direct_update(attributes, _translate_user_mapping_direct, user_dn)
+        _direct_update(attributes, direct_mapping, user_dn)
 
         # Re-Add restored user to his previous groups
         if "univentionUserGroupSyncEnabled" in attributes and attributes["univentionUserGroupSyncEnabled"] == ["TRUE"] and "memberOf" in attributes:
@@ -613,13 +620,17 @@ def _modify_user(user_dn, attributes):
 
     _log_message("Modify User: %r" % user_dn)
     changes = False
+    direct_mapping = set(_translate_user_mapping_direct.copy())
     user.open()
     for (attribute, values, ) in attributes.items():
         (attribute, values, )= _translate_user_update(attribute, values)
         if attribute is not None:
             if user[attribute] != values:
-                user[attribute] = values
-                changes = True
+                try:
+                    user[attribute] = values
+                    changes = True
+                except valueInvalidSyntax:
+                    direct_mapping.add(attribute)
     if changes:
         try:
             user.modify()
@@ -627,7 +638,7 @@ def _modify_user(user_dn, attributes):
             _log_message('E: During User.modify_changes: %s' % traceback.format_exc())
             print 'E: During User.modify_changes: %s' % traceback.format_exc()
             exit()
-    _direct_update(attributes, _translate_user_mapping_direct, user_dn)
+    _direct_update(attributes, direct_mapping, user_dn)
 
 ## Modify a Simple Authentication Account
 def _modify_simpleAuth(simpleauth_dn, attributes):
