@@ -1,3 +1,9 @@
+univention-user-group-sync-dest (2.1.1-1) unstable; urgency=medium
+
+  * Allow syncing of binary attributes #32995
+
+ -- Jan-Luca Kiok <kiok@univention.de>  Tue, 18 Jan 2022 09:13:16 +0100
+
 univention-user-group-sync-dest (2.1.0-26) unstable; urgency=medium
 
   * Fix group handling
