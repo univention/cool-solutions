@@ -1,3 +1,9 @@
+univention-user-group-sync-dest (2.1.0-26) unstable; urgency=medium
+
+  * Fix group handling
+
+ -- Jan-Luca Kiok <kiok@univention.de>  Tue, 20 Jul 2021 14:50:27 +0200
+
 univention-user-group-sync-dest (2.1.0-25) unstable; urgency=medium
 
   * Re-Add user to his previous groups, if sync is reenabled #26041
