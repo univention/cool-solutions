@@ -29,10 +29,10 @@
 # <http://www.gnu.org/licenses/>.
 import subprocess
 
-def preinst(baseConfig, changes):
+def preinst(ucr, changes):
     pass
 
-def postinst(baseConfig, changes):
+def postinst(ucr, changes):
     # Altered login restrictions of munin web-server, reload apache after postinst of '/etc/munin/apache24.conf'
     command = ['systemctl', 'reload', 'apache2']
     return subprocess.call(command, shell=False)

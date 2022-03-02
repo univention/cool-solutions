@@ -32,7 +32,7 @@
 
 #DEBHELPER#
 
-# unset baseconfig settings
+# unset config regitry settings
 univention-config-registry unset \
 	munin/server/authenticate \
 	auth/munin/restrict \

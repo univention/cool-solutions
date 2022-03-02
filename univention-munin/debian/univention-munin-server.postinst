@@ -32,7 +32,7 @@
 
 #DEBHELPER#
 
-# set default baseconfig settings
+# set default config registry settings
 univention-config-registry set \
 	munin/server/authenticate?'yes' \
 	auth/munin/restrict?'yes' \
