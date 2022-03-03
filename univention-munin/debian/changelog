@@ -1,6 +1,6 @@
 univention-munin (1.2.0-6) unstable; urgency=low
 
-  * feat: Migrate Python 2 to 3
+  * feat: Migrate Python 2 to 3 Issue: #33242
 
  -- Tim Breidenbach <breidenbach@univention.de>  Fri, 31 Dec 2021 16:47:48 +0100
 
