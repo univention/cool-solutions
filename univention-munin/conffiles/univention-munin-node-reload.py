@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Univention Munin UCR Module - munin-node reload
-# Copyright 2018 Univention GmbH
+# Copyright 2018-2022 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -29,10 +29,10 @@
 # <http://www.gnu.org/licenses/>.
 import subprocess
 
-def preinst(baseConfig, changes):
+def preinst(ucr, changes):
     pass
 
-def postinst(baseConfig, changes):
+def postinst(ucr, changes):
     # Altered allowed hosts of munin-node, restart munin-node after postinst of '/etc/munin/munin-node.conf'
     command = ['systemctl', 'reload-or-restart', 'munin-node']
     return subprocess.call(command, shell=False)
