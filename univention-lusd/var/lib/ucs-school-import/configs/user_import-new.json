@@ -1,0 +1,39 @@
+{
+    "csv": {
+        "mapping": {
+            "Nachname": "lastname",
+            "Vorname": "firstname",
+            "Geburtsdatum": "birthday",
+            "Email": "PasswordRecoveryEmail",
+            "Klassennamen": "school_classes",
+            "Jahrgang": "ksanKlassenstufe"
+        },
+        "allowed_missing_columns": ["birthday", "PasswordRecoveryEmail", "ksanKlassenstufe", "school_classes", "Jahrgang", "Klassennamen"]
+    },
+    "scheme": {
+        "record_uid": "<firstname><lastname><birthday><:umlauts,lower>",
+        "username": {
+            "default": "<firstname:umlauts,lower>[0:5].<lastname:umlauts,lower>[0:5][COUNTER2]"
+        }
+    },
+    "deletion_grace_period": {
+        "deactivation": 0,
+        "deletion": 10
+    },
+    "output": {
+        "new_user_passwords": "/var/lib/ucs-school-import/summary/%Y/%m/user_import_passwords_%Y-%m-%d_%H:%M:%S.csv",
+        "user_import_summary": "/var/lib/ucs-school-import/summary/%Y/%m/user_import_summary_%Y-%m-%d_%H:%M:%S.csv"
+    },
+  "normalize": {
+    "firstname": false,
+    "lastname": false
+    },
+    "password_length": 8,
+    "tolerate_errors": 0,
+  "include": {
+    "by_role": {
+      "student": "/var/lib/ucs-school-import/configs/student.json",
+      "staff": "/var/lib/ucs-school-import/configs/staff.json"
+    }
+  }
+}

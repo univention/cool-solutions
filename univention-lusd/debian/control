@@ -1,0 +1,23 @@
+Source: univention-lusd
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Build-Depends: debhelper (>= 9),
+ python-all,
+ python-support (>= 0.90),
+ ucslint,
+Standards-Version: 3.8.2
+Homepage: http://www.univention.de/
+
+Package: univention-lusd
+Architecture: all
+Depends: ${shlibs:Depends},
+ ${misc:Depends},
+ ${python:Depends},
+ ucs-school-import,
+ python-univention,
+ python-xmltodict,
+ python-gnupg,
+Description: Custom UCS@school import reader class for an import of XML encrypted data (LUSD).
+ Custom UCS@school import reader class. Reads a PGP encrypted XML file
+ instead of a CSV file.

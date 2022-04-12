@@ -1,0 +1,16 @@
+graph TD
+    lusd --> encxml --> reader --> xml --> importer --> ucs
+    key --> reader
+    config --> importer
+
+    lusd[(Lehrer- und<br>Schülerdatenbank Hessen)]
+    reader(univention-xml-reader)
+    key(GPG-Schlüssel)
+    importer("UCS#64;School<br>Importer")
+    ucs[("UCS (#64;School)")]
+    encxml>Verschlüsselte<br>XML-Datei]
+    xml>Entschlüsselte<br>XML-Datei]
+    config(Import-Konfig)
+
+    style reader fill:#f00,stroke:#333,stroke-width:4px
+

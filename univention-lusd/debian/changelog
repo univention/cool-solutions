@@ -1,0 +1,5 @@
+univention-lusd (1.0.0-1) unstable; urgency=medium
+
+  * Initial release (Closes: #nnnn)
+
+ -- Tim Breidenbach <packages@univention.de>  Mon, 11 Apr 2022 11:41:47 +0200

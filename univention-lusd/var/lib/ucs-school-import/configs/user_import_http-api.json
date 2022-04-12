@@ -1,0 +1,5 @@
+{
+	"classes":{
+		"reader": "ucsschool.importer.reader.http_api_csv_reader.HttpApiCsvReader"
+	}
+}
