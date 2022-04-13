@@ -5,11 +5,12 @@ Cool Solution for the Lehrer- und Schülerdatenbank Import Hessen.
 Slavisa - Ansprechpartner, QA, Doku
 Tim - Entwicklung, System Engineering
 
-### Goals
+### Deliverables
 - installable Debian-Package for UCS-5
 - Documentation as article on help.univention.de
-  - prerequisites, export, import
-- Documentation as PDF for mappings
+  - prerequisites, export, installation, import
+- Documentation for mappings
+- When finished deliver to Sales (Ben)
 
 ### Projektinfo
 - Ableitung aus Planio Task #33567
