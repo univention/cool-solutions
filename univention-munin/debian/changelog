@@ -1,3 +1,9 @@
+univention-munin (1.2.0-9) unstable; urgency=low
+
+  * fixed ConfigRegistry in conffiles Issue: #33242
+
+ -- Tim Breidenbach <breidenbach@univention.de>  Wed, 04 May 2022 09:33:07 +0200
+
 univention-munin (1.2.0-8) unstable; urgency=low
 
   * version bump Issue: #33242
