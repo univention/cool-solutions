@@ -1,6 +1,6 @@
-## Package: univention-ksan-xml-reader
+## Package: univention-lusd-xml-reader
 
-Custom UCS@school import reader class for customer Stadt Kassel. Reads a PGP encrypted XML file instead of a CSV file.
+Custom UCS@school import reader class for federal province Hessen. Reads a PGP encrypted XML file instead of a CSV file.
 
 <img src="flowchart.png" alt="flowchart" style="width:70%;"/>
 
@@ -10,9 +10,9 @@ Activate in JSON configuration with:
 ```json
 {
 	"classes": {
-		"reader": "ksan.xml_reader.XmlReader"
+		"reader": "lusd.xml_reader.XmlReader"
 	},
-	"configuration_checks": ["defaults", "ksan_checks", "ksan_class_level_checks", "ksan_fix_no_class_in_input_data_checks"],
+	"configuration_checks": ["defaults", "lusd_checks", "lusd_class_level_checks", "lusd_fix_no_class_in_input_data_checks"],
 	"gpghome": "/var/lib/...",
 	"passphrase_file": "/etc/...",
 	"lusd_normalize_classes": true,
@@ -22,7 +22,7 @@ Activate in JSON configuration with:
 		"class_name": "KeineKlasse"
 	},
 	"class_level": {
-		"key": "ksanKlassenstufe",
+		"key": "lusdKlassenstufe",
 		"mapping": {
 			"^0(?P<class_level>[0-9])/[1,2]$": "$class_level",
 			"^10/[1,2]$": "10",
@@ -41,12 +41,12 @@ The content of the file with the passphrase is expected to be a base64 encoded s
 
 python-gnupg in version <0.4 doesn't support GnuPG 2.1. Unfortunately that is the combination in UCS 4.3 and 4.4. To import the keys in a format the python-gnupg can handle, use gpg version `1`:
 ```bash
-mkdir /root/importgnupg
+mkdir /root/importgnupg # set this directory in JSON configuration file as `gpghome: "/root/importgnugpg"`
 chmod 700 /root/importgnupg
-gpg1 --homedir /root/importgnupg --import schoolimporttool.key
+gpg1 --homedir /root/importgnupg --import schoolimporttool.key #store the private key in file schoolimporttool.key and . You should be asked about the passphrase.
 ```
 
-Details about the required GPG keys can be found here: <https://hutten.knut.univention.de/dokuwiki/kunden:lusd>
+
 
 ### Normalization
 Different users of this reader have different requirements for normalization. Currently the following methods exist:
@@ -85,7 +85,7 @@ Some users don't have a class name at all. A customer request a dummy class name
 - key_name identifies the name of the key containing the class name in the input data
 - class_name defines the name of the dummy class to be added to the user object before import
 
-The `class_level` configuration tree determines the interpretation of data in the `ksanKlassenstufe` column/item:
+The `class_level` configuration tree determines the interpretation of data in the `lusdKlassenstufe` column/item:
 
 * `key` is the name of the item (in XML) or the column (in CSV). It must exist as value in `csv:mapping`.
 * `mapping` is used to modify data found in the item.

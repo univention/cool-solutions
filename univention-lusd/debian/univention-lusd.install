@@ -1,4 +1,4 @@
-README.md usr/share/doc/univention-ksan-xml-reader/
-modules/ksan usr/share/pyshared
+README.md usr/share/doc/univention-lusd-xml-reader/
+modules/lusd usr/share/pyshared
 usr/ /
 var/ /

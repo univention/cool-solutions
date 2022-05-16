@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 # Copyright (C) 2022 Univention GmbH
 # 
 # http://www.univention.de/
@@ -26,7 +28,10 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-def handler(configRegistry, changes):
-	old = changes.get("univention-lusd/key", "")
-	new = configRegistry.get("univention-lusd/key", "")
-	...
+
+#
+# alle json-Dateien auf Validität überprüfen.
+# Benötigt das Paket jsonlint
+#                 Thorsten Strusch 2020-03-10
+
+(for i in /var/lib/ucs-school-import/configs/*json; do echo -n "$(basename $i) :"; python -m json.tool $i; done)|column -t -s:
