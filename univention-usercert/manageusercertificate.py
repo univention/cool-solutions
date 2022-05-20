@@ -192,7 +192,7 @@ def create_config(object, dn, cr):
 		days = cr.get('ssl/usercert/days', "1825")
 		scripts = cr.get('ssl/usercert/scripts', "yes")
 		ldapimport = cr.get('ssl/usercert/ldapimport', "yes")
-		sslbase = cr.get('ssl/userscert/sslbase', "/etc/univention/ssl")
+		sslbase = cr.get('ssl/usercert/sslbase', "/etc/univention/ssl")
 		ca = cr.get('ssl/usercert/ca', "ucsCA")
 
 	# get user ldap info
