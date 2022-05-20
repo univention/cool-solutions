@@ -1,5 +1,7 @@
 #!/bin/sh
 #
+## joinscript api: bindpwdfile
+#
 # Univention usercert
 #  join script
 #
