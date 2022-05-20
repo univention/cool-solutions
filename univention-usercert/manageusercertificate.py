@@ -4,7 +4,7 @@
 # Univention SSL
 #  listener ssl module for user certificates
 #
-# Copyright 2004-2018 Univention GmbH
+# Copyright 2004-2022 Univention GmbH
 #
 # http://www.univention.de/
 #

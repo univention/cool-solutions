@@ -1,3 +1,9 @@
+univention-usercert (4.2.0-7) unstable; urgency=low
+
+  * Fix typo userscert to usercert (sslbase was not updated correctly)
+
+ -- Tim Breidenbach <breidenbach@univention.de>  Fri, 20 May 2022 20:02:21 +0200
+
 univention-usercert (4.2.0-6) unstable; urgency=low
 
   * Set certificates and location to read-only
