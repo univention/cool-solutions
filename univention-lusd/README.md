@@ -24,3 +24,10 @@ Tim - Entwicklung, System Engineering
 ### Testsysteme UCS 5.0
 - primary, 10.200.51.200
 - replika UCS@school, 10.200.51.201
+
+
+# Things to do first
+- pip3 install python-gnupg
+- ext_config_deb_on_role
+- create_ou transfer
+- TODO: xhtml only py2

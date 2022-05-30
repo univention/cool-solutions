@@ -49,11 +49,14 @@ except ImportError:
 class DecryptionError(UcsSchoolImportFatalError):
     pass
 
+
 class EmptyXMLLevel(UcsSchoolImportFatalError):
     pass
 
+
 class RegularExpressionMissingNamedGroup(UcsSchoolImportError):
     pass
+
 
 class RegularExpressionNoMatch(UcsSchoolImportError):
     pass
@@ -81,10 +84,10 @@ class XmlReader(HttpApiCsvReader):
             self.lusd_normalize_classes = self.config['lusd_normalize_classes']
         else:
             self.lusd_normalize_classes = False
-        if 'lusd_lkkassel_normalize_classes' in self.config:
-            self.lusd_lkkassel_normalize_classes = self.config['lusd_lkkassel_normalize_classes']
+        if 'lusd_normalize_classes' in self.config:
+            self.lusd_normalize_classes = self.config['lusd_normalize_classes']
         else:
-            self.lusd_lkkassel_normalize_classes = False
+            self.lusd_normalize_classes = False
         if 'lusd_fix_no_class_in_input_data' in self.config:
                 self.lusd_fix_no_class_in_input_data = True
                 self.lusd_fix_no_class_in_input_data_key_name = self.config['lusd_fix_no_class_in_input_data']['key_name']
@@ -140,7 +143,7 @@ class XmlReader(HttpApiCsvReader):
             if self.lusd_normalize_classes:
                 lusd_class_regex = '.*\/'
                 csv_value = re.sub(lusd_class_regex, '', csv_value)
-            if self.lusd_lkkassel_normalize_classes:
+            if self.lusd_normalize_classes:
                 csv_value = re.sub('^-\/', '', csv_value)
                 csv_value = re.sub('\/', '-', csv_value)
             # remove umlauts

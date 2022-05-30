@@ -10,13 +10,13 @@ Activate in JSON configuration with:
 ```json
 {
 	"classes": {
-		"reader": "lusd.xml_reader.XmlReader"
+		"reader": "lusd_xml_reader.XmlReader"
 	},
 	"configuration_checks": ["defaults", "lusd_checks", "lusd_class_level_checks", "lusd_fix_no_class_in_input_data_checks"],
 	"gpghome": "/var/lib/...",
 	"passphrase_file": "/etc/...",
 	"lusd_normalize_classes": true,
-	"lusd_lkkassel_normalize_classes": true,
+	"lusd_normalize_classes": true,
 	"lusd_fix_no_class_in_input_data": {
 		"key_name": "Klassenname",
 		"class_name": "KeineKlasse"
@@ -43,7 +43,7 @@ python-gnupg in version <0.4 doesn't support GnuPG 2.1. Unfortunately that is th
 ```bash
 mkdir /root/importgnupg # set this directory in JSON configuration file as `gpghome: "/root/importgnugpg"`
 chmod 700 /root/importgnupg
-gpg1 --homedir /root/importgnupg --import schoolimporttool.key #store the private key in file schoolimporttool.key and . You should be asked about the passphrase.
+gpg --homedir /root/importgnupg --import schoolimporttool.key #store the private key in file schoolimporttool.key and . You should be asked about the passphrase.
 ```
 
 
@@ -67,7 +67,7 @@ The customer can't change these values and requested an extension to make the im
 #### Class names: remove beginning '-/' and convert all other '/' to '-'
 Requested by 39720
 
-"lusd_lkkassel_normalize_classes" does the following:
+"lusd_normalize_classes" does the following:
 
 -/1a/test/klasse -> 1a-test-klasse
 

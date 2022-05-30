@@ -28,7 +28,7 @@
 # <http://www.gnu.org/licenses/>.
 
 """
-Configuration checks for lusd_fix_no_class_in_input_data in LK Kassel import.
+Configuration checks for lusd_fix_no_class_in_input_data in LK LUSD import.
 """
 
 import re
@@ -36,7 +36,7 @@ from ucsschool.importer.exceptions import InitialisationError
 from ucsschool.importer.utils.configuration_checks import ConfigurationChecks
 
 
-class KasselImportFixNoClassInInputDataConfigurationChecks(ConfigurationChecks):
+class LUSDImportFixNoClassInInputDataConfigurationChecks(ConfigurationChecks):
 	def test_00_required_config_keys(self):
 		if not self.config.get('lusd_fix_no_class_in_input_data'):
 			raise InitialisationError('No lusd_fix_no_class_in_input_data was specified in the configuration.')

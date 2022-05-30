@@ -28,7 +28,7 @@
 # <http://www.gnu.org/licenses/>.
 
 """
-Configuration checks for gpg settings in LK Kassel import.
+Configuration checks for gpg settings in LUSD import.
 """
 
 import re
@@ -38,8 +38,8 @@ from ucsschool.importer.exceptions import InitialisationError
 from ucsschool.importer.utils.configuration_checks import ConfigurationChecks
 
 
-class KasselImportGPGConfigurationChecks(ConfigurationChecks):
-	gpg_import_cmdline = 'gpg1 --homedir {gpghome!r} --import <keyfile>'
+class LUSDImportGPGConfigurationChecks(ConfigurationChecks):
+	gpg_import_cmdline = 'gpg --homedir {gpghome!r} --import <keyfile>'
 
 	def test_00_required_config_keys(self):
 		for attr in ('gpghome', 'passphrase_file'):

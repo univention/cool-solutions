@@ -28,7 +28,7 @@
 # <http://www.gnu.org/licenses/>.
 
 """
-Configuration checks for class_level in LK Kassel import.
+Configuration checks for class_level in LK LUSD import.
 """
 
 import re
@@ -36,7 +36,7 @@ from ucsschool.importer.exceptions import InitialisationError
 from ucsschool.importer.utils.configuration_checks import ConfigurationChecks
 
 
-class KasselImportClassLevelConfigurationChecks(ConfigurationChecks):
+class LUSDImportClassLevelConfigurationChecks(ConfigurationChecks):
 	def test_00_required_config_keys(self):
 		for attr in ('class_level'):
 			if not self.config.get(attr):

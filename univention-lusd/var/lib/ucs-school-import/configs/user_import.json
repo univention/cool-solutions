@@ -11,9 +11,9 @@
             "Geburtsdatum": "birthday",
             "Email": "PasswordRecoveryEmail",
             "Klassennamen": "school_classes",
-            "Jahrgang": "ksanKlassenstufe"
+            "Jahrgang": "lusdKlassenstufe"
         },
-        "allowed_missing_columns": ["birthday", "PasswordRecoveryEmail", "ksanKlassenstufe", "school_classes", "Jahrgang", "Klassennamen"]
+        "allowed_missing_columns": ["birthday", "PasswordRecoveryEmail", "lusdKlassenstufe", "school_classes", "Jahrgang", "Klassennamen"]
     },
     "scheme": {
         "record_uid": "<firstname><lastname><birthday><:umlauts,lower>",
@@ -22,7 +22,7 @@
         },
         "email": "<username>@<maildomain>"
     },
-    "maildomain": "edu.ksan.de",
+    "maildomain": "ucs.example",
     "deletion_grace_period": {
         "deactivation": 0,
         "deletion": 90
@@ -39,9 +39,9 @@
     "tolerate_errors": 0,
   "include": {
     "by_role": {
-      "student": "/var/lib/ucs-school-import/configs/student.json",
-      "student": "/var/lib/ucs-school-import/configs/teacher.json",
-      "student": "/var/lib/ucs-school-import/configs/staff.json"
+      "student": "/var/lib/ucs-school-import/configs/student-example.json",
+      "teacher": "/var/lib/ucs-school-import/configs/teacher-example.json",
+      "staff": "/var/lib/ucs-school-import/configs/staff-example.json"
     }
   }
 }

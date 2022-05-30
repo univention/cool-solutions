@@ -5,23 +5,23 @@
 			"Nachname": "lastname",
 			"Vorname": "firstname",
 			"Klassenname": "school_classes",
-			"StufeSemesterBezeichnung": "ksanKlassenstufe"
+			"StufeSemesterBezeichnung": "lusdKlassenstufe"
 		}
 	},
 	"classes":{
-		"reader": "ksan.xml_reader.XmlReader"
+		"reader": "lusd_xml_reader.XmlReader"
 	},
-	"configuration_checks": ["defaults", "ksan_checks", "ksan_class_level_checks", "ksan_fix_no_class_in_input_data_checks"],
+	"configuration_checks": ["defaults", "lusd_checks", "lusd_class_level_checks", "lusd_fix_no_class_in_input_data_checks"],
 	"gpghome": "/root/importgnupg",
 	"passphrase_file": "/root/schoolimporttool.secret",
 	"lusd_normalize_classes": true,
-	"lusd_lkkassel_normalize_classes": true,
+	"lusd_normalize_classes": true,
 	"lusd_fix_no_class_in_input_data": {
 		"key_name": "Klassenname",
 		"class_name": "KeineKlasse"
 	},
 	"class_level": {
-		"key": "ksanKlassenstufe",
+		"key": "lusdKlassenstufe",
 		"mapping": {
 			"^0(?P<class_level>[0-9])/[1,2]$": "$class_level",
 			"^1(?P<class_level>[0-5])/[1,2]$": "1$class_level",
