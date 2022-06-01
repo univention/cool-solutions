@@ -16,4 +16,4 @@ Package: univention-guacamole-rollout
 Architecture: all
 Depends: univention-guacamole-schema, ${misc:Depends}
 Description: Guacamole installation wrapper
- Guacamole installer and Apache2 configuration
+ Guacamole installer and Apache2configuration

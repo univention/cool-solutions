@@ -4,7 +4,7 @@
 # Univention Guacamole
 #  univention admin guacamole module
 #
-# Copyright 2021 Univention GmbH
+# Copyright 2021-2022 Univention GmbH
 #
 # http://www.univention.de/
 #
