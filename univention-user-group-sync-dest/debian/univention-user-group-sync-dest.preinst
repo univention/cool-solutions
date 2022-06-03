@@ -2,7 +2,7 @@
 #
 # user group sync dest
 #
-# Copyright 2018-2019 Univention GmbH
+# Copyright 2018-2022 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -29,13 +29,11 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-set -e
-
 case "$1" in
     install)
         password_local=$(pwgen -Bv 40 1)
 
-        echo $password_local > /etc/univention-user-group-sync-dest.secret
+        echo "$password_local" > /etc/univention-user-group-sync-dest.secret
         chmod 600 /etc/univention-user-group-sync-dest.secret
 
         # Generate local service user
@@ -44,7 +42,7 @@ case "$1" in
 
         # TODO: Already exists
         udm users/user create --position "cn=users,$ldap_base" --ignore_exists \
-        --option posix --set username=ucs-sync --set lastname=ucs-sync --set password=$password_local \
+        --option posix --set username=ucs-sync --set lastname=ucs-sync --set password="$password_local" \
         --set uidNumber=342 --set primaryGroup="cn=Domain Users,cn=groups,$ldap_base" \
         --set unixhome=/var/lib/univention-user-group-sync
         ucr set auth/sshd/user/ucs-sync=yes

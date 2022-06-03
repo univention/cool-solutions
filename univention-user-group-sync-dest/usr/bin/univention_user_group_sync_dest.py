@@ -4,7 +4,7 @@
 """user group sync dest
     data import program"""
 #
-# Copyright 2013-2019 Univention GmbH
+# Copyright 2013-2022 Univention GmbH
 #
 # http://www.univention.de/
 #
