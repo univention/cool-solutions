@@ -1,3 +1,9 @@
+univention-user-group-sync-dest (2.1.1-2) unstable; urgency=medium
+
+  * Start UCS5 packaging
+
+ -- Oliver Friedrich <friedrich@univention.de>  Fri, 03 Jun 2022 12:44:07 +0200
+
 univention-user-group-sync-dest (2.1.1-1) unstable; urgency=medium
 
   * Allow syncing of binary attributes #32995
