@@ -118,7 +118,7 @@ def getPosition(user_dn):
     '''Maps the given DN to the LDAP by replacing the base, if defined'''
     position = re.sub(r'(dc\=.*$)', base, user_dn)
     position = re.sub(r'^(uid|cn)=[^,]+,', '', position)
-    #Apply OU mapping if configured
+    # Apply OU mapping if configured
     sourceBase = re.search(r'(dc\=.*$)', user_dn).group()
     sourceBase = re.sub(r'^dc\=', '', sourceBase)
     sourceBase = re.sub(r',dc\=', '.', sourceBase)
@@ -135,9 +135,9 @@ def _process_file(path, filename):
 
 def _uid_to_dn(uid):
     '''Return the would be DN for <uid>'''
-    #Get dn via getPosition
-    explode_dn=ldap.dn.str2dn(uid)
-    userid='='.join((explode_dn[0][0][0], explode_dn[0][0][1]))
+    # Get dn via getPosition
+    explode_dn = ldap.dn.str2dn(uid)
+    userid = '='.join((explode_dn[0][0][0], explode_dn[0][0][1]))
     return '{},{}'.format(userid, getPosition(uid))
 
 def _uids_to_dns(uids):
@@ -443,7 +443,7 @@ def _direct_update(attributes, mapping, user_dn):
         lo.modify(user.position.getDn(), modlist)
     except:
         _log_message("E: During User.modify_ldap: %s" % traceback.format_exc())
-        print "E: During User.modify_ldap: %s" % traceback.format_exc()
+        print("E: During User.modify_ldap: {traceback.format_exc()}")
         exit()
 
 
@@ -489,8 +489,8 @@ def _create_user(user_dn, attributes):
             for source_group_dn in attributes['memberOf']:
                 source_group_cn = ldap.dn.str2dn(source_group_dn)[0][0][1]
                 source_group_attributes = {'cn': [source_group_cn],
-                    'uniqueMember': [ user_dn ],
-                    'univentionUserGroupSyncResync': [ 'TRUE' ]}
+                    'uniqueMember': [user_dn],
+                    'univentionUserGroupSyncResync': ['TRUE']}
                 _modify_group(source_group_dn, source_group_attributes)
     except:
         if lo.get(user_position):
@@ -504,7 +504,7 @@ def _create_user(user_dn, attributes):
                 return
         exit()
 
-## Create a new Simple Authentication Account, if it doesn't exist yet
+# Create a new Simple Authentication Account, if it doesn't exist yet
 def _create_simpleAuth(simpleauth_dn, attributes):
     '''Creates a new Simple Authentication Account based on the given attributes'''
     existing_simpleauth = _simpleauth_exists(attributes)
@@ -523,7 +523,7 @@ def _create_simpleAuth(simpleauth_dn, attributes):
     simpleauth = simpleauth_module.object(co, lo, simpleauth_position_obj)
     simpleauth.open()
     for (attribute, values, ) in attributes.items():
-        (attribute, values, )= _translate_simpleauth(attribute, values)
+        (attribute, values, ) = _translate_simpleauth(attribute, values)
         if attribute is not None:
             simpleauth[attribute] = values
     try:
@@ -541,7 +541,7 @@ def _create_simpleAuth(simpleauth_dn, attributes):
                 return
         exit()
 
-## Create a new Group, if it doesn't exist yet
+# Create a new Group, if it doesn't exist yet
 def _create_group(group_dn, attributes):
     '''Creates a new group based on the given attributes'''
     existing_group = _group_exists(attributes)
@@ -561,7 +561,7 @@ def _create_group(group_dn, attributes):
     group = group_module.object(co, lo, group_position_obj)
     group.open()
     for (attribute, values, ) in attributes.items():
-        (attribute, values, )= _translate_group(attribute, values)
+        (attribute, values, ) = _translate_group(attribute, values)
         if attribute is not None:
             group[attribute] = values
     try:
@@ -580,7 +580,7 @@ def _create_group(group_dn, attributes):
 
 
 # DELETE
-## Delete the given User / Simple Authentication Account
+# Delete the given User / Simple Authentication Account
 def _delete_user(user_dn):
     '''Delete the given User'''
     _log_message("Delete User: %r" % user_dn)
@@ -594,7 +594,7 @@ def _delete_user(user_dn):
                 _log_message("E: During User.remove: %s" % traceback.format_exc())
                 print("E: During User.remove: %s" % traceback.format_exc())
 
-## Delete the given Group
+# Delete the given Group
 def _delete_group(group_dn):
     '''Delete the given Group'''
     _log_message("Delete Group: %r\n" % group_dn)
@@ -609,7 +609,7 @@ def _delete_group(group_dn):
 
 
 # MODIFY
-## Modify an User
+# Modify a User
 def _modify_user(user_dn, attributes):
     '''Updates existing user based on changes'''
     user = _user_exists(attributes)
@@ -623,7 +623,7 @@ def _modify_user(user_dn, attributes):
     direct_mapping = set(_translate_user_mapping_direct.copy())
     user.open()
     for (attribute, values, ) in attributes.items():
-        (attribute, values, )= _translate_user_update(attribute, values)
+        (attribute, values, ) = _translate_user_update(attribute, values)
         if attribute is not None:
             if user[attribute] != values:
                 try:
@@ -636,11 +636,11 @@ def _modify_user(user_dn, attributes):
             user.modify()
         except:
             _log_message('E: During User.modify_changes: %s' % traceback.format_exc())
-            print 'E: During User.modify_changes: %s' % traceback.format_exc()
+            print('E: During User.modify_changes: {traceback.format_exc()}')
             exit()
     _direct_update(attributes, direct_mapping, user_dn)
 
-## Modify a Simple Authentication Account
+# Modify a Simple Authentication Account
 def _modify_simpleAuth(simpleauth_dn, attributes):
     '''Updates existing simple authentication account based on changes'''
     simpleauth = _simpleauth_exists(attributes)
@@ -653,7 +653,7 @@ def _modify_simpleAuth(simpleauth_dn, attributes):
     changes = False
     simpleauth.open()
     for (attribute, values, ) in attributes.items():
-        (attribute, values, )= _translate_simpleauth_update(attribute, values)
+        (attribute, values, ) = _translate_simpleauth_update(attribute, values)
         if attribute is not None:
             if simpleauth[attribute] != values:
                 simpleauth[attribute] = values
@@ -663,11 +663,11 @@ def _modify_simpleAuth(simpleauth_dn, attributes):
             simpleauth.modify()
         except:
             _log_message('E: During SimpleAuth.modify_changes: %s' % traceback.format_exc())
-            print 'E: During SimpleAuth.modify_changes: %s' % traceback.format_exc()
+            print("E: During SimpleAuth.modify_changes: {traceback.format_exc()}")
             exit()
     _direct_update(attributes, _translate_simpleauth_mapping_direct, simpleauth_dn)
 
-## Modify a Group
+# Modify a Group
 def _modify_group(group_dn, attributes):
     '''Updates existing Group based on changes'''
     group = _group_exists(attributes)
@@ -686,7 +686,7 @@ def _modify_group(group_dn, attributes):
         attributes.pop('univentionUserGroupSyncResync')
 
     for (attribute, values, ) in attributes.items():
-        (attribute, values, )= _translate_group_update(attribute, values)
+        (attribute, values, ) = _translate_group_update(attribute, values)
         if attribute is not None:
             if group[attribute] != values:
                 group[attribute] = values
@@ -696,7 +696,7 @@ def _modify_group(group_dn, attributes):
             group.modify()
         except:
             _log_message("E: During Group.modify_changes: %s" % traceback.format_exc())
-            print "E: During Group.modify_changes: %s" % traceback.format_exc()
+            print("E: During Group.modify_changes: {traceback.format_exc()}")
             exit()
 
 
@@ -709,7 +709,7 @@ def _import(data):
     if attributes and not certificatesEnabled:
         attributes = _unset_certificates(attributes)
 
-    if command == 'a' or command == 'n': # Add
+    if command == 'a' or command == 'n':  # Add
         if _is_user(object_dn, attributes):
             return _create_user(object_dn, attributes)
         if _is_simpleauth(object_dn, attributes):
@@ -718,7 +718,7 @@ def _import(data):
             return _create_group(object_dn, attributes)
         _log_message("E: Unknown object type (a/n): %r" % object_dn)
         return
-    elif command == 'd': # Delete
+    elif command == 'd':  # Delete
         if _is_user(object_dn, attributes):
             return _delete_user(object_dn)
         if _is_simpleauth(object_dn, attributes):
@@ -727,7 +727,7 @@ def _import(data):
             return _delete_group(object_dn)
         _log_message("E: Unknown object type (d): %r" % object_dn)
         return
-    elif command == 'r': # Rename / Move
+    elif command == 'r':  # Rename / Move
         # Two-Phrased operation. Next command will be an Add for this object at a new location
         if _is_user(object_dn, attributes):
             return _delete_user(object_dn)
@@ -737,7 +737,7 @@ def _import(data):
             return _delete_group(object_dn)
         _log_message("E: Unknown object type (r): %r" % object_dn)
         return
-    elif command == 'm': # Modify
+    elif command == 'm':  # Modify
         if _is_user(object_dn, attributes):
             return _modify_user(object_dn, attributes)
         if _is_simpleauth(object_dn, attributes):
@@ -764,6 +764,7 @@ def main():
     get_ignore_error()
     _process_files()
     _release_lock()
+
 
 if __name__ == "__main__":
     main()
