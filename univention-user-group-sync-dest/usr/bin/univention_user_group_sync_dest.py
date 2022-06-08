@@ -136,7 +136,7 @@ def _process_file(path, filename):
 def _uid_to_dn(uid):
     '''Return the would be DN for <uid>'''
     # Get dn via getPosition
-    return ldap.dn.dn2str([ldap.dn.str2dn(uid)[0]] + ldap.dn.str2dn(getPosition(uid))
+    return ldap.dn.dn2str([ldap.dn.str2dn(uid)[0]]) + ldap.dn.str2dn(getPosition(uid))
 
 def _uids_to_dns(uids):
     '''xxx'''
@@ -217,7 +217,7 @@ def _unset_certificates(attributes):
     attributes.pop('univentionCertificateDays', None)
     attributes.pop('univentionCreateRevokeCertificate', None)
     attributes.pop('univentionRenewCertificate', None)
-    if attributes.has_key('objectClass') and 'univentionManageCertificates' in attributes['objectClass']:
+    if 'objectClass' in attributes and 'univentionManageCertificates' in attributes['objectClass']:
         attributes['objectClass'].remove('univentionManageCertificates')
     return attributes
 
@@ -441,7 +441,7 @@ def _direct_update(attributes, mapping, user_dn):
         lo.modify(user.position.getDn(), modlist)
     except:
         _log_message("E: During User.modify_ldap: %s" % traceback.format_exc())
-        print("E: During User.modify_ldap: {traceback.format_exc()}")
+        print(f"E: During User.modify_ldap: {traceback.format_exc()}")
         exit()
 
 
@@ -662,7 +662,7 @@ def _modify_simpleAuth(simpleauth_dn, attributes):
             simpleauth.modify()
         except:
             _log_message('E: During SimpleAuth.modify_changes: %s' % traceback.format_exc())
-            print("E: During SimpleAuth.modify_changes: {traceback.format_exc()}")
+            print(f"E: During SimpleAuth.modify_changes: {traceback.format_exc()}")
             exit()
     _direct_update(attributes, _translate_simpleauth_mapping_direct, simpleauth_dn)
 
@@ -695,7 +695,7 @@ def _modify_group(group_dn, attributes):
             group.modify()
         except:
             _log_message("E: During Group.modify_changes: %s" % traceback.format_exc())
-            print("E: During Group.modify_changes: {traceback.format_exc()}")
+            print(f"E: During Group.modify_changes: {traceback.format_exc()}")
             exit()
 
 
