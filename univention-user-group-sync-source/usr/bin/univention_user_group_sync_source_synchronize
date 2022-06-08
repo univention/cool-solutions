@@ -3,7 +3,7 @@
 # user_group_sync_source
 # Synchronize all existing ldap-diff files to the target host set in the ldap/sync/destination variable
 #
-# Copyright 2018-2019 Univention GmbH
+# Copyright 2018-2022 Univention GmbH
 #
 # http://www.univention.de/
 #

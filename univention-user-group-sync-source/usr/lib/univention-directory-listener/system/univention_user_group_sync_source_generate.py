@@ -4,7 +4,7 @@
 """user group sync source
     listener module"""
 #
-# Copyright 2013-2019 Univention GmbH
+# Copyright 2013-2022 Univention GmbH
 #
 # http://www.univention.de/
 #
