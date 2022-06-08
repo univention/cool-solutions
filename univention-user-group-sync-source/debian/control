@@ -2,9 +2,10 @@ Source: univention-user-group-sync-source
 Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
-Build-Depends: ucslint
-Build-Depends-Indep: debhelper (>= 7.0.50~),
- univention-config-dev
+Build-Depends:
+ debhelper (= 12),
+ ucslint,
+ univention-config-dev,
 Standards-Version: 3.5.5
 
 Package: univention-user-group-sync-source
