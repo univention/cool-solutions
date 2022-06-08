@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 """user group sync dest
@@ -31,7 +31,7 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-import cPickle as pickle
+import pickle
 import fcntl
 import ldap
 import os
@@ -77,7 +77,7 @@ def _log_message(message):
 # Temporarily generate a random password
 def _random_password(_):
     '''Generates and returns a random password'''
-    return os.urandom(33).encode('base64').strip()
+    return base64.b64encode(os.urandom(33)).decode('ASCII')
 
 # Encode the given Certificate base64 for UDM
 def _encode_certificate(certificate):
@@ -85,9 +85,9 @@ def _encode_certificate(certificate):
     if not certificate:
         return None
     elif isinstance(certificate, (list,)):
-        return certificate[0].encode('base64').strip()
+        return base64.b64encode(certificate[0]).decode('ASCII')
     else:
-        return certificate.encode('base64').strip()
+        return base64.b64encode(certificate).decode('ASCII')
 
 def _decode_filename(filename):
     """Decode a unix timestamp formatted into a filename via %019.7f
@@ -136,9 +136,7 @@ def _process_file(path, filename):
 def _uid_to_dn(uid):
     '''Return the would be DN for <uid>'''
     # Get dn via getPosition
-    explode_dn = ldap.dn.str2dn(uid)
-    userid = '='.join((explode_dn[0][0][0], explode_dn[0][0][1]))
-    return '{},{}'.format(userid, getPosition(uid))
+    return ldap.dn.dn2str([ldap.dn.str2dn(uid)[0]] + ldap.dn.str2dn(getPosition(uid))
 
 def _uids_to_dns(uids):
     '''xxx'''
@@ -154,7 +152,7 @@ def _process_files():
 def _is_user(object_dn, attributes):
     '''Return whether the object is a user'''
     if not attributes:
-        if object_dn.startswith('uid='):
+        if ldap.dn.str2dn(object_dn)[0][0][0] == 'uid':
             return True
         return False
     elif 'users/user' in attributes.get('univentionObjectType', []):
@@ -485,12 +483,13 @@ def _create_user(user_dn, attributes):
         _direct_update(attributes, direct_mapping, user_dn)
 
         # Re-Add restored user to his previous groups
-        if "univentionUserGroupSyncEnabled" in attributes and attributes["univentionUserGroupSyncEnabled"] == ["TRUE"] and "memberOf" in attributes:
+        if "univentionUserGroupSyncEnabled" in attributes and attributes["univentionUserGroupSyncEnabled"] == [b"TRUE"] and "memberOf" in attributes:
             for source_group_dn in attributes['memberOf']:
-                source_group_cn = ldap.dn.str2dn(source_group_dn)[0][0][1]
-                source_group_attributes = {'cn': [source_group_cn],
-                    'uniqueMember': [user_dn],
-                    'univentionUserGroupSyncResync': ['TRUE']}
+                source_group_cn = ldap.dn.str2dn(source_group_dn.decode('UTF-8'))[0][0][1]
+                source_group_attributes = {
+                    'cn': [source_group_cn.encode('UTF-8')],
+                    'uniqueMember': [user_dn.encode('UTF-8')],
+                    'univentionUserGroupSyncResync': [b'TRUE']}
                 _modify_group(source_group_dn, source_group_attributes)
     except:
         if lo.get(user_position):
@@ -584,7 +583,7 @@ def _create_group(group_dn, attributes):
 def _delete_user(user_dn):
     '''Delete the given User'''
     _log_message("Delete User: %r" % user_dn)
-    uid = user_dn.split(',', 1)[0].split('=', 1)[1]
+    uid = ldap.dn.dn2str(user_dn)[0][0][1]
     search_filter = univention.admin.filter.expression('uid', uid)
     for lists in user_module.lookup(co, lo, search_filter), simpleauth_module.lookup(co, lo, search_filter):
         for existing_user in lists:
@@ -598,8 +597,8 @@ def _delete_user(user_dn):
 def _delete_group(group_dn):
     '''Delete the given Group'''
     _log_message("Delete Group: %r\n" % group_dn)
-    cn = group_dn.split(',', 1)[0].split('=', 1)[1]
-    search_filter = univention.admin.filter.expression('cn', cn)
+    cn = ldap.dn.dn2str(group_dn)[0][0][1]
+    search_filter = ldap.filter.filter_format('cn=%s', [cn])
     for existing_group in group_module.lookup(co, lo, search_filter):
         try:
             existing_group.remove()
