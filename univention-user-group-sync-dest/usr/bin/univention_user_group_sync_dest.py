@@ -635,7 +635,7 @@ def _modify_user(user_dn, attributes):
             user.modify()
         except:
             _log_message('E: During User.modify_changes: %s' % traceback.format_exc())
-            print('E: During User.modify_changes: {traceback.format_exc()}')
+            print(f'E: During User.modify_changes: {traceback.format_exc()}')
             exit()
     _direct_update(attributes, direct_mapping, user_dn)
 
