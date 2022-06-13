@@ -67,7 +67,7 @@ filter = """\
     (!(uidNumber=0))
     (!(uid=ucs-sync))
     (!(uid=*$))
-)""".translate(None, '\t\n\r ')
+)""".translate(str.maketrans('', '', '\t\n\r '))
 filter_custom = ""
 
 #TODO: getpwnam seems to fail at least sometimes
