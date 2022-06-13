@@ -1,3 +1,9 @@
+univention-user-group-sync-source (2.1.0-29) unstable; urgency=medium
+
+  * Start Python3 Syntax for univention_user_group_sync_source_generate.py 
+
+ -- Julian Helms <helms@univention.de>  Mon, 13 Jun 2022 11:47:03 +0200
+
 univention-user-group-sync-source (2.1.0-28) unstable; urgency=medium
 
   * Start UCS5 packaging 

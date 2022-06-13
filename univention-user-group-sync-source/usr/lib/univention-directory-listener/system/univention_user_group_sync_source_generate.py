@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 """user group sync source
@@ -32,7 +32,7 @@
 # <http://www.gnu.org/licenses/>.
 
 __package__ = '' # workaround for PEP 366, pylint: disable-msg=W0622
-import cPickle as pickle
+import pickle
 import pwd
 import grp
 import os
@@ -133,7 +133,7 @@ def _write_file(filename, path, data):
     final_file.close()
     listener.setuid(0)
     os.chown(filename, owning_user_number, owning_group_number)
-    os.chmod(filename, 0640)
+    os.chmod(filename, 0o640)
     listener.unsetuid()
 
 #
@@ -260,7 +260,7 @@ def _get_prefix():
 
 # Get custom attributes to be modified
 def _get_prefix_custom_attrs(attrs, object_type):
-    custom_attrs = ucr.get('ldap/sync/prefix/{}/attributes'.format(object_type))
+    custom_attrs = ucr.get(f'ldap/sync/prefix/{object_type}/attributes')
     if custom_attrs:
         for attr in custom_attrs.split(','):
             if not attr in attrs:
@@ -297,11 +297,11 @@ def _add_prefix_to_attrs(name, new_attributes, prefix, attrs, object_dn):
         if attr in new_attributes:
             prefixed_new_attributes[attr] = []
             for attr_item in new_attributes[attr]:
-                prefixed_attr_item = re.sub(name, '{}{}'.format(prefix, name), attr_item)
+                prefixed_attr_item = re.sub(name, f'{prefix}{name}', attr_item)
                 prefixed_new_attributes[attr].append(prefixed_attr_item)
             new_attributes[attr] = prefixed_new_attributes[attr]
         else:
-            _log_warn("Couldn't remove non-existent attribute '{}' from object with DN {}".format(attr, object_dn))
+            _log_warn(f"Couldn't remove non-existent attribute '{attr}' from object with DN {object_dn}")
     return new_attributes
 
 # Apply prefix to DNs different from the one of the edited object itself
@@ -314,11 +314,11 @@ def _add_prefix_to_dns(new_attributes, prefix, attrs, get_regex, remove_regex, n
                 other_dn_id_match = re.match(get_regex, attr_item)
                 if other_dn_id_match:
                     other_dn_id = re.sub(remove_regex, '', other_dn_id_match.group())
-                    other_dn_with_prefix = re.sub(get_regex, '{}={}{}'.format(name_attr, prefix, other_dn_id), attr_item)
+                    other_dn_with_prefix = re.sub(get_regex, f'{name_attr}={prefix}{other_dn_id}', attr_item)
                     prefixed_new_attributes[attr].append(other_dn_with_prefix)
             new_attributes[attr] = prefixed_new_attributes[attr]
         else:
-            _log_warn("Couldn't remove non-existent attribute '{}' from object with DN {}".format(attr, object_dn))
+            _log_warn(f"Couldn't remove non-existent attribute '{attr}' from object with DN {object_dn}")
     return new_attributes
 
 # Just apply prefix to given attributes without any regex matching
@@ -332,7 +332,7 @@ def _just_add_prefix(new_attributes, prefix, attrs, object_dn):
                 prefixed_new_attributes[attr].append(prefixed_attr_item)
             new_attributes[attr] = prefixed_new_attributes[attr]
         else:
-            _log_warn("Couldn't remove non-existent attribute '{}' from object with DN {}".format(attr, object_dn))
+            _log_warn(f"Couldn't remove non-existent attribute '{attr}' from object with DN {object_dn}")
     return new_attributes
 
 # Apply prefix to user
@@ -365,7 +365,7 @@ def _add_prefix_to_group(object_dn_with_prefix, new_attributes, prefix, command,
 #
 def handler(object_dn, new_attributes, old_attributes, command):
     """called for each uniqueMember-change on a group"""
-    _log_debug("handler for: %r %r" % (object_dn, command, ))
+    _log_debug(f"handler for: {object_dn} {command}")
     _wait_until_after(handler.last_time)
     timestamp = time.time()
     filename = _format_filename(timestamp)
