@@ -44,7 +44,7 @@ import univention.admin.objects
 import univention.admin.uldap
 import univention.config_registry
 import traceback
-
+from typing import Dict, List
 from univention.admin.uexceptions import valueInvalidSyntax
 
 DB_PATH = '/var/lib/univention-user-group-sync'
@@ -149,40 +149,40 @@ def _process_files():
         _process_file(path, filename)
 
 # Check, if the given DN is a User
-def _is_user(object_dn, attributes):
+def _is_user(object_dn: str, attributes: Dict[str, List[bytes]]) -> bool:
     '''Return whether the object is a user'''
     if not attributes:
         if ldap.dn.str2dn(object_dn)[0][0][0] == 'uid':
             return True
         return False
-    elif 'users/user' in attributes.get('univentionObjectType', []):
+    elif b'users/user' in attributes.get('univentionObjectType', []):
         return True
     return user_module.identify(object_dn, attributes)
 
 # Check, if the given DN is a Simple Authentication Account
-def _is_simpleauth(object_dn, attributes):
+def _is_simpleauth(object_dn: str, attributes: Dict[str, List[bytes]]) -> bool:
     '''Return whether the object is a user'''
     if not attributes:
         if object_dn.startswith('uid='):
             return True
         return False
-    elif 'users/ldap' in attributes.get('univentionObjectType', []):
+    elif b'users/ldap' in attributes.get('univentionObjectType', []):
         return True
     return simpleauth_module.identify(object_dn, attributes)
 
 # Check, if the given DN is a Group
-def _is_group(object_dn, attributes):
+def _is_group(object_dn: str, attributes: Dict[str, List[bytes]]) -> bool:
     '''Return whether the object is a group'''
     if not attributes:
         if object_dn.startswith('cn='):
             return True
         return False
-    elif 'groups/group' in attributes.get('univentionObjectType', []):
+    elif b'groups/group' in attributes.get('univentionObjectType', []):
         return True
     return group_module.identify(object_dn, attributes)
 
 # Check, if the given User UID exists in our LDAP
-def _user_exists(attributes):
+def _user_exists(attributes: Dict[str, List[bytes]]):
     '''Check, if the given User UID exists in our LDAP'''
     search_filter = univention.admin.filter.expression('uid', attributes['uid'][0])
     result = user_module.lookup(co, lo, search_filter)
@@ -192,7 +192,7 @@ def _user_exists(attributes):
         return result[0]
 
 # Check, if the given Simple Authentication Account UID exists in our LDAP
-def _simpleauth_exists(attributes):
+def _simpleauth_exists(attributes: Dict[str, List[bytes]]):
     '''Check, if the given User UID exists in our LDAP'''
     search_filter = univention.admin.filter.expression('uid', attributes['uid'][0])
     result = simpleauth_module.lookup(co, lo, search_filter)
@@ -202,7 +202,7 @@ def _simpleauth_exists(attributes):
         return result[0]
 
 # Check, if the given Group CN exists in our LDAP
-def _group_exists(attributes):
+def _group_exists(attributes: Dict[str, List[bytes]]):
     '''Check, if the given Group CN exists in our LDAP'''
     search_filter = univention.admin.filter.expression('cn', attributes['cn'][0])
     result = group_module.lookup(co, lo, search_filter)
@@ -453,7 +453,7 @@ def _ldap_decoding_error(object_type, operation, object_dn):
     exit()
 
 ## Create a non-existent User
-def _create_user(user_dn, attributes):
+def _create_user(user_dn: str, attributes: Dict[str, List[bytes]]) -> None:
     '''Creates a new user based on the given attributes'''
     existing_user = _user_exists(attributes)
     if existing_user is not None:
