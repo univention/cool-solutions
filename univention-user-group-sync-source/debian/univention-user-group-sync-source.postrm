@@ -35,7 +35,7 @@ case "$1" in
 #        ;;
 
     remove|purge)
-        /usr/lib/univention-uninstall/99univention-user-group-sync-source_remove-ucs-sync.uinst
+        /usr/lib/univention-uninstall/01univention-user-group-sync-source_remove-ucs-sync.uinst
         # Restart the directory listener to unload our module
 	echo "Restarting univention-directory-listener Service"
 	systemctl restart univention-directory-listener.service

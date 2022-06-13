@@ -1,3 +1,9 @@
+univention-user-group-sync-source (2.1.0-31) unstable; urgency=medium
+
+  * Fix Postrm 
+
+ -- Julian Helms <helms@univention.de>  Mon, 13 Jun 2022 18:28:55 +0200
+
 univention-user-group-sync-source (2.1.0-30) unstable; urgency=medium
 
   * Fix .translate Method for Python3 
