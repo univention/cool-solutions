@@ -1,2 +1,1 @@
-modules/lusd/lusd_xml_reader.py lusd_ucsschool.importer.reader
-modules/lusd/xmltodict.py ucsschool.lib
+lusd_xml_reader.py
