@@ -136,7 +136,7 @@ def _process_file(path, filename):
 def _uid_to_dn(uid):
     '''Return the would be DN for <uid>'''
     # Get dn via getPosition
-    return ldap.dn.dn2str([ldap.dn.str2dn(uid)[0]]) + ldap.dn.str2dn(getPosition(uid))
+    return ldap.dn.dn2str([ldap.dn.str2dn(uid)[0]] + ldap.dn.str2dn(getPosition(uid)))
 
 def _uids_to_dns(uids):
     '''xxx'''
