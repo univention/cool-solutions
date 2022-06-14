@@ -44,7 +44,7 @@ import univention.admin.objects
 import univention.admin.uldap
 import univention.config_registry
 import traceback
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from univention.admin.uexceptions import valueInvalidSyntax
 
 DB_PATH = '/var/lib/univention-user-group-sync'
@@ -102,7 +102,7 @@ def _find_files():
             path = os.path.join(DB_PATH, filename)
             yield (timestamp, path, filename, )
 
-def _decode_data(raw):
+def _decode_data(raw: bytes):
     '''Decode the given pickle data'''
     return pickle.loads(raw)
 
@@ -127,7 +127,7 @@ def getPosition(user_dn):
         position = re.sub(r'({})'.format(base), 'ou={},{}'.format(ou, base), position)
     return position
 
-def _process_file(path, filename):
+def _process_file(path):
     '''Read, import and delete a pickle file'''
     data = _read_file(path)
     _import(data)
@@ -146,7 +146,7 @@ def _uids_to_dns(uids):
 def _process_files():
     '''Process the first <_process_files.limit> files'''
     for (_, path, filename, ) in sorted(_find_files())[:PROCESS_FILES_LIMIT]:
-        _process_file(path, filename)
+        _process_file(path)
 
 # Check, if the given DN is a User
 def _is_user(object_dn: str, attributes: Dict[str, List[bytes]]) -> bool:
@@ -184,7 +184,7 @@ def _is_group(object_dn: str, attributes: Dict[str, List[bytes]]) -> bool:
 # Check, if the given User UID exists in our LDAP
 def _user_exists(attributes: Dict[str, List[bytes]]):
     '''Check, if the given User UID exists in our LDAP'''
-    search_filter = univention.admin.filter.expression('uid', attributes['uid'][0])
+    search_filter = univention.admin.filter.expression('uid', attributes['uid'][0].decode())
     result = user_module.lookup(co, lo, search_filter)
     if not result:
         return None
@@ -194,7 +194,7 @@ def _user_exists(attributes: Dict[str, List[bytes]]):
 # Check, if the given Simple Authentication Account UID exists in our LDAP
 def _simpleauth_exists(attributes: Dict[str, List[bytes]]):
     '''Check, if the given User UID exists in our LDAP'''
-    search_filter = univention.admin.filter.expression('uid', attributes['uid'][0])
+    search_filter = univention.admin.filter.expression('uid', attributes['uid'][0].decode())
     result = simpleauth_module.lookup(co, lo, search_filter)
     if not result:
         return None
@@ -204,7 +204,7 @@ def _simpleauth_exists(attributes: Dict[str, List[bytes]]):
 # Check, if the given Group CN exists in our LDAP
 def _group_exists(attributes: Dict[str, List[bytes]]):
     '''Check, if the given Group CN exists in our LDAP'''
-    search_filter = univention.admin.filter.expression('cn', attributes['cn'][0])
+    search_filter = univention.admin.filter.expression('cn', attributes['cn'][0].decode())
     result = group_module.lookup(co, lo, search_filter)
     if not result:
         return None
@@ -700,7 +700,7 @@ def _modify_group(group_dn, attributes):
 
 
 # Imports the given object
-def _import(data):
+def _import(data: Tuple[str, str, Dict[str, List[bytes]]]):
     '''check object type and dispatch to specific import method'''
     (object_dn, command, attributes, ) = data
 
