@@ -1,3 +1,9 @@
+univention-user-group-sync-dest (2.1.1-5) unstable; urgency=medium
+
+  * Python3 Typing 
+
+ -- Julian Helms <helms@univention.de>  Wed, 15 Jun 2022 12:05:30 +0200
+
 univention-user-group-sync-dest (2.1.1-4) unstable; urgency=medium
 
   * Fix empty '_user_exists' lookup 

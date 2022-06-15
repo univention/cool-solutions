@@ -67,7 +67,7 @@ def _release_lock():
     '''Unlock this script'''
     fcntl.flock(LOCK_FD, fcntl.LOCK_UN) # UNlock
 
-def _log_message(message):
+def _log_message(message: str):
     '''Write a Log Message'''
     t = time.time()
     t_str = time.strftime('%b %d %H:%M:%S', time.localtime(t))
@@ -80,16 +80,16 @@ def _random_password(_):
     return base64.b64encode(os.urandom(33)).decode('ASCII')
 
 # Encode the given Certificate base64 for UDM
-def _encode_certificate(certificate):
-    '''Encode the given certificate'''
-    if not certificate:
-        return None
-    elif isinstance(certificate, (list,)):
-        return base64.b64encode(certificate[0]).decode('ASCII')
-    else:
-        return base64.b64encode(certificate).decode('ASCII')
+# def _encode_certificate(certificate):
+#     '''Encode the given certificate'''
+#     if not certificate:
+#         return None
+#     elif isinstance(certificate, (list,)):
+#         return base64.b64encode(certificate[0]).decode('ASCII')
+#     else:
+#         return base64.b64encode(certificate).decode('ASCII')
 
-def _decode_filename(filename):
+def _decode_filename(filename) -> float:
     """Decode a unix timestamp formatted into a filename via %019.7f
     returns a <float> unix timestamp"""
     return float(filename)
@@ -114,7 +114,7 @@ def _read_file(path, append=False):
     return _decode_data(raw_data)
 
 # Find the User/Group by replacing the LDAP Base, if needed
-def getPosition(user_dn):
+def getPosition(user_dn) -> str:
     '''Maps the given DN to the LDAP by replacing the base, if defined'''
     position = re.sub(r'(dc\=.*$)', base, user_dn)
     position = re.sub(r'^(uid|cn)=[^,]+,', '', position)
@@ -133,7 +133,7 @@ def _process_file(path):
     _import(data)
     os.remove(path)
 
-def _uid_to_dn(uid):
+def _uid_to_dn(uid) -> str:
     '''Return the would be DN for <uid>'''
     # Get dn via getPosition
     return ldap.dn.dn2str([ldap.dn.str2dn(uid)[0]] + ldap.dn.str2dn(getPosition(uid)))
@@ -184,7 +184,7 @@ def _is_group(object_dn: str, attributes: Dict[str, List[bytes]]) -> bool:
 # Check, if the given User UID exists in our LDAP
 def _user_exists(attributes: Dict[str, List[bytes]]):
     '''Check, if the given User UID exists in our LDAP'''
-    search_filter = univention.admin.filter.expression('uid', attributes['uid'][0].decode())
+    search_filter = univention.admin.filter.expression('uid', attributes['uid'][0].decode('UTF-8'))
     result = user_module.lookup(co, lo, search_filter)
     if not result:
         return None
@@ -194,7 +194,7 @@ def _user_exists(attributes: Dict[str, List[bytes]]):
 # Check, if the given Simple Authentication Account UID exists in our LDAP
 def _simpleauth_exists(attributes: Dict[str, List[bytes]]):
     '''Check, if the given User UID exists in our LDAP'''
-    search_filter = univention.admin.filter.expression('uid', attributes['uid'][0].decode())
+    search_filter = univention.admin.filter.expression('uid', attributes['uid'][0].decode('UTF-8'))
     result = simpleauth_module.lookup(co, lo, search_filter)
     if not result:
         return None
@@ -204,14 +204,14 @@ def _simpleauth_exists(attributes: Dict[str, List[bytes]]):
 # Check, if the given Group CN exists in our LDAP
 def _group_exists(attributes: Dict[str, List[bytes]]):
     '''Check, if the given Group CN exists in our LDAP'''
-    search_filter = univention.admin.filter.expression('cn', attributes['cn'][0].decode())
+    search_filter = univention.admin.filter.expression('cn', attributes['cn'][0].decode('UTF-8'))
     result = group_module.lookup(co, lo, search_filter)
     if not result:
         return None
     else:
         return result[0]
 
-def _unset_certificates(attributes):
+def _unset_certificates(attributes: Dict[str, List[bytes]]):
     '''Ignore Certificate attributes, if sync isn't enabled'''
     attributes.pop('userCertificate;binary', None)
     attributes.pop('univentionCertificateDays', None)
@@ -390,7 +390,7 @@ def _translate_simpleauth_update(attribute, value):
     return _translate_simpleauth(attribute, value)
 
 ## Maps Group LDAP and UDM attributes
-def _translate_group(attribute, value):
+def _translate_group(attribute: str, value: List[bytes]):
     '''Maps LDAP attributes to UDM'''
     (attribute, translate, ) = _translate_group_mapping.get(attribute, (None, None, ))
     if translate is not None:
@@ -398,7 +398,7 @@ def _translate_group(attribute, value):
     return (attribute, value, )
 
 ## Maps Group LDAP and UDM attributes
-def _translate_group_update(attribute, value):
+def _translate_group_update(attribute: str, value: List[bytes]):
     '''Maps LDAP attributes to UDM'''
     if attribute in _translate_group_mapping_ignore:
         return (None, None, )
@@ -667,7 +667,7 @@ def _modify_simpleAuth(simpleauth_dn, attributes):
     _direct_update(attributes, _translate_simpleauth_mapping_direct, simpleauth_dn)
 
 # Modify a Group
-def _modify_group(group_dn, attributes):
+def _modify_group(group_dn: str, attributes: Dict[str, List[bytes]]):
     '''Updates existing Group based on changes'''
     group = _group_exists(attributes)
     if group is None:
