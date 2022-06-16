@@ -25,6 +25,9 @@ Tim - Entwicklung, System Engineering
 - primary, 10.200.51.200
 - replika UCS@school, 10.200.51.201
 
+### QA-Systeme
+- UCS 4.4, 10.207.50.68
+- UCS 5.0, 10.207.50.71
 
 # Things to do first
 - pip3 install python-gnupg
