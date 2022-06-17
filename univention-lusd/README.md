@@ -22,10 +22,12 @@ Tim - Entwicklung, System Engineering
 - Anleitung LUSD-Import Schulportal Hessen: https://support.schulportal.hessen.de/knowledgebase.php?article=538
 
 ### Testsysteme UCS 5.0
-- primary, 10.200.51.200
-- replika UCS@school, 10.200.51.201
+Diese Hosts werden für das bauen der Pakete verwendet
+- UCS 4.4, 10.207.51.55
+- UCS 5.0, 10.207.51.64
 
 ### QA-Systeme
+Testen der Installation
 - UCS 4.4, 10.207.50.68
 - UCS 5.0, 10.207.50.71
 
