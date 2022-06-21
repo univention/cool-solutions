@@ -1,3 +1,9 @@
+univention-lusd (1.0.0-3) unstable; urgency=medium
+
+  * version bump
+
+ -- Slavisa Djokic <djokic@univention.de>  Tue, 21 Jun 2022 16:23:49 +0200
+
 univention-lusd (1.0.0-2) unstable; urgency=low
 
   * python-six/ use gpg not gpg1

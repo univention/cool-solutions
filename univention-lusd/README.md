@@ -27,7 +27,7 @@ Diese Hosts werden für das bauen der Pakete verwendet
 - UCS 5.0, 10.207.51.64
 
 ### QA-Systeme
-Testen der Installation
+Testen der Installation und Dokumentation
 - UCS 4.4, 10.207.50.68
 - UCS 5.0, 10.207.50.71
 
