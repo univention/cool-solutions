@@ -150,7 +150,7 @@ def _process_files():
         _process_file(path)
 
 # Check, if the given DN is a User
-def _is_user(object_dn: str, attributes: Dict[str, List[bytes]]) -> bool:
+def _is_user(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool:
     '''Return whether the object is a user'''
     if not attributes:
         if ldap.dn.str2dn(object_dn)[0][0][0] == 'uid':
@@ -161,7 +161,7 @@ def _is_user(object_dn: str, attributes: Dict[str, List[bytes]]) -> bool:
     return user_module.identify(object_dn, attributes)
 
 # Check, if the given DN is a Simple Authentication Account
-def _is_simpleauth(object_dn: str, attributes: Dict[str, List[bytes]]) -> bool:
+def _is_simpleauth(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool:
     '''Return whether the object is a user'''
     if not attributes:
         if object_dn.startswith('uid='):
@@ -172,7 +172,7 @@ def _is_simpleauth(object_dn: str, attributes: Dict[str, List[bytes]]) -> bool:
     return simpleauth_module.identify(object_dn, attributes)
 
 # Check, if the given DN is a Group
-def _is_group(object_dn: str, attributes: Dict[str, List[bytes]]) -> bool:
+def _is_group(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool:
     '''Return whether the object is a group'''
     if not attributes:
         if object_dn.startswith('cn='):
