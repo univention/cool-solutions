@@ -1,23 +1,47 @@
 {
-	"csv": {
-		"mapping": {
-			"SchuelerId": "record_uid",
-			"Nachname": "lastname",
-			"Vorname": "firstname",
-			"Klassenname": "school_classes",
-			"StufeSemesterBezeichnung": "lusdKlassenstufe"
-		}
-	},
-	"classes":{
-		"reader": "lusd_xml_reader.XmlReader"
-	},
-	"configuration_checks": ["defaults", "lusd_checks", "lusd_class_level_checks", "lusd_fix_no_class_in_input_data_checks"],
-	"gpghome": "/root/importgnupg",
-	"passphrase_file": "/root/schoolimporttool.secret",
-	"lusd_normalize_classes": true,
-	"lusd_normalize_classes": true,
-	"lusd_fix_no_class_in_input_data": {
-		"key_name": "Klassenname",
-		"class_name": "KeineKlasse"
-	}
+    "classes": {
+        "user_importer": "ucsschool.importer.mass_import.sisopi_user_import.SingleSourcePartialUserImport"
+    },
+    "limbo_ou": "transfer",
+    "configuration_checks": ["defaults", "sisopi"],
+    "csv": {
+        "mapping": {
+            "Nachname": "lastname",
+            "Vorname": "firstname",
+            "Geburtsdatum": "birthday",
+            "Email": "PasswordRecoveryEmail",
+            "Klassennamen": "school_classes",
+            "Jahrgang": "lusdKlassenstufe"
+        },
+        "allowed_missing_columns": ["birthday", "PasswordRecoveryEmail", "lusdKlassenstufe", "school_classes", "Jahrgang", "Klassennamen"]
+    },
+    "scheme": {
+        "record_uid": "<firstname><lastname><birthday><:umlauts,lower>",
+        "username": {
+            "default": "<firstname:umlauts,lower>[0:5].<lastname:umlauts,lower>[0:5][COUNTER2]"
+        },
+        "email": "<username>@<maildomain>"
+    },
+    "maildomain": "ucs.example",
+    "deletion_grace_period": {
+        "deactivation": 0,
+        "deletion": 90
+    },
+    "output": {
+        "new_user_passwords": "/var/lib/ucs-school-import/summary/%Y/%m/user_import_passwords_%Y-%m-%d_%H:%M:%S.csv",
+        "user_import_summary": "/var/lib/ucs-school-import/summary/%Y/%m/user_import_summary_%Y-%m-%d_%H:%M:%S.csv"
+    },
+  "normalize": {
+    "firstname": false,
+    "lastname": false
+    },
+    "password_length": 8,
+    "tolerate_errors": 0,
+  "include": {
+    "by_role": {
+      "student": "/var/lib/ucs-school-import/configs/student-example.json",
+      "teacher": "/var/lib/ucs-school-import/configs/teacher-example.json",
+      "staff": "/var/lib/ucs-school-import/configs/staff-example.json"
+    }
+  }
 }
