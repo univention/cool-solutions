@@ -114,7 +114,7 @@ def _read_file(path, append=False):
     return _decode_data(raw_data)
 
 # Find the User/Group by replacing the LDAP Base, if needed
-def getPosition(user_dn) -> str:
+def getPosition(user_dn: str) -> str:
     '''Maps the given DN to the LDAP by replacing the base, if defined'''
     position = re.sub(r'(dc\=.*$)', base, user_dn)
     position = re.sub(r'^(uid|cn)=[^,]+,', '', position)
@@ -360,7 +360,7 @@ _translate_group_mapping_ignore = frozenset((
 ))
 
 ## Maps User LDAP and UDM attributes
-def _translate_user(attribute, value):
+def _translate_user(attribute: str, value: List[bytes]):
     '''Maps LDAP attributes to UDM'''
     (attribute, translate, ) = _translate_user_mapping.get(attribute, (None, None, ))
     if translate is not None:
@@ -368,7 +368,7 @@ def _translate_user(attribute, value):
     return (attribute, value, )
 
 ## Maps User LDAP and UDM attributes
-def _translate_user_update(attribute, value):
+def _translate_user_update(attribute: str, value: List[bytes]):
     '''Maps LDAP attributes to UDM'''
     if attribute in _translate_user_mapping_ignore:
         return (None, None, )
@@ -383,7 +383,7 @@ def _translate_simpleauth(attribute, value):
     return (attribute, value, )
 
 ## Maps Simple Authentication Account LDAP and UDM attributes
-def _translate_simpleauth_update(attribute, value):
+def _translate_simpleauth_update(attribute: str, value: List[bytes]):
     '''Maps LDAP attributes to UDM'''
     if attribute in _translate_simpleauth_mapping_ignore:
         return (None, None, )
@@ -402,7 +402,7 @@ def _translate_group_update(attribute: str, value: List[bytes]):
     '''Maps LDAP attributes to UDM'''
     if attribute in _translate_group_mapping_ignore:
         return (None, None, )
-    return _translate_group(attribute, value)
+    return _translate_group(attribute, value) # attribute, value -> str
 
 ## Run direct update
 def _direct_update(attributes, mapping, user_dn):
@@ -453,7 +453,7 @@ def _ldap_decoding_error(object_type, operation, object_dn):
     exit()
 
 ## Create a non-existent User
-def _create_user(user_dn: str, attributes: Dict[str, List[bytes]]) -> None:
+def _create_user(user_dn: bytes, attributes: Dict[str, List[bytes]]) -> None:
     '''Creates a new user based on the given attributes'''
     existing_user = _user_exists(attributes)
     if existing_user is not None:
@@ -504,7 +504,7 @@ def _create_user(user_dn: str, attributes: Dict[str, List[bytes]]) -> None:
         exit()
 
 # Create a new Simple Authentication Account, if it doesn't exist yet
-def _create_simpleAuth(simpleauth_dn, attributes):
+def _create_simpleAuth(simpleauth_dn: bytes, attributes: Dict[str, List[bytes]]):
     '''Creates a new Simple Authentication Account based on the given attributes'''
     existing_simpleauth = _simpleauth_exists(attributes)
     if existing_simpleauth is not None:
@@ -541,7 +541,7 @@ def _create_simpleAuth(simpleauth_dn, attributes):
         exit()
 
 # Create a new Group, if it doesn't exist yet
-def _create_group(group_dn, attributes):
+def _create_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
     '''Creates a new group based on the given attributes'''
     existing_group = _group_exists(attributes)
     if existing_group is not None:
@@ -609,7 +609,7 @@ def _delete_group(group_dn):
 
 # MODIFY
 # Modify a User
-def _modify_user(user_dn, attributes):
+def _modify_user(user_dn: bytes, attributes: Dict[str, List[bytes]]):
     '''Updates existing user based on changes'''
     user = _user_exists(attributes)
     if user is None:
@@ -640,7 +640,7 @@ def _modify_user(user_dn, attributes):
     _direct_update(attributes, direct_mapping, user_dn)
 
 # Modify a Simple Authentication Account
-def _modify_simpleAuth(simpleauth_dn, attributes):
+def _modify_simpleAuth(simpleauth_dn: bytes, attributes: Dict[str, List[bytes]]):
     '''Updates existing simple authentication account based on changes'''
     simpleauth = _simpleauth_exists(attributes)
     if simpleauth is None:
@@ -667,7 +667,7 @@ def _modify_simpleAuth(simpleauth_dn, attributes):
     _direct_update(attributes, _translate_simpleauth_mapping_direct, simpleauth_dn)
 
 # Modify a Group
-def _modify_group(group_dn: str, attributes: Dict[str, List[bytes]]):
+def _modify_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
     '''Updates existing Group based on changes'''
     group = _group_exists(attributes)
     if group is None:
@@ -690,6 +690,7 @@ def _modify_group(group_dn: str, attributes: Dict[str, List[bytes]]):
             if group[attribute] != values:
                 group[attribute] = values
                 changes = True
+
     if changes:
         try:
             group.modify()
@@ -700,7 +701,7 @@ def _modify_group(group_dn: str, attributes: Dict[str, List[bytes]]):
 
 
 # Imports the given object
-def _import(data: Tuple[str, str, Dict[str, List[bytes]]]):
+def _import(data: Tuple[bytes, str, Dict[str, List[bytes]]]):
     '''check object type and dispatch to specific import method'''
     (object_dn, command, attributes, ) = data
 
