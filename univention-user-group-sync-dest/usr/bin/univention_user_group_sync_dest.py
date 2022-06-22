@@ -164,7 +164,7 @@ def _is_user(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool:
 def _is_simpleauth(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool:
     '''Return whether the object is a user'''
     if not attributes:
-        if object_dn.startswith('uid='):
+        if object_dn.startswith(b'uid='):
             return True
         return False
     elif b'users/ldap' in attributes.get('univentionObjectType', []):
@@ -175,7 +175,7 @@ def _is_simpleauth(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool
 def _is_group(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool:
     '''Return whether the object is a group'''
     if not attributes:
-        if object_dn.startswith('cn='):
+        if object_dn.startswith(b'cn='):
             return True
         return False
     elif b'groups/group' in attributes.get('univentionObjectType', []):
