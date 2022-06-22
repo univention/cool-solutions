@@ -1,3 +1,9 @@
+univention-user-group-sync-dest (2.1.1-7) unstable; urgency=medium
+
+  * Fix Encoding/Decoding Errors 
+
+ -- Julian Helms <helms@univention.de>  Wed, 22 Jun 2022 11:02:21 +0200
+
 univention-user-group-sync-dest (2.1.1-6) unstable; urgency=medium
 
   * More Python3 Typing

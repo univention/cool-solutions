@@ -38,6 +38,7 @@ import os
 import re
 import sys
 import time
+import base64
 import univention.admin.config as config
 import univention.admin.modules as udm
 import univention.admin.objects
@@ -136,11 +137,11 @@ def _process_file(path):
 def _uid_to_dn(uid) -> str:
     '''Return the would be DN for <uid>'''
     # Get dn via getPosition
-    return ldap.dn.dn2str([ldap.dn.str2dn(uid)[0]] + ldap.dn.str2dn(getPosition(uid)))
+    return ldap.dn.dn2str([ldap.dn.str2dn(uid)[0]] + ldap.dn.str2dn(getPosition(uid.decode('UTF-8'))))
 
 def _uids_to_dns(uids):
     '''xxx'''
-    return map(_uid_to_dn, uids)
+    return list(map(_uid_to_dn, uids))
 
 # Process all files in the DB_PATH location
 def _process_files():
@@ -462,7 +463,7 @@ def _create_user(user_dn: bytes, attributes: Dict[str, List[bytes]]) -> None:
         return
 
     _log_message("Create User: %r" % user_dn)
-    user_position = getPosition(user_dn)
+    user_position = getPosition(user_dn.decode('UTF-8'))
     user_position_obj = univention.admin.uldap.position(base)
     try:
         user_position_obj.setDn(user_position)
@@ -513,7 +514,7 @@ def _create_simpleAuth(simpleauth_dn: bytes, attributes: Dict[str, List[bytes]])
         return
 
     _log_message("Create User: %r" % simpleauth_dn)
-    simpleauth_position = getPosition(simpleauth_dn)
+    simpleauth_position = getPosition(simpleauth_dn.decode('UTF-8'))
     simpleauth_position_obj = univention.admin.uldap.position(base)
     try:
         simpleauth_position_obj.setDn(simpleauth_position)
@@ -550,7 +551,7 @@ def _create_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
         return
 
     _log_message("Create Group: %r" % group_dn)
-    group_position = getPosition(group_dn)
+    group_position = getPosition(group_dn.decode('UTF-8'))
     group_position_obj = univention.admin.uldap.position(base)
     try:
         group_position_obj.setDn(group_position)
@@ -681,7 +682,7 @@ def _modify_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
 
     # If called by _create_user. Re-Add restored user to a previous group
     if 'univentionUserGroupSyncResync' in attributes:
-        attributes['uniqueMember'].extend(group['users'])
+        attributes['uniqueMember'].extend([x.encode() for x in group['users']]) # group['users'] is a list of str
         attributes.pop('univentionUserGroupSyncResync')
 
     for (attribute, values, ) in attributes.items():
