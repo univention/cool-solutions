@@ -308,6 +308,7 @@ def _log_ignore_error(ignore_error_var):
 
 # LDAP TO UDM MAPPING
 ## User
+## _translate_user_mapping is mutable and will be changed later in the script - according to UCRV
 _translate_user_mapping = {
     'givenName': ('firstname', univention.admin.mapping.ListToString, ),
     'sn': ('lastname', univention.admin.mapping.ListToString, ),
