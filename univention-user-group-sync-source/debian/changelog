@@ -1,3 +1,9 @@
+univention-user-group-sync-source (2.1.0-32) unstable; urgency=medium
+
+  * Encode dn to byte-string when writing pickle data 
+
+ -- Julian Helms <helms@univention.de>  Wed, 22 Jun 2022 11:06:42 +0200
+
 univention-user-group-sync-source (2.1.0-31) unstable; urgency=medium
 
   * Fix Postrm 

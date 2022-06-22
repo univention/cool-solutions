@@ -145,7 +145,7 @@ def _wait_until_after(timestamp):
 # Pickle the given data
 def _format_data(object_dn, new_attributes, command):
     """encode (serialise) object data"""
-    data = (object_dn, command, new_attributes, )
+    data = (object_dn.encode(), command, new_attributes, )
     return pickle.dumps(data, protocol=2)
 
 # Get attributes and objectClasses to be removed from objects from UCR
