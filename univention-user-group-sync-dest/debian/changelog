@@ -1,3 +1,9 @@
+univention-user-group-sync-dest (2.1.1-10) unstable; urgency=medium
+
+  * Get rid of False Warning in _direct_update 
+
+ -- Julian Helms <helms@univention.de>  Wed, 22 Jun 2022 11:16:25 +0200
+
 univention-user-group-sync-dest (2.1.1-9) unstable; urgency=medium
 
   * Add short doc to _translate_user_mapping 

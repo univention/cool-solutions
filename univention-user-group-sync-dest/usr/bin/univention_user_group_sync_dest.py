@@ -424,7 +424,8 @@ def _direct_update(attributes, mapping, user_dn):
     for (attribute, new_values, ) in attributes.items():
         if attribute in mapping:
             old_values = user.oldattr.get(attribute, [])
-            if new_values != old_values:
+            # if new_values != old_values: # Note jhelms: If the lists have the same content but not in the same order this is wrong.
+            if sorted(new_values) != sorted(old_values):
                 if attribute == 'objectClass':
                     _log_message("W: Different objectClasses detected NEW {} vs. OLD {}".format(new_values, old_values))
                     print("W: Different objectClasses detected NEW {} vs. OLD {}".format(new_values, old_values))
