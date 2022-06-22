@@ -34,6 +34,7 @@
 import pickle
 import fcntl
 import ldap
+import ldap.filter
 import os
 import re
 import sys
@@ -586,7 +587,7 @@ def _create_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
 def _delete_user(user_dn):
     '''Delete the given User'''
     _log_message("Delete User: %r" % user_dn)
-    uid = ldap.dn.dn2str(user_dn)[0][0][1]
+    uid = ldap.dn.str2dn(user_dn)[0][0][1]
     search_filter = univention.admin.filter.expression('uid', uid)
     for lists in user_module.lookup(co, lo, search_filter), simpleauth_module.lookup(co, lo, search_filter):
         for existing_user in lists:
@@ -600,7 +601,7 @@ def _delete_user(user_dn):
 def _delete_group(group_dn):
     '''Delete the given Group'''
     _log_message("Delete Group: %r\n" % group_dn)
-    cn = ldap.dn.dn2str(group_dn)[0][0][1]
+    cn = ldap.dn.str2dn(group_dn)[0][0][1]
     search_filter = ldap.filter.filter_format('cn=%s', [cn])
     for existing_group in group_module.lookup(co, lo, search_filter):
         try:
