@@ -1,3 +1,9 @@
+univention-user-group-sync-dest (2.1.1-8) unstable; urgency=medium
+
+  * Add LdapError Exception for _modify_group 
+
+ -- Julian Helms <helms@univention.de>  Wed, 22 Jun 2022 11:10:15 +0200
+
 univention-user-group-sync-dest (2.1.1-7) unstable; urgency=medium
 
   * Fix Encoding/Decoding Errors 
