@@ -698,13 +698,8 @@ def _modify_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
         try:
             group.modify()
         except univention.admin.uexceptions.ldapError as error:
-            if 'Type or value exists: modify/add:' in error:
-                print(f"W: During Group.modify_changes: {error}")
-                _log_message(f"W: During Group.modify_changes: {error}")
-            else:
-                print(f"E: During Group.modify_changes: {error}")
-                _log_message(f"E: During Group.modify_changes: {error}")
-                sys.exit()
+            print(f"W: During Group.modify_changes: {error}")
+            _log_message(f"W: During Group.modify_changes: {error}")
         # except ModifyError as error:
         #     _log_message(f"W: During Group.modify_changes: {error}")
         except:
