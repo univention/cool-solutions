@@ -32,7 +32,7 @@ XML reader for importing users.
 """
 
 import re
-import codecs
+import base64
 from six import iteritems
 import xmltodict
 import gnupg
@@ -199,8 +199,9 @@ class XmlReader(HttpApiCsvReader):
         :rtype: str
         """
         self.logger.info('Reading passphrase from %r...', self.config['passphrase_file'])
-        with codecs.open(self.config['passphrase_file'], 'r', encoding='base64') as fp:
-            passphrase = fp.read().strip()
+        with open(self.config['passphrase_file'], 'r') as fp:
+            # base64 → byte → string
+            passphrase = base64.b64decode(fp.read().strip()).decode('UTF-8')
         self.logger.info('Decrypting %r...', self.filename)
         gpg = gnupg.GPG(gnupghome=self.config['gpghome'])
         with open(self.filename, 'r') as fpr:
