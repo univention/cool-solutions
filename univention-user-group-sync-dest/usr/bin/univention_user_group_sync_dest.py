@@ -46,7 +46,7 @@ import univention.admin.objects
 import univention.admin.uldap
 import univention.config_registry
 import traceback
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Set
 from univention.admin.uexceptions import valueInvalidSyntax
 
 DB_PATH = '/var/lib/univention-user-group-sync'
@@ -91,7 +91,7 @@ def _random_password(_):
 #     else:
 #         return base64.b64encode(certificate).decode('ASCII')
 
-def _decode_filename(filename) -> float:
+def _decode_filename(filename: str) -> float:
     """Decode a unix timestamp formatted into a filename via %019.7f
     returns a <float> unix timestamp"""
     return float(filename)
@@ -108,7 +108,7 @@ def _decode_data(raw: bytes):
     '''Decode the given pickle data'''
     return pickle.loads(raw)
 
-def _read_file(path, append=False):
+def _read_file(path: str, append=False):
     '''Read the pickle file found under given path'''
     _log_message("Reading file {}".format(path))
     print("Reading file {}".format(path))
@@ -129,18 +129,18 @@ def getPosition(user_dn: str) -> str:
         position = re.sub(r'({})'.format(base), 'ou={},{}'.format(ou, base), position)
     return position
 
-def _process_file(path):
+def _process_file(path: str):
     '''Read, import and delete a pickle file'''
     data = _read_file(path)
     _import(data)
     os.remove(path)
 
-def _uid_to_dn(uid) -> str:
+def _uid_to_dn(uid: bytes) -> str:
     '''Return the would be DN for <uid>'''
     # Get dn via getPosition
     return ldap.dn.dn2str([ldap.dn.str2dn(uid)[0]] + ldap.dn.str2dn(getPosition(uid.decode('UTF-8'))))
 
-def _uids_to_dns(uids):
+def _uids_to_dns(uids: List[bytes]):
     '''xxx'''
     return list(map(_uid_to_dn, uids))
 
@@ -219,8 +219,8 @@ def _unset_certificates(attributes: Dict[str, List[bytes]]):
     attributes.pop('univentionCertificateDays', None)
     attributes.pop('univentionCreateRevokeCertificate', None)
     attributes.pop('univentionRenewCertificate', None)
-    if 'objectClass' in attributes and 'univentionManageCertificates' in attributes['objectClass']:
-        attributes['objectClass'].remove('univentionManageCertificates')
+    if 'objectClass' in attributes and b'univentionManageCertificates' in attributes['objectClass']:
+        attributes['objectClass'].remove(b'univentionManageCertificates')
     return attributes
 
 
@@ -301,7 +301,7 @@ def get_ignore_error():
     if ignore_error_objectClass_difference:
         ignore_error_objectClass_difference = ignore_error_objectClass_difference.split(',')
 
-def _log_ignore_error(ignore_error_var):
+def _log_ignore_error(ignore_error_var: str):
     '''Returns whether certain errors during import shall be ignored and files causing them removed'''
     if ignore_error_var == ignore_error_missing_position_var:
         _log_message("Skipping and removing file which contains DN with missing LDAP position because {} is true\n".format(ignore_error_var))
@@ -378,7 +378,7 @@ def _translate_user_update(attribute: str, value: List[bytes]):
     return _translate_user(attribute, value)
 
 ## Maps Simple Authentication Account LDAP and UDM attributes
-def _translate_simpleauth(attribute, value):
+def _translate_simpleauth(attribute: str, value: List[bytes]):
     '''Maps LDAP attributes to UDM'''
     (attribute, translate, ) = _translate_simpleauth_mapping.get(attribute, (None, None, ))
     if translate is not None:
@@ -408,13 +408,13 @@ def _translate_group_update(attribute: str, value: List[bytes]):
     return _translate_group(attribute, value) # attribute, value -> str
 
 ## Run direct update
-def _direct_update(attributes, mapping, user_dn):
+def _direct_update(attributes: Dict[str, List[bytes]], mapping: Set[str], user_dn: bytes):
     if _is_user(user_dn, attributes):
         user = _user_exists(attributes)
     elif _is_simpleauth(user_dn, attributes):
         user = _simpleauth_exists(attributes)
     else:
-        _log_message('E: During _direct_update. Unknown user type: %s %s' % (command, object_dn))
+        _log_message('E: During _direct_update. Unknown user type: %s %s' % (command, object_dn))  # FIXME: Variable Scope
         exit()
     if user is None:
         _log_message("I: Ignoring modify for non-existent %r" % user_dn)
@@ -451,7 +451,7 @@ def _direct_update(attributes, mapping, user_dn):
 
 # CREATE
 ## Handle ldap.DECODING_ERROR
-def _ldap_decoding_error(object_type, operation, object_dn):
+def _ldap_decoding_error(object_type: str, operation: str, object_dn: str):
     _log_message("E: LDAP DECODING_ERROR during {}.{}. There might be an illegal character in the DN. Please refer to the cool solution for allowed characters: {}\n\n{}\n\n{}".format(object_type, operation, cool_solution_link, object_dn, traceback.format_exc()))
     print("E: LDAP DECODING_ERROR during {}.{}. There might be an illegal character in the DN. Please refer to the cool solution for allowed characters: {}\n\n{}\n\n{}".format(object_type, operation, cool_solution_link, object_dn, traceback.format_exc()))
     exit()
@@ -489,10 +489,10 @@ def _create_user(user_dn: bytes, attributes: Dict[str, List[bytes]]) -> None:
         # Re-Add restored user to his previous groups
         if "univentionUserGroupSyncEnabled" in attributes and attributes["univentionUserGroupSyncEnabled"] == [b"TRUE"] and "memberOf" in attributes:
             for source_group_dn in attributes['memberOf']:
-                source_group_cn = ldap.dn.str2dn(source_group_dn.decode('UTF-8'))[0][0][1]
+                source_group_cn = ldap.dn.str2dn(source_group_dn.decode('UTF-8'))[0][0][1]  # type: str
                 source_group_attributes = {
-                    'cn': [source_group_cn.encode('UTF-8')],
-                    'uniqueMember': [user_dn.encode('UTF-8')],
+                    'cn': [source_group_cn.encode()],
+                    'uniqueMember': [user_dn],
                     'univentionUserGroupSyncResync': [b'TRUE']}
                 _modify_group(source_group_dn, source_group_attributes)
     except:
@@ -584,7 +584,7 @@ def _create_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
 
 # DELETE
 # Delete the given User / Simple Authentication Account
-def _delete_user(user_dn):
+def _delete_user(user_dn: bytes):
     '''Delete the given User'''
     _log_message("Delete User: %r" % user_dn)
     uid = ldap.dn.str2dn(user_dn)[0][0][1]
@@ -598,7 +598,7 @@ def _delete_user(user_dn):
                 print("E: During User.remove: %s" % traceback.format_exc())
 
 # Delete the given Group
-def _delete_group(group_dn):
+def _delete_group(group_dn: bytes):
     '''Delete the given Group'''
     _log_message("Delete Group: %r\n" % group_dn)
     cn = ldap.dn.str2dn(group_dn)[0][0][1]

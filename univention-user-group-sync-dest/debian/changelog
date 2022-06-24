@@ -1,3 +1,9 @@
+univention-user-group-sync-dest (2.1.1-15) unstable; urgency=medium
+
+  * Style Python3 Typing Functions 
+
+ -- Julian Helms <helms@univention.de>  Fri, 24 Jun 2022 10:37:53 +0200
+
 univention-user-group-sync-dest (2.1.1-14) unstable; urgency=medium
 
   * Fix ldap.dn.dn2str -> ldap.dn.str2dn 
