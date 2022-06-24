@@ -756,8 +756,8 @@ def _import(data: Tuple[bytes, str, Dict[str, List[bytes]]]):
         _log_message("E: Unknown object type (m): %r" % object_dn)
         return
     else:
-        _log_message('E: During _import. Unknown Command %s: %s' % (command, object_dn))
-        print('E: During _import. Unknown Command %s: %s' % (command, object_dn))
+        _log_message(f'E: During _import. Unknown Command ({command.decode('UTF-8')}): {object_dn.decode('UTF-8')}')
+        print(f'E: During _import. Unknown Command ({command.decode('UTF-8')}): {object_dn.decode('UTF-8')}')
         return
 
 
