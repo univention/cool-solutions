@@ -36,48 +36,47 @@
 eval "$(ucr shell)"
 
 case "$1" in
-	configure)
-		# User listener:nogroup needs writing rights
-		chmod 777 /var/lib/univention-user-group-sync
+configure)
+	# User listener:nogroup needs writing rights
+	chmod 777 /var/lib/univention-user-group-sync
 
-    call_joinscript 99univention-user-group-sync-source_add-ucs-sync.inst
+	call_joinscript 99univention-user-group-sync-source_add-ucs-sync.inst
 
-		#
-		echo "Creating a synchronization cron job"
-		eval "$(ucr shell ldap/sync/destination)"
-		ucr set cron/ldap-sync-src/command="univention_user_group_sync_source_synchronize" \
+	#
+	echo "Creating a synchronization cron job"
+	eval "$(ucr shell ldap/sync/destination)"
+	ucr set cron/ldap-sync-src/command="univention_user_group_sync_source_synchronize" \
 		cron/ldap-sync-src/time?"*/5 * * * *" \
 		cron/ldap-sync-src/user="ucs-sync" \
 		cron/ldap-sync-src/description="Synchronize all existing ldap-diff files to the target host set in the ldap/sync/destination variable"
 
-		# Restart the directory listener to load our module
-		echo "Restarting univention-directory-listener Service"
-		systemctl restart univention-directory-listener.service
+	# Restart the directory listener to load our module
+	echo "Restarting univention-directory-listener Service"
+	systemctl restart univention-directory-listener.service
 
-		# Temporary fix for Bug #48062
-		echo "Restarting cron Service"
-		systemctl restart cron.service
+	# Temporary fix for Bug #48062
+	echo "Restarting cron Service"
+	systemctl restart cron.service
 
-		# Fix for Warning "cron.service changed on disk"
-		echo "Reloading systemd daemon"
-		systemctl daemon-reload
+	# Fix for Warning "cron.service changed on disk"
+	echo "Reloading systemd daemon"
+	systemctl daemon-reload
 
-		# Wait a little for the listener to notice that univention_user_group_sync_source_generate was imported sucessfully. The initial import fails because ucs-sync does not yet exist on the local system.
-		sleep 10
+	# Wait a little for the listener to notice that univention_user_group_sync_source_generate was imported sucessfully. The initial import fails because ucs-sync does not yet exist on the local system.
+	sleep 10
 
-		# Reset the Notifier IDs on reinstallations with existing Notifier IDs
-		if [ -z "$2" ]; then
-			univention-directory-listener-ctrl resync univention_user_group_sync_source_generate
-		fi
-		;;
+	# Reset the Notifier IDs on reinstallations with existing Notifier IDs
+	if [ -z "$2" ]; then
+		univention-directory-listener-ctrl resync univention_user_group_sync_source_generate
+	fi
+	;;
 
-	abort-upgrade|abort-remove|abort-deconfigure)
-		;;
+abort-upgrade | abort-remove | abort-deconfigure) ;;
 
 	*)
-		echo "postinst called with unknown argument '$1'" >&2
-		exit 1
-		;;
+	echo "postinst called with unknown argument '$1'" >&2
+	exit 1
+	;;
 esac
 
 exit 0
