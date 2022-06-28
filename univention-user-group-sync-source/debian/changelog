@@ -1,3 +1,9 @@
+univention-user-group-sync-source (2.1.0-33) unstable; urgency=medium
+
+  * Python3 typing and bytes <-> str fix
+
+ -- Julian Helms <helms@univention.de>  Tue, 28 Jun 2022 17:40:51 +0200
+
 univention-user-group-sync-source (2.1.0-32) unstable; urgency=medium
 
   * Encode dn to byte-string when writing pickle data 
