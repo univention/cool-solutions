@@ -1,3 +1,9 @@
+univention-lusd (1.0.0-6) unstable; urgency=medium
+
+  * fix for decrypting byte data
+
+ -- Slavisa Djokic <djokic@univention.de>  Wed, 29 Jun 2022 12:20:21 +0200
+
 univention-lusd (1.0.0-5) unstable; urgency=medium
 
   * fix base64 password handling
