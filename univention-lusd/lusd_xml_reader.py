@@ -105,6 +105,7 @@ class XmlReader(HttpApiCsvReader):
         :rtype: Iterator
         """
         decrypted_xml = self.decrypt_pgp_file()
+# HIER!
         fixed_xml = self.fix_xml(decrypted_xml)
 
         # walk XML tree
@@ -204,8 +205,11 @@ class XmlReader(HttpApiCsvReader):
             passphrase = base64.b64decode(fp.read().strip()).decode('UTF-8')
         self.logger.info('Decrypting %r...', self.filename)
         gpg = gnupg.GPG(gnupghome=self.config['gpghome'])
-        with open(self.filename, 'r') as fpr:
-            status = gpg.decrypt_file(fpr, passphrase=passphrase)
+        with open(self.filename, 'rb') as fpr:
+#            status = gpg.decrypt_file(fpr, passphrase=passphrase)
+            data = fpr.read()                                   # NEW
+            str_data = data.decode('UTF-8')                     # NEW 
+            status = gpg.decrypt(str_data, passphrase=passphrase) #NEW
             self.logger.info('GnuPG decryption status: %r', status.status)
             if not status.ok:
                 raise DecryptionError('Could not decrypt %r: %s', self.filename, status.stderr)
