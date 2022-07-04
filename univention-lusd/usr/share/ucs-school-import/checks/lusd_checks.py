@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2019-2022 Univention GmbH
+# Copyright 2022 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -51,7 +51,7 @@ class LUSDImportGPGConfigurationChecks(ConfigurationChecks):
 			raise InitialisationError('Path {!r} does not exist.'.format(self.config['gpghome']))
 		if not os.path.isdir(self.config['gpghome']):
 			raise InitialisationError('Path {!r} is not a directory.'.format(self.config['gpghome']))
-		if not os.path.exists(os.path.join(self.config['gpghome'], 'secring.gpg')):
+		if not os.path.exists(os.path.join(self.config['gpghome'], 'private-keys-v1.d')):
 			cmdline = self.gpg_import_cmdline.format(gpghome=self.config['gpghome'])
 			raise InitialisationError('Please import private PGP key (cmdline: {!r}).'.format(cmdline))
 

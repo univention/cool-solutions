@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2019-2022 Univention GmbH
+# Copyright 2022 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -28,7 +28,7 @@
 # <http://www.gnu.org/licenses/>.
 
 """
-Configuration checks for class_level in LK LUSD import.
+Configuration checks for class_level in LUSD import.
 """
 
 import re
@@ -37,28 +37,28 @@ from ucsschool.importer.utils.configuration_checks import ConfigurationChecks
 
 
 class LUSDImportClassLevelConfigurationChecks(ConfigurationChecks):
-	def test_00_required_config_keys(self):
-		for attr in ('class_level'):
-			if not self.config.get(attr):
-				raise InitialisationError('No {!r} was specified in the configuration.'.format(attr))
+    def test_00_required_config_keys(self):
+        for attr in ['class_level']:
+            if not self.config.get(attr):
+                raise InitialisationError('No {!r} was specified in the configuration.'.format(attr))
 
-	def test_01_class_level(self):
-		if not isinstance(self.config['class_level'], dict):
-			raise InitialisationError('Configuration key "class_level" must point to a mapping.')
-		for attr in ('key', 'mapping', 'unknown_is_error'):
-			if not self.config['class_level'].get(attr):
-				raise InitialisationError('No {!r} was specified in the "class_level" configuration.'.format(attr))
-		if self.config['class_level']['key'] not in self.config['csv']['mapping'].values():
-			raise InitialisationError(
-				'"class_level:key" {!r} is missing in in the "csv:mapping" configuration.'.format(
-					self.config['class_level']['key']
-				))
-		if not isinstance(self.config['class_level']['mapping'], dict):
-			raise InitialisationError('Configuration key "class_level:mapping" must point to a mapping.')
-		for k in self.config['class_level']['mapping'].keys():
-			try:
-				re.compile(k)
-			except re.error as exc:
-				raise InitialisationError(
-					'Configuration "class_level:mapping:{}" is not a valid regular expression: {}'.format(k, exc)
-				)
+        def test_01_class_level(self):
+            if not isinstance(self.config['class_level'], dict):
+                raise InitialisationError('Configuration key "class_level" must point to a mapping.')
+            for attr in ('key', 'mapping', 'unknown_is_error'):
+                if not self.config['class_level'].get(attr):
+                    raise InitialisationError('No {!r} was specified in the "class_level" configuration.'.format(attr))
+                if self.config['class_level']['key'] not in self.config['csv']['mapping'].values():
+                    raise InitialisationError(
+                        '"class_level:key" {!r} is missing in in the "csv:mapping" configuration.'.format(
+                            self.config['class_level']['key']
+                            ))
+                if not isinstance(self.config['class_level']['mapping'], dict):
+                    raise InitialisationError('Configuration key "class_level:mapping" must point to a mapping.')
+                for k in self.config['class_level']['mapping'].keys():
+                    try:
+                        re.compile(k)
+                    except re.error as exc:
+                        raise InitialisationError(
+                            'Configuration "class_level:mapping:{}" is not a valid regular expression: {}'.format(k, exc)
+                        )

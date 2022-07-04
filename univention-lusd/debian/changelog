@@ -1,3 +1,12 @@
+univention-lusd (1.0.0-7) unstable; urgency=low
+
+  * fix XML encoding
+  * fix path to secret key in configuration check
+  * fix typo in `lusd_class_level_checks.py`
+  * copyright
+
+ -- Tim Breidenbach <breidenbach@univention.de>  Tue, 05 Jul 2022 00:09:22 +0200
+
 univention-lusd (1.0.0-6) unstable; urgency=medium
 
   * fix for decrypting byte data

@@ -105,7 +105,6 @@ class XmlReader(HttpApiCsvReader):
         :rtype: Iterator
         """
         decrypted_xml = self.decrypt_pgp_file()
-# HIER!
         fixed_xml = self.fix_xml(decrypted_xml)
 
         # walk XML tree
@@ -197,7 +196,7 @@ class XmlReader(HttpApiCsvReader):
         Decrypts PGP encrypted data in :py:attr:`self.filename`.
 
         :return: decrypted data
-        :rtype: str
+        :rtype: bytes
         """
         self.logger.info('Reading passphrase from %r...', self.config['passphrase_file'])
         with open(self.config['passphrase_file'], 'r') as fp:
@@ -206,22 +205,23 @@ class XmlReader(HttpApiCsvReader):
         self.logger.info('Decrypting %r...', self.filename)
         gpg = gnupg.GPG(gnupghome=self.config['gpghome'])
         with open(self.filename, 'rb') as fpr:
-#            status = gpg.decrypt_file(fpr, passphrase=passphrase)
-            data = fpr.read()                                   # NEW
-            str_data = data.decode('UTF-8')                     # NEW 
-            status = gpg.decrypt(str_data, passphrase=passphrase) #NEW
+            data = fpr.read()
+            str_data = data.decode('UTF-8')
+            status = gpg.decrypt(str_data, passphrase=passphrase)
             self.logger.info('GnuPG decryption status: %r', status.status)
             if not status.ok:
                 raise DecryptionError('Could not decrypt %r: %s', self.filename, status.stderr)
         return status.data
 
     @staticmethod
-    def fix_xml(xml_str):
+    def fix_xml(xml_b):
         """
-        Fixes bad "encoding" property in `xml_str`.
+        Fixes bad "encoding" property in `xml_b`.
 
-        :param str xml_str: XML string
+        :param bytes xml_b: XML byte
         :return: text with fixed "encoding" property
         :rtype: str
         """
-        return xml_str.replace('<?xml version="1.0" encoding="utf-16"?>', '<?xml version="1.0" encoding="utf-8"?>')
+        xml_str = xml_b.decode("utf-8")
+        xml_str = xml_str.replace('<?xml version="1.0" encoding="utf-16"?>', '<?xml version="1.0" encoding="utf-8"?>')
+        return xml_str
