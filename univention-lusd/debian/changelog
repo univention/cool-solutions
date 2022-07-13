@@ -1,0 +1,45 @@
+univention-lusd (1.0.0-7) unstable; urgency=low
+
+  * fix XML encoding
+  * fix path to secret key in configuration check
+  * fix typo in `lusd_class_level_checks.py`
+  * copyright
+
+ -- Tim Breidenbach <breidenbach@univention.de>  Tue, 05 Jul 2022 00:09:22 +0200
+
+univention-lusd (1.0.0-6) unstable; urgency=medium
+
+  * fix for decrypting byte data
+
+ -- Slavisa Djokic <djokic@univention.de>  Wed, 29 Jun 2022 12:20:21 +0200
+
+univention-lusd (1.0.0-5) unstable; urgency=medium
+
+  * fix base64 password handling
+  * remove *.deb files
+
+ -- Oliver Friedrich <friedrich@univention.de>  Thu, 23 Jun 2022 11:44:56 +0200
+
+univention-lusd (1.0.0-4) unstable; urgency=low
+
+  * Removed user_import.json
+
+ -- Tim Breidenbach <breidenbach@univention.de>  Wed, 22 Jun 2022 08:09:55 +0200
+
+univention-lusd (1.0.0-3) unstable; urgency=medium
+
+  * version bump
+
+ -- Slavisa Djokic <djokic@univention.de>  Tue, 21 Jun 2022 16:23:49 +0200
+
+univention-lusd (1.0.0-2) unstable; urgency=low
+
+  * python-six/ use gpg not gpg1
+
+ -- Tim Breidenbach <breidenbach@univention.de>  Tue, 07 Jun 2022 00:22:23 +0200
+
+univention-lusd (1.0.0-1) unstable; urgency=medium
+
+  * Initial release
+
+ -- Tim Breidenbach <packages@univention.de>  Mon, 11 Apr 2022 11:41:47 +0200
