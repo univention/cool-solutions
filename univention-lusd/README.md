@@ -1,38 +1,3 @@
 ## Package: univention-lusd
 
 Cool Solution for the Lehrer- und Schülerdatenbank Import Hessen.
-
-Slavisa - Ansprechpartner, QA, Doku
-Tim - Entwicklung, System Engineering
-
-### Deliverables
-- installable Debian-Package for UCS-5
-- Documentation as article on help.univention.de
-  - prerequisites, export, installation, import
-- Documentation for mappings
-- When finished deliver to Sales (Ben)
-
-### Projektinfo
-- Ableitung aus Planio Task #33567
-- Odoo - S00424 - Medienzentrum Marburg - LUSD Erweiterung
-- Dokuwiki https://hutten.knut.univention.de/dokuwiki/kunden:lusd
-- Schätzung https://luns.knut.univention.de/etherpad/p/lusd-schaetzung
-- Ableitung der Umsetzung aus KSAN https://univention.plan.io/projects/20677_stadt_kassel/repository/104/entry/univention-ksan-xml-reader/README.md?rev=ucs-4.4%2Fmaster
-- Remarks of TImo for https://univention.plan.io/issues/21969 #4
-- Anleitung LUSD-Import Schulportal Hessen: https://support.schulportal.hessen.de/knowledgebase.php?article=538
-
-### Testsysteme UCS 5.0
-Diese Hosts werden für das bauen der Pakete verwendet
-- UCS 4.4, 10.207.51.55
-- UCS 5.0, 10.207.51.64
-
-### QA-Systeme
-Testen der Installation und Dokumentation
-- UCS 4.4, 10.207.50.68
-- UCS 5.0, 10.207.50.71
-
-# Things to do first
-- pip3 install python-gnupg
-- ext_config_deb_on_role
-- create_ou transfer
-- TODO: xhtml only py2
