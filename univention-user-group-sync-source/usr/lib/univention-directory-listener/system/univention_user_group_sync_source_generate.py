@@ -291,6 +291,7 @@ def _get_group_name_prefix_config():
     return attrs, other_dn_attrs, other_attrs
 
 def _get_remove_if_univentionUserGroupSyncEnabled_removed_config() -> bool:
+    """Set this UCRV to TRUE if you'd like to remove users from the destination by deactivating the sync for user (with univentionUserGroupSyncEnabled)."""
     return ucr.is_true('ldap/sync/remove/deactivated_user')
 
 # Apply prefix to attributes which contain the uid or cn of the current object
