@@ -1,54 +1,62 @@
+univention-user-group-sync-dest (2.1.1-16) unstable; urgency=medium
+
+  * python3 styling
+  * replaced bare excepts
+  * replaced 'co' by 'None'
+
+ -- Oliver Friedrich <friedrich@univention.de>  Fri, 22 Jul 2022 14:24:41 +0200
+
 univention-user-group-sync-dest (2.1.1-15) unstable; urgency=medium
 
-  * Style Python3 Typing Functions 
+  * Style Python3 Typing Functions
 
  -- Julian Helms <helms@univention.de>  Fri, 24 Jun 2022 10:37:53 +0200
 
 univention-user-group-sync-dest (2.1.1-14) unstable; urgency=medium
 
-  * Fix ldap.dn.dn2str -> ldap.dn.str2dn 
+  * Fix ldap.dn.dn2str -> ldap.dn.str2dn
 
  -- Julian Helms <helms@univention.de>  Wed, 22 Jun 2022 18:01:17 +0200
 
 univention-user-group-sync-dest (2.1.1-13) unstable; urgency=medium
 
-  * Fix Bytestring error 
+  * Fix Bytestring error
 
  -- Julian Helms <helms@univention.de>  Wed, 22 Jun 2022 13:07:07 +0200
 
 univention-user-group-sync-dest (2.1.1-12) unstable; urgency=medium
 
-  * Fix wrong Python3 Typing 
+  * Fix wrong Python3 Typing
 
  -- Julian Helms <helms@univention.de>  Wed, 22 Jun 2022 12:57:56 +0200
 
 univention-user-group-sync-dest (2.1.1-11) unstable; urgency=medium
 
-  * Remove if-Statement from Exception 
+  * Remove if-Statement from Exception
 
  -- Julian Helms <helms@univention.de>  Wed, 22 Jun 2022 12:36:22 +0200
 
 univention-user-group-sync-dest (2.1.1-10) unstable; urgency=medium
 
-  * Get rid of False Warning in _direct_update 
+  * Get rid of False Warning in _direct_update
 
  -- Julian Helms <helms@univention.de>  Wed, 22 Jun 2022 11:16:25 +0200
 
 univention-user-group-sync-dest (2.1.1-9) unstable; urgency=medium
 
-  * Add short doc to _translate_user_mapping 
+  * Add short doc to _translate_user_mapping
 
  -- Julian Helms <helms@univention.de>  Wed, 22 Jun 2022 11:13:59 +0200
 
 univention-user-group-sync-dest (2.1.1-8) unstable; urgency=medium
 
-  * Add LdapError Exception for _modify_group 
+  * Add LdapError Exception for _modify_group
 
  -- Julian Helms <helms@univention.de>  Wed, 22 Jun 2022 11:10:15 +0200
 
 univention-user-group-sync-dest (2.1.1-7) unstable; urgency=medium
 
-  * Fix Encoding/Decoding Errors 
+  * Fix Encoding/Decoding Errors
 
  -- Julian Helms <helms@univention.de>  Wed, 22 Jun 2022 11:02:21 +0200
 
@@ -60,19 +68,19 @@ univention-user-group-sync-dest (2.1.1-6) unstable; urgency=medium
 
 univention-user-group-sync-dest (2.1.1-5) unstable; urgency=medium
 
-  * Python3 Typing 
+  * Python3 Typing
 
  -- Julian Helms <helms@univention.de>  Wed, 15 Jun 2022 12:05:30 +0200
 
 univention-user-group-sync-dest (2.1.1-4) unstable; urgency=medium
 
-  * Fix empty '_user_exists' lookup 
+  * Fix empty '_user_exists' lookup
 
  -- Julian Helms <helms@univention.de>  Tue, 14 Jun 2022 13:11:10 +0200
 
 univention-user-group-sync-dest (2.1.1-3) unstable; urgency=medium
 
-  * univention_user_group_sync_dest.py: Python3 Syntax 
+  * univention_user_group_sync_dest.py: Python3 Syntax
 
  -- Julian Helms <helms@univention.de>  Mon, 13 Jun 2022 18:14:37 +0200
 

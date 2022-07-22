@@ -6,7 +6,7 @@
 #
 # Copyright 2013-2022 Univention GmbH
 #
-# http://www.univention.de/
+# https://www.univention.de/
 #
 # All rights reserved.
 #
@@ -29,25 +29,27 @@
 # You should have received a copy of the GNU Affero General Public
 # License with the Debian GNU/Linux or Univention distribution in file
 # /usr/share/common-licenses/AGPL-3; if not, see
-# <http://www.gnu.org/licenses/>.
+# <https://www.gnu.org/licenses/>.
 
-import pickle
+import base64
 import fcntl
-import ldap
-import ldap.filter
 import os
+import pickle
 import re
 import sys
 import time
-import base64
+import traceback
+from typing import Dict, List, Set, Tuple
+
+import ldap
+import ldap.filter
 import univention.admin.config as config
 import univention.admin.modules as udm
 import univention.admin.objects
 import univention.admin.uldap
 import univention.config_registry
-import traceback
-from typing import Dict, List, Tuple, Set
-from univention.admin.uexceptions import valueInvalidSyntax
+from univention.udm.exceptions import CreateError, ModifyError, DeleteError
+from univention.admin.uexceptions import valueInvalidSyntax, valueError
 
 DB_PATH = '/var/lib/univention-user-group-sync'
 DB_ENTRY_FORMAT = re.compile('^[0-9]{11}[.][0-9]{7}$')
@@ -63,11 +65,13 @@ ucr.load()
 # Lock/Unlock this script
 def _take_lock():
     '''Lock this script / Prevent double running'''
-    fcntl.flock(LOCK_FD, fcntl.LOCK_EX | fcntl.LOCK_NB) # EXclusive and NonBlocking
+    fcntl.flock(LOCK_FD, fcntl.LOCK_EX | fcntl.LOCK_NB)  # EXclusive and NonBlocking
+
 
 def _release_lock():
     '''Unlock this script'''
-    fcntl.flock(LOCK_FD, fcntl.LOCK_UN) # UNlock
+    fcntl.flock(LOCK_FD, fcntl.LOCK_UN)  # UNlock
+
 
 def _log_message(message: str):
     '''Write a Log Message'''
@@ -76,25 +80,35 @@ def _log_message(message: str):
     with open(LOG_PATH, 'a+') as f:
         f.write("%s: %s\n" % (t_str, message, ))
 
+
+def _raise_generic_exception(e):
+    '''Display generic exceptions'''
+    _log_message(f'Undefined exception: {e}')
+    print(f"Couldn't determine exception: {e}")
+    sys.exit(1)
+
+
 # Temporarily generate a random password
 def _random_password(_):
     '''Generates and returns a random password'''
     return base64.b64encode(os.urandom(33)).decode('ASCII')
 
-# Encode the given Certificate base64 for UDM
+
+# # Encode the given Certificate base64 for UDM
 # def _encode_certificate(certificate):
 #     '''Encode the given certificate'''
 #     if not certificate:
 #         return None
-#     elif isinstance(certificate, (list,)):
+#     if isinstance(certificate, (list,)):
 #         return base64.b64encode(certificate[0]).decode('ASCII')
-#     else:
-#         return base64.b64encode(certificate).decode('ASCII')
+#     return base64.b64encode(certificate).decode('ASCII')
+
 
 def _decode_filename(filename: str) -> float:
-    """Decode a unix timestamp formatted into a filename via %019.7f
-    returns a <float> unix timestamp"""
+    '''Decode a unix timestamp formatted into a filename via %019.7f
+    returns a <float> unix timestamp'''
     return float(filename)
+
 
 def _find_files():
     '''Returns all files in folder DB_PATH'''
@@ -104,16 +118,19 @@ def _find_files():
             path = os.path.join(DB_PATH, filename)
             yield (timestamp, path, filename, )
 
+
 def _decode_data(raw: bytes):
     '''Decode the given pickle data'''
     return pickle.loads(raw)
 
-def _read_file(path: str, append=False):
+
+def _read_file(path: str):
     '''Read the pickle file found under given path'''
     _log_message("Reading file {}".format(path))
     print("Reading file {}".format(path))
     raw_data = open(path, 'rb').read()
     return _decode_data(raw_data)
+
 
 # Find the User/Group by replacing the LDAP Base, if needed
 def getPosition(user_dn: str) -> str:
@@ -129,26 +146,31 @@ def getPosition(user_dn: str) -> str:
         position = re.sub(r'({})'.format(base), 'ou={},{}'.format(ou, base), position)
     return position
 
+
 def _process_file(path: str):
     '''Read, import and delete a pickle file'''
     data = _read_file(path)
     _import(data)
     os.remove(path)
 
+
 def _uid_to_dn(uid: bytes) -> str:
     '''Return the would be DN for <uid>'''
     # Get dn via getPosition
     return ldap.dn.dn2str([ldap.dn.str2dn(uid)[0]] + ldap.dn.str2dn(getPosition(uid.decode('UTF-8'))))
 
+
 def _uids_to_dns(uids: List[bytes]):
     '''xxx'''
     return list(map(_uid_to_dn, uids))
+
 
 # Process all files in the DB_PATH location
 def _process_files():
     '''Process the first <_process_files.limit> files'''
     for (_, path, filename, ) in sorted(_find_files())[:PROCESS_FILES_LIMIT]:
         _process_file(path)
+
 
 # Check, if the given DN is a User
 def _is_user(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool:
@@ -161,6 +183,7 @@ def _is_user(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool:
         return True
     return user_module.identify(object_dn, attributes)
 
+
 # Check, if the given DN is a Simple Authentication Account
 def _is_simpleauth(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool:
     '''Return whether the object is a user'''
@@ -171,6 +194,7 @@ def _is_simpleauth(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool
     elif b'users/ldap' in attributes.get('univentionObjectType', []):
         return True
     return simpleauth_module.identify(object_dn, attributes)
+
 
 # Check, if the given DN is a Group
 def _is_group(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool:
@@ -183,35 +207,39 @@ def _is_group(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool:
         return True
     return group_module.identify(object_dn, attributes)
 
+
 # Check, if the given User UID exists in our LDAP
 def _user_exists(attributes: Dict[str, List[bytes]]):
     '''Check, if the given User UID exists in our LDAP'''
     search_filter = univention.admin.filter.expression('uid', attributes['uid'][0].decode('UTF-8'))
-    result = user_module.lookup(co, lo, search_filter)
+    result = user_module.lookup(None, lo, search_filter)
     if not result:
         return None
     else:
         return result[0]
+
 
 # Check, if the given Simple Authentication Account UID exists in our LDAP
 def _simpleauth_exists(attributes: Dict[str, List[bytes]]):
     '''Check, if the given User UID exists in our LDAP'''
     search_filter = univention.admin.filter.expression('uid', attributes['uid'][0].decode('UTF-8'))
-    result = simpleauth_module.lookup(co, lo, search_filter)
+    result = simpleauth_module.lookup(None, lo, search_filter)
     if not result:
         return None
     else:
         return result[0]
 
+
 # Check, if the given Group CN exists in our LDAP
 def _group_exists(attributes: Dict[str, List[bytes]]):
     '''Check, if the given Group CN exists in our LDAP'''
     search_filter = univention.admin.filter.expression('cn', attributes['cn'][0].decode('UTF-8'))
-    result = group_module.lookup(co, lo, search_filter)
+    result = group_module.lookup(None, lo, search_filter)
     if not result:
         return None
     else:
         return result[0]
+
 
 def _unset_certificates(attributes: Dict[str, List[bytes]]):
     '''Ignore Certificate attributes, if sync isn't enabled'''
@@ -237,20 +265,18 @@ def getLdapConnection():
     udm.init(lo, po, simpleauth_module)
     udm.init(lo, po, group_module)
 
-def getConfig():
-    '''xxx'''
-    global co
-    co = config.config()
 
 def getUCRV():
     '''Returns the LDAP base'''
     global base
     base = ucr.get('ldap/base')
 
+
 def getUCRCertificatesEnabled():
     '''Returns whether certificates shall be imported'''
     global certificatesEnabled
     certificatesEnabled = ucr.is_true('ldap/sync/certificates')
+
 
 def get_additional_user_mapping():
     '''Apply additional user attribute mapping from UCR'''
@@ -278,6 +304,7 @@ def get_additional_user_mapping():
         mapping_func = univention.admin.handlers.users.user.mapping._map[keep_attribute[1]][1]
         _translate_user_mapping[keep_attribute[0]] = (keep_attribute[1], mapping_func, )
 
+
 def get_ucr_process_files_limit():
     '''Apply custom PROCESS_FILES_LIMIT from UCR'''
     global PROCESS_FILES_LIMIT
@@ -285,9 +312,12 @@ def get_ucr_process_files_limit():
     if ucr_process_files_limit:
         try:
             PROCESS_FILES_LIMIT = int(ucr_process_files_limit)
-        except:
+        except ValueError:
             _log_message('Value specified in UCR variable ldap/sync/process_files_limit is not an integer, ignoring.')
             print('Value specified in UCR variable ldap/sync/process_files_limit is not an integer, ignoring.')
+        except Exception as e:
+            _raise_generic_exception(e)
+
 
 def get_ignore_error():
     '''Returns whether certain errors during import shall be ignored and files causing them removed'''
@@ -300,6 +330,7 @@ def get_ignore_error():
     ignore_error_objectClass_difference = ucr.get(ignore_error_objectClass_difference_var)
     if ignore_error_objectClass_difference:
         ignore_error_objectClass_difference = ignore_error_objectClass_difference.split(',')
+
 
 def _log_ignore_error(ignore_error_var: str):
     '''Returns whether certain errors during import shall be ignored and files causing them removed'''
@@ -362,6 +393,7 @@ _translate_group_mapping = {
 _translate_group_mapping_ignore = frozenset((
 ))
 
+
 ## Maps User LDAP and UDM attributes
 def _translate_user(attribute: str, value: List[bytes]):
     '''Maps LDAP attributes to UDM'''
@@ -370,12 +402,14 @@ def _translate_user(attribute: str, value: List[bytes]):
         value = translate(value)
     return (attribute, value, )
 
+
 ## Maps User LDAP and UDM attributes
 def _translate_user_update(attribute: str, value: List[bytes]):
     '''Maps LDAP attributes to UDM'''
     if attribute in _translate_user_mapping_ignore:
         return (None, None, )
     return _translate_user(attribute, value)
+
 
 ## Maps Simple Authentication Account LDAP and UDM attributes
 def _translate_simpleauth(attribute: str, value: List[bytes]):
@@ -385,12 +419,14 @@ def _translate_simpleauth(attribute: str, value: List[bytes]):
         value = translate(value)
     return (attribute, value, )
 
+
 ## Maps Simple Authentication Account LDAP and UDM attributes
 def _translate_simpleauth_update(attribute: str, value: List[bytes]):
     '''Maps LDAP attributes to UDM'''
     if attribute in _translate_simpleauth_mapping_ignore:
         return (None, None, )
     return _translate_simpleauth(attribute, value)
+
 
 ## Maps Group LDAP and UDM attributes
 def _translate_group(attribute: str, value: List[bytes]):
@@ -400,12 +436,14 @@ def _translate_group(attribute: str, value: List[bytes]):
         value = translate(value)
     return (attribute, value, )
 
+
 ## Maps Group LDAP and UDM attributes
 def _translate_group_update(attribute: str, value: List[bytes]):
     '''Maps LDAP attributes to UDM'''
     if attribute in _translate_group_mapping_ignore:
         return (None, None, )
     return _translate_group(attribute, value) # attribute, value -> str
+
 
 ## Run direct update
 def _direct_update(attributes: Dict[str, List[bytes]], mapping: Set[str], user_dn: bytes):
@@ -415,7 +453,7 @@ def _direct_update(attributes: Dict[str, List[bytes]], mapping: Set[str], user_d
         user = _simpleauth_exists(attributes)
     else:
         _log_message('E: During _direct_update. Unknown user type: %s %s' % (command, object_dn))  # FIXME: Variable Scope
-        exit()
+        sys.exit(1)
     if user is None:
         _log_message("I: Ignoring modify for non-existent %r" % user_dn)
         print("I: Ignoring modify for non-existent %r" % user_dn)
@@ -436,27 +474,30 @@ def _direct_update(attributes: Dict[str, List[bytes]], mapping: Set[str], user_d
                                 _log_message("W: Ignoring difference in objectClass as specified in {} : {}".format(ignore_error_objectClass_difference_var, objectClass))
                                 print("W: Ignoring difference in objectClass as specified in {} : {}".format(ignore_error_objectClass_difference_var, objectClass))
                                 new_values.remove(objectClass)
-                            elif objectClass in old_values and not objectClass in new_values:
+                            elif objectClass in old_values and objectClass not in new_values:
                                 _log_message("W: Ignoring difference in objectClass as specified in {} : {}".format(ignore_error_objectClass_difference_var, objectClass))
                                 print("W: Ignoring difference in objectClass as specified in {} : {}".format(ignore_error_objectClass_difference_var, objectClass))
                                 new_values.append(objectClass)
                 modlist.append((attribute, old_values, new_values, ))
     try:
         lo.modify(user.position.getDn(), modlist)
-    except:
+    except valueError:
         _log_message("E: During User.modify_ldap: %s" % traceback.format_exc())
         print(f"E: During User.modify_ldap: {traceback.format_exc()}")
-        exit()
+        sys.exit(1)
+    except Exception as e:
+        _raise_generic_exception(e)
 
 
 # CREATE
-## Handle ldap.DECODING_ERROR
+# Handle ldap.DECODING_ERROR
 def _ldap_decoding_error(object_type: str, operation: str, object_dn: str):
     _log_message("E: LDAP DECODING_ERROR during {}.{}. There might be an illegal character in the DN. Please refer to the cool solution for allowed characters: {}\n\n{}\n\n{}".format(object_type, operation, cool_solution_link, object_dn, traceback.format_exc()))
     print("E: LDAP DECODING_ERROR during {}.{}. There might be an illegal character in the DN. Please refer to the cool solution for allowed characters: {}\n\n{}\n\n{}".format(object_type, operation, cool_solution_link, object_dn, traceback.format_exc()))
-    exit()
+    sys.exit(1)
 
-## Create a non-existent User
+
+# Create a non-existent User
 def _create_user(user_dn: bytes, attributes: Dict[str, List[bytes]]) -> None:
     '''Creates a new user based on the given attributes'''
     existing_user = _user_exists(attributes)
@@ -472,7 +513,9 @@ def _create_user(user_dn: bytes, attributes: Dict[str, List[bytes]]) -> None:
         user_position_obj.setDn(user_position)
     except ldap.DECODING_ERROR:
         _ldap_decoding_error("User", "Create", user_position)
-    user = user_module.object(co, lo, user_position_obj)
+    except Exception as e:
+        _raise_generic_exception(e)
+    user = user_module.object(None, lo, user_position_obj)
     user.open()
     direct_mapping = set(_translate_user_mapping_direct.copy())
     for (attribute, values, ) in attributes.items():
@@ -482,6 +525,10 @@ def _create_user(user_dn: bytes, attributes: Dict[str, List[bytes]]) -> None:
                 user[attribute] = values
             except valueInvalidSyntax:
                 direct_mapping.add(attribute)
+            except valueError as e:
+                _log_message(f"E: can't create user: {e}")
+            except Exception as e:
+                _raise_generic_exception(e)
     try:
         user.create()
         _direct_update(attributes, direct_mapping, user_dn)
@@ -495,17 +542,20 @@ def _create_user(user_dn: bytes, attributes: Dict[str, List[bytes]]) -> None:
                     'uniqueMember': [user_dn],
                     'univentionUserGroupSyncResync': [b'TRUE']}
                 _modify_group(source_group_dn, source_group_attributes)
-    except:
+    except (CreateError, ModifyError) as e:
         if lo.get(user_position):
-            _log_message("E: During User.create: %s" % traceback.format_exc())
-            print("E: During User.create: %s" % traceback.format_exc())
+            _log_message("E: During User.create: %s" % e)
+            print("E: During User.create: %s" % e)
         else:
-            _log_message("E: during User.create. The object's position does not exist: {}\n{}".format(user_position, traceback.format_exc()))
-            print("E: during User.create. The object's position does not exist: {}\n{}".format(user_position, traceback.format_exc()))
+            _log_message("E: during User.create. The object's position does not exist: {}\n{}".format(user_position, e))
+            print("E: during User.create. The object's position does not exist: {}\n{}".format(user_position, e))
             if ignore_error_missing_position:
                 _log_ignore_error(ignore_error_missing_position_var)
                 return
-        exit()
+        sys.exit(1)
+    except Exception as e:
+        _raise_generic_exception(e)
+
 
 # Create a new Simple Authentication Account, if it doesn't exist yet
 def _create_simpleAuth(simpleauth_dn: bytes, attributes: Dict[str, List[bytes]]):
@@ -523,7 +573,9 @@ def _create_simpleAuth(simpleauth_dn: bytes, attributes: Dict[str, List[bytes]])
         simpleauth_position_obj.setDn(simpleauth_position)
     except ldap.DECODING_ERROR:
         _ldap_decoding_error("SimpleAuth", "Create", simpleauth_position)
-    simpleauth = simpleauth_module.object(co, lo, simpleauth_position_obj)
+    except Exception as e:
+        _raise_generic_exception(e)
+    simpleauth = simpleauth_module.object(None, lo, simpleauth_position_obj)
     simpleauth.open()
     for (attribute, values, ) in attributes.items():
         (attribute, values, ) = _translate_simpleauth(attribute, values)
@@ -532,17 +584,20 @@ def _create_simpleAuth(simpleauth_dn: bytes, attributes: Dict[str, List[bytes]])
     try:
         simpleauth.create()
         _direct_update(attributes, _translate_simpleauth_mapping_direct, simpleauth_dn)
-    except:
+    except univention.admin.uexceptions.ldapError as e:
         if lo.get(simpleauth_position):
-            _log_message("E: During SimpleAuth.create: %s" % traceback.format_exc())
-            print("E: During SimpleAuth.create: %s" % traceback.format_exc())
+            _log_message("E: During SimpleAuth.create: %s" % e)
+            print("E: During SimpleAuth.create: %s" % e)
         else:
             _log_message("E: during SimpleAuth.create. The object's position does not exist: {}\n{}".format(simpleauth_position, traceback.format_exc()))
             print("E: during SimpleAuth.create. The object's position does not exist: {}\n{}".format(simpleauth_position, traceback.format_exc()))
             if ignore_error_missing_position:
                 _log_ignore_error(ignore_error_missing_position_var)
                 return
-        exit()
+        sys.exit(1)
+    except Exception as e:
+        _raise_generic_exception(e)
+
 
 # Create a new Group, if it doesn't exist yet
 def _create_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
@@ -560,8 +615,9 @@ def _create_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
         group_position_obj.setDn(group_position)
     except ldap.DECODING_ERROR:
         _ldap_decoding_error("Group", "Create", group_position)
-
-    group = group_module.object(co, lo, group_position_obj)
+    except Exception as e:
+        _raise_generic_exception(e)
+    group = group_module.object(None, lo, group_position_obj)
     group.open()
     for (attribute, values, ) in attributes.items():
         (attribute, values, ) = _translate_group(attribute, values)
@@ -569,17 +625,20 @@ def _create_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
             group[attribute] = values
     try:
         group.create()
-    except:
+    except CreateError as e:
         if lo.get(group_position):
-            _log_message("E: During Group.create: %s" % traceback.format_exc())
-            print("E: During Group.create: %s" % traceback.format_exc())
+            _log_message("E: During Group.create: %s" % e)
+            print("E: During Group.create: %s" % e)
         else:
             _log_message("E: during Group.create. The object's position does not exist: {}\n{}".format(group_position, traceback.format_exc()))
             print("E: during Group.create. The object's position does not exist: {}\n{}".format(group_position, traceback.format_exc()))
             if ignore_error_missing_position:
                 _log_ignore_error(ignore_error_missing_position_var)
                 return
-        exit()
+        sys.exit(1)
+
+    except Exception as e:
+        _raise_generic_exception(e)
 
 
 # DELETE
@@ -589,13 +648,16 @@ def _delete_user(user_dn: bytes):
     _log_message("Delete User: %r" % user_dn)
     uid = ldap.dn.str2dn(user_dn)[0][0][1]
     search_filter = univention.admin.filter.expression('uid', uid)
-    for lists in user_module.lookup(co, lo, search_filter), simpleauth_module.lookup(co, lo, search_filter):
+    for lists in user_module.lookup(None, lo, search_filter), simpleauth_module.lookup(None, lo, search_filter):
         for existing_user in lists:
             try:
                 existing_user.remove()
-            except:
-                _log_message("E: During User.remove: %s" % traceback.format_exc())
-                print("E: During User.remove: %s" % traceback.format_exc())
+            except (ModifyError, DeleteError) as e:
+                _log_message("E: During User.remove: %s" % e)
+                print("E: During User.remove: %s" % e)
+            except Exception as e:
+                _raise_generic_exception(e)
+
 
 # Delete the given Group
 def _delete_group(group_dn: bytes):
@@ -603,12 +665,14 @@ def _delete_group(group_dn: bytes):
     _log_message("Delete Group: %r\n" % group_dn)
     cn = ldap.dn.str2dn(group_dn)[0][0][1]
     search_filter = ldap.filter.filter_format('cn=%s', [cn])
-    for existing_group in group_module.lookup(co, lo, search_filter):
+    for existing_group in group_module.lookup(None, lo, search_filter):
         try:
             existing_group.remove()
-        except:
-            _log_message("E: During Group.remove: %s" % traceback.format_exc())
-            print("E: During Group.remove: %s" % traceback.format_exc())
+        except (ModifyError, DeleteError) as e:
+            _log_message("E: During Group.remove: %s" % e)
+            print("E: During Group.remove: %s" % e)
+        except Exception as e:
+            _raise_generic_exception(e)
 
 
 # MODIFY
@@ -634,14 +698,21 @@ def _modify_user(user_dn: bytes, attributes: Dict[str, List[bytes]]):
                     changes = True
                 except valueInvalidSyntax:
                     direct_mapping.add(attribute)
+                except valueError as e:
+                    _log_message(f"E: can't modify user: {e}")
+                except Exception as e:
+                    _raise_generic_exception(e)
     if changes:
         try:
             user.modify()
-        except:
+        except ModifyError:
             _log_message('E: During User.modify_changes: %s' % traceback.format_exc())
             print(f'E: During User.modify_changes: {traceback.format_exc()}')
-            exit()
+            sys.exit(1)
+        except Exception as e:
+            _raise_generic_exception(e)
     _direct_update(attributes, direct_mapping, user_dn)
+
 
 # Modify a Simple Authentication Account
 def _modify_simpleAuth(simpleauth_dn: bytes, attributes: Dict[str, List[bytes]]):
@@ -664,11 +735,14 @@ def _modify_simpleAuth(simpleauth_dn: bytes, attributes: Dict[str, List[bytes]])
     if changes:
         try:
             simpleauth.modify()
-        except:
+        except ModifyError:
             _log_message('E: During SimpleAuth.modify_changes: %s' % traceback.format_exc())
             print(f"E: During SimpleAuth.modify_changes: {traceback.format_exc()}")
-            exit()
+            sys.exit(1)
+        except Exception as e:
+            _raise_generic_exception(e)
     _direct_update(attributes, _translate_simpleauth_mapping_direct, simpleauth_dn)
+
 
 # Modify a Group
 def _modify_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
@@ -685,7 +759,7 @@ def _modify_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
 
     # If called by _create_user. Re-Add restored user to a previous group
     if 'univentionUserGroupSyncResync' in attributes:
-        attributes['uniqueMember'].extend([x.encode() for x in group['users']]) # group['users'] is a list of str
+        attributes['uniqueMember'].extend([x.encode() for x in group['users']])  # group['users'] is a list of str
         attributes.pop('univentionUserGroupSyncResync')
 
     for (attribute, values, ) in attributes.items():
@@ -703,10 +777,12 @@ def _modify_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
             _log_message(f"W: During Group.modify_changes: {error}")
         # except ModifyError as error:
         #     _log_message(f"W: During Group.modify_changes: {error}")
-        except:
-            _log_message("E: During Group.modify_changes: %s" % traceback.format_exc())
-            print(f"E: During Group.modify_changes: {traceback.format_exc()}")
-            sys.exit()
+        # except:
+            # _log_message("E: During Group.modify_changes: %s" % traceback.format_exc())
+            # print(f"E: During Group.modify_changes: {traceback.format_exc()}")
+            # sys.exit(1)
+        except Exception as e:
+            _raise_generic_exception(e)
 
 
 # Imports the given object
@@ -765,7 +841,6 @@ def _import(data: Tuple[bytes, str, Dict[str, List[bytes]]]):
 def main():
     _take_lock()
     getLdapConnection()
-    getConfig()
     getUCRV()
     getUCRCertificatesEnabled()
     get_additional_user_mapping()
