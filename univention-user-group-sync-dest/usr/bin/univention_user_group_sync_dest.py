@@ -173,7 +173,7 @@ def _process_files():
 
 
 # Check, if the given DN is a User
-def _is_user(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool:
+def _is_user(object_dn: str, attributes: Dict[str, List[bytes]]) -> bool:
     '''Return whether the object is a user'''
     if not attributes:
         if ldap.dn.str2dn(object_dn)[0][0][0] == 'uid':
@@ -185,10 +185,10 @@ def _is_user(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool:
 
 
 # Check, if the given DN is a Simple Authentication Account
-def _is_simpleauth(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool:
+def _is_simpleauth(object_dn: str, attributes: Dict[str, List[bytes]]) -> bool:
     '''Return whether the object is a user'''
     if not attributes:
-        if object_dn.startswith(b'uid='):
+        if object_dn.startswith('uid='):
             return True
         return False
     elif b'users/ldap' in attributes.get('univentionObjectType', []):
@@ -197,10 +197,10 @@ def _is_simpleauth(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool
 
 
 # Check, if the given DN is a Group
-def _is_group(object_dn: bytes, attributes: Dict[str, List[bytes]]) -> bool:
+def _is_group(object_dn: str, attributes: Dict[str, List[bytes]]) -> bool:
     '''Return whether the object is a group'''
     if not attributes:
-        if object_dn.startswith(b'cn='):
+        if object_dn.startswith('cn='):
             return True
         return False
     elif b'groups/group' in attributes.get('univentionObjectType', []):
@@ -446,7 +446,7 @@ def _translate_group_update(attribute: str, value: List[bytes]):
 
 
 ## Run direct update
-def _direct_update(attributes: Dict[str, List[bytes]], mapping: Set[str], user_dn: bytes):
+def _direct_update(attributes: Dict[str, List[bytes]], mapping: Set[str], user_dn: str):
     if _is_user(user_dn, attributes):
         user = _user_exists(attributes)
     elif _is_simpleauth(user_dn, attributes):
@@ -498,7 +498,7 @@ def _ldap_decoding_error(object_type: str, operation: str, object_dn: str):
 
 
 # Create a non-existent User
-def _create_user(user_dn: bytes, attributes: Dict[str, List[bytes]]) -> None:
+def _create_user(user_dn: str, attributes: Dict[str, List[bytes]]) -> None:
     '''Creates a new user based on the given attributes'''
     existing_user = _user_exists(attributes)
     if existing_user is not None:
@@ -507,7 +507,7 @@ def _create_user(user_dn: bytes, attributes: Dict[str, List[bytes]]) -> None:
         return
 
     _log_message("Create User: %r" % user_dn)
-    user_position = getPosition(user_dn.decode('UTF-8'))
+    user_position = getPosition(user_dn)
     user_position_obj = univention.admin.uldap.position(base)
     try:
         user_position_obj.setDn(user_position)
@@ -539,7 +539,7 @@ def _create_user(user_dn: bytes, attributes: Dict[str, List[bytes]]) -> None:
                 source_group_cn = ldap.dn.str2dn(source_group_dn.decode('UTF-8'))[0][0][1]  # type: str
                 source_group_attributes = {
                     'cn': [source_group_cn.encode()],
-                    'uniqueMember': [user_dn],
+                    'uniqueMember': [user_dn.encode('UTF-8')],
                     'univentionUserGroupSyncResync': [b'TRUE']}
                 _modify_group(source_group_dn, source_group_attributes)
     except (CreateError, ModifyError) as e:
@@ -558,7 +558,7 @@ def _create_user(user_dn: bytes, attributes: Dict[str, List[bytes]]) -> None:
 
 
 # Create a new Simple Authentication Account, if it doesn't exist yet
-def _create_simpleAuth(simpleauth_dn: bytes, attributes: Dict[str, List[bytes]]):
+def _create_simpleAuth(simpleauth_dn: str, attributes: Dict[str, List[bytes]]):
     '''Creates a new Simple Authentication Account based on the given attributes'''
     existing_simpleauth = _simpleauth_exists(attributes)
     if existing_simpleauth is not None:
@@ -567,7 +567,7 @@ def _create_simpleAuth(simpleauth_dn: bytes, attributes: Dict[str, List[bytes]])
         return
 
     _log_message("Create User: %r" % simpleauth_dn)
-    simpleauth_position = getPosition(simpleauth_dn.decode('UTF-8'))
+    simpleauth_position = getPosition(simpleauth_dn)
     simpleauth_position_obj = univention.admin.uldap.position(base)
     try:
         simpleauth_position_obj.setDn(simpleauth_position)
@@ -600,7 +600,7 @@ def _create_simpleAuth(simpleauth_dn: bytes, attributes: Dict[str, List[bytes]])
 
 
 # Create a new Group, if it doesn't exist yet
-def _create_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
+def _create_group(group_dn: str, attributes: Dict[str, List[bytes]]):
     '''Creates a new group based on the given attributes'''
     existing_group = _group_exists(attributes)
     if existing_group is not None:
@@ -609,7 +609,7 @@ def _create_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
         return
 
     _log_message("Create Group: %r" % group_dn)
-    group_position = getPosition(group_dn.decode('UTF-8'))
+    group_position = getPosition(group_dn)
     group_position_obj = univention.admin.uldap.position(base)
     try:
         group_position_obj.setDn(group_position)
@@ -643,7 +643,7 @@ def _create_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
 
 # DELETE
 # Delete the given User / Simple Authentication Account
-def _delete_user(user_dn: bytes):
+def _delete_user(user_dn: str):
     '''Delete the given User'''
     _log_message("Delete User: %r" % user_dn)
     uid = ldap.dn.str2dn(user_dn)[0][0][1]
@@ -660,7 +660,7 @@ def _delete_user(user_dn: bytes):
 
 
 # Delete the given Group
-def _delete_group(group_dn: bytes):
+def _delete_group(group_dn: str):
     '''Delete the given Group'''
     _log_message("Delete Group: %r\n" % group_dn)
     cn = ldap.dn.str2dn(group_dn)[0][0][1]
@@ -677,7 +677,7 @@ def _delete_group(group_dn: bytes):
 
 # MODIFY
 # Modify a User
-def _modify_user(user_dn: bytes, attributes: Dict[str, List[bytes]]):
+def _modify_user(user_dn: str, attributes: Dict[str, List[bytes]]):
     '''Updates existing user based on changes'''
     user = _user_exists(attributes)
     if user is None:
@@ -715,7 +715,7 @@ def _modify_user(user_dn: bytes, attributes: Dict[str, List[bytes]]):
 
 
 # Modify a Simple Authentication Account
-def _modify_simpleAuth(simpleauth_dn: bytes, attributes: Dict[str, List[bytes]]):
+def _modify_simpleAuth(simpleauth_dn: str, attributes: Dict[str, List[bytes]]):
     '''Updates existing simple authentication account based on changes'''
     simpleauth = _simpleauth_exists(attributes)
     if simpleauth is None:
@@ -745,7 +745,7 @@ def _modify_simpleAuth(simpleauth_dn: bytes, attributes: Dict[str, List[bytes]])
 
 
 # Modify a Group
-def _modify_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
+def _modify_group(group_dn: str, attributes: Dict[str, List[bytes]]):
     '''Updates existing Group based on changes'''
     group = _group_exists(attributes)
     if group is None:
@@ -786,7 +786,7 @@ def _modify_group(group_dn: bytes, attributes: Dict[str, List[bytes]]):
 
 
 # Imports the given object
-def _import(data: Tuple[bytes, str, Dict[str, List[bytes]]]):
+def _import(data: Tuple[str, str, Dict[str, List[bytes]]]):
     '''check object type and dispatch to specific import method'''
     (object_dn, command, attributes, ) = data
 
@@ -832,8 +832,8 @@ def _import(data: Tuple[bytes, str, Dict[str, List[bytes]]]):
         _log_message("E: Unknown object type (m): %r" % object_dn)
         return
     else:
-        _log_message(f"E: During _import. Unknown Command ({command.decode('UTF-8')}): {object_dn.decode('UTF-8')}")
-        print(f"E: During _import. Unknown Command ({command.decode('UTF-8')}): {object_dn.decode('UTF-8')}")
+        _log_message(f"E: During _import. Unknown Command ({command}): {object_dn}")
+        print(f"E: During _import. Unknown Command ({command}): {object_dn}")
         return
 
 
