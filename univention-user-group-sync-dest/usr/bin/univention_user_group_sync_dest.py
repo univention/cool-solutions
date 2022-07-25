@@ -541,7 +541,7 @@ def _create_user(user_dn: str, attributes: Dict[str, List[bytes]]) -> None:
                     'cn': [source_group_cn.encode()],
                     'uniqueMember': [user_dn.encode('UTF-8')],
                     'univentionUserGroupSyncResync': [b'TRUE']}
-                _modify_group(source_group_dn, source_group_attributes)
+                _modify_group(source_group_dn.decode('UTF-8'), source_group_attributes)
     except (CreateError, ModifyError) as e:
         if lo.get(user_position):
             _log_message("E: During User.create: %s" % e)
