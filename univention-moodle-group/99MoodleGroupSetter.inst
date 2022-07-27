@@ -1,0 +1,101 @@
+#!/bin/bash
+#
+# Univention Moodle Group Setter
+#	--set join script
+#
+# Copyright 2022 Univention GmbH
+#
+# https://www.univention.de/
+#
+# All rights reserved.
+#
+# The source code of this program is made available
+# under the terms of the GNU Affero General Public License version 3
+# (GNU AGPL V3) as published by the Free Software Foundation.
+#
+# Binary versions of this program provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention and not subject to the GNU AGPL V3.
+#
+# In the case you use this program under the terms of the GNU AGPL V3,
+# the program is provided in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License with the Debian GNU/Linux or Univention distribution in file
+# /usr/share/common-licenses/AGPL-3; if not, see
+# <https://www.gnu.org/licenses/>.
+
+VERSION=1
+
+. /usr/share/univention-join/joinscripthelper.lib
+
+joinscript_init
+
+set -e
+set -u
+
+eval "$(ucr shell server/role ldap/base)"
+
+if [ "$server_role" = "domaincontroller_master" ]; then
+	#RS-1300
+	/usr/sbin/univention-directory-manager settings/extended_attribute create "$@" --ignore_exists --position "cn=custom attributes,cn=univention,${ldap_base}" \
+	--set CLIName=Student \
+	--set copyable=0 \
+	--set deleteObjectClass=0 \
+	--set disableUDMWeb=0 \
+	--set doNotSearch=0 \
+	--set fullWidth=0 \
+	--set groupName=Class \
+	--set groupPosition=1 \
+	--set ldapMapping=univentionFreeAttribute20 \
+	--set longDescription="Students in a Class" \
+	--set mayChange=0 \
+	--set module="groups/group" \
+	--set multivalue=1 \
+	--set name=Student \
+	--set notEditable=1 \
+	--set objectClass=univentionFreeAttributes \
+	--set overwriteTab=0 \
+	--set shortDescription=Students \
+	--set syntax=UserName \
+	--set tabAdvanced=1 \
+	--set tabName=Class \
+	--set tabPosition=2 \
+	--set valueRequired=0 \
+	--set version=2 
+
+	/usr/sbin/univention-directory-manager settings/extended_attribute create "$@" --ignore_exists --position "cn=custom attributes,cn=univention,${ldap_base}" \
+	--set CLIName=Teacher \
+	--set copyable=0 \
+	--set deleteObjectClass=0 \
+	--set disableUDMWeb=0 \
+	--set doNotSearch=0 \
+	--set fullWidth=0 \
+	--set groupName=Class \
+	--set groupPosition=1 \
+	--set ldapMapping=univentionFreeAttribute19 \
+	--set longDescription="Teacher in a Class" \
+	--set mayChange=0 \
+	--set module="groups/group" \
+	--set multivalue=1 \
+	--set name=Student \
+	--set notEditable=1 \
+	--set objectClass=univentionFreeAttributes \
+	--set overwriteTab=0 \
+	--set shortDescription=Teacher \
+	--set syntax=UserName \
+	--set tabAdvanced=1 \
+	--set tabName=Class \
+	--set tabPosition=2 \
+	--set valueRequired=0 \
+	--set version=2 
+fi
+
+joinscript_save_current_version
+
+exit 0

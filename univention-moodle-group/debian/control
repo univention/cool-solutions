@@ -1,0 +1,19 @@
+Source: univention-moodle-group
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Build-Depends: debhelper (>= 8), ucslint, quilt, univention-config-dev
+Standards-Version: 3.9.5
+Homepage: http://www.univention.de/
+
+Package: univention-moodle-group
+Architecture: all
+Depends: ${shlibs:Depends},
+ ${misc:Depends},
+ procps,
+ univention-base-files,
+ univention-server-master | univention-server-backup,
+Description: Put Teacher and Studend into extended attributes for moodle
+ Moodle requires teachers and Students to be in different attributes
+ this listener moves the respective users from classes into
+ the extendede attributes 19 & 20 and makes these available in the UMC
