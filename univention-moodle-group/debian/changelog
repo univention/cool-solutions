@@ -1,3 +1,9 @@
+univention-moodle-group (1.0.0-2) unstable; urgency=medium
+
+  * Change source format version
+
+ -- Kevin Dominik Korte <korte@univention.com>  Tue, 26 Jul 2022 19:28:42 -0700
+
 univention-moodle-group (1.0.0-1) unstable; urgency=low
 
   * Initial Release 

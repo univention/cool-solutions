@@ -12,7 +12,7 @@ Depends: ${shlibs:Depends},
  ${misc:Depends},
  procps,
  univention-base-files,
- univention-server-master | univention-server-backup,
+ univention-server-master | univention-server-backup
 Description: Put Teacher and Studend into extended attributes for moodle
  Moodle requires teachers and Students to be in different attributes
  this listener moves the respective users from classes into
