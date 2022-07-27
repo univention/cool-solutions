@@ -1,0 +1,2 @@
+99MoodleGroupSetter.inst usr/lib/univention-install/
+MoodleGroupSetter.py usr/lib/univention-directory-listener/system/
