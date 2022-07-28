@@ -2,7 +2,7 @@
 #
 # rules file for the debian package
 #
-# Copyright 2007-2018 Univention GmbH
+# Copyright 2020-2022 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -30,7 +30,7 @@
 # <http://www.gnu.org/licenses/>.
 
 %:
-	dh $@
+	dh $@ --with ucr 
 
 override_dh_auto_test:
 	ucslint
