@@ -152,12 +152,12 @@ def _format_data(object_dn: str, new_attributes: Dict[str, List[bytes]], command
 def _get_remove_config():
     attributes = ucr.get('ldap/sync/remove/attribute')
     if attributes:
-        attributes = attributes.encode('UTF-8')
-        attributes: List[bytes] = attributes.split(',')
+        attributes = attributes.split(',')
+        attributes: List[bytes] = [attribute.encode('UTF-8') for attribute in attributes]
     objectClasses = ucr.get('ldap/sync/remove/objectClass')
     if objectClasses:
-        objectClasses = objectClasses.encode('UTF-8')
-        objectClasses: List[bytes] = objectClasses.split(',')
+        objectClasses = objectClasses.split(',')
+        objectClasses: List[bytes] = [objectClass.encode('UTF-8') for objectClass in objectClasses]
     return attributes, objectClasses
 
 def _get_whitelist_config():
