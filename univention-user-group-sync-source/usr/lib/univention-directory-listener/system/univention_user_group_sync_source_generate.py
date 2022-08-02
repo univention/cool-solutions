@@ -219,40 +219,41 @@ def _get_whitelist_config():
     'univentionGroupType'
     ]
     #keep_attributes = ['uid', 'givenName', 'sn', 'displayName', 'title', 'mailPrimaryAddress', 'description', 'univentionBirthday', 'objectClass', 'userPassword', 'pwhistory']
-    attributes = ucr.get('ldap/sync/whitelist/attribute')
+    attributes: str = ucr.get('ldap/sync/whitelist/attribute')
     if attributes:
-        attributes = attributes.split(',')
+        attributes: List[str] = attributes.split(',')
         for attr in attributes:
             keep_attributes.append(attr)
+    keep_attributes = [attribute.encode('UTF-8') for attribute in keep_attributes]
 
     keep_objectClasses = [
     # USER
-    b'automount',
-    b'sambaSamAccount',
-    b'univentionMail',
-    b'univentionPerson',
-    b'krb5KDCEntry',
-    b'organizationalPerson',
-    b'top',
-    b'inetOrgPerson',
-    b'person',
-    b'univentionPWHistory',
-    b'univentionObject',
-    b'krb5Principal',
-    b'shadowAccount',
-    b'posixAccount',
-    b'univentionPolicyReference',
-    b'univentionSAMLEnabled',
+    'automount',
+    'sambaSamAccount',
+    'univentionMail',
+    'univentionPerson',
+    'krb5KDCEntry',
+    'organizationalPerson',
+    'top',
+    'inetOrgPerson',
+    'person',
+    'univentionPWHistory',
+    'univentionObject',
+    'krb5Principal',
+    'shadowAccount',
+    'posixAccount',
+    'univentionPolicyReference',
+    'univentionSAMLEnabled',
 
     # GROUP
-    b'sambaGroupMapping'
+    'sambaGroupMapping'
     ]
-    objectClasses = ucr.get('ldap/sync/whitelist/objectClass')
+    objectClasses: str = ucr.get('ldap/sync/whitelist/objectClass')
     if objectClasses:
-        objectClasses = objectClasses.encode('UTF-8')
-        objectClasses = objectClasses.split(',')
+        objectClasses: List[str] = objectClasses.split(',')
         for objectClass in objectClasses:  # TODO: Warum ist objectClass 'int'?
             keep_objectClasses.append(objectClass)
+    keep_objectClasses = [objectClass.encode('UTF-8') for objectClass in keep_objectClasses]
 
     return apply_whitelist, keep_attributes, keep_objectClasses
 
