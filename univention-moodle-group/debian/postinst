@@ -34,6 +34,6 @@ esac
 
 #DEBHELPER#
 
-/etc/init.d/univention-directory-listener crestart
+systemctl restart univention-directory-listener.service 
 
 exit 0
