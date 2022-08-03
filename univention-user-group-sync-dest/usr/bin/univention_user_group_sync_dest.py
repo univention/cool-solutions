@@ -83,8 +83,9 @@ def _log_message(message: str):
 
 def _raise_generic_exception(e):
     '''Display generic exceptions'''
-    _log_message(f'Undefined exception: {e}')
-    print(f"Couldn't determine exception: {e}")
+    func_name = sys._getframe(1).f_code.co_name
+    _log_message(f"{func_name}: Undefined exception: {e}")
+    print(f"{func_name}: Couldn't determine exception: {e}")
     sys.exit(1)
 
 
