@@ -143,8 +143,9 @@ def _wait_until_after(timestamp: float):
         time.sleep(0.01)
 
 # Pickle the given data
-def _format_data(object_dn: str, new_attributes: Dict[str, List[bytes]], command: str) -> bytes:
+def _format_data(object_dn: str, new_attributes: Dict[str, List[str]], command: str) -> bytes:
     """encode (serialise) object data"""
+    new_attributes: Dict[str, List[bytes]] = convert_attributes_dict_str_to_bytes(new_attributes)
     data = (object_dn, command, new_attributes, )
     return pickle.dumps(data, protocol=2)
 
@@ -152,12 +153,12 @@ def _format_data(object_dn: str, new_attributes: Dict[str, List[bytes]], command
 def _get_remove_config():
     attributes = ucr.get('ldap/sync/remove/attribute')
     if attributes:
-        attributes = attributes.split(',')
-        attributes: List[bytes] = [attribute.encode('UTF-8') for attribute in attributes]
+        attributes: List[str] = attributes.split(',')
+        # attributes: List[bytes] = [attribute.encode('UTF-8') for attribute in attributes]
     objectClasses = ucr.get('ldap/sync/remove/objectClass')
     if objectClasses:
-        objectClasses = objectClasses.split(',')
-        objectClasses: List[bytes] = [objectClass.encode('UTF-8') for objectClass in objectClasses]
+        objectClasses: List[str] = objectClasses.split(',')
+        # objectClasses: List[bytes] = [objectClass.encode('UTF-8') for objectClass in objectClasses]
     return attributes, objectClasses
 
 def _get_whitelist_config():
@@ -224,7 +225,7 @@ def _get_whitelist_config():
         attributes: List[str] = attributes.split(',')
         for attr in attributes:
             keep_attributes.append(attr)
-    keep_attributes = [attribute.encode('UTF-8') for attribute in keep_attributes]
+    # keep_attributes = [attribute.encode('UTF-8') for attribute in keep_attributes]
 
     keep_objectClasses = [
     # USER
@@ -253,13 +254,13 @@ def _get_whitelist_config():
         objectClasses: List[str] = objectClasses.split(',')
         for objectClass in objectClasses:  # TODO: Warum ist objectClass 'int'?
             keep_objectClasses.append(objectClass)
-    keep_objectClasses = [objectClass.encode('UTF-8') for objectClass in keep_objectClasses]
+    # keep_objectClasses = [objectClass.encode('UTF-8') for objectClass in keep_objectClasses]
 
     return apply_whitelist, keep_attributes, keep_objectClasses
 
 # Get prefix from UCR
 def _get_prefix() -> str:
-    prefix = ucr.get('ldap/sync/prefix')
+    prefix: str = ucr.get('ldap/sync/prefix')
     return prefix
 
 # Get custom attributes to be modified
@@ -274,7 +275,7 @@ def _get_prefix_custom_attrs(attrs: List[str], object_type: str):
 # Get user attributes to be taken into consideration
 def _get_username_prefix_config():
     # Attributes which contain the uid of the object in some way
-    attrs = ['uid', 'krb5PrincipalName', 'homeDirectory', 'entryDN']
+    attrs: List[str] = ['uid', 'krb5PrincipalName', 'homeDirectory', 'entryDN']
     # Attributes which contain DNs other than the DN of the object itself
     other_dn_attrs: List[str] = ['memberOf', 'creatorsName', 'modifiersName']
     attrs = _get_prefix_custom_attrs(attrs, 'user')
@@ -296,13 +297,13 @@ def _get_remove_if_univentionUserGroupSyncEnabled_removed_config() -> bool:
     return ucr.is_true('ldap/sync/remove/deactivated_user')
 
 # Apply prefix to attributes which contain the uid or cn of the current object
-def _add_prefix_to_attrs(name: bytes, new_attributes: Dict[str, List[bytes]], prefix: str, attrs: List[str], object_dn: str):
+def _add_prefix_to_attrs(name: str, new_attributes: Dict[str, List[str]], prefix: str, attrs: List[str], object_dn: str):
     prefixed_new_attributes = {}
     for attr in attrs:
         if attr in new_attributes:
             prefixed_new_attributes[attr] = []
             for attr_item in new_attributes[attr]:
-                prefixed_attr_item = re.sub(name, prefix.encode('UTF-8')+name, attr_item)
+                prefixed_attr_item = re.sub(name, prefix+name, attr_item)
                 prefixed_new_attributes[attr].append(prefixed_attr_item)
             new_attributes[attr] = prefixed_new_attributes[attr]
         else:
@@ -310,30 +311,30 @@ def _add_prefix_to_attrs(name: bytes, new_attributes: Dict[str, List[bytes]], pr
     return new_attributes
 
 # Apply prefix to DNs different from the one of the edited object itself
-def _add_prefix_to_dns(new_attributes: Dict[str, List[bytes]], prefix: str, attrs: List[str], get_regex: str, remove_regex: str, name_attr: str, object_dn: str):
+def _add_prefix_to_dns(new_attributes: Dict[str, List[str]], prefix: str, attrs: List[str], get_regex: str, remove_regex: str, name_attr: str, object_dn: str):
     prefixed_new_attributes = {}
     for attr in attrs:
         if attr in new_attributes:
             prefixed_new_attributes[attr] = []
             for attr_item in new_attributes[attr]:
-                other_dn_id_match = re.match(get_regex, attr_item.decode('UTF-8'))
+                other_dn_id_match = re.match(get_regex, attr_item)
                 if other_dn_id_match:
                     other_dn_id = re.sub(remove_regex, '', other_dn_id_match.group())
-                    other_dn_with_prefix = re.sub(get_regex, f'{name_attr}={prefix}{other_dn_id}', attr_item.decode('UTF-8'))
-                    prefixed_new_attributes[attr].append(other_dn_with_prefix.encode('UTF-8'))
+                    other_dn_with_prefix = re.sub(get_regex, f'{name_attr}={prefix}{other_dn_id}', attr_item)
+                    prefixed_new_attributes[attr].append(other_dn_with_prefix)
             new_attributes[attr] = prefixed_new_attributes[attr]
         else:
             _log_warn(f"Couldn't remove non-existent attribute '{attr}' from object with DN {object_dn}")
     return new_attributes
 
 # Just apply prefix to given attributes without any regex matching
-def _just_add_prefix(new_attributes: Dict[str, List[bytes]], prefix: str, attrs: List[str], object_dn: str):
+def _just_add_prefix(new_attributes: Dict[str, List[str]], prefix: str, attrs: List[str], object_dn: str):
     prefixed_new_attributes = {}
     for attr in attrs:
         if attr in new_attributes:  # if 'key' in Dict[str, List[bytes]]
             prefixed_new_attributes[attr] = []
             for attr_item in new_attributes[attr]:
-                prefixed_attr_item = prefix.encode('UTF-8') + attr_item
+                prefixed_attr_item = prefix + attr_item
                 prefixed_new_attributes[attr].append(prefixed_attr_item)
             new_attributes[attr] = prefixed_new_attributes[attr]
         else:
@@ -341,31 +342,43 @@ def _just_add_prefix(new_attributes: Dict[str, List[bytes]], prefix: str, attrs:
     return new_attributes
 
 # Apply prefix to user
-def _add_prefix_to_user(object_dn_with_prefix: str, new_attributes: Dict[str, List[bytes]], prefix: str, command: str, old_attributes: Dict[str, List[bytes]], attrs: List[str], other_dn_attrs: List[str], object_dn: str):
+def _add_prefix_to_user(object_dn_with_prefix: str, new_attributes: Dict[str, List[str]], prefix: str, command: str, old_attributes: Dict[str, List[str]], attrs: List[str], other_dn_attrs: List[str], object_dn: str):
     uid_regex = '^uid=[a-zA-Z0-9-_.]*'
     if command == 'd' or command == 'r':
-        object_dn_with_prefix = re.sub(uid_regex, 'uid={}{}'.format(prefix, old_attributes['uid'][0].decode('UTF-8')), object_dn_with_prefix)
+        object_dn_with_prefix = re.sub(uid_regex, 'uid={}{}'.format(prefix, old_attributes['uid'][0]), object_dn_with_prefix)
         return object_dn_with_prefix, new_attributes
     else:
         username = new_attributes['uid'][0]
-        object_dn_with_prefix = re.sub(uid_regex, 'uid={}{}'.format(prefix, new_attributes['uid'][0].decode('UTF-8')), object_dn_with_prefix)
+        object_dn_with_prefix = re.sub(uid_regex, 'uid={}{}'.format(prefix, new_attributes['uid'][0]), object_dn_with_prefix)
         new_attributes = _add_prefix_to_attrs(username, new_attributes, prefix, attrs, object_dn)
         new_attributes = _add_prefix_to_dns(new_attributes, prefix, other_dn_attrs, '^cn=[a-zA-Z0-9-_. ]*', '^cn=', 'cn', object_dn)
     return object_dn_with_prefix, new_attributes
 
 # Apply prefix to group
-def _add_prefix_to_group(object_dn_with_prefix: str, new_attributes: Dict[str, List[bytes]], prefix: str, command: str, old_attributes: Dict[str, List[bytes]], attrs: List[str], other_dn_attrs: List[str], other_attrs: List[str], object_dn: str):
+def _add_prefix_to_group(object_dn_with_prefix: str, new_attributes: Dict[str, List[str]], prefix: str, command: str, old_attributes: Dict[str, List[str]], attrs: List[str], other_dn_attrs: List[str], other_attrs: List[str], object_dn: str):
     cn_regex = '^cn=[a-zA-Z0-9-_. ]*'
     if command == 'd' or command == 'r':
-        object_dn_with_prefix = re.sub(cn_regex, 'cn={}{}'.format(prefix, old_attributes['cn'][0].decode('UTF-8')), object_dn_with_prefix)
+        object_dn_with_prefix = re.sub(cn_regex, 'cn={}{}'.format(prefix, old_attributes['cn'][0]), object_dn_with_prefix)
         return object_dn_with_prefix, new_attributes
     else:
         group_name = new_attributes['cn'][0]
-        object_dn_with_prefix = re.sub(cn_regex, 'cn={}{}'.format(prefix, new_attributes['cn'][0].decode('UTF-8')), object_dn_with_prefix)
+        object_dn_with_prefix = re.sub(cn_regex, 'cn={}{}'.format(prefix, new_attributes['cn'][0]), object_dn_with_prefix)
         new_attributes = _add_prefix_to_attrs(group_name, new_attributes, prefix, attrs, object_dn)
         new_attributes = _add_prefix_to_dns(new_attributes, prefix, other_dn_attrs, '^uid=[a-zA-Z0-9-_.]*', '^uid=', 'uid', object_dn)
         new_attributes = _just_add_prefix(new_attributes, prefix, other_attrs, object_dn)
     return object_dn_with_prefix, new_attributes
+
+
+def convert_attributes_dict_bytes_to_str(attr: Dict[str, List[bytes]]) -> Dict[str, List[str]]:
+    for key in attr:
+        attr[key] = list(map(bytes.decode, attr[key]))
+    return attr
+
+
+def convert_attributes_dict_str_to_bytes(attr: Dict[str, List[bytes]]) -> Dict[str, List[bytes]]:
+    for key in attr:
+        attr[key] = list(map(str.encode, attr[key]))
+    return attr
 
 #
 def handler(object_dn: str, new_attributes: Dict[str, List[bytes]], old_attributes: Dict[str, List[bytes]], command: str):
@@ -375,19 +388,22 @@ def handler(object_dn: str, new_attributes: Dict[str, List[bytes]], old_attribut
     timestamp = time.time()
     filename = _format_filename(timestamp)
 
+    new_attributes: Dict[str, List[str]] = convert_attributes_dict_bytes_to_str(new_attributes)
+    old_attributes: Dict[str, List[str]] = convert_attributes_dict_bytes_to_str(old_attributes)
+
     remove_if_univentionUserGroupSyncEnabled_removed = _get_remove_if_univentionUserGroupSyncEnabled_removed_config()
     resync = False
     if 'univentionUserGroupSyncEnabled' in new_attributes and 'univentionUserGroupSyncEnabled' in old_attributes:
         if remove_if_univentionUserGroupSyncEnabled_removed:
-            if new_attributes['univentionUserGroupSyncEnabled'] == [b'FALSE'] and old_attributes['univentionUserGroupSyncEnabled'] == [b'TRUE']:
+            if new_attributes['univentionUserGroupSyncEnabled'] == ['FALSE'] and old_attributes['univentionUserGroupSyncEnabled'] == ['TRUE']:
                 _log_warn('Object was deactivated for sync, deleting in destination...')
                 command = 'd'
-        if new_attributes['univentionUserGroupSyncEnabled'] == [b'TRUE'] and old_attributes['univentionUserGroupSyncEnabled'] == [b'FALSE']:
+        if new_attributes['univentionUserGroupSyncEnabled'] == ['TRUE'] and old_attributes['univentionUserGroupSyncEnabled'] == ['FALSE']:
             _log_warn('Object was activated for sync, adding in destination...')
             command = 'n'
             resync = True
     elif 'univentionUserGroupSyncEnabled' in new_attributes and not 'univentionUserGroupSyncEnabled' in old_attributes:
-        if new_attributes['univentionUserGroupSyncEnabled'] == [b'TRUE']:
+        if new_attributes['univentionUserGroupSyncEnabled'] == ['TRUE']:
             _log_warn('Object was activated for sync, adding in destination...')
             command = 'n'
 
@@ -400,7 +416,7 @@ def handler(object_dn: str, new_attributes: Dict[str, List[bytes]], old_attribut
 
     #Remove univention-user-group-sync attribute and objectClass if set
     if 'univentionUserGroupSyncEnabled' in new_attributes:
-        new_attributes['objectClass'].remove(b'univentionUserGroupSync')
+        new_attributes['objectClass'].remove('univentionUserGroupSync')
         if not resync:
             new_attributes.pop('univentionUserGroupSyncEnabled')
 
