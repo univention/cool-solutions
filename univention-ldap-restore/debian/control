@@ -3,9 +3,8 @@ Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
 Standards-Version: 3.9.8
-Build-Depends: debhelper (>= 7),
+Build-Depends: debhelper-compat (= 12),
  python-all,
- python-support (>= 0.90),
  univention-config-dev,
  ucslint-univention,
  python-mock,
