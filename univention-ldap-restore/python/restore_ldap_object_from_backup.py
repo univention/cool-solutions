@@ -80,9 +80,9 @@ class MyRestore():
 
 	def identify_udm(self, entry):
 		try:
-			udm_type = entry.get('univentionObjectType', [None])[0]
+			udm_type = entry.get('univentionObjectType', [None])[0].decode('utf-8')
 			univention.admin.modules.update()
-			udm = univention.admin.modules.get(udm_type)
+			udm = univention.admin.modules.get(udm_type)		
 			univention.admin.modules.init(self.lo, self.position, udm)
 			return udm.object(self.co, self.lo, self.position, dn=self.args.dn, attributes=entry)
 		except Exception:
@@ -93,7 +93,7 @@ class MyRestore():
 			print('\t{0}: {1}'.format(self.ldif_parser.records_read, dn))
 		if self.args.dn:
 			if self.args.restore_membership:
-				if self.args.dn.lower() in list(map(str.lower, entry.get('uniqueMember', []))):
+				if self.args.dn.lower() in map(str.lower, entry.get('uniqueMember', [])):
 					self.unique_member_of.add(dn)
 			if self.args.dn.lower() == dn.lower():
 				if not self.args.restore_membership:
