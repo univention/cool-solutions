@@ -1,7 +1,7 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Univention GmbH
+# Copyright 2018-2022 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -28,6 +28,8 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
+#from __future__ import print_function
+from __future__ import absolute_import
 import argparse
 import gzip
 import sys
@@ -43,13 +45,13 @@ import univention.admin.modules
 import univention.admin.config
 import univention.config_registry
 
-BLACKLIST_ATTRS = ['uid', 'uidNumber', 'sambaSID', 'entryUUID']
+BLACKLIST_ATTRS = [b'uid', b'uidNumber', b'sambaSID', b'entryUUID']
 
 
 def my_pretty_print(obj, indent=2):
 	tmp = pprint.pformat(obj)
 	for i in tmp.split('\n'):
-		print('\t' * indent + i)
+		print(('\t' * indent + i))
 
 
 class MyRestore():
@@ -65,12 +67,12 @@ class MyRestore():
 		self.ucr = univention.config_registry.ConfigRegistry()
 		self.ucr.load()
 		univention.admin.modules.update()
-		self.operational_mark = ['directoryOperation', 'dSAOperation', 'distributedOperation']
-		self.operational_attributes = set(['entryCSN', 'entrycsn'])
+		self.operational_mark = [b'directoryOperation', b'dSAOperation', b'distributedOperation']
+		self.operational_attributes = set([b'entryCSN',b'entrycsn'])  # type: set([bytes,bytes]) 
 		self.get_operational_attributes()
 
 	def get_backup_data(self):
-		print('Checking backup file {0}.'.format(self.args.backup_file))
+		print('Checking backup file {0}.'.format(self.args.backup_file))  
 		with gzip.open(self.args.backup_file, 'rb') as f:
 			self.ldif_parser = LDIFParser(f)
 			self.ldif_parser.handle = self.ldap_parser_handle
@@ -91,7 +93,7 @@ class MyRestore():
 			print('\t{0}: {1}'.format(self.ldif_parser.records_read, dn))
 		if self.args.dn:
 			if self.args.restore_membership:
-				if self.args.dn.lower() in map(str.lower, entry.get('uniqueMember', [])):
+				if self.args.dn.lower() in list(map(str.lower, entry.get('uniqueMember', []))):
 					self.unique_member_of.add(dn)
 			if self.args.dn.lower() == dn.lower():
 				if not self.args.restore_membership:
@@ -106,7 +108,8 @@ class MyRestore():
 		for i in schema[0][1].get('attributeTypes'):
 			for j in self.operational_mark:
 				if j.lower() in i.lower():
-					attr = i.split('NAME ')[1].split("'")[1]
+					attr = i.split(b'NAME ')[1].split(b"'")[1]
+					#print(type(attr))
 					self.operational_attributes.add(attr)
 					self.operational_attributes.add(attr.lower())
 
@@ -170,7 +173,7 @@ class MyRestore():
 	def add_from_backup(self):
 		ml = self.create_modlist(new=self.backup_data)
 		if self.args.verbose or self.args.dry_run:
-			print('\tAdding {0} with modlist:'.format(self.args.dn))
+			print(('\tAdding {0} with modlist:'.format(self.args.dn)))
 			my_pretty_print(ml)
 		if not self.args.dry_run:
 			try:
@@ -194,7 +197,11 @@ class MyRestore():
 
 	@property
 	def backup_data(self):
-		return self.backup_data
+		return self.__backup_data
+	
+	@backup_data.setter
+	def backup_data(self, mydata):
+		self.__backup_data = mydata	
 
 	@property
 	def backup_udm_object(self):
@@ -205,13 +212,23 @@ class MyRestore():
 		self.get_ldap_data()
 		return self.identify_udm(self.ldap_data)
 
+	
 	@property
 	def unique_member_of(self):
-		return self.unique_member_of
+		return self.__unique_member_of
+
+	@unique_member_of.setter
+	def unique_member_of(self, myset):
+		self.__unique_member_of = myset	
 
 	@property
 	def ldap_data(self):
-		return self.ldap_data
+		return self.__ldap_data
+
+	@ldap_data.setter
+	def ldap_data(self, myldapdata):
+		self.__ldap_data = myldapdata
+
 
 
 def main():
