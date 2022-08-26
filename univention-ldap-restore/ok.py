@@ -28,6 +28,8 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
+#from __future__ import print_function
+from __future__ import absolute_import
 import argparse
 import gzip
 import sys
@@ -42,6 +44,7 @@ import univention.admin.objects
 import univention.admin.modules
 import univention.admin.config
 import univention.config_registry
+#from univention.udm import UDM
 
 
 BLACKLIST_ATTRS = ['uid', 'uidNumber', 'sambaSID', 'entryUUID']
@@ -79,7 +82,8 @@ class MyRestore():
 		self.ucr.load()
 		univention.admin.modules.update()
 		self.operational_mark = [b'directoryOperation', b'dSAOperation', b'distributedOperation']
-		self.operational_attributes = set([b'entryCSN',b'entrycsn']) 
+		self.operational_attributes = set([b'entryCSN',b'entrycsn'])  # type: set([bytes,bytes]) 
+		#self.get_operational_attribut()
 
 	def get_backup_data(self):
 		print('Checking backup file {0}.'.format(self.args.backup_file))  
@@ -92,6 +96,7 @@ class MyRestore():
 		try:
 			udm_type = entry.get('univentionObjectType', [None])[0].decode('utf-8')
 			univention.admin.modules.update()
+			#udm = UDM.admin().version(2).get('users/user')
 			udm = univention.admin.modules.get(udm_type)		
 			univention.admin.modules.init(self.lo, self.position, udm)
 			return udm.object(self.co, self.lo, self.position, dn=self.args.dn, attributes=entry)
@@ -119,10 +124,12 @@ class MyRestore():
 			for j in self.operational_mark:
 				if j.lower() in i.lower():
 					attr = i.split(b'NAME ')[1].split(b"'")[1]
+					#print(type(attr))
 					self.operational_attributes.add(attr)
 					self.operational_attributes.add(attr.lower())
 
 	def create_modlist(self, new=None, old=None):
+		import pdb;pdb.set_trace()
 		ml = list()
 		if new and not old:
 			ml = addModlist(new, ignore_attr_types=self.operational_attributes)
@@ -144,10 +151,14 @@ class MyRestore():
 		return None
 
 	# modify
+
 	def update_from_backup(self):
+		import pdb;pdb.set_trace()
 		self.get_ldap_data()
 		ml = self.create_modlist(new=self.backup_data, old=self.ldap_data)
+		print(ml)
 		ml = filter_modlist(ml)
+		print(ml)
 		if ml:
 			if self.args.verbose or self.args.dry_run:
 				print('\tUpdating {0} with modlist:'.format(self.args.dn))
@@ -180,7 +191,10 @@ class MyRestore():
 				udm_object.modify()
 
 	def add_from_backup(self):
+		#import pdb;pdb.set_trace()
 		ml = self.create_modlist(new=self.backup_data)
+		print(ml)
+
 		ml = filter_modlist(ml)
 		if self.args.verbose or self.args.dry_run:
 			print(('\tAdding {0} with modlist:'.format(self.args.dn)))
