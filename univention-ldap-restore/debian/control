@@ -6,8 +6,7 @@ Standards-Version: 3.9.8
 Build-Depends: debhelper-compat (= 12),
  python-all,
  univention-config-dev,
- ucslint-univention,
- python-mock,
+  python-mock,
  python-mockldap
 
 Package: univention-ldap-restore
