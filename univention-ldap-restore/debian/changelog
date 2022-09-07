@@ -1,3 +1,9 @@
+univention-ldap-restore (0.1.0-4) unstable; urgency=medium
+
+  * fix: add missing dependency ucslint
+
+ -- Jannik Ahlers <ahlers@univention.de>  Wed, 07 Sep 2022 15:42:54 +0200
+
 univention-ldap-restore (0.1.0-3) unstable; urgency=medium
 
   * fix: minor qa touchups
