@@ -52,12 +52,17 @@ def my_pretty_print(obj, indent=2):
 	for i in tmp.split('\n'):
 		print(('\t' * indent + i))
 
+
 def filter_modlist(_input):
 	output = []
 	filter_values = [
 		"entryUUID",
 		"structuralObjectClass",
-		"creatorsName", "createTimestamp", "entryCSN", "modifiersName", "modifyTimestamp"
+		"creatorsName",
+		"createTimestamp",
+		"entryCSN",
+		"modifiersName",
+		"modifyTimestamp",
 	]
 	for _item in _input:
 		if all(x not in filter_values for x in _item):
@@ -79,10 +84,10 @@ class MyRestore():
 		self.ucr.load()
 		univention.admin.modules.update()
 		self.operational_mark = [b'directoryOperation', b'dSAOperation', b'distributedOperation']
-		self.operational_attributes = set([b'entryCSN',b'entrycsn']) 
+		self.operational_attributes = set([b'entryCSN', b'entrycsn'])
 
 	def get_backup_data(self):
-		print('Checking backup file {0}.'.format(self.args.backup_file))  
+		print('Checking backup file {0}.'.format(self.args.backup_file))
 		with gzip.open(self.args.backup_file, 'rb') as f:
 			self.ldif_parser = LDIFParser(f)
 			self.ldif_parser.handle = self.ldap_parser_handle
@@ -92,7 +97,7 @@ class MyRestore():
 		try:
 			udm_type = entry.get('univentionObjectType', [None])[0].decode('utf-8')
 			univention.admin.modules.update()
-			udm = univention.admin.modules.get(udm_type)		
+			udm = univention.admin.modules.get(udm_type)
 			univention.admin.modules.init(self.lo, self.position, udm)
 			return udm.object(self.co, self.lo, self.position, dn=self.args.dn, attributes=entry)
 		except Exception:
@@ -103,7 +108,7 @@ class MyRestore():
 			print('\t{0}: {1}'.format(self.ldif_parser.records_read, dn))
 		if self.args.dn:
 			if self.args.restore_membership:
-				if self.args.dn.lower() in map(str.lower, entry.get('uniqueMember', [])):
+				if self.args.dn.lower().encode() in map(bytes.lower, entry.get('uniqueMember', [])):
 					self.unique_member_of.add(dn)
 			if self.args.dn.lower() == dn.lower():
 				if not self.args.restore_membership:
@@ -129,7 +134,8 @@ class MyRestore():
 		elif new and old:
 			ml = modifyModlist(old, new, ignore_attr_types=self.operational_attributes)
 		ml = filter_modlist(ml)
-		return ml 
+		return ml
+
 	def dn_exists(self, dn):
 		return bool(self.lo.get(dn))
 
@@ -208,10 +214,10 @@ class MyRestore():
 	@property
 	def backup_data(self):
 		return self.__backup_data
-	
+
 	@backup_data.setter
 	def backup_data(self, mydata):
-		self.__backup_data = mydata	
+		self.__backup_data = mydata
 
 	@property
 	def backup_udm_object(self):
@@ -222,14 +228,13 @@ class MyRestore():
 		self.get_ldap_data()
 		return self.identify_udm(self.ldap_data)
 
-	
 	@property
 	def unique_member_of(self):
 		return self.__unique_member_of
 
 	@unique_member_of.setter
 	def unique_member_of(self, myset):
-		self.__unique_member_of = myset	
+		self.__unique_member_of = myset
 
 	@property
 	def ldap_data(self):
@@ -238,7 +243,6 @@ class MyRestore():
 	@ldap_data.setter
 	def ldap_data(self, myldapdata):
 		self.__ldap_data = myldapdata
-
 
 
 def main():
