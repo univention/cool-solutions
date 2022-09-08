@@ -1,3 +1,9 @@
+univention-user-group-sync-source (2.1.0-38) unstable; urgency=medium
+
+  * Fix byte-str encoding
+
+ -- Julian Helms <helms@univention.de>  Thu, 08 Sep 2022 13:02:01 +0200
+
 univention-user-group-sync-source (2.1.0-37) unstable; urgency=medium
 
   * Revert bytes to str from 2.1.0-35
