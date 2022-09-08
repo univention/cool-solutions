@@ -152,12 +152,12 @@ def _format_data(object_dn: str, new_attributes: Dict[str, List[bytes]], command
 def _get_remove_config():
     attributes = ucr.get('ldap/sync/remove/attribute')
     if attributes:
-        attributes: List[str] = attributes.split(',')
-        attributes: List[bytes] = [attribute.encode('UTF-8') for attribute in attributes]
+        attributes = attributes.split(',')
+        attributes = [attribute.encode('UTF-8') for attribute in attributes]
     objectClasses = ucr.get('ldap/sync/remove/objectClass')
     if objectClasses:
-        objectClasses: List[str] = objectClasses.split(',')
-        objectClasses: List[bytes] = [objectClass.encode('UTF-8') for objectClass in objectClasses]
+        objectClasses = objectClasses.split(',')
+        objectClasses = [objectClass.encode('UTF-8') for objectClass in objectClasses]
     return attributes, objectClasses
 
 def _get_whitelist_config():
@@ -296,12 +296,13 @@ def _get_remove_if_univentionUserGroupSyncEnabled_removed_config() -> bool:
     return ucr.is_true('ldap/sync/remove/deactivated_user')
 
 # Apply prefix to attributes which contain the uid or cn of the current object
-def _add_prefix_to_attrs(name: str, new_attributes: Dict[str, List[str]], prefix: str, attrs: List[str], object_dn: str):
+def _add_prefix_to_attrs(name: str, new_attributes: Dict[str, List[bytes]], prefix: str, attrs: List[str], object_dn: str):
     prefixed_new_attributes = {}
     for attr in attrs:
         if attr in new_attributes:
             prefixed_new_attributes[attr] = []
             for attr_item in new_attributes[attr]:
+                attr_item = attr_item.decode('UTF-8')
                 prefixed_attr_item = re.sub(name, prefix+name, attr_item)
                 prefixed_new_attributes[attr].append(prefixed_attr_item)
             new_attributes[attr] = prefixed_new_attributes[attr]
@@ -310,12 +311,13 @@ def _add_prefix_to_attrs(name: str, new_attributes: Dict[str, List[str]], prefix
     return new_attributes
 
 # Apply prefix to DNs different from the one of the edited object itself
-def _add_prefix_to_dns(new_attributes: Dict[str, List[str]], prefix: str, attrs: List[str], get_regex: str, remove_regex: str, name_attr: str, object_dn: str):
+def _add_prefix_to_dns(new_attributes: Dict[str, List[bytes]], prefix: str, attrs: List[str], get_regex: str, remove_regex: str, name_attr: str, object_dn: str):
     prefixed_new_attributes = {}
     for attr in attrs:
         if attr in new_attributes:
             prefixed_new_attributes[attr] = []
             for attr_item in new_attributes[attr]:
+                attr_item = attr_item.decode('UTF-8')
                 other_dn_id_match = re.match(get_regex, attr_item)
                 if other_dn_id_match:
                     other_dn_id = re.sub(remove_regex, '', other_dn_id_match.group())
@@ -327,12 +329,13 @@ def _add_prefix_to_dns(new_attributes: Dict[str, List[str]], prefix: str, attrs:
     return new_attributes
 
 # Just apply prefix to given attributes without any regex matching
-def _just_add_prefix(new_attributes: Dict[str, List[str]], prefix: str, attrs: List[str], object_dn: str):
+def _just_add_prefix(new_attributes: Dict[str, List[bytes]], prefix: str, attrs: List[str], object_dn: str):
     prefixed_new_attributes = {}
     for attr in attrs:
         if attr in new_attributes:  # if 'key' in Dict[str, List[bytes]]
             prefixed_new_attributes[attr] = []
             for attr_item in new_attributes[attr]:
+                attr_item = attr_item.decode('UTF-8')
                 prefixed_attr_item = prefix + attr_item
                 prefixed_new_attributes[attr].append(prefixed_attr_item)
             new_attributes[attr] = prefixed_new_attributes[attr]
@@ -347,7 +350,7 @@ def _add_prefix_to_user(object_dn_with_prefix: str, new_attributes: Dict[str, Li
         object_dn_with_prefix = re.sub(uid_regex, 'uid={}{}'.format(prefix, old_attributes['uid'][0].decode('UTF-8')), object_dn_with_prefix)
         return object_dn_with_prefix, new_attributes
     else:
-        username = new_attributes['uid'][0]
+        username = new_attributes['uid'][0].decode('UTF-8')
         object_dn_with_prefix = re.sub(uid_regex, 'uid={}{}'.format(prefix, new_attributes['uid'][0].decode('UTF-8')), object_dn_with_prefix)
         new_attributes = _add_prefix_to_attrs(username, new_attributes, prefix, attrs, object_dn)
         new_attributes = _add_prefix_to_dns(new_attributes, prefix, other_dn_attrs, '^cn=[a-zA-Z0-9-_. ]*', '^cn=', 'cn', object_dn)
@@ -360,7 +363,7 @@ def _add_prefix_to_group(object_dn_with_prefix: str, new_attributes: Dict[str, L
         object_dn_with_prefix = re.sub(cn_regex, 'cn={}{}'.format(prefix, old_attributes['cn'][0].decode('UTF-8')), object_dn_with_prefix)
         return object_dn_with_prefix, new_attributes
     else:
-        group_name = new_attributes['cn'][0]
+        group_name = new_attributes['cn'][0].decode('UTF-8')
         object_dn_with_prefix = re.sub(cn_regex, 'cn={}{}'.format(prefix, new_attributes['cn'][0].decode('UTF-8')), object_dn_with_prefix)
         new_attributes = _add_prefix_to_attrs(group_name, new_attributes, prefix, attrs, object_dn)
         new_attributes = _add_prefix_to_dns(new_attributes, prefix, other_dn_attrs, '^uid=[a-zA-Z0-9-_.]*', '^uid=', 'uid', object_dn)
