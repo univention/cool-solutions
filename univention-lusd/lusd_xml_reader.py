@@ -1,8 +1,9 @@
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 # Copyright 2022 Univention GmbH
 #
-# http://www.univention.de/
+# https://www.univention.de/
 #
 # All rights reserved.
 #
@@ -25,7 +26,7 @@
 # You should have received a copy of the GNU Affero General Public
 # License with the Debian GNU/Linux or Univention distribution in file
 # /usr/share/common-licenses/AGPL-3; if not, see
-# <http://www.gnu.org/licenses/>.
+# <https://www.gnu.org/licenses/>.
 
 """
 XML reader for importing users.
@@ -33,7 +34,6 @@ XML reader for importing users.
 
 import re
 import base64
-from six import iteritems
 import xmltodict
 import gnupg
 from ucsschool.importer.models.import_user import ImportUser
@@ -74,7 +74,7 @@ class XmlReader(HttpApiCsvReader):
         if 'class_level' in self.config:
             self.class_level_key = self.config['class_level']['key']
             self.class_level_mapping = dict(
-                (re.compile(k), v) for k, v in iteritems(self.config['class_level']['mapping'])
+                (re.compile(k), v) for k, v in self.config['class_level']['mapping'].items()
             )  # type: Dict[Pattern, str]
             self.class_level_unknown_is_error = self.config['class_level']['unknown_is_error']
             self.class_level_config = True
@@ -89,9 +89,9 @@ class XmlReader(HttpApiCsvReader):
         else:
             self.lusd_normalize_classes = False
         if 'lusd_fix_no_class_in_input_data' in self.config:
-                self.lusd_fix_no_class_in_input_data = True
-                self.lusd_fix_no_class_in_input_data_key_name = self.config['lusd_fix_no_class_in_input_data']['key_name']
-                self.lusd_fix_no_class_in_input_data_class_name = self.config['lusd_fix_no_class_in_input_data']['class_name']
+            self.lusd_fix_no_class_in_input_data = True
+            self.lusd_fix_no_class_in_input_data_key_name = self.config['lusd_fix_no_class_in_input_data']['key_name']
+            self.lusd_fix_no_class_in_input_data_class_name = self.config['lusd_fix_no_class_in_input_data']['class_name']
         else:
             self.lusd_fix_no_class_in_input_data = False
 
@@ -119,7 +119,7 @@ class XmlReader(HttpApiCsvReader):
                     level, self.xml_item_path))
         for item in items:
             self.logger.debug('Found item: %r', item)
-            self.entry_count += 1
+            # self.entry_count += 1
             if self.lusd_fix_no_class_in_input_data:
                 if not self.lusd_fix_no_class_in_input_data_key_name in item.keys():
                     self.logger.warning('Adding pseudo class {} to item {}'.format(self.lusd_fix_no_class_in_input_data_class_name, item))
@@ -129,7 +129,7 @@ class XmlReader(HttpApiCsvReader):
                 self.fieldnames = item.keys()
             yield {
                 key.strip(): (value or '').strip()
-                for key, value in iteritems(item)
+                for key, value in item.items()
             }
 
     def handle_input(self, mapping_key, mapping_value, csv_value, import_user):
@@ -155,7 +155,7 @@ class XmlReader(HttpApiCsvReader):
             if mapping_value == self.class_level_key:
                 # transform value using mapping in class_level:mapping
                 new_value = csv_value
-                for k, v in iteritems(self.class_level_mapping):
+                for k, v in self.class_level_mapping.items():
                     m = k.match(csv_value)
                     if m and v == '$class_level':
                         try:
