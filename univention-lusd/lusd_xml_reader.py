@@ -32,15 +32,20 @@
 XML reader for importing users.
 """
 
-import re
 import base64
-import xmltodict
+import re
+
 import gnupg
+import magic
+import xmltodict
+from ucsschool.importer.exceptions import (UcsSchoolImportError,
+                                           UcsSchoolImportFatalError)
 from ucsschool.importer.models.import_user import ImportUser
-from ucsschool.importer.exceptions import UcsSchoolImportError, UcsSchoolImportFatalError
+from ucsschool.importer.models.reader import CsvReader
 from ucsschool.importer.reader.http_api_csv_reader import HttpApiCsvReader
+
 try:
-    from typing import Dict
+    from typing import Any, Iterator, Dict, Text
     from typing.re import Pattern
 except ImportError:
     pass
@@ -95,42 +100,52 @@ class XmlReader(HttpApiCsvReader):
         else:
             self.lusd_fix_no_class_in_input_data = False
 
-    def read(self, *args, **kwargs):
+    def read(self, *args, **kwargs):  # type: (*Any, **Any) -> Iterator[Dict[Text, Text]]
         """
         Generate dicts from a PGP encrypted XML file.
+        Skip the XMLreader if an unencrypted CSV file is provided.
 
         :param args: ignored
         :param dict kwargs: ignored
         :return: iterator over list of dicts
         :rtype: Iterator
         """
-        decrypted_xml = self.decrypt_pgp_file()
-        fixed_xml = self.fix_xml(decrypted_xml)
 
-        # walk XML tree
-        self.logger.debug('Reading XML...')
-        doc = xmltodict.parse(fixed_xml, encoding='utf-8')
-        # descend tree until level of items
-        items = doc
-        for level in self.xml_item_path:
-            items = items.get(level)
-            if not items:
-                raise EmptyXMLLevel('Found no items in {!r}, when descending XML path {!r}.'.format(
-                    level, self.xml_item_path))
-        for item in items:
-            self.logger.debug('Found item: %r', item)
-            # self.entry_count += 1
-            if self.lusd_fix_no_class_in_input_data:
-                if not self.lusd_fix_no_class_in_input_data_key_name in item.keys():
-                    self.logger.warning('Adding pseudo class {} to item {}'.format(self.lusd_fix_no_class_in_input_data_class_name, item))
-                    item.update({self.lusd_fix_no_class_in_input_data_key_name: self.lusd_fix_no_class_in_input_data_class_name})
-            self.input_data = item.values()
-            if not self.fieldnames:
-                self.fieldnames = item.keys()
-            yield {
-                key.strip(): (value or '').strip()
-                for key, value in item.items()
-            }
+        self.logger.info('Checking if %r is a CSV file...', self.filename)
+        if self.is_csv_file(self.filename):
+            self.logger.info('%r is a CSV file! Skipping XML reader..', self.filename)
+            # TODO: set source_uid to csv-<role> determined by lusd config
+            CsvReader.read(self, *args, **kwargs)
+        else:
+            self.logger.info('%r is not CSV file! Going on with XML reader..', self.filename)
+            decrypted_xml = self.decrypt_pgp_file()
+            fixed_xml = self.fix_xml(decrypted_xml)
+
+            # walk XML tree
+            self.logger.debug('Reading XML...')
+            doc = xmltodict.parse(fixed_xml, encoding='utf-8')
+            # descend tree until level of items
+            items = doc
+            for level in self.xml_item_path:
+                items = items.get(level)
+                if not items:
+                    raise EmptyXMLLevel('Found no items in {!r}, when descending XML path {!r}.'.format(
+                        level, self.xml_item_path))
+            for item in items:
+                self.logger.debug('Found item: %r', item)
+                # self.entry_count += 1
+                if self.lusd_fix_no_class_in_input_data:
+                    if not self.lusd_fix_no_class_in_input_data_key_name in item.keys():
+                        self.logger.warning('Adding pseudo class {} to item {}'.format(self.lusd_fix_no_class_in_input_data_class_name, item))
+                        item.update({self.lusd_fix_no_class_in_input_data_key_name: self.lusd_fix_no_class_in_input_data_class_name})
+                self.input_data = item.values()
+                if not self.fieldnames:
+                    self.fieldnames = item.keys()
+                yield {
+                    key.strip(): (value or '').strip()
+                    for key, value in item.items()
+                    if key is not None
+                }
 
     def handle_input(self, mapping_key, mapping_value, csv_value, import_user):
         """
@@ -190,6 +205,16 @@ class XmlReader(HttpApiCsvReader):
                     # no transformation if data, let csv_reader.map() handle saving the data into import_user
                     return False
         return super(XmlReader, self).handle_input(mapping_key, mapping_value, csv_value, import_user)
+
+    @staticmethod
+    def is_csv_file(filename):
+        """
+        Checks if the given file is a CSV file
+
+        :return: decrypted data
+        :rtype: bool
+        """
+        return magic.from_file(filename) == "CSV text"
 
     def decrypt_pgp_file(self):
         """
