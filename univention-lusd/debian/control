@@ -17,6 +17,7 @@ Depends:
  python-xmltodict,
  python-gnupg,
  univention-lusd,
+ python-magic,
  ${misc:Depends},
  ${python:Depends}
 Provides:
@@ -34,6 +35,7 @@ Depends:
  python-xmltodict,
  python-gnupg,
  univention-lusd,
+ python3-magic,
  ${misc:Depends},
  ${python3:Depends}
 Provides:
