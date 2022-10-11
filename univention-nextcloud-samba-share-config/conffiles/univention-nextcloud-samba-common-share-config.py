@@ -31,16 +31,12 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-#__package__='' 	# workaround for PEP 366
-
-#import listener
-import subprocess
 import sys
-import time
-import univention.nextcloud_samba.common as common
-import univention.debug
+
 import univention.admin.uldap
+import univention.nextcloud_samba.common as common
 from univention.config_registry import ConfigRegistry
+
 ucr = ConfigRegistry()
 ucr.load()
 
@@ -60,14 +56,14 @@ remoteHost = ucr.get('nextcloud-samba-share-config/remoteHost')
 applicableGroup = ucr.get('nextcloud-samba-share-config/nextcloudGroup')
 
 for shareCn in commonShares:
-	#share = lo.search("(&(objectClass=univentionShareSamba)(cn={}))".format(shareCn))
-	shareDn = common.getShareObj(lo, groupCn)
-#	if share is False:
-#		return
+	# share = lo.search("(&(objectClass=univentionShareSamba)(cn={}))".format(shareCn))
+	share = common.getShareObj(lo, shareCn)
+	if share is False:
+		break
 
 	if share:
 		# Enable files_external Nextcloud app; moved to postinst, too much overhead to do this on every single change
-		#univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Making sure files_external app is enabled")
+		#ud.debug(ud.LISTENER, ud.WARN, "Making sure files_external app is enabled")
 		#enableAppCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ app:enable files_external"
 		#subprocess.call(enableAppCmd, shell=True)
 
@@ -75,11 +71,12 @@ for shareCn in commonShares:
 		#shareSambaName = ''.join(share[0][1]['univentionShareSambaName'])
 		shareHost = common.getShareHost(share)
 		shareSambaName = common.getShareSambaName(share)
+		mountName = shareSambaName
 		mountId = common.getMountId(mountName)
 		if not mountId:
 			print("Creating new mount {} ...".format(mountName))
 			mountId = common.createMount(mountName)
 
-		common.setMountConfig(mountId, shareHost, shareName, windomain, applicableGroup)
+		common.setMountConfig(mountId, shareHost, shareSambaName, windomain, applicableGroup)
 	else:
 		print("Nothing to do: no share was found for CN {}".format(shareCn))

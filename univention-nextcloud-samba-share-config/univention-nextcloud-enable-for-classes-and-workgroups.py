@@ -31,22 +31,21 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-__package__='' 	# workaround for PEP 366
+from __future__ import absolute_import
+
+from typing import List
+
+import univention.admin.uldap
+import univention.debug as ud
 
 import listener
-import univention.debug
-import univention.admin.uldap
-from typing import List, Dict
 
-name='nextcloud-enable-for-classes-and-workgroups'
-description='Enable Nextcloud for all classes, workgroups, Domain Users <ou>, lehrer-<ou> and schueler-<ou>'
-filter='(|(cn=Domain Users *)(cn=lehrer-*)(cn=schueler-*)(ucsschoolRole=school_class:school:*)(ucsschoolRole=workgroup:school:*))'
-attributes=[]
-modrdn="1"
+name = 'nextcloud-enable-for-classes-and-workgroups'
+description = 'Enable Nextcloud for all classes, workgroups, Domain Users <ou>, lehrer-<ou> and schueler-<ou>'
+filter = '(|(cn=Domain Users *)(cn=lehrer-*)(cn=schueler-*)(ucsschoolRole=school_class:school:*)(ucsschoolRole=workgroup:school:*))'
+attributes = []
+modrdn = "1"
 
-def initialize() -> None:
-	univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "{}: initialize".format(name))
-	return
 
 def handler(
 	dn: str,
@@ -55,20 +54,16 @@ def handler(
 	command: str = '') -> None:
 	if command == 'd':
 		return
-	univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "DN {}".format(dn))
+	ud.debug(ud.LISTENER, ud.WARN, "DN {}".format(dn))
 	listener.setuid(0)
-	lo, po = univention.admin.uldap.getAdminConnection()
-	listener.unsetuid()
+	try:
+		lo, po = univention.admin.uldap.getAdminConnection()
+	finally:
+		listener.unsetuid()
 
-	#Enable group for nextcloud
+	# Enable group for nextcloud
 	nextcloudEnabled = lo.getAttr(dn, 'nextcloudEnabled')
 	if not nextcloudEnabled:
-		modlist = [('objectClass', '', 'nextcloudGroup'), ('nextcloudEnabled', '', '1')]
+		modlist = [('objectClass', b'', b'nextcloudGroup'), ('nextcloudEnabled', b'', b'1')]
 		lo.modify(dn, modlist)
-		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Enabled Nextcloud for {}".format(dn))
-
-def clean():
-	return
-
-def postrun():
-	return
+		ud.debug(ud.LISTENER, ud.WARN, "Enabled Nextcloud for {}".format(dn))

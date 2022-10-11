@@ -31,15 +31,19 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-__package__='' 	# workaround for PEP 366
+from __future__ import absolute_import
 
-import listener
 import re
 import subprocess
 import time
-import univention.debug
-import univention.admin.uldap
+
+from ldap.filter import filter_format
+
+import univention.debug as ud
 from univention.config_registry import ConfigRegistry
+
+import listener
+
 ucr = ConfigRegistry()
 ucr.load()
 
@@ -49,23 +53,24 @@ if occ_path_ucr:
 else:
 	occ_path = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ"
 
+
 def isDomainUsersCn(dn):
-	domainUsersRegex = '^cn=Domain\ Users\ [A-Za-z0-9_]*'
-	domainUsersOuRegex = '^cn=Domain\ Users\ '
+	domainUsersRegex = r'^cn=Domain\ Users\ [A-Za-z0-9_]*'
 	domainUsersMatch = re.match(domainUsersRegex, dn)
 	return domainUsersMatch
 
+
 def isSchuelerCn(dn):
 	schuelerRegex = '^cn=schueler-[A-Za-z0-9_]*'
-	schuelerOuRegex = '^cn=schueler-'
 	schuelerMatch = re.match(schuelerRegex, dn)
 	return schuelerMatch
 
+
 def isLehrerCn(dn):
 	lehrerRegex = '^cn=lehrer-[A-Za-z0-9_]*'
-	lehrerOuRegex = '^cn=lehrer-'
 	lehrerMatch = re.match(lehrerRegex, dn)
 	return lehrerMatch
+
 
 def getGroupCn(dn):
 	groupCnRegex = '^cn=([^,]*)'
@@ -73,84 +78,95 @@ def getGroupCn(dn):
 	groupCn = re.sub('^cn=', '', groupCnMatch.group())
 	return groupCn
 
+
 def getShareObj(lo, cn):
 	timeout = time.time() + 30
-	shareObj = lo.search("(&(objectClass=univentionShareSamba)(cn={}))".format(cn))
+	shareObj = lo.search(filter_format("(&(objectClass=univentionShareSamba)(cn={}))", (cn,)))
 	while not shareObj:
-		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Share {} does not yet exist in LDAP, waiting until it exists with 30s timeout".format(cn))
-		shareObj = lo.search("(&(objectClass=univentionShareSamba)(cn={}))".format(cn))
+		ud.debug(ud.LISTENER, ud.WARN, "Share {} does not yet exist in LDAP, waiting until it exists with 30s timeout".format(cn))
+		shareObj = lo.search(filter_format("(&(objectClass=univentionShareSamba)(cn={}))", (cn,)))
 		time.sleep(1)
 		if time.time() > timeout:
-			univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Share {} does not exist in LDAP after 30s timeout. Share mount won't be created".format(cn))
+			ud.debug(ud.LISTENER, ud.WARN, "Share {} does not exist in LDAP after 30s timeout. Share mount won't be created".format(cn))
 			return False
 	return shareObj[0][1]
 
+
 def getShareHost(share):
-	shareHost = ''.join(share['univentionShareHost'])
-	return shareHost
+	return b''.join(share['univentionShareHost']).decode('UTF-8')
+
 
 def getShareSambaName(share):
-	shareSambaName = ''.join(share['univentionShareSambaName'])
-	return shareSambaName
+	return b''.join(share['univentionShareSambaName']).decode('UTF-8')
+
 
 def getBase():
-	base = ucr.get('ldap/base')
-	return base
+	return ucr.get('ldap/base')
+
 
 def getDomain():
-	domainname = ucr.get('domainname')
-	return domainname
+	return ucr.get('domainname')
+
 
 def getWinDomain():
-	winDomain = ucr.get('windows/domain')
-	return winDomain
+	return ucr.get('windows/domain')
+
 
 def getMountId(mountName):
-	getMountIdCmd = "{} files_external:list | grep '\/{}' | awk '{{print $2}}'".format(occ_path, mountName)
+	getMountIdCmd = r"{} files_external:list | grep '\/{}' | awk '{{print $2}}'".format(occ_path, mountName)
 	listener.setuid(0)
-	mountId = subprocess.check_output(getMountIdCmd, shell=True)
-	listener.unsetuid()
-	mountId = re.search('[0-9]+', mountId)
+	try:
+		mountId = subprocess.check_output(getMountIdCmd, shell=True)
+	finally:
+		listener.unsetuid()
+	mountId = re.search('[0-9]+', mountId.decode('UTF-8'))
 	if mountId:
 		mountId = mountId.group()
-		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Mount for {} is already configured. Re-setting config if command is not delete...".format(mountName))
+		ud.debug(ud.LISTENER, ud.WARN, "Mount for {} is already configured. Re-setting config if command is not delete...".format(mountName))
 	else:
-		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "No mount for {} configured yet.".format(mountName))
+		ud.debug(ud.LISTENER, ud.WARN, "No mount for {} configured yet.".format(mountName))
 		mountId = False
 	return mountId
 
+
 def getSshCommand(remoteUser, remotePwFile, remoteHost):
-	sshCommand = "univention-ssh {} {}@{} ".format(remotePwFile, remoteUser, remoteHost)
-	return sshCommand
+	return "univention-ssh {} {}@{} ".format(remotePwFile, remoteUser, remoteHost)
+
 
 def createMount(mountName, useSSH=False, remoteUser=None, remotePwFile=None, remoteHost=None):
-	if useSSH == True:
+	if useSSH:
 		sshCommand = getSshCommand()
 	else:
 		sshCommand = ""
 
 	createMountCmd = "{}{} files_external:create '/{}' smb 'password::sessioncredentials'".format(sshCommand, occ_path, mountName)
 	listener.setuid(0)
-	subprocess.call(createMountCmd, shell=True)
-	listener.unsetuid()
+	try:
+		subprocess.call(createMountCmd, shell=True)
+	finally:
+		listener.unsetuid()
 	mountId = getMountId(mountName)
 	return mountId
 
+
 def deleteMount(mountId, useSSH=False):
-	if useSSH == True:
+	if useSSH:
 		sshCommand = getSshCommand()
 	else:
 		sshCommand = ""
 
 	deleteMountCmd = "{}{} files_external:delete --yes {}".format(sshCommand, occ_path, mountId)
-	univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Deleting mount with ID {}".format(mountId))
+	ud.debug(ud.LISTENER, ud.WARN, "Deleting mount with ID {}".format(mountId))
 	listener.setuid(0)
-	subprocess.call(deleteMountCmd, shell=True)
-	listener.unsetuid()
-	univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Deleted mount with ID {}".format(mountId))
+	try:
+		subprocess.call(deleteMountCmd, shell=True)
+	finally:
+		listener.unsetuid()
+	ud.debug(ud.LISTENER, ud.WARN, "Deleted mount with ID {}".format(mountId))
+
 
 def setMountConfig(mountId, shareHost, shareName, windomain, groupCn, useSSH=False, remoteUser=None, remotePwFile=None, remoteHost=None, applicableGroup=None):
-	if useSSH == True:
+	if useSSH:
 		sshCommand = getSshCommand()
 	else:
 		sshCommand = ""
@@ -167,25 +183,26 @@ def setMountConfig(mountId, shareHost, shareName, windomain, groupCn, useSSH=Fal
 	addNcAdminApplicableUserCmd = "{}{} files_external:applicable --add-user 'nc_admin' {}".format(sshCommand, occ_path, mountId)
 
 	listener.setuid(0)
-	subprocess.call(addHostCmd, shell=True)
-	subprocess.call(addShareRootCmd, shell=True)
-	subprocess.call(addShareNameCmd, shell=True)
-	subprocess.call(addShareDomainCmd, shell=True)
-	ret = subprocess.call(checkApplicableGroupCmd, shell=True)
-	timeout = time.time() + 600
-	while ret != 0:
-		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Group {} does not yet exist in Nextcloud, waiting until it exists with 600s timeout".format(groupCn))
-		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Performing LDAP search via occ for group {} to make Nextcloud aware of it".format(groupCn))
-		subprocess.call(checkLdapApplicableGroupCmd, shell=True)
+	try:
+		subprocess.call(addHostCmd, shell=True)
+		subprocess.call(addShareRootCmd, shell=True)
+		subprocess.call(addShareNameCmd, shell=True)
+		subprocess.call(addShareDomainCmd, shell=True)
 		ret = subprocess.call(checkApplicableGroupCmd, shell=True)
-		if time.time() > timeout:
-			break
-	if ret == 0:
-		subprocess.call(addApplicableGroupCmd, shell=True)
-		subprocess.call(cleanupApplicableGroupCmd, shell=True)
-		listener.unsetuid()
-		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Finished share mount configuration for share {}".format(groupCn))
-	else:
-		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Group {} for share {} was not found in Nextcloud. Check ldapBaseGroups in Nextcloud ldap config. Adding nc_admin as applicable user to hide share mount from all other users.".format(groupCn, shareName))
-		subprocess.call(addNcAdminApplicableUserCmd, shell=True)
+		timeout = time.time() + 600
+		while ret != 0:
+			ud.debug(ud.LISTENER, ud.WARN, "Group {} does not yet exist in Nextcloud, waiting until it exists with 600s timeout".format(groupCn))
+			ud.debug(ud.LISTENER, ud.WARN, "Performing LDAP search via occ for group {} to make Nextcloud aware of it".format(groupCn))
+			subprocess.call(checkLdapApplicableGroupCmd, shell=True)
+			ret = subprocess.call(checkApplicableGroupCmd, shell=True)
+			if time.time() > timeout:
+				break
+		if ret == 0:
+			subprocess.call(addApplicableGroupCmd, shell=True)
+			subprocess.call(cleanupApplicableGroupCmd, shell=True)
+			ud.debug(ud.LISTENER, ud.WARN, "Finished share mount configuration for share {}".format(groupCn))
+		else:
+			ud.debug(ud.LISTENER, ud.WARN, "Group {} for share {} was not found in Nextcloud. Check ldapBaseGroups in Nextcloud ldap config. Adding nc_admin as applicable user to hide share mount from all other users.".format(groupCn, shareName))
+			subprocess.call(addNcAdminApplicableUserCmd, shell=True)
+	finally:
 		listener.unsetuid()
