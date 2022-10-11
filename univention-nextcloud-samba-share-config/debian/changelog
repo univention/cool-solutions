@@ -1,3 +1,9 @@
+univention-nextcloud-samba-share-config (1.0.0-21) unstable; urgency=medium
+
+  * Python 3 Migration
+
+ -- Björn Usling <bjoern.usling@univention.de>  Mon, 10 Oct 2022 09:09:40 +0200
+
 univention-nextcloud-samba-share-config (1.0.0-20) unstable; urgency=medium
 
   * Add compatibility with non-App Center nextcloud

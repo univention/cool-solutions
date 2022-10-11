@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 # Univention Nextcloud Samba share configuration
@@ -36,6 +36,7 @@ __package__='' 	# workaround for PEP 366
 import listener
 import univention.debug
 import univention.admin.uldap
+from typing import List, Dict
 
 name='nextcloud-enable-for-classes-and-workgroups'
 description='Enable Nextcloud for all classes, workgroups, Domain Users <ou>, lehrer-<ou> and schueler-<ou>'
@@ -43,11 +44,15 @@ filter='(|(cn=Domain Users *)(cn=lehrer-*)(cn=schueler-*)(ucsschoolRole=school_c
 attributes=[]
 modrdn="1"
 
-def initialize():
+def initialize() -> None:
 	univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "{}: initialize".format(name))
 	return
 
-def handler(dn, new, old, command=''):
+def handler(
+	dn: str,
+	new: dict[str, List[bytes]],
+	old: dict[str, List[bytes]],
+	command: str = '') -> None:
 	if command == 'd':
 		return
 	univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "DN {}".format(dn))

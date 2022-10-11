@@ -2,18 +2,22 @@
 Description[de]=Entfernter Nextcloud-Server auf dem die common Samba shares dieses Servers eingebunden werden sollen.
 Description[en]=Remote Nextcloud host to configure mounts of common Samba shares of this server on.
 Type=str
+Categories=Nextcloud-Samba-Share
 
 [nextcloud-samba-share-config/remoteUser]
-Description[de]=
+Description[de]=Entfernter Benutzer mit dem die common Samba shares dieses Servers eingebunden werden sollen.
 Description[en]=User on remote Nextcloud host to configure mounts of common Samba shares of this server on.
 Type=str
+Categories=Nextcloud-Samba-Share
 
 [nextcloud-samba-share-config/remotePwFile]
-Description[de]=
+Description[de]=Pfad zur Passwort Datei des entfernten Benutzers mit dem die common Samba shares dieses Servers eingebunden werden sollen.
 Description[en]=Path to password file of user on remote Nextcloud host to configure mounts of common Samba shares of this server on.
 Type=str
+Categories=Nextcloud-Samba-Share
 
 [nextcloud-samba-share-config/nextcloudGroup]
-Description[de]=
+Description[de]=DN der LDAP Gruppe um den Zugang zu die common Samba shares zu gewähren.
 Description[en]=DN of LDAP group to allow access to mounted common Samba shares in Nextcloud.
 Type=str
+Categories=Nextcloud-Samba-Share
