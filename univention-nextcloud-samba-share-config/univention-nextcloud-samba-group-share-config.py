@@ -130,8 +130,8 @@ def handler(dn, new, old, command=''):
 			#ud.debug(ud.LISTENER, ud.WARN, "Making sure files_external app is enabled")
 			#enableAppCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ app:enable files_external"
 			#subprocess.call(enableAppCmd, shell=True)
-			share = shares[mountName][0]
-			shareName = shares[mountName][1]
+			share = shares[mountName][0][0]
+			shareName = shares[mountName][0][1]
 			shareHost = common.getShareHost(share)
 			mountId = common.getMountId(mountName)
 			if not mountId:

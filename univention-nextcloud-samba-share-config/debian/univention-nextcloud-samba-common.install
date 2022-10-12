@@ -1,1 +1,1 @@
-python/ /usr/lib/python3/dist-packages/univention/nextcloud_samba
+python/* /usr/lib/python3/dist-packages/univention/nextcloud_samba

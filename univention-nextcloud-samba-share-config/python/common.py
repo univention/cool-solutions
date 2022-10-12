@@ -81,10 +81,10 @@ def getGroupCn(dn):
 
 def getShareObj(lo, cn):
 	timeout = time.time() + 30
-	shareObj = lo.search(filter_format("(&(objectClass=univentionShareSamba)(cn={}))", (cn,)))
+	shareObj = lo.search(filter_format("(&(objectClass=univentionShareSamba)(cn=%s))", (cn,)))
 	while not shareObj:
 		ud.debug(ud.LISTENER, ud.WARN, "Share {} does not yet exist in LDAP, waiting until it exists with 30s timeout".format(cn))
-		shareObj = lo.search(filter_format("(&(objectClass=univentionShareSamba)(cn={}))", (cn,)))
+		shareObj = lo.search(filter_format("(&(objectClass=univentionShareSamba)(cn=%s))", (cn,)))
 		time.sleep(1)
 		if time.time() > timeout:
 			ud.debug(ud.LISTENER, ud.WARN, "Share {} does not exist in LDAP after 30s timeout. Share mount won't be created".format(cn))
