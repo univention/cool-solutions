@@ -1,5 +1,8 @@
-#!/usr/bin/python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# This file is Python2 & 3 compatible!
+# Therefore it works with UCS4 & 5
 #
 # Copyright 2022 Univention GmbH
 #
@@ -38,6 +41,7 @@ import re
 import gnupg
 import magic
 import xmltodict
+from six import iteritems
 from ucsschool.importer.exceptions import (UcsSchoolImportError,
                                            UcsSchoolImportFatalError)
 from ucsschool.importer.models.import_user import ImportUser
@@ -79,7 +83,7 @@ class XmlReader(HttpApiCsvReader):
         if 'class_level' in self.config:
             self.class_level_key = self.config['class_level']['key']
             self.class_level_mapping = dict(
-                (re.compile(k), v) for k, v in self.config['class_level']['mapping'].items()
+                (re.compile(k), v) for k, v in iteritems(self.config['class_level']['mapping'])
             )  # type: Dict[Pattern, str]
             self.class_level_unknown_is_error = self.config['class_level']['unknown_is_error']
             self.class_level_config = True
@@ -114,7 +118,13 @@ class XmlReader(HttpApiCsvReader):
         self.logger.info('Checking if %r is a CSV file...', self.filename)
         if self.is_csv_file(self.filename):
             self.logger.info('%r is a CSV file! Skipping XML reader..', self.filename)
+
+            if 'lusd_csv_source_uid' in self.config:
+                self.lusd_csv_source_uid = self.config['lusd_csv_source_uid']
+            else:
+                self.lusd_csv_source_uid = "lusd-csv"
             # TODO: set source_uid to csv-<role> determined by lusd config
+
             CsvReader.read(self, *args, **kwargs)
         else:
             self.logger.info('%r is not CSV file! Going on with XML reader..', self.filename)
@@ -143,7 +153,7 @@ class XmlReader(HttpApiCsvReader):
                     self.fieldnames = item.keys()
                 yield {
                     key.strip(): (value or '').strip()
-                    for key, value in item.items()
+                    for key, value in iteritems(item)
                     if key is not None
                 }
 
@@ -170,7 +180,7 @@ class XmlReader(HttpApiCsvReader):
             if mapping_value == self.class_level_key:
                 # transform value using mapping in class_level:mapping
                 new_value = csv_value
-                for k, v in self.class_level_mapping.items():
+                for k, v in iteritems(self.class_level_mapping):
                     m = k.match(csv_value)
                     if m and v == '$class_level':
                         try:
@@ -235,7 +245,7 @@ class XmlReader(HttpApiCsvReader):
             status = gpg.decrypt(str_data, passphrase=passphrase)
             self.logger.info('GnuPG decryption status: %r', status.status)
             if not status.ok:
-                raise DecryptionError('Could not decrypt %r: %s', self.filename, status.stderr)
+                raise DecryptionError('Could not decrypt {!s}: {!s}'.format(self.filename, status.stderr))
         return status.data
 
     @staticmethod

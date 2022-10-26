@@ -17,6 +17,7 @@ Activate in JSON configuration with:
 	"passphrase_file": "/etc/...",
 	"lusd_normalize_classes": true,
 	"lusd_normalize_classes": true,
+	"lusd_csv_source_uid": "lusd-csv",
 	"lusd_fix_no_class_in_input_data": {
 		"key_name": "Klassenname",
 		"class_name": "KeineKlasse"
@@ -35,6 +36,9 @@ Activate in JSON configuration with:
 	}
 }
 ```
+
+Except `reader`, `gpghome`, `passphrase_file`, all config options are optional.
+
 Make `/var/lib/ucs-school-import/configs/user_import_http-api.json` a symlink of `/var/lib/ucs-school-import/configs/user_import.json`, if the HTTP-API should be used.
 
 The content of the file with the passphrase is expected to be a base64 encoded string.
