@@ -78,7 +78,6 @@ class XmlReader(HttpApiCsvReader):
     xml_item_path = ('NetzwerknutzerDaten', 'DatenTable')  # branches to descend to find list of items
 
     def __init__(self):
-        super(XmlReader, self).__init__()
         # cache and compile class_level configuration
         if 'class_level' in self.config:
             self.class_level_key = self.config['class_level']['key']
@@ -103,6 +102,11 @@ class XmlReader(HttpApiCsvReader):
             self.lusd_fix_no_class_in_input_data_class_name = self.config['lusd_fix_no_class_in_input_data']['class_name']
         else:
             self.lusd_fix_no_class_in_input_data = False
+        if 'lusd_csv_source_uid' in self.config:
+            self.lusd_csv_source_uid = self.config['lusd_csv_source_uid']
+        else:
+            self.lusd_csv_source_uid = False
+        super(XmlReader, self).__init__()
 
     def read(self, *args, **kwargs):  # type: (*Any, **Any) -> Iterator[Dict[Text, Text]]
         """
@@ -118,13 +122,6 @@ class XmlReader(HttpApiCsvReader):
         self.logger.info('Checking if %r is a CSV file...', self.filename)
         if self.is_csv_file(self.filename):
             self.logger.info('%r is a CSV file! Skipping XML reader..', self.filename)
-
-            if 'lusd_csv_source_uid' in self.config:
-                self.lusd_csv_source_uid = self.config['lusd_csv_source_uid']
-            else:
-                self.lusd_csv_source_uid = "lusd-csv"
-            # TODO: set source_uid to csv-<role> determined by lusd config
-
             CsvReader.read(self, *args, **kwargs)
         else:
             self.logger.info('%r is not CSV file! Going on with XML reader..', self.filename)
@@ -158,6 +155,12 @@ class XmlReader(HttpApiCsvReader):
                 }
 
     def handle_input(self, mapping_key, mapping_value, csv_value, import_user):
+        # TODO: right context?
+        """
+        Change the source_uid of the user if we have a CSV file
+        """
+        if self.lusd_csv_source_uid:
+            import_user.source_uid = self.lusd_csv_source_uid
         """
         * normalize class names
         * transform values of property `class_level:key` using mapping in
