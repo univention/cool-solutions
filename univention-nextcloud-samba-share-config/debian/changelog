@@ -1,3 +1,9 @@
+univention-nextcloud-samba-share-config (1.0.0-24) unstable; urgency=medium
+
+  * fix(univention-nextcloud-samba-share-config): Fixed home share mount on external Nextcloud
+
+ -- Björn Usling <bjoern.usling@univention.de>  Thu, 03 Nov 2022 08:54:16 +0100
+
 univention-nextcloud-samba-share-config (1.0.0-23) unstable; urgency=medium
 
   * Fix share mount on external Nextcloud
