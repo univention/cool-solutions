@@ -51,8 +51,10 @@ modrdn = "1"
 def handler(dn, new, old, command=''):
 	ud.debug(ud.LISTENER, ud.WARN, "DN {}".format(dn))
 	listener.setuid(0)
-	lo, po = univention.admin.uldap.getMachineConnection()
-	listener.unsetuid()
+	try:
+		lo, po = univention.admin.uldap.getMachineConnection()
+	finally:
+		listener.unsetuid()
 
 	windomain = common.getWinDomain()
 	domain = common.getDomain()

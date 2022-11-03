@@ -47,8 +47,8 @@ if not commonShares:
 	sys.exit(1)
 
 commonShares = commonShares.split(',')
-#if 'Marktplatz' in commonShares:
-#	commonShares.remove('Marktplatz')
+if 'Marktplatz' in commonShares:
+	commonShares.remove('Marktplatz')
 windomain = common.getWinDomain()
 remoteUser = ucr.get('nextcloud-samba-share-config/remoteUser')
 remotePwFile = ucr.get('nextcloud-samba-share-config/remotePwFile')

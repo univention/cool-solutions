@@ -47,11 +47,7 @@ attributes = []
 modrdn = "1"
 
 
-def handler(
-	dn: str,
-	new: dict[str, List[bytes]],
-	old: dict[str, List[bytes]],
-	command: str = '') -> None:
+def handler(dn, new, old, command=''):
 	if command == 'd':
 		return
 	ud.debug(ud.LISTENER, ud.WARN, "DN {}".format(dn))

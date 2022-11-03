@@ -52,6 +52,7 @@ if occ_path_ucr:
 	useSSH = True
 	ud.debug(ud.LISTENER, ud.WARN, "External Nextcloud".format())
 	occ_cmd = "sudo -u www-data php {}".format(occ_path_ucr)
+	ud.debug(ud.LISTENER, ud.WARN, "occ Command: {}".format(occ_cmd))
 	remoteUser = ucr.get('nextcloud-samba-share-config/remoteUser')
 	remotePwFile = ucr.get('nextcloud-samba-share-config/remotePwFile')
 	remoteHost = ucr.get('nextcloud-samba-share-config/remoteHost')

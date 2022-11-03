@@ -51,7 +51,7 @@ fi
 
 # restart directory listener due to new or changed listener module
 if [ -f "/etc/init.d/univention-directory-listener" ] ; then
-   /etc/init.d/univention-directory-listener crestart
+   service univention-directory-listener restart
 fi
 
 exit 0
