@@ -52,11 +52,11 @@ if occ_path_ucr:
 	useSSH = True
 	ud.debug(ud.LISTENER, ud.WARN, "External Nextcloud".format())
 	occ_cmd = "sudo -u www-data php {}".format(occ_path_ucr)
-	ud.debug(ud.LISTENER, ud.WARN, "occ Command: {}".format(occ_cmd))
 	remoteUser = ucr.get('nextcloud-samba-share-config/remoteUser')
 	remotePwFile = ucr.get('nextcloud-samba-share-config/remotePwFile')
 	remoteHost = ucr.get('nextcloud-samba-share-config/remoteHost')
 	applicableGroup = ucr.get('nextcloud-samba-share-config/nextcloudGroup')
+	nc_admin = ucr.get('nextcloud-samba-share-config/nc_admin')
 else:
 	useSSH = False
 	ud.debug(ud.LISTENER, ud.WARN, "Univention Nextcloud App".format())
@@ -123,10 +123,8 @@ def getWinDomain():
 
 def getMountId(mountName):
 	if useSSH:
-		sshCommand = getSshCommand(remotePwFile, remoteUser, remoteHost) #+ "\""
+		sshCommand = getSshCommand(remotePwFile, remoteUser, remoteHost)
 		getMountIdCmd = r"{}{} files_external:list | grep '\/{}' | awk '{{print $2}}'".format(sshCommand, occ_cmd, mountName)
-		#getMountIdCmd = getMountIdCmdTmp + "\""
-		ud.debug(ud.LISTENER, ud.WARN, "getMountIdCmd: {}".format(getMountIdCmd))
 	else:
 		getMountIdCmd = r"{} files_external:list | grep '\/{}' | awk '{{print $2}}'".format(occ_cmd, mountName)
 	listener.setuid(0)
@@ -155,7 +153,6 @@ def createMount(mountName):
 	else:
 		createMountCmd = "{} files_external:create '/{}' smb 'password::sessioncredentials'".format(occ_cmd, mountName)
 
-	ud.debug(ud.LISTENER, ud.WARN, "createMountCmd: {}".format(createMountCmd))
 	listener.setuid(0)
 	try:
 		subprocess.call(createMountCmd, shell=True)
@@ -186,14 +183,14 @@ def setMountConfig(mountId, shareHost, shareName, windomain, groupCn, applicable
 		sshCommand = getSshCommand(remotePwFile, remoteUser, remoteHost)
 		addHostCmd = "{}\"{} files_external:config {} host {}\"".format(sshCommand, occ_cmd, mountId, shareHost)
 		addShareRootCmd = "{}\"{} files_external:config {} share '/'\"".format(sshCommand, occ_cmd, mountId)
-		addShareNameCmd = "{}\"{} files_external:config {} root '{}'\"".format(sshCommand, occ_cmd, mountId, shareName)
+		addShareNameCmd = "{}\"{} files_external:config {} root '{}'\"".format(sshCommand, occ_cmd, mountId, shareName.replace('$','\\$'))
 		addShareDomainCmd = "{}\"{} files_external:config {} domain '{}'\"".format(sshCommand, occ_cmd, mountId, windomain)
 		#checkApplicableGroupCmd = "{}\"{} group:list | grep -E '\-\ {}:'\"".format(sshCommand, occ_cmd, groupCn)
-		checkApplicableGroupCmd = "{}\"{} group:adduser '{}' nc_admin\"".format(sshCommand, occ_cmd, groupCn)
+		checkApplicableGroupCmd = "{}\"{} group:adduser '{}' {}\"".format(sshCommand, occ_cmd, groupCn, nc_admin)
 		checkLdapApplicableGroupCmd = "{}\"{} ldap:search --group '{}'\"".format(sshCommand, occ_cmd, groupCn)
-		cleanupApplicableGroupCmd = "{}\"{} group:removeuser '{}' nc_admin\"".format(sshCommand, occ_cmd, groupCn)
+		cleanupApplicableGroupCmd = "{}\"{} group:removeuser '{}' {}\"".format(sshCommand, occ_cmd, groupCn, nc_admin)
 		addApplicableGroupCmd = "{}\"{} files_external:applicable --add-group '{}' {}\"".format(sshCommand, occ_cmd, groupCn, mountId)
-		addNcAdminApplicableUserCmd = "{}\"{} files_external:applicable --add-user 'nc_admin' {}\"".format(sshCommand, occ_cmd, mountId)
+		addNcAdminApplicableUserCmd = "{}\"{} files_external:applicable --add-user '{}' {}\"".format(sshCommand, occ_cmd, nc_admin, mountId)
 	else:
 		addHostCmd = "{} files_external:config {} host {}".format(occ_cmd, mountId, shareHost)
 		addShareRootCmd = "{} files_external:config {} share '/'".format(occ_cmd, mountId)
@@ -205,12 +202,6 @@ def setMountConfig(mountId, shareHost, shareName, windomain, groupCn, applicable
 		cleanupApplicableGroupCmd = "{} group:removeuser '{}' nc_admin".format(occ_cmd, groupCn)
 		addApplicableGroupCmd = "{} files_external:applicable --add-group '{}' {}".format(occ_cmd, groupCn, mountId)
 		addNcAdminApplicableUserCmd = "{} files_external:applicable --add-user 'nc_admin' {}\"".format(occ_cmd, mountId)
-
-	ud.debug(ud.LISTENER, ud.WARN, "addHostCmd: {}".format(addHostCmd))
-	ud.debug(ud.LISTENER, ud.WARN, "addShareRootCmd: {}".format(addShareRootCmd))
-	ud.debug(ud.LISTENER, ud.WARN, "addShareNameCmd: {}".format(addShareNameCmd))
-	ud.debug(ud.LISTENER, ud.WARN, "addShareDomainCmd: {}".format(addShareDomainCmd))
-	ud.debug(ud.LISTENER, ud.WARN, "checkApplicableGroupCmd: {}".format(checkApplicableGroupCmd))
 
 	listener.setuid(0)
 	try:

@@ -21,3 +21,9 @@ Description[de]=DN der LDAP Gruppe um den Zugang zu die common Samba shares zu g
 Description[en]=DN of LDAP group to allow access to mounted common Samba shares in Nextcloud.
 Type=str
 Categories=Nextcloud-Samba-Share
+
+[nextcloud-samba-common/nc_admin]
+Description[de]=Name des Nextcloud Administrator. Leer lassen, wenn eine App Center Nextcloud auf diesem System verwendet wird
+Description[en]=NAme of Nextcloud Administrator. Leave empty, if an App Center Nextcloud is being used on this system
+Type=String
+Categories=Nextcloud-Samba-Share

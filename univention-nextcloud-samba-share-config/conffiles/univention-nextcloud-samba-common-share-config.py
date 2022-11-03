@@ -54,6 +54,7 @@ remoteUser = ucr.get('nextcloud-samba-share-config/remoteUser')
 remotePwFile = ucr.get('nextcloud-samba-share-config/remotePwFile')
 remoteHost = ucr.get('nextcloud-samba-share-config/remoteHost')
 applicableGroup = ucr.get('nextcloud-samba-share-config/nextcloudGroup')
+nc_admin = ucr.get('nextcloud-samba-share-config/nc_admin')
 
 for shareCn in commonShares:
 	# share = lo.search("(&(objectClass=univentionShareSamba)(cn={}))".format(shareCn))
