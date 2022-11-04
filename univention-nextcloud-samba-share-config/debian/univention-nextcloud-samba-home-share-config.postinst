@@ -30,8 +30,6 @@
 #DEBHELPER#
 
 # restart directory listener due to new listener module
-if [ -f "/etc/init.d/univention-directory-listener" ] ; then
-   service univention-directory-listener restart
-fi
+service univention-directory-listener restart
 
 exit 0

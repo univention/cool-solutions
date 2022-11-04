@@ -50,8 +50,6 @@ else
 fi
 
 # restart directory listener due to new or changed listener module
-if [ -f "/etc/init.d/univention-directory-listener" ] ; then
-   service univention-directory-listener restart
-fi
+service univention-directory-listener restart
 
 exit 0
