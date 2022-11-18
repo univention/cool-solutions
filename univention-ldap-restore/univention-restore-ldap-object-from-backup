@@ -28,6 +28,6 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <https://www.gnu.org/licenses/>.
 
-from restore_ldap_object_from_backup import main
+import univention.restore_ldap_object_from_backup as urlobj
 
-main()
+urlobj.main()

@@ -4,12 +4,14 @@ Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
 Standards-Version: 3.9.8
 Build-Depends:
- dh-python,
  debhelper-compat (= 12),
+ dh-python,
  python-all,
  python-mock,
  python-mockldap,
  python3-all,
+ python3-mock,
+ python3-mockldap,
  ucslint,
  univention-config-dev,
 

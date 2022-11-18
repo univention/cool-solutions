@@ -76,14 +76,14 @@ class MyTests(unittest.TestCase):
 	# nothing to do
 	@mock.patch('argparse._sys.argv', ['python', '--dn', 'uid=bob,dc=test', '-b', 'a'])
 	def test_nothing_found(self, *args):
-		from python.restore_ldap_object_from_backup import main
+		from python import main
 		ret = main()
 		assert ret == 0
 
 	# no dn
 	@mock.patch('argparse._sys.argv', ['python', '--dn', '-b', 'a'])
 	def test_args(self, *args):
-		from python.restore_ldap_object_from_backup import main
+		from python import main
 		with self.assertRaises(SystemExit):
 			main()
 
@@ -91,7 +91,7 @@ class MyTests(unittest.TestCase):
 	@mock.patch('argparse._sys.argv', ['python', '-d', 'uid=bob,dc=test', '-b', 'a'])
 	def test_add(self, *args):
 		from python.restore_ldap_object_from_backup import MyRestore
-		from python.restore_ldap_object_from_backup import main
+		from python import main
 
 		uldap_mock.init()
 

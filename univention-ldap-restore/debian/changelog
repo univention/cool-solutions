@@ -1,3 +1,11 @@
+univention-ldap-restore (0.2.0-6) unstable; urgency=medium
+
+  * fix: tidy up pyinstall naming issue #5
+  * doc: add README.md
+  * refactor: put main() to __init__.py for proper namespace & adapt test.py
+
+ -- Oliver Friedrich <friedrich@univention.de>  Fri, 18 Nov 2022 14:50:00 +0100
+
 univention-ldap-restore (0.2.0-5) unstable; urgency=medium
 
   * feat: migrate to python3 and pyinstall issue #5
