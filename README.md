@@ -1,0 +1,66 @@
+
+**Note:** Cool Solutions are articles documenting additional functionality based on Univention products. Packages provided by a Cool Solutions Repository are built by Univention professional service, but will not necessarily be maintained. Not all the shown steps in the article are covered by Univention Support. For questions about your support coverage, contact your contact person at Univention before you want to implement one of the shown steps.
+
+Furher documentation & discussion at: <https://help.univention.com/t/cool-solutions-articles-and-repository/11517>
+
+
+# Introduction
+
+Cool Solutions are articles documenting additional functionality based on Univention products. Packages provided by a Cool Solutions Repository are built by Univention, but will not be maintained.
+Not all of the shown steps in the article are covered by Univention Support. For questions about your support coverage contact your contact person at Univention before you want to implement one of the shown steps.
+
+# Repository integration
+
+Some solutions need special packages build by Univention. These packages are provided in a Cool Solutions Repository. There are different possibilities to integrate the Cool Solutions Repository.
+
+In the Univention Management Console, Software tab, open the module *Repository settings* and add a new repository component with Component Name *cool-solutions* and Advanced Setting *Use unmaintained repositories*.
+
+Alternatively, set the following Univention Configuration Registry variables on the console:
+
+> ucr set repository/online/component/cool-solutions=yes \\
+> repository/online/component/cool-solutions/version=current \\
+> repository/online/component/cool-solutions/unmaintained=yes
+
+# Upgrade
+If you have a cool solution repository integrated and plan to upgrade, please check if the Cool Solution is already available for target UCS Version.
+
+# Source Code
+
+All Cool Solutions packages and their source code can be found at our [github mirror](https://github.com/univention/cool-solutions). Feel free to fork the code repository, enhance a package and start a pull request.
+
+
+# Overview of packages
+
+| Name                                      | description                                                                                 | state                   | Link                                                                                                      |
+| -----                                     | -----                                                                                       | -----                   | ----                                                                                                      |
+| `libvirt-wakeonlan`                       | Starts KVM instances from wake on lan packets                                               | outdated                |                                                                                                           |
+| `multi-master-setup`                      | Multi master setup - user aggregation                                                       | outdated                |                                                                                                           |
+| `univention-automx`                       | provides an automx config for UCS                                                           | outdated                |                                                                                                           |
+| `univention-bind-blacklist`               |                                                                                             | no doc, no tests        |                                                                                                           |
+| `univention-custom-ldap-acls`             | LDAP attributes to define custom LDAP ACLs                                                  | in progress             | [Issue](https://git.knut.univention.de/univention/prof-services/cool-solutions/-/issues/6)                |
+| `univention-demo-data`                    | Demo data provied by the "Deutsche Wolke"                                                   | outdated                |                                                                                                           |
+| `univention-domain-userquota`             | domain wide userquota                                                                       | outdated                |                                                                                                           |
+| `univention-dovecot-migration`            | helper script to automate offlineimap                                                       | outdated                |                                                                                                           |
+| `univention-fail2ban-config-ransomware`   | Configuration for fail2ban to detect Samba full_audit log messages                          | outdated                |                                                                                                           |
+| `univention-guacamole-ldap-connection`    | Guacamole installation wrapper                                                              | superseded by Appcenter | [Appcenter](https://www.univention.de/produkte/univention-app-center/app-katalog/guacamole/)              |
+| `univention-homedir-autocreate`           | listener module for home directory creation                                                 | outdated                |                                                                                                             |
+| `univention-icinga2`                      | listener module to configure Icinga2 with Nagios objects from UCS LDAP                      | outdated                |                                                                                                             |
+| `univention-ldap-restore`                 | Restore LDAP objects from LDIF backups                                                      | ported to UCS5          | [Help](https://help.univention.com/t/cool-solution-restore-ldap-objects-attributes-and-memberships/20839)   |
+| `univention-letsencrypt`                  | automatically request SSL certificates                                                      | superseded by Appcenter | [Appcenter](https://www.univention.de/produkte/univention-app-center/app-katalog/letsencrypt/)             |
+| `univention-lusd`                         | Custom UCS@school import reader class for an import of XML encrypted data (LUSD)            | ported to UCS5          | [Help](https://help.univention.com/t/cool-solution-lusd-erweiterung-fur-ucs-5-0/20176)                      |
+| `univention-moodle-group`                 | Put Teachers and Students into extended attributes for moodle                               | not tested for UCS5     |                                                                                                             |
+| `univention-munin`                        | munin server and node support                                                               | not tested for UCS5     | [Wiki](https://wiki.univention.de/index.php?title=Cool_Solution_-_Install_and_integration_of_Munin)         |
+| `univention-nextcloud-groupfolders-sync`  | sync UCS groups to nextcloud groupfolders                                                   | outdated                |                                                                                                             |
+| `univention-nextcloud-samba-share-config` | listener module configuration of Samba share access in Nextcloud                            | in progress             | [Merge Request](https://git.knut.univention.de/univention/prof-services/cool-solutions/-/merge_requests/11) |
+| `univention-printer-assignment`           | Assign printers to groups containing computers                                              | outdated                |                                                                                                             |
+| `univention-ro-wo-group-dirs`             | Listener module to configure read-only and write-only folders in class and workgroup shares | not tested for UCS5     |                                                                                                             |
+| `univention-samba-config-ransomware`      | Configuration for Samba to implement full_audit logging for shares                          | not tested for UCS5     |                                                                                                             |
+| `univention-set-samba4-profile-path`      | Bulk setting of the samba 4 profile path                                                    | not tested for UCS5     |                                                                                                             |
+| `univention-shalla-list-downloader`       | Shalla list downloader                                                                      | not tested for UCS5     |                                                                                                             |
+| `univention-sudo-ldap-host`               | sudo-ldap integration - host integration                                                    | not tested for UCS5     |                                                                                                             |
+| `univention-sudo-ldap-server`             | sudo-ldap integration - domain integration                                                  | in progress             | [Merge Request](https://git.knut.univention.de/univention/prof-services/cool-solutions/-/merge_requests/14) |
+| `univention-ucc-status-integration`       | UCC Status integration                                                                      | outdated                | [docs](https://docs.software-univention.de/ucc-quickstart-de.html)                                          |
+| `univention-user-group-sync-dest`         | import transferred user and group information                                               | in progress             | [Merge Request](https://git.knut.univention.de/univention/prof-services/cool-solutions/-/merge_requests/9)  |
+| `univention-user-group-sync-source`       | store user and group information to be transferred                                          | in progress             | [Merge Request](https://git.knut.univention.de/univention/prof-services/cool-solutions/-/merge_requests/9)  |
+| `univention-usercert`                     | usercert extension                                                                          | not tested for UCS5     | [Merge Request](https://git.knut.univention.de/univention/prof-services/cool-solutions/-/merge_requests/4)  |
+| `univention-wakeonlan`                    | WakeOnLan with a hostname                                                                   | outdated                |                                                                                                             |
