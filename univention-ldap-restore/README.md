@@ -47,24 +47,24 @@ The script behaves as follows:
 ## Usage examples
 
 Restore deleted user object or overwrite attributes of existing user object with uid:
-`example-user1` using backup file from 2018-06-14:
+`example-user1` using backup file from 2022-10-24:
 
 ```
 univention-restore-ldap-object-from-backup -d uid=example-user1,cn=users,dc=ucs,dc=demo \
--b /var/univention-backup/ldap-backup_20180614.ldif.gz
+-b /var/univention-backup/ldap-backup_20221024.ldif.gz
 ```
 
 Restore deleted user object or overwrite attributes of existing user object with uid:
-`example-user1` with group memberships using backup file from 2018-06-14:
+`example-user1` with group memberships using backup file from 2022-10-24:
 
 ```
 univention-restore-ldap-object-from-backup -m -d uid=example-user1,cn=users,dc=ucs,dc=demo \
--b /var/univention-backup/ldap-backup_20180614.ldif.gz
+-b /var/univention-backup/ldap-backup_20221024.ldif.gz
 ```
 
 Delete existing user object with uid example-user1 because it's not present in backup:
 
 ```
 univention-restore-ldap-object-from-backup -r -d uid=example-user1,cn=users,dc=ucs,dc=demo \
--b /var/univention-backup/ldap-backup_20180614.ldif.gz
+-b /var/univention-backup/ldap-backup_20221024.ldif.gz
 ```
