@@ -29,7 +29,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-__package__ = ''         # workaround for PEP 366
+from __future__ import absolute_import
 
 import listener
 import univention.debug as ud
@@ -81,14 +81,14 @@ def handler(dn, new, old, command):
 	if command == 'r':
 		listener.setuid(0)
 		try:
-			with open(FN_CACHE, 'w+') as f:
+			with open(FN_CACHE, 'wb+') as f:
 				os.chmod(FN_CACHE, 0o600)
 				pickle.dump(old, f)
 		except Exception as e:
 			ud.debug(
 				ud.LISTENER,
 				ud.ERROR,
-				'manageusercertificate: failed to open/write pickle file: %s' % str(e))
+				'manageusercertificate: failed to open/write pickle file: %s' % (e,))
 		listener.unsetuid()
 		return
 
@@ -96,20 +96,20 @@ def handler(dn, new, old, command):
 	if os.path.exists(FN_CACHE):
 		listener.setuid(0)
 		try:
-			with open(FN_CACHE, 'r') as f:
+			with open(FN_CACHE, 'rb') as f:
 				old = pickle.load(f)
 		except Exception as e:
 			ud.debug(
 				ud.LISTENER,
 				ud.ERROR,
-				'manageusercertificate: failed to open/read pickle file: %s' % str(e))
+				'manageusercertificate: failed to open/read pickle file: %s' % (e,))
 		try:
 			os.remove(FN_CACHE)
 		except Exception as e:
 			ud.debug(
 				ud.LISTENER,
 				ud.ERROR,
-				'manageusercertificate: cannot remove pickle file: %s' % str(e))
+				'manageusercertificate: cannot remove pickle file: %s' % (e,))
 			ud.debug(
 				ud.LISTENER,
 				ud.ERROR,
@@ -128,19 +128,19 @@ def handler(dn, new, old, command):
 		retval = doit("revoke", new, dn, cr)
 	# object created/changed
 	else:
-		old_cert = old.get('univentionCreateRevokeCertificate', [""])[0] == b"1"
-		new_cert = new.get('univentionCreateRevokeCertificate', [""])[0] == b"1"
+		old_cert = old.get('univentionCreateRevokeCertificate', [b""])[0] == b"1"
+		new_cert = new.get('univentionCreateRevokeCertificate', [b""])[0] == b"1"
 
 		# create cert
 		if new_cert and not old_cert:
-				retval = doit("create", new, dn, cr)
+			retval = doit("create", new, dn, cr)
 
 		# revoke cert
 		if old_cert and not new_cert:
-				retval = doit("revoke", new, dn, cr)
+			retval = doit("revoke", new, dn, cr)
 
 		# renew cert
-		if new.get('univentionRenewCertificate', [""])[0] == b"1":
+		if new.get('univentionRenewCertificate', [b""])[0] == b"1":
 			retval = doit("renew", new, dn, cr)
 	# fin
 	if retval:
@@ -265,12 +265,12 @@ def saveCert(dn, cfg, ldapObject, delete=False):
 	if cfg["ldapimport"].lower() in ("true", "yes"):
 		listener.setuid(0)
 		try:
-			cert = ""
+			cert = b""
 			if not delete:
 				with open(os.path.join(cfg["certpath"], cfg["uid"], "cert.cer"), "rb") as fd:
 					cert = fd.read()
 			lo = univention.uldap.getAdminConnection()
-			oldValue = ldapObject.get('userCertificate;binary', [""])[0]
+			oldValue = ldapObject.get('userCertificate;binary', [b""])[0]
 			modlist = [('userCertificate;binary', oldValue, cert)]
 			try:
 				lo.modify(dn, modlist)
@@ -281,7 +281,7 @@ def saveCert(dn, cfg, ldapObject, delete=False):
 			ud.debug(
 				ud.LISTENER,
 				ud.ERROR,
-				'manageusercertificate: failed to add certificate to %s (%s)' % (dn, str(e))
+				'manageusercertificate: failed to add certificate to %s (%s)' % (dn, e)
 			)
 		finally:
 			listener.unsetuid()
@@ -381,7 +381,7 @@ def doit(action, object, dn, cr):
 		listener.setuid(0)
 		try:
 			lo = univention.uldap.getAdminConnection()
-			modlist = [('univentionRenewCertificate', object['univentionRenewCertificate'][0], 0)]
+			modlist = [('univentionRenewCertificate', object['univentionRenewCertificate'][0], None)]
 			lo.modify(dn, modlist)
 			ud.debug(ud.LISTENER, ud.INFO, 'manageusercertificate: reset univentionRenewCertificate successfully')
 		except Exception as e:
@@ -446,11 +446,11 @@ def run_cmd(command, *expected_retvals):
 	cmd = ' '.join(quote(arg) for arg in command)
 	ud.debug(ud.LISTENER, ud.INFO, "manageusercertificate: run %s" % cmd)
 	listener.setuid(0)
-	proc = subprocess.Popen(command, bufsize=0, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	stdout = None
-	stderr = None
-	retval = 0
 	try:
+		proc = subprocess.Popen(command, bufsize=0, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		stdout = None
+		stderr = None
+		retval = 0
 		(stdout, stderr) = proc.communicate()
 	finally:
 		listener.unsetuid()
@@ -463,11 +463,3 @@ def run_cmd(command, *expected_retvals):
 		ud.debug(ud.LISTENER, ud.ERROR, "manageusercertificate: stdout: %s" % stderr)
 
 	return retval
-
-
-def clean():
-	return
-
-
-def postrun():
-	return

@@ -3,23 +3,26 @@ Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
 Standards-Version: 3.5.5
-Build-Depends: debhelper (>> 7),
- univention-config-dev,
- ucslint,
+Build-Depends:
+ debhelper (>> 7),
  dh-python,
  python-all,
  python3-all,
-XS-Python-Version: 2.6, 2.7
+ ucslint,
+ univention-config-dev,
+X-Python-Version: 2.7
 
 Package: univention-usercert
 Architecture: all
-Depends: univention-ldap-usercert (= ${binary:Version}),
+Depends:
+ python-univention-directory-manager,
  univention-config,
  univention-directory-manager-tools,
+ univention-ldap-usercert (= ${binary:Version}),
  univention-ssl,
- python-univention-directory-manager,
- ${python:Depends}, ${python3:Depends},
- ${misc:Depends}
+ ${misc:Depends},
+ ${python3:Depends},
+ ${python:Depends},
 Description: UCS - usercert extension
  This package contains the configuration for the UCS
  usercert extension.
@@ -31,9 +34,9 @@ Description: UCS - usercert extension
 
 Package: univention-windowscert
 Architecture: all
-Depends: univention-usercert (= ${binary:Version}),
- ${python:Depends}, ${python3:Depends},
- ${misc:Depends}
+Depends:
+ univention-usercert (= ${binary:Version}),
+ ${misc:Depends},
 Description: UCS - windowscert extension
  This package contains the join script for the UCS
  usercert extension.
@@ -45,8 +48,9 @@ Description: UCS - windowscert extension
 
 Package: univention-ldap-usercert
 Architecture: all
-Depends: univention-ldap-config, univention-config
- ${python:Depends}, ${python3:Depends},
+Depends:
+ univention-config,
+ univention-ldap-config,
 Description: UCS - LDAP usercert configuration
  This package contains the configuration for the OpenLDAP
  server.

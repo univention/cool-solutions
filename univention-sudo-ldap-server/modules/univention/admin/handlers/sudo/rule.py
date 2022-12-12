@@ -1,7 +1,7 @@
 #!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 #
-# Copyright 2004-2015 Univention GmbH
+# Copyright 2004-2022 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -112,41 +112,6 @@ mapping.register('command', 'sudoCommand')
 class object(univention.admin.handlers.simpleLdap):
 	module = module
 
-	if not hasattr(univention.admin.handlers.simpleLdap, '_ldap_dn'):
-		def _ldap_pre_create(self):
-			self.dn = '%s=%s,%s' % (mapping.mapName('name'), mapping.mapValue('name', self.info['name']), self.position.getDn())
 
-		def _ldap_addlist(self):
-			al = [('objectClass', [b'top', b'sudoRole'])]
-			return al
-
-
-try:
-	lookup = object.lookup
-except AttributeError:  # TODO: remove; which UCS version needs to be supported?
-	try:
-		unicode
-	except NameError:
-		unicode = str
-
-	def lookup(co, lo, filter_s, base='', superordinate=None, scope='sub', unique=0, required=0, timeout=-1, sizelimit=0):
-		searchfilter = univention.admin.filter.conjunction('&', [
-			univention.admin.filter.expression('objectClass', 'sudoRole'),
-		])
-
-		if filter_s:
-			filter_p = univention.admin.filter.parse(filter_s)
-			univention.admin.filter.walk(filter_p, univention.admin.mapping.mapRewrite, arg=mapping)
-			searchfilter.expressions.append(filter_p)
-
-		res = []
-		for dn in lo.searchDn(unicode(searchfilter), base, scope, unique, required, timeout, sizelimit):
-			res.append(object(co, lo, None, dn))
-		return res
-
-
-try:
-	identify = object.identify
-except AttributeError:
-	def identify(distinguished_name, attributes, canonical=False):
-		return b'sudoRole' in attributes.get('objectClass', [])
+lookup = object.lookup
+identify = object.identify

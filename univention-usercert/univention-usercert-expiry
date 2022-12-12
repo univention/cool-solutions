@@ -30,7 +30,6 @@
 import os
 import sys
 import base64
-import time
 import datetime
 import M2Crypto
 import univention.uldap
@@ -90,7 +89,7 @@ def parse_certificate(certificate):
 
 	try:
 		cn = subject.CN
-	except:
+	except Exception:
 		cn = str(subject)
 
 	return (cn, {
@@ -105,8 +104,8 @@ def parse_certificate(certificate):
 # ldap certificates
 try:
 	lo = univention.uldap.getMachineConnection()
-except Exception as e:
-	print('ERROR: authentication error: %s' % str(e))
+except Exception as exc:
+	print('ERROR: authentication error: %s' % (exc,))
 	sys.exit(1)
 
 results = lo.search(filter='(&(userCertificate;binary=*)(uid=*)(cn=*))', attr=['userCertificate;binary', 'uid', 'cn'])
