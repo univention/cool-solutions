@@ -49,7 +49,7 @@ Description: UCS - windowscert extension
 Package: univention-ldap-usercert
 Architecture: all
 Depends:
- univention-config
+ univention-config,
  univention-ldap-config,
 Description: UCS - LDAP usercert configuration
  This package contains the configuration for the OpenLDAP
