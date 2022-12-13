@@ -1,3 +1,23 @@
+univention-ldap-restore (0.2.0-7) unstable; urgency=medium
+
+  * doc: improve README.md
+
+ -- Oliver Friedrich <friedrich@univention.de>  Tue, 06 Dec 2022 15:55:30 +0100
+
+univention-ldap-restore (0.2.0-6) unstable; urgency=medium
+
+  * fix: tidy up pyinstall naming issue #5
+  * doc: add README.md
+  * refactor: put main() to __init__.py for proper namespace & adapt test.py
+
+ -- Oliver Friedrich <friedrich@univention.de>  Fri, 18 Nov 2022 14:50:00 +0100
+
+univention-ldap-restore (0.2.0-5) unstable; urgency=medium
+
+  * feat: migrate to python3 and pyinstall issue #5
+
+ -- Oliver Friedrich <friedrich@univention.de>  Mon, 07 Nov 2022 18:29:50 +0100
+
 univention-ldap-restore (0.1.0-4) unstable; urgency=medium
 
   * fix: add missing dependency ucslint
@@ -12,7 +32,7 @@ univention-ldap-restore (0.1.0-3) unstable; urgency=medium
 
 univention-ldap-restore (0.1.0-2) unstable; urgency=low
 
-  * feat: Migration to Python3. issue #34485 
+  * feat: Migration to Python3. issue #34485
 
  -- Abdul Rahman, Vakili <vakili@univention.de>  Fri, 26 Aug 2022 12:31:24 +0200
 
