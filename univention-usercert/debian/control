@@ -6,10 +6,10 @@ Standards-Version: 3.5.5
 Build-Depends: debhelper (>> 7),
  univention-config-dev,
  ucslint,
- python-support,
- python-all,
- python-support (>= 0.90)
-XS-Python-Version: 2.6, 2.7
+ dh-python,
+ python-debian,
+ python-all
+X-Python-Version: 2.7
 
 Package: univention-usercert
 Architecture: all
