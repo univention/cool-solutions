@@ -1,3 +1,9 @@
+univention-usercert (4.2.0-8) unstable; urgency=medium
+
+  * feat: python 3 upgrade #1
+
+ -- Jannik Ahlers <ahlers@univention.de>  Mon, 19 Dec 2022 10:44:23 +0100
+
 univention-usercert (4.2.0-7) unstable; urgency=low
 
   * Fix typo userscert to usercert (sslbase was not updated correctly)
