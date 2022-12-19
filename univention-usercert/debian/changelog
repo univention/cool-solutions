@@ -1,3 +1,9 @@
+univention-usercert (5.0.0-1) unstable; urgency=medium
+
+  * feat: UCS 5 version bump
+
+ -- Jannik Ahlers <ahlers@univention.de>  Mon, 19 Dec 2022 12:21:12 +0100
+
 univention-usercert (4.2.0-6) unstable; urgency=low
 
   * Set certificates and location to read-only
