@@ -1,4 +1,0 @@
-# Lehrer, Mitarbeiter und OU-Admins duerfen Schueler-Passwoerter aendern wenn diese eine Domain-Quota eingerichtet haben
-access to filter="objectClass=ucsschoolStudent" attrs=domainquota
-        by set="this/ucsschoolSchool & ([ldap:///]+user/entryDN+[?entryDN?base?%28%7C%28objectClass%3DucsschoolTeacher%29%28objectClass%3DucsschoolAdministrator%29%28objectClass%3DucsschoolStaff%29%29])/ucsschoolSchool" write
-        by * +0 break

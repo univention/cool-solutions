@@ -1,5 +1,0 @@
-[icinga2/server/autostart]
-Description[de]=Werden Änderungen an der Nagios-Konfiguration im LDAP-Verzeichnis vorgenommen, wird der Icinga 2-Server automatisch neu gestartet. Dies kann mit 'no' deaktiviert werden. Ist die Variable nicht gesetzt, erfolgt ein automatischer Neustart.
-Description[en]=If changes to the Nagios configuration are made in the LDAP directory, the Icinga 2 server is restarted automatically. This can be deactivated with 'no'. If the variable is unset, an automatic restart occurs.
-Type=str
-Categories=service-nagios
