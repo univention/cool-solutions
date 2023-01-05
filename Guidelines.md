@@ -49,7 +49,7 @@ Use quoting, especially for the following:
 
 ```bash
 "$@"
-eval "$(univention-config-registry shell)
+eval "$(univention-config-registry shell)"
 eval "$(univention_policy_result -s "$(univention-config-registry get ldap/hostdn)")"
 ```
 
