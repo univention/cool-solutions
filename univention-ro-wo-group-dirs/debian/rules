@@ -1,9 +1,9 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 #
-# Copyright (C) 2019 Univention GmbH
+# Copyright (C) 2019-2023 Univention GmbH
 #
-# http://www.univention.de/
+# https://www.univention.de/
 #
 # All rights reserved.
 #
@@ -27,7 +27,9 @@
 # You should have received a copy of the GNU Affero General Public
 # License with the Debian GNU/Linux or Univention distribution in file
 # /usr/share/common-licenses/AGPL-3; if not, see
-# <http://www.gnu.org/licenses/>.
+# <https://www.gnu.org/licenses/>.
+
+export LC_ALL=C.UTF-8
 
 %:
 	dh $@

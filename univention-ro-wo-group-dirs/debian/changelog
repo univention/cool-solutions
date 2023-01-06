@@ -1,3 +1,9 @@
+univention-ro-wo-group-dirs (1.0.0-7) unstable; urgency=medium
+
+  * uniupdatecopyright and compatibility for ucs5 #42100
+
+ -- Oliver Friedrich <friedrich@univention.de>  Fri, 06 Jan 2023 15:55:15 +0100
+
 univention-ro-wo-group-dirs (1.0.0-6) unstable; urgency=medium
 
   * Don't overwrite cron time
