@@ -51,6 +51,6 @@ deb-systemd-invoke restart cron.service
 
 # Fix for Warning "cron.service changed on disk"
 echo "Reloading systemd daemon"
-deb-systemd-invoke daemon-reload
+systemctl daemon-reload
 
 exit 0

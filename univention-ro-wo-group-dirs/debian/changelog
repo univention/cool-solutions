@@ -1,3 +1,9 @@
+univention-ro-wo-group-dirs (1.0.0-8) unstable; urgency=medium
+
+  * fix: systemctl daemon-reload in postinst
+
+ -- Oliver Friedrich <friedrich@univention.de>  Fri, 06 Jan 2023 16:09:52 +0100
+
 univention-ro-wo-group-dirs (1.0.0-7) unstable; urgency=medium
 
   * uniupdatecopyright and compatibility for ucs5 #42100
