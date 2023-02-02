@@ -4,9 +4,9 @@
 # univention-ro-wo-group-dirs
 # Create Abgabe and Lernmaterial directories in class and workgroup shares
 #
-# Copyright 2019 Univention GmbH
+# Copyright 2019-2023 Univention GmbH
 #
-# http://www.univention.de/
+# https://www.univention.de/
 #
 # All rights reserved.
 #
@@ -29,13 +29,13 @@
 # You should have received a copy of the GNU Affero General Public
 # License with the Debian GNU/Linux or Univention distribution in file
 # /usr/share/common-licenses/AGPL-3; if not, see
-# <http://www.gnu.org/licenses/>.
+# <https://www.gnu.org/licenses/>.
 
 import os
 import re
 import subprocess
 import time
-import sys
+
 import univention.admin.uldap
 from univention.config_registry import ConfigRegistry
 from univention.config_registry.frontend import ucr_update
