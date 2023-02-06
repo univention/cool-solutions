@@ -1,4 +1,16 @@
-univention-munin (1.2.0-7) unstable; urgency=low
+univention-munin (1.2.0-10) unstable; urgency=medium
+
+  * chore(univention-munin): fix typos & uniupdatecopyright #33242
+
+ -- Oliver Friedrich <friedrich@univention.de>  Mon, 06 Feb 2023 16:56:34 +0100
+
+univention-munin (1.2.0-9) unstable; urgency=low
+
+  * fixed ConfigRegistry in conffiles Issue: #33242
+
+ -- Tim Breidenbach <breidenbach@univention.de>  Wed, 04 May 2022 09:33:07 +0200
+
+univention-munin (1.2.0-8) unstable; urgency=low
 
   * version bump #33242
 

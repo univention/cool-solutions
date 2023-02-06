@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Univention Munin UCR Module - munin-server reload
-# Copyright 2018-2022 Univention GmbH
+# Copyright 2018-2023 Univention GmbH
 #
 # http://www.univention.de/
 #

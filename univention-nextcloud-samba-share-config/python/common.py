@@ -125,7 +125,7 @@ def getSshCommand(remoteUser, remotePwFile, remoteHost):
 
 def createMount(mountName, useSSH=False, remoteUser=None, remotePwFile=None, remoteHost=None):
 	if useSSH == True:
-		sshCommand = getSshCommand()
+		sshCommand = getSshCommand(remoteUser, remotePwFile, remoteHost)(remoteUser, remotePwFile, remoteHost)
 	else:
 		sshCommand = ""
 
@@ -138,7 +138,7 @@ def createMount(mountName, useSSH=False, remoteUser=None, remotePwFile=None, rem
 
 def deleteMount(mountId, useSSH=False):
 	if useSSH == True:
-		sshCommand = getSshCommand()
+		sshCommand = getSshCommand(remoteUser, remotePwFile, remoteHost)(remoteUser, remotePwFile, remoteHost)
 	else:
 		sshCommand = ""
 
@@ -151,7 +151,7 @@ def deleteMount(mountId, useSSH=False):
 
 def setMountConfig(mountId, shareHost, shareName, windomain, groupCn, useSSH=False, remoteUser=None, remotePwFile=None, remoteHost=None, applicableGroup=None):
 	if useSSH == True:
-		sshCommand = getSshCommand()
+		sshCommand = getSshCommand(remoteUser, remotePwFile, remoteHost)()
 	else:
 		sshCommand = ""
 

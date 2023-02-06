@@ -1,3 +1,10 @@
+univention-nextcloud-samba-share-config (1.0.0-21) unstable; urgency=low
+
+  * Refactor: template file univention-nextcloud-samba-share-config.py
+  * Fix: setting UCRV for commonshares failed with remote access to nc host 
+
+ -- Tim Breidenbach <breidenbach@univention.de>  Fri, 08 Apr 2022 15:29:57 +0200
+
 univention-nextcloud-samba-share-config (1.0.0-20) unstable; urgency=medium
 
   * Add compatibility with non-App Center nextcloud
