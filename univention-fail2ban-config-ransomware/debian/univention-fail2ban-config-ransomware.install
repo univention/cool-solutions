@@ -1,3 +1,0 @@
-jail.local etc/fail2ban
-mail-lines.conf etc/fail2ban/action.d
-samba.conf etc/fail2ban/filter.d
