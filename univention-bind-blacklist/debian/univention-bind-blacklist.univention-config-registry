@@ -1,8 +1,0 @@
-Type: file
-File: etc/bind/db.univention-bind-blacklist
-Variables: dns/blacklist/ipv4
-Variables: dns/blacklist/ipv6
-
-Type: script
-Script: univention-bind-blacklist-resync
-Variables: dns/blacklist/record/domains

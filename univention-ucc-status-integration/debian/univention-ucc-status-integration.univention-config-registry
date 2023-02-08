@@ -1,4 +1,0 @@
-Type: file
-File: etc/cron.d/univention-ucc-status-update
-Variables: ucc/status/cron/update
-Variables: ucc/status/cron

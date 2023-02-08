@@ -1,2 +1,0 @@
-schema/univention-domain-userquota.schema usr/share/univention-ldap/schema
-70univention-domain-userquota.inst usr/lib/univention-install

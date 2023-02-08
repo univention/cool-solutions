@@ -1,4 +1,0 @@
-Type: subfile
-Multifile: etc/ldap/slapd.conf
-Subfile: etc/ldap/slapd.conf.d/99univention-domain-userquota-school-acl
-Variables: ldap/server/type

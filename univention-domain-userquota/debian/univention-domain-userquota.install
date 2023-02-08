@@ -1,3 +1,0 @@
-modules/univention usr/share/pyshared
-listener/univention-domain-userquota.py usr/lib/univention-directory-listener/system
-univention-admin-syntax-domainquota.mo usr/share/locale/de/LC_MESSAGES

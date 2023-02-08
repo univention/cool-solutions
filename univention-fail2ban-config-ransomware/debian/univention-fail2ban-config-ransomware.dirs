@@ -1,3 +1,0 @@
-etc/fail2ban
-etc/fail2ban/action.d
-etc/fail2ban/filter.d
