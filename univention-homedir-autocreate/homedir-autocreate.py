@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 # Univention homedir autocreation
@@ -66,7 +67,7 @@ filter =    "(&\
                     (uid=*$)\
                 )\
             )"
-attributes = [] # type: List
+attributes = []  # type: List
 
 PATH_SU = "/bin/su"
 PATH_MKDIR = "/bin/mkdir"
@@ -78,7 +79,6 @@ def initialize():
     univention.debug.debug(
         univention.debug.LISTENER, univention.debug.INFO, "%s: initialize" % name
     )
-    return
 
 
 def handler(
@@ -86,15 +86,14 @@ def handler(
 ):  # type: (str, Dict[str, List[bytes]], Dict[str, List[bytes]]) -> None
     # create users homedir only on user creation
     if not old and new:
-        # if homeDirectoy is not set OR ( homeDirectoy is missing and not '/dev/null' ) then ....
+        # if homeDirectory is not set OR ( homeDirectory is missing and not '/dev/null' ) then ....
         if not new.get("homeDirectory") or (
-            new.get("homeDirectory", ["/"])[0] != "/dev/null"
-            and not os.path.exists(new.get("homeDirectory", ["/"])[0])
+            new.get("homeDirectory", [b"/"])[0] != "/dev/null"
+            and not os.path.exists(new.get("homeDirectory", [b"/"])[0])
         ):
             if not new.get("automountInformation"):
                 # check for uid
                 if new.get("uid"):
-                    listener.setuid(0)
                     try:
                         univention.debug.debug(
                             univention.debug.LISTENER,
@@ -103,43 +102,39 @@ def handler(
                             % (
                                 name,
                                 PATH_SU,
-                                new.get("uid")[0],
+                                new.get("uid")[0].decode("utf-8"),
                                 str(new.get("homeDirectory", [])),
                             ),
                         )
-                        listener.run(
-                            PATH_SU, [PATH_SU, "-c", "echo", "-", new.get("uid")[0]]
-                        )
+                        with SetUID():
+                            listener.run(
+                                PATH_SU, [PATH_SU, "-c", "echo", "-", new.get("uid")[0].decode("utf-8")]
+                            )
                         univention.debug.debug(
                             univention.debug.LISTENER,
                             univention.debug.WARN,
                             "%s: created home directory %s for user %s"
                             % (
                                 name,
-                                str(new.get("homeDirectory", [])),
-                                new.get("uid")[0],
+                                new.get("homeDirectory", []).decode("utf-8"),
+                                new.get("uid")[0].decode("utf-8"),
                             ),
                         )
-                    finally:
-                        listener.unsetuid()
             elif (
                 ucr["hostname"] in new.get("automountInformation", [ucr["hostname"]])[0]
             ):
                 if new.get("uid"):
-                    listener.setuid(0)
-                    path = new.get("automountInformation", [ucr["hostname"]])[0].split(
-                        ":"
-                    )[1]
-                    listener.run(PATH_MKDIR, [PATH_MKDIR, path])
-                    listener.run(PATH_CHOWN, [PATH_CHOWN, new.get("uid")[0], path])
-                    listener.run(PATH_CHMOD, [PATH_CHMOD, "0700", path])
+                    path = new.get("automountInformation", [ucr["hostname"]])[0].split(":")[1]
+                    with SetUID():
+                        listener.run(PATH_MKDIR, [PATH_MKDIR, path])
+                        listener.run(PATH_CHOWN, [PATH_CHOWN, new.get("uid")[0].decode("utf-8"), path])
+                        listener.run(PATH_CHMOD, [PATH_CHMOD, "0700", path])
                     univention.debug.debug(
                         univention.debug.LISTENER,
                         univention.debug.WARN,
                         "%s: created home directory %s on share for user %s"
-                        % (name, str(new.get("homeDirectory", [])), new.get("uid")[0]),
+                        % (name, new.get("homeDirectory", []).decode("utf-8")), new.get("uid")[0].decode("utf-8")),
                     )
-                    listener.unsetuid()
             else:
                 # debuglevel changes temporary from info to warn
                 univention.debug.debug(
@@ -148,8 +143,8 @@ def handler(
                     "%s: created home directory %s for user %s on host %s"
                     % (
                         name,
-                        str(new.get("homeDirectory", [])),
-                        new.get("uid")[0],
+                        new.get("homeDirectory", []).decode("utf-8"),
+                        new.get("uid")[0].decode("utf-8"),
                         new.get("automountInformation", [ucr["hostname"]])[0]
                         .split(" ")[1]
                         .split(":")[0],
