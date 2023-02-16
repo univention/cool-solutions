@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 #
-# Copyright 2018-2019 Univention GmbH
+# Copyright 2009-2023 Univention GmbH
 #
-# http://www.univention.de/
+# https://www.univention.de/
 #
 # All rights reserved.
 #
@@ -30,8 +30,6 @@
 #DEBHELPER#
 
 # restart directory listener due to new listener module
-if [ -f "/etc/init.d/univention-directory-listener" ] ; then
-   /etc/init.d/univention-directory-listener crestart
-fi
+deb-systemd-invoke restart univention-directory-listener
 
 exit 0
