@@ -39,13 +39,14 @@ import univention.debug
 from univention.config_registry import ConfigRegistry
 from typing import Dict
 from typing import List
+from listener import SetUID
 
 ucr = ConfigRegistry()
 ucr.load()
 
 name = "homedir-autocreate"
 description = "Generate homedir on usercreation"
-filter =    "(&\
+filter = '(&\
                 (|\
                     (&\
                         (objectClass=posixAccount)\
@@ -66,7 +67,7 @@ filter =    "(&\
                 (!\
                     (uid=*$)\
                 )\
-            )"
+            )'
 attributes = []  # type: List
 
 PATH_SU = "/bin/su"
@@ -94,32 +95,31 @@ def handler(
             if not new.get("automountInformation"):
                 # check for uid
                 if new.get("uid"):
-                    try:
-                        univention.debug.debug(
-                            univention.debug.LISTENER,
-                            univention.debug.INFO,
-                            "%s: starting %s for %s %s"
-                            % (
-                                name,
-                                PATH_SU,
-                                new.get("uid")[0].decode("utf-8"),
-                                str(new.get("homeDirectory", [])),
-                            ),
+                    univention.debug.debug(
+                        univention.debug.LISTENER,
+                        univention.debug.INFO,
+                        "%s: starting %s for %s %s"
+                        % (
+                            name,
+                            PATH_SU,
+                            new.get("uid")[0].decode("utf-8"),
+                            str(new.get("homeDirectory", [])),
+                        ),
+                    )
+                    with SetUID():
+                        listener.run(
+                            PATH_SU, [PATH_SU, "-c", "echo", "-", new.get("uid")[0].decode("utf-8")]
                         )
-                        with SetUID():
-                            listener.run(
-                                PATH_SU, [PATH_SU, "-c", "echo", "-", new.get("uid")[0].decode("utf-8")]
-                            )
-                        univention.debug.debug(
-                            univention.debug.LISTENER,
-                            univention.debug.WARN,
-                            "%s: created home directory %s for user %s"
-                            % (
-                                name,
-                                new.get("homeDirectory", []).decode("utf-8"),
-                                new.get("uid")[0].decode("utf-8"),
-                            ),
-                        )
+                    univention.debug.debug(
+                        univention.debug.LISTENER,
+                        univention.debug.WARN,
+                        "%s: created home directory %s for user %s"
+                        % (
+                            name,
+                            new.get("homeDirectory", []).decode("utf-8"),
+                            new.get("uid")[0].decode("utf-8"),
+                        ),
+                    )
             elif (
                 ucr["hostname"] in new.get("automountInformation", [ucr["hostname"]])[0]
             ):
@@ -133,14 +133,18 @@ def handler(
                         univention.debug.LISTENER,
                         univention.debug.WARN,
                         "%s: created home directory %s on share for user %s"
-                        % (name, new.get("homeDirectory", []).decode("utf-8")), new.get("uid")[0].decode("utf-8")),
+                        % (
+                            name,
+                            new.get("homeDirectory", []).decode("utf-8"),
+                            new.get("uid")[0].decode("utf-8"),
+                        ),
                     )
             else:
                 # debuglevel changes temporary from info to warn
                 univention.debug.debug(
                     univention.debug.LISTENER,
                     univention.debug.WARN,
-                    "%s: created home directory %s for user %s on host %s"
+                    "%s: created home directory %s onfor user %s on host %s"
                     % (
                         name,
                         new.get("homeDirectory", []).decode("utf-8"),
