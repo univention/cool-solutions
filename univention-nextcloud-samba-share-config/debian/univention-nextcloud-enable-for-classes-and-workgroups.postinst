@@ -1,11 +1,8 @@
-#!/usr/bin/make -f
-# -*- coding: utf-8 -*-
+#!/bin/bash
 #
-# Univention homedir autocreation
+# Copyright 2018-2019 Univention GmbH
 #
-# Copyright 2009-2023 Univention GmbH
-#
-# https://www.univention.de/
+# http://www.univention.de/
 #
 # All rights reserved.
 #
@@ -30,5 +27,11 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-%:
-	dh $@
+#DEBHELPER#
+
+# restart directory listener due to new listener module
+if [ -f "/etc/init.d/univention-directory-listener" ] ; then
+   /etc/init.d/univention-directory-listener crestart
+fi
+
+exit 0
