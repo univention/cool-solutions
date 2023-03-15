@@ -1,0 +1,69 @@
+univention-ssh-key-sync (1.0.0-11) unstable; urgency=medium
+
+  * doc: improve README
+
+ -- Oliver Friedrich <friedrich@univention.de>  Wed, 15 Mar 2023 11:01:44 +0100
+
+univention-ssh-key-sync (1.0.0-10) unstable; urgency=medium
+
+  * chore: add backwards compatibility to UCS4 & wrap-and-sort -ast
+
+ -- Oliver Friedrich <friedrich@univention.de>  Thu, 23 Feb 2023 13:51:25 +0100
+
+univention-ssh-key-sync (1.0.0-9) unstable; urgency=medium
+
+  * doc: change to Match Group in README
+
+ -- Oliver Friedrich <friedrich@univention.de>  Thu, 23 Feb 2023 13:45:21 +0100
+
+univention-ssh-key-sync (1.0.0-8) unstable; urgency=medium
+
+  * doc: fix ucr syntax in README
+
+ -- Oliver Friedrich <friedrich@univention.de>  Thu, 23 Feb 2023 11:36:35 +0100
+
+univention-ssh-key-sync (1.0.0-7) unstable; urgency=medium
+
+  * doc: add info about Join account and more ssh security options
+
+ -- Oliver Friedrich <friedrich@univention.de>  Thu, 23 Feb 2023 10:59:47 +0100
+
+univention-ssh-key-sync (1.0.0-6) unstable; urgency=medium
+
+  * feat: add multi value keys
+  * doc: add better escaping to ucr syntax
+  * style: simplify sed syntax in ldap-keys.sh
+
+ -- Oliver Friedrich <friedrich@univention.de>  Thu, 16 Feb 2023 11:29:32 +0100
+
+univention-ssh-key-sync (1.0.0-5) unstable; urgency=medium
+
+  * doc: add example and info about permissions
+  * style: use black formatting for acls & shfmt for join script
+  * fix: rm leftover comment from join script
+
+ -- Oliver Friedrich <friedrich@univention.de>  Thu, 16 Feb 2023 09:00:15 +0100
+
+univention-ssh-key-sync (1.0.0-4) unstable; urgency=medium
+
+  * fix LDAP ACLs syntax
+
+ -- Oliver Friedrich <friedrich@univention.de>  Wed, 15 Feb 2023 18:24:07 +0100
+
+univention-ssh-key-sync (1.0.0-3) unstable; urgency=medium
+
+  * fix LDAP syntax
+
+ -- Oliver Friedrich <friedrich@univention.de>  Wed, 15 Feb 2023 16:55:52 +0100
+
+univention-ssh-key-sync (1.0.0-2) unstable; urgency=medium
+
+  * Add acl and tidy up unneeded debian files
+
+ -- Oliver Friedrich <friedrich@univention.de>  Wed, 15 Feb 2023 15:29:19 +0100
+
+univention-ssh-key-sync (1.0.0-1) unstable; urgency=medium
+
+  * Initial release
+
+ -- Oliver Friedrich <friedrich@univention.de>  Wed, 15 Feb 2023 10:56:29 +0100

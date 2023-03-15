@@ -1,0 +1,22 @@
+# start 65ssh-key-attributes
+
+@!@
+
+base = configRegistry.get("ldap/base")
+if (
+    configRegistry.get("ldap/server/type") == "master"
+    or configRegistry.get("ldap/server/type") == "domaincontroller_backup"
+):
+    access = "write"
+else:
+    access = "read"
+
+print("# Nur Domain Admins duerfen SSH keys an Nutzerobjekten aendern")
+print("access to attrs=sshAttributes,sshPublicKey")
+print(
+    f'\tby group/univentionGroup/uniqueMember="cn=Domain Admins,cn=groups,{base}" {access}'
+)
+print("\tby * +0 break")
+
+@!@
+# end 65ssh-key-attributes
