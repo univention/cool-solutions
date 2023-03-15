@@ -1,0 +1,19 @@
+Source: univention-ssh-key-sync
+Section: univention
+Priority: optional
+Maintainer: Univention GmbH <packages@univention.de>
+Build-Depends:
+ debhelper,
+Standards-Version: 4.1.4
+Homepage: https://univention.de
+
+Package: univention-ssh-key-sync
+Architecture: all
+Depends:
+ shell-univention-lib (>= 2.0.17-1),
+ univention-join (>= 5.0.20-1),
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: use SSH keys stored in LDAP for system access
+ This package adds a schema extension to allow storing SSH keys
+ in LDAP. They can then be used to check access during SSH login.

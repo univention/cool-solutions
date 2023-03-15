@@ -1,0 +1,4 @@
+50univention-ssh-key-ldap-extension.inst    usr/lib/univention-install/
+65ssh-key-attributes-acl                    usr/share/univention-ssh-key-sync/
+ldap-keys.sh                                usr/share/univention-ssh-key-sync/
+schema/ssh-key-attributes.schema            usr/share/univention-ssh-key-sync/
