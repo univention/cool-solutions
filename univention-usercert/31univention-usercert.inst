@@ -30,7 +30,7 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-VERSION=7
+VERSION=8
 . /usr/share/univention-join/joinscripthelper.lib
 joinscript_init
 
@@ -236,6 +236,17 @@ if joinscript_check_version_in_range_executed "1" "6"; then
 		--set 'translationTabName="de_DE" "Zertifikat"' \
 		--set tabName="Certificate"
 
+fi
+
+# append pki object class to objects that need it
+if joinscript_check_version_in_range_executed "1" "7"; then
+	for dn in $(univention-ldapsearch -LLL '(&(userCertificate=*)(univentionObjectType=users/ldap))' dn | awk 'NF {print $2}'); do
+		udm users/ldap modify --dn "$dn" --append-option pki
+	done
+
+	for dn in $(univention-ldapsearch -LLL '(&(userCertificate=*)(univentionObjectType=computers/windows))' dn | awk 'NF {print $2}'); do
+		udm computers/windows modify --dn "$dn" --append-option pki
+	done
 fi
 
 joinscript_save_current_version

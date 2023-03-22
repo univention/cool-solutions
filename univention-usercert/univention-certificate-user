@@ -54,7 +54,7 @@ usage () {
 	echo "        -name <uid>"
 	echo "        -days <int>"
 	echo "        -email <emailAddress>"
-	echo "        -cn   <string>"
+	echo "        -certname | -cn <string>"
 	echo "        -organizationalunit <string>"
 	echo "        -certpath <path>"
 	echo "        -sslbase <path>"
@@ -91,7 +91,7 @@ while [ $# -gt 0 ]; do
 		extfile="$2"
 		test -f "$extfile" || usage "$extfile is not a valid file"
 		;;
-	"-cn") cn="$2" ;;
+	"-certname" | "-cn") cn="$2" ;;
 	"-organizationalunit") organizationalunit="$2" ;;
 	"-email") email="$2" ;;
 	"-admingroup") admingroup="$2" ;;
@@ -120,11 +120,11 @@ case "$command" in
 esac
 
 [ -n "$name" ] || usage "missing -name"
-path="${certpath:-$SSLBASE}/${name}"
+path="${certpath:-$(ucr get ssl/usercert/certpath)}/${name}"
 
 case "$script" in
 univention-certificate-user)
-	[ -n "$cn" ] || usage "missing -cn"
+	[ -n "$cn" ] || usage "missing -certname or -cn"
 	owner="$name"
 	[ -n "$admingroup" ] || admingroup="Domain Admins"
 	;;
