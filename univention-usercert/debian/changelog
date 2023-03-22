@@ -1,3 +1,21 @@
+univention-usercert (5.0.0-4) unstable; urgency=medium
+
+  * fix: add objectclass pkiUser to users/ldap and computer/windows objects
+
+ -- Jannik Ahlers <ahlers@univention.de>  Thu, 09 Mar 2023 14:29:49 +0100
+
+univention-usercert (5.0.0-3) unstable; urgency=medium
+
+  * feat: make script univention-certificate-user more user-friendly
+
+ -- Jannik Ahlers <ahlers@univention.de>  Fri, 03 Mar 2023 08:26:08 +0100
+
+univention-usercert (5.0.0-2) unstable; urgency=medium
+
+  * fix: typo
+
+ -- Jannik Ahlers <ahlers@univention.de>  Mon, 27 Feb 2023 18:40:33 +0100
+
 univention-usercert (5.0.0-1) unstable; urgency=medium
 
   * feat: UCS 5 version bump
