@@ -1,3 +1,9 @@
+univention-nextcloud-samba-share-config (1.0.0-22) unstable; urgency=medium
+
+  * Refactor: port package to UCS 5 - #43092
+
+ -- Frank Greif <greif@univention.de>  Fri, 31 Mar 2023 11:36:18 +0200
+
 univention-nextcloud-samba-share-config (1.0.0-21) unstable; urgency=low
 
   * Refactor: template file univention-nextcloud-samba-share-config.py

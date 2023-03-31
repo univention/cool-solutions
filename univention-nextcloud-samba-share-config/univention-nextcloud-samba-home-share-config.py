@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 # Univention Nextcloud Samba share configuration
@@ -64,14 +64,14 @@ def handler(dn, new, old, command=''):
 	domainUsersMatch = common.isDomainUsersCn(dn)
 
 	groupCn = common.getGroupCn(dn)
-	domainUsersOuRegex = '^cn=Domain\ Users\ '
+	domainUsersOuRegex = r'^cn=Domain\ Users\ '
 	ou = re.sub(domainUsersOuRegex, '', domainUsersMatch.group())
 	mountName = "Home {}".format(ou)
 	shareName = '$user'
 
 	ouObject = lo.get('ou={},{}'.format(ou, base))
-	shareHostDn = ouObject['ucsschoolHomeShareFileServer'][0]
-	shareHostCn = lo.get(shareHostDn)['cn'][0]
+	shareHostDn = ouObject['ucsschoolHomeShareFileServer'][0].decode('UTF-8')
+	shareHostCn = lo.get(shareHostDn)['cn'][0].decode('UTF-8')
 
 	shareHost = "{}.{}".format(shareHostCn, domain)
 
