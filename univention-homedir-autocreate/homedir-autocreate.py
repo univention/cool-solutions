@@ -46,29 +46,29 @@ ucr.load()
 
 name = "homedir-autocreate"
 description = "Generate homedir on usercreation"
-filter = '(&\
-                (|\
-                    (&\
-                        (objectClass=posixAccount)\
-                        (objectClass=shadowAccount)\
+prettyFilter = '(&\
+                    (|\
+                        (&\
+                            (objectClass=posixAccount)\
+                            (objectClass=shadowAccount)\
+                        )\
+                        (objectClass=univentionMail)\
+                        (objectClass=sambaSamAccount)\
+                        (objectClass=simpleSecurityObject)\
+                        (&\
+                            (objectClass=person)\
+                            (objectClass=organizationalPerson)\
+                            (objectClass=inetOrgPerson)\
+                        )\
                     )\
-                    (objectClass=univentionMail)\
-                    (objectClass=sambaSamAccount)\
-                    (objectClass=simpleSecurityObject)\
-                    (&\
-                        (objectClass=person)\
-                        (objectClass=organizationalPerson)\
-                        (objectClass=inetOrgPerson)\
+                    (!\
+                        (uidNumber=0)\
                     )\
-                )\
-                (!\
-                    (uidNumber=0)\
-                )\
-                (!\
-                    (uid=*$)\
-                )\
-            )'
-#filter = "(&(|(&(objectClass=posixAccount)(objectClass=shadowAccount))(objectClass=univentionMail)(objectClass=sambaSamAccount)(objectClass=simpleSecurityObject)(&(objectClass=person)(objectClass=organizationalPerson)(objectClass=inetOrgPerson)))(!(uidNumber=0))(!(uid=*$)))"
+                    (!\
+                        (uid=*$)\
+                    )\
+                )'
+filter = "".join(prettyFilter.split())
 attributes = []  # type: List
 
 PATH_SU = "/bin/su"
