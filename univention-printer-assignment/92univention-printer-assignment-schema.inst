@@ -2,7 +2,7 @@
 #
 # Univention Printer Assignment
 #
-# Copyright 2009-2018 Univention GmbH
+# Copyright 2009-2023 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -29,6 +29,8 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
+## joinscript api: bindpwdfile
+
 VERSION=1
 . /usr/share/univention-lib/all.sh
 . /usr/share/univention-join/joinscripthelper.lib
@@ -36,7 +38,7 @@ joinscript_init
 
 eval "$(/usr/sbin/ucr shell)"
 
-add_ext_attr () {
+add_ext_attr() {
 	local SUFFIX="$1"
 	local MODULE="$2"
 	shift 2 || exit 1
@@ -101,7 +103,7 @@ univention-directory-manager settings/syntax create "$@" --ignore_exists \
 	--set value="shares/printer: dn" \
 	--set filter="(objectclass=univentionPrinter)" \
 	--set base="$ldap_base" \
-	--set addEmptyValue="TRUE" \
+	--set addEmptyValue="FALSE" \
 	--set viewonly="FALSE" || die
 
 add_ext_attr "host" "computers/windows" "$@"

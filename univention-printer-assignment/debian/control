@@ -2,16 +2,20 @@ Source: univention-printer-assignment
 Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
-Build-Depends: debhelper, univention-config-dev, ucslint
+Build-Depends:
+ debhelper-compat (= 12),
+ ucslint,
+ univention-config-dev,
 Standards-Version: 3.8.2
 
 Package: univention-printer-assignment
 Architecture: all
-Depends: ${misc:Depends},
+Depends:
+ python3-univention-directory-manager,
+ shell-univention-lib,
  univention-config-registry,
- python-univention-directory-manager,
  univention-join,
- shell-univention-lib
+ ${misc:Depends},
 Description: Assign printers to groups containing computers
  This package allows the assignment of printers to groups that
  contain computers. On Windows systems a Netlogon script will
@@ -19,9 +23,10 @@ Description: Assign printers to groups containing computers
 
 Package: univention-printer-assignment-schema
 Architecture: all
-Depends: ${misc:Depends},
+Depends:
+ shell-univention-lib (>= 2.0.17-1),
  univention-join (>= 5.0.20-1),
- shell-univention-lib (>= 2.0.17-1)
+ ${misc:Depends},
 Description: LDAP schema for assigning printers to hosts
- This package contains the required LDAP schema for the 
+ This package contains the required LDAP schema for the
  package univention-printer-assignment.

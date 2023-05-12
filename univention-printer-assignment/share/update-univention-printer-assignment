@@ -1,8 +1,8 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 # Univention Printer Assignment
-# Copyright 2007-2018 Univention GmbH
+# Copyright 2007-2023 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -29,16 +29,17 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
+import argparse
+import os
+import shutil
 import sys
-import optparse
-import univention.config_registry
-import univention.admin.uldap
+import tempfile
+
+import univention.admin.config
 import univention.admin.modules
 import univention.admin.objects
-import univention.admin.config
-import tempfile
-import shutil
-import os
+import univention.admin.uldap
+import univention.config_registry
 
 ucr = univention.config_registry.ConfigRegistry()
 ucr.load()
@@ -53,25 +54,25 @@ cache_hosts = {}
 
 def log_debug(msg):
 	if debug:
-		print 'DEBUG: %s' % msg
+		print('DEBUG: %s' % msg)
 
 def log_error(msg):
-	print >>sys.stderr, msg
+	print(msg, file=sys.stderr)
 
 def main():
 	global debug
-	usage  = '''%prog [-d|--debug] [-f|--file <backlogfile>] [dn] ...
+	usage = '''%(prog)s [-d|--debug] [-f|--file <backlogfile>] [dn] ...
 
-%prog updates the printer assignment logon scripts.
+%(prog)s updates the printer assignment logon scripts.
 The given list of DNs (either as direct argument or by a file) defines
 which logon script has to be updated. The backlogfile has to contain one
 DN per line.
 '''
 
-	parser = optparse.OptionParser(usage=usage)
-	parser.add_option('-f', '--file', action='store', dest='backlogfile', default=None, help='path to the backlog file')
-	parser.add_option('-d', '--debug', action='store_true', dest='debug', default=False, help='enable debugging output')
-	(options, args, ) = parser.parse_args()
+	parser = argparse.ArgumentParser(usage=usage)
+	parser.add_argument('-f', '--file', action='store', dest='backlogfile', default=None, help='path to the backlog file')
+	parser.add_argument('-d', '--debug', action='store_true', dest='debug', default=False, help='enable debugging output')
+	options, args = parser.parse_known_args()
 
 	if not options.backlogfile and not args:
 		log_error('At least one DN has to be specified as argument or via backlog file')
@@ -160,16 +161,35 @@ def load_printer(lo, dn, obj=None, recursive=True, reload=False, ignore_missing=
 
 	if recursive or ignore_missing:
 		# fetch all groups that refer to this printer
+		ldap_filter = (
+			'(&'
+				'(objectClass=univentionGroup)'
+				'(|'
+					f'(univentionAssignedPrinter={dn})'
+					f'(univentionAssignedPrinterDefault={dn})'
+				')'
+			')'
+		)
 		try:
-			search_result = lo.search(filter='(&(objectClass=univentionGroup)(|(univentionAssignedPrinter=%s)(univentionAssignedPrinterDefault=%s)))' % (dn, dn), base=baseDN)
+			search_result = lo.search(filter=ldap_filter, base=baseDN)
 		except univention.admin.uexceptions.noObject:
 			search_result = []
 		for (grpdn, grpobj) in search_result:
 			load_group(lo, grpdn, obj=grpobj)
 
 		# fetch all hosts that refer to this printer
+		ldap_filter = (
+			'(&'
+				'(objectClass=univentionHost)'
+				'(objectClass=univentionWindows)'
+				'(|'
+					f'(univentionAssignedPrinter={dn})'
+					f'(univentionAssignedPrinterDefault={dn})'
+				')'
+				')'
+		)
 		try:
-			search_result = lo.search(filter='(&(objectClass=univentionHost)(objectClass=univentionWindows)(|(univentionAssignedPrinter=%s)(univentionAssignedPrinterDefault=%s)))' % (dn, dn), base=baseDN)
+			search_result = lo.search(filter=ldap_filter, base=baseDN)
 		except univention.admin.uexceptions.noObject:
 			search_result = []
 		for (hostdn, hostobj) in search_result:
@@ -206,7 +226,8 @@ def load_host(lo, dn, obj=None, reload=False):
 		obj = fetch_object(lo, dn)
 	if not obj:
 		return
-	if not 'univentionHost' in obj.get('objectClass', []) or not 'univentionWindows' in obj.get('objectClass', []):
+	if not 'univentionHost' in obj.get('objectClass', []) or \
+			'univentionWindows' not in obj.get('objectClass', []):
 		return
 	# add to cache
 	cache_hosts[dn] = obj
@@ -226,7 +247,8 @@ def load_objects(lo, dnlist):
 			# Side note: This has to be done only once if the first missing object in the backlog is checked; all further checks are redundant
 			#            This may be implemented in future.
 			load_printer(lo, dn, ignore_missing=True)
-		elif 'univentionHost' in obj.get('objectClass', []) and 'univentionWindows' in obj.get('objectClass', []):
+		elif 'univentionHost' in obj.get('objectClass', []) and \
+				'univentionWindows' in obj.get('objectClass', []):
 			load_host(lo, dn, obj=obj)
 		elif 'univentionGroup' in obj.get('objectClass', []):
 			load_group(lo, dn, obj=obj)
@@ -287,8 +309,14 @@ def process_host(lo, dn, target_dirs):
 	if dn not in cache_hosts:
 		log_error('ERROR: host is not in cache: %s' % dn)
 
+	ldap_filter = (
+		'(&'
+			'(objectClass=univentionGroup)'
+			f'(uniqueMember={dn})'
+		')'
+	)
 	try:
-		search_result = lo.searchDn(filter='(&(objectClass=univentionGroup)(uniqueMember=%s))' % dn, base=baseDN)
+		search_result = lo.searchDn(filter=ldap_filter, base=baseDN)
 	except univention.admin.uexceptions.noObject:
 		search_result = []
 	for grpdn in search_result:
@@ -342,11 +370,10 @@ def process_host(lo, dn, target_dirs):
 		fd = open(temp_fn, 'w')
 		fd.write(content)
 		fd.close()
-		os.chmod(temp_fn, 0755)
+		os.chmod(temp_fn, 0o755)
 		# replace old file
 		log_debug('Replacing file %s' % target_fn)
 		shutil.move(temp_fn, target_fn.lower())
-
 
 
 if __name__ == '__main__':

@@ -1,113 +1,50 @@
-univention-printer-assignment (7.1.0-3) unstable; urgency=low
+univention-printer-assignment (9.0.0-3) unstable; urgency=low
 
-  * VBS script names now generate in lowercase Issue #10531
-  * Update Copyright
+  * Issue #34619 Migration to pyhton3 for UCS 5.0
 
- -- Alexander Ulpts <ulpts@univention.de>  Fri, 30 Nov 2018 09:32:39 +0100
+ -- Abdul Rahman, Vakili <vakili@univention.de>  Tue, 02 Aug 2022 14:09:07 +0200
 
-univention-printer-assignment (7.1.0-2) unstable; urgency=low
+univention-printer-assignment (9.0.0-2) unstable; urgency=low
 
-  * Fixed test/testsuite.sh path and ucslint unquoted argument. Issue #7915
+  * Issue #34619 Migration to pyhton3 for UCS 5.0
 
- -- Andreas Peichert <peichert@univention.de>  Tue, 23 May 2017 16:03:12 +0200
+ -- Abdul Rahman, Vakili <vakili@univention.de>  Tue, 02 Aug 2022 13:00:33 +0200
 
-univention-printer-assignment (7.1.0-1) unstable; urgency=low
+univention-printer-assignment (8.1.0-2) unstable; urgency=low
 
-  * merged branch for 4.2. Issue #7915
-  * Update Copyright
+  * Issue #17723: use new joinscript API 'bindpwdfile'
 
- -- Andreas Peichert <peichert@univention.de>  Mon, 22 May 2017 15:23:47 +0200
+ -- Sönke Schwardt-Krummrich <schwardt@univention.de>  Mon, 15 Jul 2019 13:20:44 +0200
 
-univention-printer-assignment (7.0.1-14) unstable; urgency=medium
+univention-printer-assignment (8.1.0-1) unstable; urgency=low
 
-  * move resync script #6910 
+  * version bump for UCS 4.4
 
- -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 20 Mar 2017 15:10:35 +0100
+ -- Sönke Schwardt-Krummrich <schwardt@univention.de>  Mon, 15 Jul 2019 09:50:05 +0200
 
-univention-printer-assignment (7.0.1-6) unstable; urgency=medium
+univention-printer-assignment (8.0.0-1) unstable; urgency=low
 
-  * update dirs file #6910
+  * version bump for UCS 4.3
 
- -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 20 Mar 2017 13:10:06 +0100
+ -- Sönke Schwardt-Krummrich <schwardt@univention.de>  Fri, 29 Jun 2018 16:14:54 +0200
 
-univention-printer-assignment (7.0.1-5) unstable; urgency=medium
+univention-printer-assignment (7.0.0-1) unstable; urgency=low
 
-  * add UCR hook to recreate VB scripts on relevant change
+  * version bump for UCS 4.0
 
- -- Valentin Heidelberger <heidelberger@univention.de>  Mon, 20 Mar 2017 12:42:32 +0100
+ -- Sönke Schwardt-Krummrich <schwardt@univention.de>  Tue, 28 Jul 2015 11:03:31 +0200
 
-univention-printer-assignment (7.0.1-5) unstable; urgency=medium
+univention-printer-assignment (6.1.1-1) unstable; urgency=low
 
-  * fix VBS template (Ticket#: 2016070621000283)
+  * resume on error during assignment (Ticket#: 2014090221000263)
 
- -- Tobias Birkefeld <birkefeld@univention.de>  Fri, 23 Sep 2016 11:04:39 +0200
+ -- Sönke Schwardt-Krummrich <schwardt@univention.de>  Mon, 08 Sep 2014 11:31:05 +0200
 
-univention-printer-assignment (7.0.1-4) unstable; urgency=medium
-
-  * put old VBS template back into place
-
- -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 15 Sep 2016 16:58:35 +0200
-
-univention-printer-assignment (7.0.1-3) unstable; urgency=medium
-
-  * test package with VBS template from SfB package
-
- -- Valentin Heidelberger <heidelberger@univention.de>  Thu, 15 Sep 2016 13:25:09 +0200
-
-univention-printer-assignment (7.0.1-2) unstable; urgency=medium
-
-  * fix ucs lint errors (Ticket#: 2016070621000283)
-
- -- Tobias Birkefeld <birkefeld@univention.de>  Mon, 22 Aug 2016 14:42:15 +0200
-
-univention-printer-assignment (7.0.1-1) unstable; urgency=medium
-
-  * version dump (Ticket#: 2016070621000283)
-
- -- Tobias Birkefeld <birkefeld@univention.de>  Mon, 22 Aug 2016 14:03:53 +0200
-
-univention-printer-assignment (6.0.5-2) unstable; urgency=low
-
-  * removed more oboselte ucr vars (Ticket#: 2013121921001244) 
-
- -- Felix Botner <botner@univention.de>  Fri, 04 Apr 2014 17:11:10 +0200
-
-univention-printer-assignment (6.0.5-1) unstable; urgency=low
-
-  * removed oboselte ucr info/module during this update (Ticket#: 2013121921001244) 
-
- -- Felix Botner <botner@univention.de>  Fri, 04 Apr 2014 17:01:19 +0200
-
-univention-printer-assignment (6.0.4-1) unstable; urgency=low
-
-  * fixed 92univention-printer-assignment-schema.inst (Ticket#: 2013121921001244) 
-
- -- Felix Botner <botner@univention.de>  Wed, 19 Mar 2014 14:22:34 +0100
-
-univention-printer-assignment (6.0.3-1) unstable; urgency=low
+univention-printer-assignment (6.1.0-1) unstable; urgency=low
 
   * use local LDAP server instead auf DC master (Ticket#: 2012121421001111)
 
- -- Sönke Schwardt-Krummrich <schwardt@univention.de>  Fri, 07 Mar 2014 15:44:18 +0100
-
-univention-printer-assignment (6.0.2-3) unstable; urgency=low
-
-  * added printuientry options (Ticket#: 2013121921001244)
-
- -- Felix Botner <botner@univention.de>  Fri, 21 Feb 2014 11:01:13 +0100
-
-univention-printer-assignment (6.0.2-2) unstable; urgency=low
-
-  * fixed oid for "printers settings file" schema (Ticket#: 2013121921001244)
-
- -- Felix Botner <botner@univention.de>  Thu, 20 Feb 2014 16:25:35 +0100
-
-univention-printer-assignment (6.0.2-1) unstable; urgency=low
-
-  * added settings file for printers (rundll32 printui.dll,PrintUIEntry) 
-    (Ticket#: 2013121921001244)
-
- -- Felix Botner <botner@univention.de>  Thu, 20 Feb 2014 16:19:23 +0100
+ -- Sönke Schwardt-Krummrich <schwardt@univention.de>  Fri, 07 Mar 2014 15:36:29 +0100
 
 univention-printer-assignment (6.0.1-2) unstable; urgency=low
 
