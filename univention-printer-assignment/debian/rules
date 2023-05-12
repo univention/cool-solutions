@@ -2,7 +2,7 @@
 #
 # rules file for the debian package
 #
-# Copyright 2007-2018 Univention GmbH
+# Copyright 2020-2023 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -30,12 +30,4 @@
 # <http://www.gnu.org/licenses/>.
 
 %:
-	dh $@
-
-override_dh_auto_test:
-	ucslint
-	dh_auto_test
-
-override_dh_install:
-	dh_install
-	univention-install-config-registry
+	dh $@ --with ucr 

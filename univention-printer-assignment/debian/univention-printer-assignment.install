@@ -1,3 +1,3 @@
 listener/univention-printer-assignment.py usr/lib/univention-directory-listener/system/
-share/update-univention-printer-assignment usr/share/univention-printer-assignment/
 share/printer-assignment-template.vbs usr/share/univention-printer-assignment
+share/update-univention-printer-assignment usr/share/univention-printer-assignment/

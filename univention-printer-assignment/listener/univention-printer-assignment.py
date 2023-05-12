@@ -3,7 +3,7 @@
 # univention-printer-assignment
 #  listener module
 #
-# Copyright 2013-2018 Univention GmbH
+# Copyright 2013-2023 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -30,14 +30,18 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-__package__=''  # workaround for PEP 366
-import listener
-import univention.debug as ud
-import univention.config_registry
 
-import re
 import os
+import re
 import subprocess
+from builtins import str
+
+import listener
+import univention.config_registry
+import univention.debug as ud
+
+__package__=''  # workaround for PEP 366
+
 
 name='univention-printer-assignment'
 description='create windows netlogon scripts for univention-printer-assignment'
@@ -70,7 +74,7 @@ def __append_to_backlog(dn):
 		fd = open(backlog_filename, 'a+')
 		fd.write('%s\n' % dn)
 		fd.close()
-		os.chmod(backlog_filename, 0644)
+		os.chmod(backlog_filename, 0o644)
 	except Exception as e:
 		ud.debug(ud.LISTENER, ud.ERROR, "univention-printer-assignment: failed to append to backlog file %s" % backlog_filename)
 		ud.debug(ud.LISTENER, ud.ERROR, "univention-printer-assignment: %s" % str(e))
@@ -102,19 +106,19 @@ def __is_relevant(dn, old, new):
 	if not old or not new:
 		return True
 
-	if 'univentionPrinter' in new.get('objectClass',[]):
+	if b'univentionPrinter' in new.get('objectClass',[]):
 		for attrname in ('cn', 'univentionPrinterSambaName', 'univentionAssignedPrinterSettingsFile'):
 			if old.get(attrname, []) != new.get(attrname, []):
 				return True
 
-	if 'univentionGroup' in new.get('objectClass',[]):
+	if b'univentionGroup' in new.get('objectClass',[]):
 		if dn_filter_grp and not dn_filter_grp.match(dn):
 			return False
 		for attrname in ('uniqueMember', 'univentionAssignedPrinter', 'univentionAssignedPrinterDefault'):
 			if old.get(attrname, []) != new.get(attrname, []):
 				return True
 
-	if 'univentionWindows' in new.get('objectClass',[]):
+	if b'univentionWindows' in new.get('objectClass',[]):
 		for attrname in ('univentionAssignedPrinter', 'univentionAssignedPrinterDefault'):
 			if old.get(attrname, []) != new.get(attrname, []):
 				return True
@@ -130,7 +134,7 @@ def handler(dn, new, old):
 	# check if object or change is relevant for logon scripts
 	if __is_relevant(dn, old, new):
 		# special case: group has been removed ==> check all old members
-		if not new and 'univentionGroup' in old.get('objectClass', []):
+		if not new and b'univentionGroup' in old.get('objectClass', []):
 			for memberdn in old.get('uniqueMember', []):
 				__append_to_backlog(memberdn)
 		else:
@@ -165,4 +169,3 @@ def postrun():
 
 def initialize():
 	pass
-
