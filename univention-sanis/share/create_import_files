@@ -1,0 +1,149 @@
+#!/usr/bin/python3
+
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+# Cool solutions -- SANIS import
+#
+# Like what you see? Join us!
+# https://www.univention.com/about-us/careers/vacancies/
+#
+# Copyright 2023 Univention GmbH
+#
+# https://www.univention.de/
+#
+# All rights reserved.
+#
+# The source code of this program is made available
+# under the terms of the GNU Affero General Public License version 3
+# (GNU AGPL V3) as published by the Free Software Foundation.
+#
+# Binary versions of this program provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention and not subject to the GNU AGPL V3.
+#
+# In the case you use this program under the terms of the GNU AGPL V3,
+# the program is provided in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License with the Debian GNU/Linux or Univention distribution in file
+# /usr/share/common-licenses/AGPL-3; if not, see
+# <https://www.gnu.org/licenses/>.
+
+import os
+import datetime
+import json
+import base64
+from urllib import request
+
+from sanis_tools import iterStore
+from sanis_models import person, organisation, kontext, klassen, mitglieder
+
+# Constants
+
+TOKEN_URL = 'https://auth.stage.niedersachsen-login.schule/realms/SANIS/protocol/openid-connect/token'
+SANIS_API = 'https://api-schulen.stage.niedersachsen-login.schule/v1'
+
+CRED_FILE = 'credentials'
+
+class sanisImport:
+
+	token = None
+
+	def __init__(self):
+		""" Prepare object for use. Any errors throw exceptions and are not handled here. """
+
+		# TODO get current timestamp -> as prefix of all created files
+
+		self.token = self.get_token()
+
+		# --------------- person -----------------
+		pers_file = self.fetch_data('/personen')		# read from SANIS API
+		pers = iterStore(person, pers_file)				# for 'person'
+		pers.print_data()
+
+		# ---------- schools (organizations) ------
+		org_file = self.fetch_data('/organisationen')
+		org = iterStore(organisation, org_file)
+		org.print_data()
+
+		# -------- "personenkontexte" --------------
+		# Note that the 'personen' dataset already contains all of the data
+		# needed by the 'personenkontext' logic. Therefore it is useless to
+		# fetch the same data again here. Instead, we use the 'pers_file'
+		# which we already have fetched.
+		kont = iterStore(kontext, pers_file)
+		kont.print_data()
+
+		# ------------ groups (only classes) -------------
+		grp_file = self.fetch_data('/gruppen')
+		grp = iterStore(klassen, grp_file)
+		grp.print_data()
+
+		# ----------- membership ------------------
+		# Just as for 'personenkontexte', the 'gruppenmitgliedschaften' membership
+		# relations are already fully fetched by the '/gruppen' entry point.
+		memb = iterStore(mitglieder, grp_file)
+		memb.print_data()
+
+	def get_token(self):
+		""" Acquire a token from the login server.
+
+			We currently do not care about how long this token is valid. If we really
+			run into the problem that our data requests take too long -> we should
+			implement kind of error handling in the request methods.
+		"""
+
+		# FIXME implement sensible error handling
+
+		with open(CRED_FILE,'rb') as cred:
+			clid = cred.readline().strip()
+			clpw = cred.readline().strip()
+
+		req = request.Request(TOKEN_URL,data=b'grant_type=client_credentials',method='POST')
+		# Preemptively add credentials
+		req.add_header('Authorization','Basic %s' % base64.b64encode(b'%s:%s' % (clid,clpw)).decode('utf-8'))
+
+		with request.urlopen(req) as resp:
+			rtxt = resp.read()
+			return json.loads(rtxt)['access_token']
+
+	def fetch_data(self,entrypoint):
+		""" Fetch a dataset from the SANIS entry point. Maybe this can be made a stream
+			interface that directly pushes data into the iterStore; currently this is
+			not done.
+		"""
+
+		# FOR TESTING: Make a fixed result file name.
+		resfile = 'sanis_api_%s.json' % entrypoint.translate( { ord(i): None for i in '/_-.'} )
+
+		# FOR TESTING: avoid fetching the same file over and over as long as it already exists.
+		if not os.path.exists(resfile):
+			# binary mode is correct here: response is expected to be UTF8-encoded, and the
+			# file can hold this data without de-/reencoding
+			with open(resfile,'wb') as ofile:
+				req = request.Request('%s%s' % (SANIS_API,entrypoint))
+				req.add_header('Authorization', 'Bearer %s' % self.token)
+				with request.urlopen(req) as resp:
+					while True:
+						buf = resp.read(1024)
+						if not len(buf):
+							break
+						ofile.write(buf)
+
+		return resfile
+
+def main():
+
+	si = sanisImport()
+
+	return 0
+
+if __name__ == '__main__':
+    main()
+

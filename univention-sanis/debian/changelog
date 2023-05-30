@@ -1,0 +1,5 @@
+univention-sanis (1.0.0) unstable; urgency=medium
+
+  * Initial release - #43882
+
+ -- Frank Greif <greif@univention.de>  Thu, 25 May 2023 15:59:48 +0200
