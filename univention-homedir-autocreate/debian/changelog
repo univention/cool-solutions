@@ -1,3 +1,13 @@
+univention-homedir-autocreate (4.0.0-8) unstable; urgency=low
+
+  * Changes due to merge request comments
+  * Removed unnecessary get methods
+  * Removed decode method that wasn't need because the object is already a string
+  * Added check if returnd object is a string if not return decoded object to string
+  * Updated type hints
+
+ -- Joschua Geske <geske@univention.de>  , 5 Sep 2023 08:37:16 +0200
+
 univention-homedir-autocreate (4.0.0-7) unstable; urgency=low
 
   * refactor(univention-homedir-autocreate):changes due last review
