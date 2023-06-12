@@ -66,3 +66,6 @@ $RECYCLE.BIN/
 
 cookbooks/in8deployment/attributes/ndev.rb
 cookbooks/in8-univention
+
+#Vscode
+.vscode/settings.json
