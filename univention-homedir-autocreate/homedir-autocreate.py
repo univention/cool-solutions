@@ -74,12 +74,6 @@ PATH_CHOWN = "/bin/chown"
 PATH_CHMOD = "/bin/chmod"
 
 
-def initialize():
-    univention.debug.debug(
-        univention.debug.LISTENER, univention.debug.INFO, "%s: initialize" % name
-    )
-
-
 def handler(
     dn, new, old
 ):  # type: (str, Dict[str, List[bytes]], Dict[str, List[bytes]]) -> None
