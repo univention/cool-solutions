@@ -36,13 +36,10 @@ from __future__ import absolute_import
 import listener
 import os
 import univention.debug
-from univention.config_registry import ConfigRegistry
+from univention.config_registry import ucr
 from typing import Dict
 from typing import List
 from listener import SetUID
-
-ucr = ConfigRegistry()
-ucr.load()
 
 name = "homedir-autocreate"
 description = "Generate homedir on usercreation"
