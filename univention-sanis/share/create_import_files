@@ -42,7 +42,7 @@ import base64
 from urllib import request
 
 from sanis_tools import iterStore
-from sanis_models import person, organisation, kontext, klassen, mitglieder
+from sanis_models import Person, Organisation, Kontext, Klassen, Mitglieder
 
 # Constants
 
@@ -53,43 +53,70 @@ CRED_FILE = 'credentials'
 
 class sanisImport:
 
-	token = None
+	token = None				# current auth token
+	temp_base = None			# base for temp files
 
-	def __init__(self):
+	pers_store = None			# personen
+	org_store = None			# organisationen
+	kont_store = None			# personenkontexte
+	grp_store = None			# gruppen
+	memb_store = None			# gruppenmitgliedschaften
+
+	tempfiles = []				# to be cleaned up
+
+	def __init__(self, verbose=False):
 		""" Prepare object for use. Any errors throw exceptions and are not handled here. """
-
-		# TODO get current timestamp -> as prefix of all created files
 
 		self.token = self.get_token()
 
-		# --------------- person -----------------
-		pers_file = self.fetch_data('/personen')		# read from SANIS API
-		pers = iterStore(person, pers_file)				# for 'person'
-		pers.print_data()
+		# invent a prefix for temp files. Can be a directory or only a filename prefix.
+		# Will be used here for JSON files as well as in the stores when switching
+		# to file store. All temp files are cleaned up.
+		self.temp_base = '/tmp/sanis_import_%d_' % os.getpid()
 
-		# ---------- schools (organizations) ------
-		org_file = self.fetch_data('/organisationen')
-		org = iterStore(organisation, org_file)
-		org.print_data()
+		# --------------- person -----------------
+		pers_file = self.fetch_data('/personen')
+		self.pers_store = iterStore(Person, pers_file, temp_base=self.temp_base)
+		if verbose:
+			self.pers_store.print_data()
 
 		# -------- "personenkontexte" --------------
 		# Note that the 'personen' dataset already contains all of the data
 		# needed by the 'personenkontext' logic. Therefore it is useless to
 		# fetch the same data again here. Instead, we use the 'pers_file'
 		# which we already have fetched.
-		kont = iterStore(kontext, pers_file)
-		kont.print_data()
+		self.kont_store = iterStore(Kontext, pers_file, temp_base=self.temp_base)
+		if verbose:
+			self.kont_store.print_data()
+
+		# ---------- schools (organizations) ------
+		org_file = self.fetch_data('/organisationen')
+		self.org_store = iterStore(Organisation, org_file, temp_base=self.temp_base)
+		# too much debug
+		#if verbose:
+		#	self.org_store.print_data()
 
 		# ------------ groups (only classes) -------------
 		grp_file = self.fetch_data('/gruppen')
-		grp = iterStore(klassen, grp_file)
-		grp.print_data()
+		self.grp_store = iterStore(Klassen, grp_file, temp_base=self.temp_base)
+		if verbose:
+			self.grp_store.print_data()
 
 		# ----------- membership ------------------
 		# Just as for 'personenkontexte', the 'gruppenmitgliedschaften' membership
 		# relations are already fully fetched by the '/gruppen' entry point.
-		memb = iterStore(mitglieder, grp_file)
-		memb.print_data()
+		self.memb_store = iterStore(Mitglieder, grp_file, temp_base=self.temp_base)
+		if verbose:
+			self.memb_store.print_data()
+
+	def __del__(self):
+		""" Cleanup on program end. Currently only removes temp files. """
+
+		for fname in self.tempfiles:
+			try:
+				os.unlink(fname)
+			except:
+				pass
 
 	def get_token(self):
 		""" Acquire a token from the login server.
@@ -114,33 +141,59 @@ class sanisImport:
 			return json.loads(rtxt)['access_token']
 
 	def fetch_data(self,entrypoint):
-		""" Fetch a dataset from the SANIS entry point. Maybe this can be made a stream
-			interface that directly pushes data into the iterStore; currently this is
-			not done.
+		""" Fetch a dataset from the SANIS entry point. Will be kept in a cache file while
+			the program is running.
 		"""
 
-		# FOR TESTING: Make a fixed result file name.
-		resfile = 'sanis_api_%s.json' % entrypoint.translate( { ord(i): None for i in '/_-.'} )
+		# Resultfiles are now cleaned up
+		resfile = '%sapi_%s.json' % (self.temp_base, entrypoint.translate( { ord(i): None for i in '/_-.'} ))
+		print('resfile: %s' % resfile)
 
-		# FOR TESTING: avoid fetching the same file over and over as long as it already exists.
-		if not os.path.exists(resfile):
-			# binary mode is correct here: response is expected to be UTF8-encoded, and the
-			# file can hold this data without de-/reencoding
-			with open(resfile,'wb') as ofile:
-				req = request.Request('%s%s' % (SANIS_API,entrypoint))
-				req.add_header('Authorization', 'Bearer %s' % self.token)
-				with request.urlopen(req) as resp:
-					while True:
-						buf = resp.read(1024)
-						if not len(buf):
-							break
-						ofile.write(buf)
+		# binary mode is correct here: response is expected to be UTF8-encoded, and the
+		# file can hold this data without de-/reencoding
+		with open(resfile,'wb') as ofile:
+			req = request.Request('%s%s' % (SANIS_API,entrypoint))
+			req.add_header('Authorization', 'Bearer %s' % self.token)
+			with request.urlopen(req) as resp:
+				while True:
+					buf = resp.read(1024)
+					if not len(buf):
+						break
+					ofile.write(buf)
+
+		# All files created here are candidates for autodeletion on exit, so
+		# add them to the tempfiles list.
+		self.tempfiles.append(resfile)
 
 		return resfile
 
+	def resolve_contexts(self):
+		""" Resolve the list of GUIDs of the 'personenkontexte' data
+			into the real objects. Current structure is:
+
+				[context_id, org_id, pers_id, role]
+
+			the org_id and pers_id are being looked up and replaced by the
+			identifying string of the organization resp. prerson:
+
+				[context_id, org_name, pers_name, role]
+
+			Because we fetch the contexts from the 'personen' entrypoint we know for sure
+			that ALL roles of ONE user are guaranteed to appear as one contiguous block. Therefore
+			we do not need to iterate over all contexts just to find the ones for one user.
+		"""
+
+		for kontext in self.kont_store:
+				org = self.org_store.resolve(kontext['org_id'],'name')
+				pers = self.pers_store.resolve(kontext['person_id'])
+				print('pers: [%s] %s, role: %s at: %s' % (kontext['person_id'],pers,kontext['rolle'],org))
+
+
 def main():
 
-	si = sanisImport()
+	si = sanisImport(verbose=True)
+
+	si.resolve_contexts()
 
 	return 0
 

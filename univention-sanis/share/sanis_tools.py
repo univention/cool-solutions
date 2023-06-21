@@ -26,7 +26,9 @@ class iterStore:
 			`self.switch_to_filestore()`
 
 		which will turn the memory-consuming array into a file-backed array where
-		array elements are represented by tab-delimited plain text lines.
+		array elements are represented by tab-delimited plain text lines. (Yes, this
+		forbids using linefeeds and tabs in the cell contents, but who wants that
+		anyway?)
 
 		iterStore implements the Iterator API, so the caller can loop over the objects
 		currently stored here as if it were a real array.
@@ -35,13 +37,15 @@ class iterStore:
 
 			`self.find(key,value)`
 
-		This function can search for values in every key, but if the key is the first attribute
-		mentioned in the _attributes class, then the search benefits from an internal index.
+		This function can search for values in every key. Search is done sequentially, but if the
+		key is the first attribute mentioned in the _attributes property of the sanisObject class,
+		then the search benefits from an internal index.
 
 	"""
 
 	data = []
 	fname = None
+	temp_base = ''		# where to create temp file (if needed)
 
 	# status-holding variables. Used while filling the store AND while reading it.
 	file = None
@@ -51,9 +55,10 @@ class iterStore:
 	keyattr = ''
 	keyidx = {}		# key = value of the first attribute, value = record number.
 
-	def __init__(self, klass, jsonfile=None):
+	def __init__(self, klass, jsonfile=None, temp_base=None):
 		""" Initialize a store object for elements of the 'klass' class.
 			If jsonfile is given: read it immediately.
+			If temp_base is given: use it as prefix for temp file (if ever needed)
 		"""
 
 		self.klass = klass
@@ -64,6 +69,9 @@ class iterStore:
 		self.file = None
 		self.pos = 0
 		self.keyidx = {}
+
+		if temp_base:
+			self.temp_base = temp_base
 
 		if jsonfile:
 			self.read_json_file(jsonfile)
@@ -97,7 +105,7 @@ class iterStore:
 		""" An internal NEXT function that hides the internals of the current
 			storage mode (memory or file). This is used by the public __next__()
 			API by the callers. The internal function is used when it is not needed
-			to convert the full data inyo the external representation (such as in the
+			to convert the full data into the external representation (such as in the
 			find() and find_all() methods).
 		"""
 
@@ -116,8 +124,8 @@ class iterStore:
 	def switch_to_filestore(self):
 		""" Switch store mode to temp file store. """
 
-		# FIXME invent a sensible temp file name scheme
-		fname = 'temp_%s_%d.tmp' % (self.klass.__name__,os.getpid())
+		fname = '%sstore_%s.tmp' % (self.temp_base, self.klass.__name__.lower())
+		print('switch_to_filestore: %s' % fname)
 
 		self.fname = fname
 		with open(fname, 'w') as file:
@@ -217,7 +225,7 @@ class iterStore:
 		return len(self.keyidx.keys())
 
 	def find(self, key, val):
-		""" find an object by a key/value pair. """
+		""" Find an object by a key/value pair. """
 
 		# if key is our 'key attribute': search by index.
 		if key == self.keyattr:
@@ -245,7 +253,7 @@ class iterStore:
 			return None
 
 	def find_all(self, key, val):
-		""" find all occurrences of key == val and return them in an array.
+		""" Find all occurrences of key == val and return them in an array.
 			This operation may be somewhat expensive because it must be
 			carried out sequentially until the end of the data array (or file,
 			for that matter).
@@ -258,3 +266,15 @@ class iterStore:
 				result.append(element)
 
 		return result
+
+	def resolve(self,key,retval=None):
+		""" Searches for 'key' in the (indexed) key column of the store,
+			and extracts a property denoted by retval.
+		"""
+
+		element = self.find(self.keyattr,key)
+		if element:
+			return self.klass.extract(element,retval)
+
+		return None
+

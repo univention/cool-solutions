@@ -54,7 +54,7 @@ class sanisObject():
 
 	@classmethod
 	def extract_value(self,obj,key):
-		""" Extract a value keyed by 'key' from an object. This can delve recursively
+		""" Extract a value keyed by 'key' from a JSON object. This can delve recursively
 			into nested structures. Notexistance of any structure level leaves the
 			result as empty string.
 		"""
@@ -78,22 +78,45 @@ class sanisObject():
 		""" return an object of the class denoted by the own object class """
 		return dict(zip(self._attribs.keys(),data))
 
+	@classmethod
+	def extract(self,data,retval=None):
+		""" Extract a field from the (already parsed) data. Data is expected
+			to be a blessed instance (a dict). If retval is None, return the
+			second data value.
+		"""
+
+		if retval:
+			return data[retval]
+
+		return list(data.values())[2]
+
 # -----------------------------------------------------------------------------
 #
 #	C l a s s e s   d e r i v e d   f r o m   s a n i s O b j e c t
 #
 # -----------------------------------------------------------------------------
 
-class person(sanisObject):
+class Person(sanisObject):
 
 	_attribs = {
 		'id':				'person.id',
 		'familienname':		'person.name.familienname',
 		'vorname':			'person.name.vorname',
 		'geburtsdatum':		'person.geburt.datum',
+		'stammorg':			'person.stammorganisation',
 	}
 
-class organisation(sanisObject):
+	# This class overloads the 'extract' function, just to see if it works.
+	@classmethod
+	def extract(self,data,retval=None):
+
+		# Any other 'retval's are resolved by the base classe.
+		if retval is None:
+			return '%(familienname)s, %(vorname)s' % data
+
+		return super().extract(data,retval)
+
+class Organisation(sanisObject):
 
 	_attribs = {
 		'id':				'id',
@@ -116,7 +139,7 @@ class organisation(sanisObject):
 
 		return True
 
-class kontext(sanisObject):
+class Kontext(sanisObject):
 
 	# 'personenkontexte' is an array and should therefore yield multiple
 	# store objects.
@@ -133,7 +156,7 @@ class kontext(sanisObject):
 		'person_id':	'person.id',
 	}
 
-class klassen(sanisObject):
+class Klassen(sanisObject):
 
 	_attribs = {
 		'id':				'gruppe.id',
@@ -156,7 +179,7 @@ class klassen(sanisObject):
 
 		return True
 
-class mitglieder(sanisObject):
+class Mitglieder(sanisObject):
 
 	_arrays = [
 		'gruppenzugehoerigkeiten',

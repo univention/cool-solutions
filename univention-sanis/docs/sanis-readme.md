@@ -8,6 +8,7 @@ A helper for UCS@school user import from SANIS (official name 'moin.schule')
 
 * A helper script that imports the current user data from SANIS, using a well-documented REST API, using contractually agreed credentials. The script produces CSV files suited for a so-called SiSoPi import (single source, partial import) into all schools of one UCS@school domain.
 * An import config file that matches the API conditions, field names and other details needed for the SiSoPi import.
+* An import config hook to inject different configuration snippets depending on the user role, and the snippets themselves.
 
 ### Usage
 
