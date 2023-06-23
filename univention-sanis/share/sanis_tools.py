@@ -1,7 +1,7 @@
 import os
-import datetime
 import ijson
 import copy
+
 
 class iterStore:
 	""" A store holding an array of things, and providing an iterator interface.
@@ -91,7 +91,7 @@ class iterStore:
 			if self.file:
 				self.file.close()
 				self.file = None
-			self.file = open(self.fname,'r')
+			self.file = open(self.fname, 'r')
 		else:
 			self.pos = 0
 		return self
@@ -131,7 +131,7 @@ class iterStore:
 		with open(fname, 'w') as file:
 			if len(self.data):
 				for item in self.data:
-					print('\t'.join(item),file=file)
+					print('\t'.join(item), file=file)
 				# empty the array of arrays: this helps garbage-collecting the memory!
 				idx = len(self.data)
 				while idx > 0:
@@ -168,15 +168,15 @@ class iterStore:
 		"""
 
 		if not len(self.klass._arrays):
-			return [obj,]
+			return [obj, ]
 
-		input = [obj,]
+		input = [obj, ]
 		result = []
 		# this can get multidimensional if we want it...
 		for akey in self.klass._arrays:
 			for obj in input:
-				avar = copy.deepcopy(self.klass.extract_value(obj,akey))
-				if isinstance(avar,list):
+				avar = copy.deepcopy(self.klass.extract_value(obj, akey))
+				if isinstance(avar, list):
 					for aseg in avar:
 						tmp_obj = copy.deepcopy(obj)
 						# this currently only works for toplevel keys. If akey is a nested key
@@ -200,8 +200,8 @@ class iterStore:
 
 		if self.fname:
 			if not self.file:
-				self.file = open(self.fname,'a')
-			print('\t'.join(data),file=self.file)
+				self.file = open(self.fname, 'a')
+			print('\t'.join(data), file=self.file)
 		else:
 			self.data.append(data)
 			if self.klass._memory_threshold:
@@ -211,13 +211,13 @@ class iterStore:
 	def print_data(self):
 		""" DEBUG print the data contained in this store. """
 
-		print('Store [%s] has %d elements:' % (self.klass.__name__,self.length()))
+		print('Store [%s] has %d elements:' % (self.klass.__name__, self.length()))
 
 		# Invoke the iterator interface
 		num = 0
 		for element in self:
 			num += 1
-			print('[%d] %s' % (num,element))
+			print('[%d] %s' % (num, element))
 
 	def length(self):
 		""" return how much elements we have in the index """
@@ -235,7 +235,7 @@ class iterStore:
 					if self.file:
 						self.file.close()
 						self.file = None
-					self.file = open(self.fname,'r')
+					self.file = open(self.fname, 'r')
 					z = num
 					while z > 0:
 						self.file.readline()
@@ -267,14 +267,13 @@ class iterStore:
 
 		return result
 
-	def resolve(self,key,retval=None):
+	def resolve(self, key, retval=None):
 		""" Searches for 'key' in the (indexed) key column of the store,
 			and extracts a property denoted by retval.
 		"""
 
-		element = self.find(self.keyattr,key)
+		element = self.find(self.keyattr, key)
 		if element:
-			return self.klass.extract(element,retval)
+			return self.klass.extract(element, retval)
 
 		return None
-

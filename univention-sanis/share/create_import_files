@@ -1,6 +1,4 @@
 #!/usr/bin/python3
-
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 # Cool solutions -- SANIS import
@@ -36,7 +34,6 @@
 # <https://www.gnu.org/licenses/>.
 
 import os
-import datetime
 import json
 import base64
 from urllib import request
@@ -50,6 +47,7 @@ TOKEN_URL = 'https://auth.stage.niedersachsen-login.schule/realms/SANIS/protocol
 SANIS_API = 'https://api-schulen.stage.niedersachsen-login.schule/v1'
 
 CRED_FILE = 'credentials'
+
 
 class sanisImport:
 
@@ -128,31 +126,31 @@ class sanisImport:
 
 		# FIXME implement sensible error handling
 
-		with open(CRED_FILE,'rb') as cred:
+		with open(CRED_FILE, 'rb') as cred:
 			clid = cred.readline().strip()
 			clpw = cred.readline().strip()
 
-		req = request.Request(TOKEN_URL,data=b'grant_type=client_credentials',method='POST')
+		req = request.Request(TOKEN_URL, data=b'grant_type=client_credentials', method='POST')
 		# Preemptively add credentials
-		req.add_header('Authorization','Basic %s' % base64.b64encode(b'%s:%s' % (clid,clpw)).decode('utf-8'))
+		req.add_header('Authorization', 'Basic %s' % base64.b64encode(b'%s:%s' % (clid, clpw)).decode('utf-8'))
 
 		with request.urlopen(req) as resp:
 			rtxt = resp.read()
 			return json.loads(rtxt)['access_token']
 
-	def fetch_data(self,entrypoint):
+	def fetch_data(self, entrypoint):
 		""" Fetch a dataset from the SANIS entry point. Will be kept in a cache file while
 			the program is running.
 		"""
 
 		# Resultfiles are now cleaned up
-		resfile = '%sapi_%s.json' % (self.temp_base, entrypoint.translate( { ord(i): None for i in '/_-.'} ))
+		resfile = '%sapi_%s.json' % (self.temp_base, entrypoint.translate({ord(i): None for i in '/_-.'}))
 		print('resfile: %s' % resfile)
 
 		# binary mode is correct here: response is expected to be UTF8-encoded, and the
 		# file can hold this data without de-/reencoding
-		with open(resfile,'wb') as ofile:
-			req = request.Request('%s%s' % (SANIS_API,entrypoint))
+		with open(resfile, 'wb') as ofile:
+			req = request.Request('%s%s' % (SANIS_API, entrypoint))
 			req.add_header('Authorization', 'Bearer %s' % self.token)
 			with request.urlopen(req) as resp:
 				while True:
@@ -184,9 +182,9 @@ class sanisImport:
 		"""
 
 		for kontext in self.kont_store:
-				org = self.org_store.resolve(kontext['org_id'],'name')
+				org = self.org_store.resolve(kontext['org_id'], 'name')
 				pers = self.pers_store.resolve(kontext['person_id'])
-				print('pers: [%s] %s, role: %s at: %s' % (kontext['person_id'],pers,kontext['rolle'],org))
+				print('pers: [%s] %s, role: %s at: %s' % (kontext['person_id'], pers, kontext['rolle'], org))
 
 
 def main():
@@ -197,6 +195,6 @@ def main():
 
 	return 0
 
-if __name__ == '__main__':
-    main()
 
+if __name__ == '__main__':
+	main()

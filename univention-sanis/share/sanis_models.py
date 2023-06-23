@@ -32,8 +32,8 @@ class sanisObject():
 
 		result = []
 
-		for (okey,ikey) in self._attribs.items():
-			result.append(self.extract_value(obj,ikey))
+		for (okey, ikey) in self._attribs.items():
+			result.append(self.extract_value(obj, ikey))
 
 		return result
 
@@ -53,7 +53,7 @@ class sanisObject():
 		return True
 
 	@classmethod
-	def extract_value(self,obj,key):
+	def extract_value(self, obj, key):
 		""" Extract a value keyed by 'key' from a JSON object. This can delve recursively
 			into nested structures. Notexistance of any structure level leaves the
 			result as empty string.
@@ -76,10 +76,10 @@ class sanisObject():
 	@classmethod
 	def bless(self, data):
 		""" return an object of the class denoted by the own object class """
-		return dict(zip(self._attribs.keys(),data))
+		return dict(zip(self._attribs.keys(), data))
 
 	@classmethod
-	def extract(self,data,retval=None):
+	def extract(self, data, retval=None):
 		""" Extract a field from the (already parsed) data. Data is expected
 			to be a blessed instance (a dict). If retval is None, return the
 			second data value.
@@ -96,6 +96,7 @@ class sanisObject():
 #
 # -----------------------------------------------------------------------------
 
+
 class Person(sanisObject):
 
 	_attribs = {
@@ -108,13 +109,14 @@ class Person(sanisObject):
 
 	# This class overloads the 'extract' function, just to see if it works.
 	@classmethod
-	def extract(self,data,retval=None):
+	def extract(self, data, retval=None):
 
 		# Any other 'retval's are resolved by the base classe.
 		if retval is None:
 			return '%(familienname)s, %(vorname)s' % data
 
-		return super().extract(data,retval)
+		return super().extract(data, retval)
+
 
 class Organisation(sanisObject):
 
@@ -139,6 +141,7 @@ class Organisation(sanisObject):
 
 		return True
 
+
 class Kontext(sanisObject):
 
 	# 'personenkontexte' is an array and should therefore yield multiple
@@ -155,6 +158,7 @@ class Kontext(sanisObject):
 		'status':		'personenkontexte.personenstatus',
 		'person_id':	'person.id',
 	}
+
 
 class Klassen(sanisObject):
 
@@ -174,10 +178,11 @@ class Klassen(sanisObject):
 
 		# ignore groups that are not classes.
 		# WHY CAN'T I LOOK AT THE 'codelisten' TO SEE WHAT IS VALID HERE?!?
-		if self.extract_value(obj,'gruppe.typ') != 'Klasse':
+		if self.extract_value(obj, 'gruppe.typ') != 'Klasse':
 			return False
 
 		return True
+
 
 class Mitglieder(sanisObject):
 
