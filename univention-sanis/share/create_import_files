@@ -33,165 +33,53 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <https://www.gnu.org/licenses/>.
 
-import os
-import json
-import base64
-from urllib import request
+from sanis_import import SanisImport, NoSchoolException, DataExtractException
 
-from sanis_tools import iterStore
-from sanis_models import Person, Organisation, Kontext, Klassen, Mitglieder
-
-# Constants
-
+# API URLs
 TOKEN_URL = 'https://auth.stage.niedersachsen-login.schule/realms/SANIS/protocol/openid-connect/token'
 SANIS_API = 'https://api-schulen.stage.niedersachsen-login.schule/v1'
 
+# Config files
+SISOPI_CONFIG = '/usr/share/ucs-school-import/configs/user_import_sisopi.json'
+SANIS_CONFIG = '/usr/share/univention-sanis/sanis.json'
+
+# local (workdir) files
 CRED_FILE = 'credentials'
-
-
-class sanisImport:
-
-	token = None				# current auth token
-	temp_base = None			# base for temp files
-
-	pers_store = None			# personen
-	org_store = None			# organisationen
-	kont_store = None			# personenkontexte
-	grp_store = None			# gruppen
-	memb_store = None			# gruppenmitgliedschaften
-
-	tempfiles = []				# to be cleaned up
-
-	def __init__(self, verbose=False):
-		""" Prepare object for use. Any errors throw exceptions and are not handled here. """
-
-		self.token = self.get_token()
-
-		# invent a prefix for temp files. Can be a directory or only a filename prefix.
-		# Will be used here for JSON files as well as in the stores when switching
-		# to file store. All temp files are cleaned up.
-		self.temp_base = '/tmp/sanis_import_%d_' % os.getpid()
-
-		# --------------- person -----------------
-		pers_file = self.fetch_data('/personen')
-		self.pers_store = iterStore(Person, pers_file, temp_base=self.temp_base)
-		if verbose:
-			self.pers_store.print_data()
-
-		# -------- "personenkontexte" --------------
-		# Note that the 'personen' dataset already contains all of the data
-		# needed by the 'personenkontext' logic. Therefore it is useless to
-		# fetch the same data again here. Instead, we use the 'pers_file'
-		# which we already have fetched.
-		self.kont_store = iterStore(Kontext, pers_file, temp_base=self.temp_base)
-		if verbose:
-			self.kont_store.print_data()
-
-		# ---------- schools (organizations) ------
-		org_file = self.fetch_data('/organisationen')
-		self.org_store = iterStore(Organisation, org_file, temp_base=self.temp_base)
-		# too much debug
-		#if verbose:
-		#	self.org_store.print_data()
-
-		# ------------ groups (only classes) -------------
-		grp_file = self.fetch_data('/gruppen')
-		self.grp_store = iterStore(Klassen, grp_file, temp_base=self.temp_base)
-		if verbose:
-			self.grp_store.print_data()
-
-		# ----------- membership ------------------
-		# Just as for 'personenkontexte', the 'gruppenmitgliedschaften' membership
-		# relations are already fully fetched by the '/gruppen' entry point.
-		self.memb_store = iterStore(Mitglieder, grp_file, temp_base=self.temp_base)
-		if verbose:
-			self.memb_store.print_data()
-
-	def __del__(self):
-		""" Cleanup on program end. Currently only removes temp files. """
-
-		for fname in self.tempfiles:
-			try:
-				os.unlink(fname)
-			except:
-				pass
-
-	def get_token(self):
-		""" Acquire a token from the login server.
-
-			We currently do not care about how long this token is valid. If we really
-			run into the problem that our data requests take too long -> we should
-			implement kind of error handling in the request methods.
-		"""
-
-		# FIXME implement sensible error handling
-
-		with open(CRED_FILE, 'rb') as cred:
-			clid = cred.readline().strip()
-			clpw = cred.readline().strip()
-
-		req = request.Request(TOKEN_URL, data=b'grant_type=client_credentials', method='POST')
-		# Preemptively add credentials
-		req.add_header('Authorization', 'Basic %s' % base64.b64encode(b'%s:%s' % (clid, clpw)).decode('utf-8'))
-
-		with request.urlopen(req) as resp:
-			rtxt = resp.read()
-			return json.loads(rtxt)['access_token']
-
-	def fetch_data(self, entrypoint):
-		""" Fetch a dataset from the SANIS entry point. Will be kept in a cache file while
-			the program is running.
-		"""
-
-		# Resultfiles are now cleaned up
-		resfile = '%sapi_%s.json' % (self.temp_base, entrypoint.translate({ord(i): None for i in '/_-.'}))
-		print('resfile: %s' % resfile)
-
-		# binary mode is correct here: response is expected to be UTF8-encoded, and the
-		# file can hold this data without de-/reencoding
-		with open(resfile, 'wb') as ofile:
-			req = request.Request('%s%s' % (SANIS_API, entrypoint))
-			req.add_header('Authorization', 'Bearer %s' % self.token)
-			with request.urlopen(req) as resp:
-				while True:
-					buf = resp.read(1024)
-					if not len(buf):
-						break
-					ofile.write(buf)
-
-		# All files created here are candidates for autodeletion on exit, so
-		# add them to the tempfiles list.
-		self.tempfiles.append(resfile)
-
-		return resfile
-
-	def resolve_contexts(self):
-		""" Resolve the list of GUIDs of the 'personenkontexte' data
-			into the real objects. Current structure is:
-
-				[context_id, org_id, pers_id, role]
-
-			the org_id and pers_id are being looked up and replaced by the
-			identifying string of the organization resp. prerson:
-
-				[context_id, org_name, pers_name, role]
-
-			Because we fetch the contexts from the 'personen' entrypoint we know for sure
-			that ALL roles of ONE user are guaranteed to appear as one contiguous block. Therefore
-			we do not need to iterate over all contexts just to find the ones for one user.
-		"""
-
-		for kontext in self.kont_store:
-				org = self.org_store.resolve(kontext['org_id'], 'name')
-				pers = self.pers_store.resolve(kontext['person_id'])
-				print('pers: [%s] %s, role: %s at: %s' % (kontext['person_id'], pers, kontext['rolle'], org))
+TEMP_CONFIG = 'temp_config.json'
+SCRIPT_NAME = 'run_import'
 
 
 def main():
 
-	si = sanisImport(verbose=True)
+	sanis_import = SanisImport(api_url=SANIS_API, token_url=TOKEN_URL, cred_file=CRED_FILE)
+	sanis_import.read_input_data()
+	#sanis_import.resolve_contexts()
+	sanis_import.dump_stores_to_csv()
 
-	si.resolve_contexts()
+	try:
+		schools = sanis_import.get_school_mapping()
+	except NoSchoolException as ex:
+		print(ex.args[0])
+		print('Bitte korrigieren Sie den obigen Fehler.')
+		print('Der Import kann nur gestartet werden, wenn die Konfiguration korrekt ist.')
+		return 1
+
+	# Prepare import configs and data. Will only be done if everything is in tune.
+	sanis_import.create_config([SISOPI_CONFIG, SANIS_CONFIG], TEMP_CONFIG)
+
+	# extract_school_data writes CSV files for each configured role, and collects
+	# the commands to be executed in an internal variable in SanisImport.
+	for school, sanis_id in schools.items():
+		try:
+			sanis_import.extract_school_data(school, sanis_id)
+		except DataExtractException as ex:
+			print(ex.args[0])
+			print('Die extrahierten Daten sind nicht korrekt bzw. vollständig.')
+			print('Bitte starten Sie keinen Import mit diesen Daten.')
+			return 1
+
+	# Now: print the commands out.
+	sanis_import.write_command_script(SCRIPT_NAME)
 
 	return 0
 

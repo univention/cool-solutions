@@ -1,3 +1,38 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+# Cool solutions -- SANIS import
+#
+# Like what you see? Join us!
+# https://www.univention.com/about-us/careers/vacancies/
+#
+# Copyright 2023 Univention GmbH
+#
+# https://www.univention.de/
+#
+# All rights reserved.
+#
+# The source code of this program is made available
+# under the terms of the GNU Affero General Public License version 3
+# (GNU AGPL V3) as published by the Free Software Foundation.
+#
+# Binary versions of this program provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention and not subject to the GNU AGPL V3.
+#
+# In the case you use this program under the terms of the GNU AGPL V3,
+# the program is provided in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License with the Debian GNU/Linux or Univention distribution in file
+# /usr/share/common-licenses/AGPL-3; if not, see
+# <https://www.gnu.org/licenses/>.
+
 import os
 import ijson
 import copy
@@ -7,7 +42,7 @@ class iterStore:
 	""" A store holding an array of things, and providing an iterator interface.
 
 		External representation of these 'things' is defined in the 'klass' class
-		which has to be a subclass of 'sanisObject'.
+		which has to be a subclass of 'SanisObject'.
 
 		Internal representation is an array holding only the values (and no keys).
 
@@ -38,9 +73,8 @@ class iterStore:
 			`self.find(key,value)`
 
 		This function can search for values in every key. Search is done sequentially, but if the
-		key is the first attribute mentioned in the _attributes property of the sanisObject class,
+		key is the first attribute mentioned in the _attributes property of the SanisObject class,
 		then the search benefits from an internal index.
-
 	"""
 
 	data = []
@@ -48,7 +82,7 @@ class iterStore:
 	temp_base = ''		# where to create temp file (if needed)
 
 	# status-holding variables. Used while filling the store AND while reading it.
-	file = None
+	fhandle = None
 	pos = 0
 
 	# Indexed access if we search for the first attribute of the attribute mapping.
@@ -66,7 +100,7 @@ class iterStore:
 
 		self.data = []
 		self.fname = None
-		self.file = None
+		self.fhandle = None
 		self.pos = 0
 		self.keyidx = {}
 
@@ -78,28 +112,37 @@ class iterStore:
 
 	def __del__(self):
 
-		if self.file:
-			self.file.close()
+		if self.fhandle:
+			self.fhandle.close()
 		if self.fname:
 			os.unlink(self.fname)
 
 	def __iter__(self):
 		""" start iterating over the data """
 
-		if self.fname:
-			# always close the temp file before starting to read it again
-			if self.file:
-				self.file.close()
-				self.file = None
-			self.file = open(self.fname, 'r')
-		else:
-			self.pos = 0
+		self.__internal_iter_start__()
+
 		return self
 
 	def __next__(self):
 		""" return the next element in the 'external' representation """
 
 		return self.klass.bless(self.__internal_next__())
+
+	def __internal_iter_start__(self):
+		""" To call __internal_next__ as the NEXT function of an iteration
+			we make an internal 'start iteration' function which is callable
+			HERE without using the iterator interface.
+		"""
+
+		if self.fname:
+			# always close the temp file before starting to read it again
+			if self.fhandle:
+				self.fhandle.close()
+				self.fhandle = None
+			self.fhandle = open(self.fname, 'r')
+		else:
+			self.pos = 0
 
 	def __internal_next__(self):
 		""" An internal NEXT function that hides the internals of the current
@@ -110,7 +153,7 @@ class iterStore:
 		"""
 
 		if self.fname:
-			line = self.file.readline()
+			line = self.fhandle.readline()
 			if not line:
 				raise StopIteration
 			element = line.rstrip('\n').split('\t')
@@ -128,10 +171,10 @@ class iterStore:
 		print('switch_to_filestore: %s' % fname)
 
 		self.fname = fname
-		with open(fname, 'w') as file:
+		with open(fname, 'w') as fhandle:
 			if len(self.data):
 				for item in self.data:
-					print('\t'.join(item), file=file)
+					print('\t'.join(item), file=fhandle)
 				# empty the array of arrays: this helps garbage-collecting the memory!
 				idx = len(self.data)
 				while idx > 0:
@@ -156,9 +199,9 @@ class iterStore:
 					if self.klass.validate_object(obj):
 						self.append_object(self.klass.parse_object(obj))
 
-		if self.file:
-			self.file.close()
-			self.file = None
+		if self.fhandle:
+			self.fhandle.close()
+			self.fhandle = None
 
 	def iterate_object(self, obj):
 		""" This expands a given object with embedded arrays into single objects
@@ -170,11 +213,11 @@ class iterStore:
 		if not len(self.klass._arrays):
 			return [obj, ]
 
-		input = [obj, ]
+		inputobj = [obj, ]
 		result = []
 		# this can get multidimensional if we want it...
 		for akey in self.klass._arrays:
-			for obj in input:
+			for obj in inputobj:
 				avar = copy.deepcopy(self.klass.extract_value(obj, akey))
 				if isinstance(avar, list):
 					for aseg in avar:
@@ -186,7 +229,7 @@ class iterStore:
 				else:
 					# if this is not an array: keep the object unexpanded.
 					result.append(obj)
-			input = result
+			inputobj = result
 		return result
 
 	def append_object(self, data):
@@ -199,48 +242,38 @@ class iterStore:
 		self.pos += 1
 
 		if self.fname:
-			if not self.file:
-				self.file = open(self.fname, 'a')
-			print('\t'.join(data), file=self.file)
+			if not self.fhandle:
+				self.fhandle = open(self.fname, 'a')
+			print('\t'.join(data), file=self.fhandle)
 		else:
 			self.data.append(data)
 			if self.klass._memory_threshold:
 				if len(self.data) > self.klass._memory_threshold:
 					self.switch_to_filestore()
 
-	def print_data(self):
-		""" DEBUG print the data contained in this store. """
-
-		print('Store [%s] has %d elements:' % (self.klass.__name__, self.length()))
-
-		# Invoke the iterator interface
-		num = 0
-		for element in self:
-			num += 1
-			print('[%d] %s' % (num, element))
-
 	def length(self):
 		""" return how much elements we have in the index """
 
 		return len(self.keyidx.keys())
 
-	def find(self, key, val):
+	def find(self, val, key=None):
 		""" Find an object by a key/value pair. """
 
 		# if key is our 'key attribute': search by index.
-		if key == self.keyattr:
+		# (also if key is not specified)
+		if key == self.keyattr or key is None:
 			if val in self.keyidx:
 				num = self.keyidx[val]
 				if self.fname:
-					if self.file:
-						self.file.close()
-						self.file = None
-					self.file = open(self.fname, 'r')
+					if self.fhandle:
+						self.fhandle.close()
+						self.fhandle = None
+					self.fhandle = open(self.fname, 'r')
 					z = num
 					while z > 0:
-						self.file.readline()
+						self.fhandle.readline()
 						z -= 1
-					line = self.file.readline().rstrip('\n')
+					line = self.fhandle.readline().rstrip('\n')
 					return self.klass.bless(line.split('\t'))
 				else:
 					return self.klass.bless(self.data[num])
@@ -277,3 +310,38 @@ class iterStore:
 			return self.klass.extract(element, retval)
 
 		return None
+
+	# --------------- D e b u g g i n g -------------------
+	# Strictly not needed: these functions help examining the
+	# contents of the store, and should never be used in the
+	# productive business logic.
+
+	def print_data(self):
+		""" DEBUG print the data contained in this store to STDOUT """
+
+		print('Store [%s] has %d elements:' % (self.klass.__name__, self.length()))
+
+		# Invoke the iterator interface
+		num = 0
+		for element in self:
+			num += 1
+			print('[%d] %s' % (num, element))
+
+	def print_csv(self, fname):
+		""" DEBUG output the current data into a CSV with fixed format:
+			really COMMA-separated, and all fields quoted. Just for
+			easy generation of debug input data.
+
+			Note that this is really only for debugging: it will contain our
+			store-internal attribute names as headings!
+		"""
+
+		with open(fname, 'w', encoding='utf-8') as fhandle:
+			print(','.join('"%s"' % x for x in self.klass._attribs.keys()), file=fhandle)
+			self.__internal_iter_start__()
+			try:
+				while True:
+					element = self.__internal_next__()
+					print(','.join('"%s"' % x for x in element), file=fhandle)
+			except StopIteration:
+				return

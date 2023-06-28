@@ -13,6 +13,7 @@ Architecture: all
 Depends:
  ucs-school-import,
  python3-ijson,
+ jq,
  ${misc:Depends},
  ${python3:Depends}
 Description: Custom helper for UCS@school import from SANIS (moin.schule)
