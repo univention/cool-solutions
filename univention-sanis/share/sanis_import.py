@@ -96,6 +96,13 @@ class SanisImport:
 		'',
 		'# Importskript für SANIS Lehrer- und Schülerbestände',
 		'',
+		'cd $(dirname $0)',
+		'(',
+	]
+
+	script_footer = [
+		'',
+		') 2>&1 | tee $(basename $0).log',
 	]
 
 	def __init__(self, api_url, token_url, cred_file, verbose=False):
@@ -202,7 +209,11 @@ class SanisImport:
 			out_filename = 'import_%s_%s.csv' % (school, role)
 			with open(out_filename, 'w') as out_handle:
 				print(self._data_line(self.headers.keys()), file=out_handle)
-				# find all contexts related to this SANIS ORG_ID
+				# Build a mapping of valid groups (GUID -> name) of this school.
+				groups = {}
+				for group in self.grp_store.find_all('org_id', sanis_id):
+					groups[group['id']] = group['bezeichnung']
+				# find all person contexts related to this SANIS ORG_ID -> users
 				for context in self.cont_store.find_all('org_id', sanis_id):
 					# process only those with active status
 					if context['status'] != 'aktiv':
@@ -214,8 +225,16 @@ class SanisImport:
 					# We have some persons without birthdate: fix it with a constant!
 					if person['geburtsdatum'] == '':
 						person['geburtsdatum'] = '1999-09-09'
-					# FIXME retrieve group memberships and store them in person['classes']
-					person['classes'] = ['1a']		# this is to not create invalid students (must have at least one class)
+					# get classes of this user.
+					classes = []
+					for klass in self.memb_store.find_all('ktid', context['id']):
+						classes.append(klass['group_name'])
+					person['classes'] = classes
+					# Skip students without at least one class
+					if role == 'student' and len(classes) == 0:
+						# DEBUG?
+						# print('  No classes for [%(familienname)s, %(vorname)s], skipping user.' % person)
+						continue
 					record = []
 					for attr, iattr in self.headers.items():
 						if iattr in person:
@@ -228,14 +247,16 @@ class SanisImport:
 			# is intentional: if anything fails while trying to write these files, the script
 			# will not be written, and the user should not even think about executing any
 			# import with these partly-damaged data.
-			self.commands.append('/usr/share/ucs-school-import/scripts/ucs-school-user-import \\')
-			self.commands.append('   --dry-run \\')
-			self.commands.append('   --source_uid sanis \\')
-			self.commands.append('   --conffile temp_config.json \\')
-			self.commands.append('   --school %s \\' % school)
-			self.commands.append('   --user_role %s \\' % role)
-			self.commands.append('   --infile %s \\' % out_filename)
-			self.commands.append('   --set output:new_user_passwords=passwords_%s_%s.csv' % (school, role))
+			self.commands.append('   /usr/share/ucs-school-import/scripts/ucs-school-user-import \\')
+			#self.commands.append('   --dry-run \\')
+			self.commands.append('      --source_uid sanis \\')
+			self.commands.append('      --conffile temp_config.json \\')
+			self.commands.append('      --school %s \\' % school)
+			self.commands.append('      --user_role %s \\' % role)
+			self.commands.append('      --infile %s \\' % out_filename)
+			self.commands.append('      --set output:new_user_passwords=passwords_%s_%s.csv \\' % (school, role))
+			self.commands.append('      --set output:user_import_summary=summary_%s_%s.csv \\' % (school, role))
+			self.commands.append('      2>&1 | tee import_%s_%s.log' % (school, role))
 			self.commands.append('')
 
 	def write_command_script(self, out_filename):
@@ -246,9 +267,11 @@ class SanisImport:
 				print(line, file=out_handle)
 			for line in self.commands:
 				print(line, file=out_handle)
+			for line in self.script_footer:
+				print(line, file=out_handle)
 
 		# ug+rwx
-		os.chmod(out_filename, stat.S_IXUSR | stat.S_IRUSR | stat.S_IWUSR | stat.S_IXGRP | stat.S_IRGRP | stat.S_IWGRP )
+		os.chmod(out_filename, stat.S_IXUSR | stat.S_IRUSR | stat.S_IWUSR | stat.S_IXGRP | stat.S_IRGRP | stat.S_IWGRP)
 
 	def __del__(self):
 		""" Cleanup on program end. Currently only removes temp files. """
@@ -360,27 +383,6 @@ class SanisImport:
 
 		return result
 
-	def resolve_contexts(self):
-		""" Resolve the list of GUIDs of the 'personenkontexte' data
-			into the real objects. Current structure is:
-
-				[context_id, org_id, pers_id, role]
-
-			the org_id and pers_id are being looked up and replaced by the
-			identifying string of the organization resp. prerson:
-
-				[context_id, org_name, pers_name, role]
-
-			Because we fetch the contexts from the 'personen' entrypoint we know for sure
-			that ALL roles of ONE user are guaranteed to appear as one contiguous block. Therefore
-			we do not need to iterate over all contexts just to find the ones for one user.
-		"""
-
-		for kontext in self.cont_store:
-				org = self.org_store.resolve(kontext['org_id'], 'name')
-				pers = self.pers_store.resolve(kontext['person_id'])
-				print('pers: [%s] %s, role: %s at: %s' % (kontext['person_id'], pers, kontext['rolle'], org))
-
 	def dump_stores_to_csv(self):
 		""" Dump some selected stores into CSV files. This shall help to manually create some sets
 			of import data for testing.
@@ -389,6 +391,8 @@ class SanisImport:
 		self.pers_store.print_csv('store_users.csv')
 		self.cont_store.print_csv('store_contexts.csv')
 		self.org_store.print_csv('store_schools.csv')
+		self.grp_store.print_csv('store_groups.csv')
+		self.memb_store.print_csv('store_members.csv')
 
 	def dump_json(self, inputfile, outputfile):
 		""" Only for debugging and/or auditing: print a beautified version of the JSON

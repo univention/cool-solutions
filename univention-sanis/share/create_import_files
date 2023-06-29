@@ -53,7 +53,6 @@ def main():
 
 	sanis_import = SanisImport(api_url=SANIS_API, token_url=TOKEN_URL, cred_file=CRED_FILE)
 	sanis_import.read_input_data()
-	#sanis_import.resolve_contexts()
 	sanis_import.dump_stores_to_csv()
 
 	try:

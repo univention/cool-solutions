@@ -199,6 +199,7 @@ class Klassen(SanisObject):
 
 	_attribs = {
 		'id':				'gruppe.id',
+		'org_id':			'gruppe.orgid',		# this is the school
 		'referrer':			'gruppe.referrer',
 		'bezeichnung':		'gruppe.bezeichnung',
 		'laufzeit_von':		'gruppe.laufzeit.vonlernperiode',
@@ -227,12 +228,27 @@ class Mitglieder(SanisObject):
 
 	_attribs = {
 		'id':				'gruppenzugehoerigkeiten.id',
-		'referrer':			'gruppenzugehoerigkeiten.referrer',
-		'ktid':				'gruppenzugehoerigkeiten.ktid',		# <- WHAT IS THIS AND DO WE NEED IT
+		'referrer':			'gruppenzugehoerigkeiten.referrer',		# <- do we need this?
+		'ktid':				'gruppenzugehoerigkeiten.ktid',			# context ID: this is the link to the user
 		'von':				'gruppenzugehoerigkeiten.von',
 		'bis':				'gruppenzugehoerigkeiten.bis',
-		'class_id':			'gruppe.id',
+		'group_name':		'gruppe.bezeichnung',					# this saves one additional lookup when
+																	# resolving group memberships via contexts
+		'group_id':			'gruppe.id',
 	}
 
-	# FIXME create a meaningful validation, perhaps dependent on the 'rollen' attribute
-	# WHY CAN'T I LOOK AT THE 'codelisten' TO SEE WHAT IS VALID HERE?!?
+	@classmethod
+	def validate_object(self, obj):
+		""" This repeats the validation of the 'Klassen' class because this
+			parser reads the same data.
+		"""
+
+		if not super().validate_object(obj):
+			return False
+
+		# ignore group memberships which don't relate to classes.
+		# WHY CAN'T I LOOK AT THE 'codelisten' TO SEE WHAT IS VALID HERE?!?
+		if self.extract_value(obj, 'gruppe.typ') != 'Klasse':
+			return False
+
+		# FIXME do we have to honor 'von' and 'bis' validities, and if so, how?
