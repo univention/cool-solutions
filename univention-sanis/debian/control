@@ -4,7 +4,8 @@ Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
 Build-Depends: debhelper (>= 9),
  ucslint,
- dh-python
+ dh-python,
+ univention-config-dev
 Standards-Version: 3.8.2
 Homepage: http://www.univention.de/
 
@@ -12,6 +13,7 @@ Package: univention-sanis
 Architecture: all
 Depends:
  ucs-school-import,
+ univention-config,
  python3-ijson,
  jq,
  ${misc:Depends},

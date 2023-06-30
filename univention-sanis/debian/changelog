@@ -1,3 +1,9 @@
+univention-sanis (1.0.1) unstable; urgency=medium
+
+  * Added group processing, validation, documentation etc. - #43882
+
+ -- Frank Greif <greif@univention.de>  Fri, 30 Jun 2023 14:20:06 +0200
+
 univention-sanis (1.0.0) unstable; urgency=medium
 
   * Initial release - #43882

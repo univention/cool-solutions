@@ -200,6 +200,7 @@ class Klassen(SanisObject):
 	_attribs = {
 		'id':				'gruppe.id',
 		'org_id':			'gruppe.orgid',		# this is the school
+		'typ':				'gruppe.typ',
 		'referrer':			'gruppe.referrer',
 		'bezeichnung':		'gruppe.bezeichnung',
 		'laufzeit_von':		'gruppe.laufzeit.vonlernperiode',
@@ -232,9 +233,11 @@ class Mitglieder(SanisObject):
 		'ktid':				'gruppenzugehoerigkeiten.ktid',			# context ID: this is the link to the user
 		'von':				'gruppenzugehoerigkeiten.von',
 		'bis':				'gruppenzugehoerigkeiten.bis',
-		'group_name':		'gruppe.bezeichnung',					# this saves one additional lookup when
-																	# resolving group memberships via contexts
+		# some redundant group properties: save us some recurson cycles
+		# and help debugging selection criteria
+		'group_name':		'gruppe.bezeichnung',
 		'group_id':			'gruppe.id',
+		'group_type':		'gruppe.typ',
 	}
 
 	@classmethod
@@ -252,3 +255,5 @@ class Mitglieder(SanisObject):
 			return False
 
 		# FIXME do we have to honor 'von' and 'bis' validities, and if so, how?
+
+		return True
