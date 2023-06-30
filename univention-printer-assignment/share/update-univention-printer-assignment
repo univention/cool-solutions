@@ -136,6 +136,8 @@ def load_backlog(filename):
 
 
 def fetch_object(lo, dn):
+	if type(dn) == bytes:
+		dn = dn.decode()
 	try:
 		return lo.get(dn)
 	except Exception as e:
@@ -205,7 +207,7 @@ def load_group(lo, dn, obj=None, recursive=True, reload=False):
 		obj = fetch_object(lo, dn)
 	if not obj:
 		return
-	if not 'univentionGroup' in obj.get('objectClass', []):
+	if not b'univentionGroup' in obj.get('objectClass', []):
 		return
 	# add to cache
 	cache_groups[dn] = obj
@@ -226,10 +228,12 @@ def load_host(lo, dn, obj=None, reload=False):
 		obj = fetch_object(lo, dn)
 	if not obj:
 		return
-	if not 'univentionHost' in obj.get('objectClass', []) or \
-			'univentionWindows' not in obj.get('objectClass', []):
+	if not b'univentionHost' in obj.get('objectClass', []) or \
+			b'univentionWindows' not in obj.get('objectClass', []):
 		return
 	# add to cache
+	if type(dn) == bytes:
+		dn = dn.decode()
 	cache_hosts[dn] = obj
 	log_debug('loaded host %s' % dn)
 
@@ -247,16 +251,15 @@ def load_objects(lo, dnlist):
 			# Side note: This has to be done only once if the first missing object in the backlog is checked; all further checks are redundant
 			#            This may be implemented in future.
 			load_printer(lo, dn, ignore_missing=True)
-		elif 'univentionHost' in obj.get('objectClass', []) and \
-				'univentionWindows' in obj.get('objectClass', []):
+		elif b'univentionHost' in obj.get('objectClass', []) and \
+				b'univentionWindows' in obj.get('objectClass', []):
 			load_host(lo, dn, obj=obj)
-		elif 'univentionGroup' in obj.get('objectClass', []):
+		elif b'univentionGroup' in obj.get('objectClass', []):
 			load_group(lo, dn, obj=obj)
-		elif 'univentionPrinter' in obj.get('objectClass', []):
+		elif b'univentionPrinter' in obj.get('objectClass', []):
 			load_printer(lo, dn, obj=obj)
 		else:
 			log_debug('found unknown object type\nDN: %s\nobjectClass: %r\n' % (dn, obj.get('objectClass')))
-
 		already_checked.add(dn)
 	log_debug('list of affected hosts:\n  %s' % '\n  '.join(cache_hosts.keys()))
 
@@ -284,18 +287,22 @@ def get_assigned_printers_from_obj(lo, obj):
 	default_printer = None
 
 	for printer_dn in obj.get('univentionAssignedPrinter', []):
+		if type(printer_dn) == bytes:
+			printer_dn = printer_dn.decode()
 		printer_unc = get_printer_unc(lo, printer_dn)
 		if printer_unc:
 			printer_list.append(printer_unc)
 		else:
-			log_error('ERROR: cannot load printer %s (reference found at cn=%s)' % (printer_dn, obj.get('cn',[''])[0]))
+			log_error('ERROR: cannot load printer %s (reference found at cn=%s)' % (printer_dn, obj.get('cn',[''])[0].decode("utf8")))
 
 	for printer_dn in obj.get('univentionAssignedPrinterDefault', []):
+		if type(printer_dn) == bytes:
+			printer_dn = printer_dn.decode()
 		printer_unc = get_printer_unc(lo, printer_dn)
 		if printer_unc:
 			default_printer = printer_unc
 		else:
-			log_error('ERROR: cannot load printer %s (reference found at cn=%s)' % (printer_dn, obj.get('cn',[''])[0]))
+			log_error('ERROR: cannot load printer %s (reference found at cn=%s)' % (printer_dn, obj.get('cn',[''])[0].decode("utf8")))
 
 	return (printer_list, default_printer)
 
@@ -363,8 +370,8 @@ def process_host(lo, dn, target_dirs):
 	# open template, read content and replace variables
 	content = open(vbs_filename, 'r').read() % settings
 	for target_dir in target_dirs:
-		target_fn = os.path.join(target_dir, '%s.vbs' % cache_hosts[dn].get('cn', ['UNKNOWN'])[0])
-		# create and write temporary file
+		target_fn = os.path.join(target_dir, '%s.vbs' % cache_hosts[dn].get('cn', ['UNKNOWN'])[0].decode("utf8"))
+                # create and write temporary file
 		temp_fn = tempfile.mkstemp(dir=target_dir)[1]
 		log_debug('Writing temporary file %s' % temp_fn)
 		fd = open(temp_fn, 'w')
