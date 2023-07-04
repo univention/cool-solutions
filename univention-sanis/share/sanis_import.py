@@ -377,7 +377,7 @@ class SanisImport:
 		"""
 
 		# print what we're about to read
-		print('   %s%s:' % (entrypoint[1].upper(),entrypoint[2:].lower()))
+		print('   %s%s:' % (entrypoint[1].upper(), entrypoint[2:].lower()))
 
 		# Resultfiles are now cleaned up
 		resfile = '%sapi_%s.json' % (self.temp_base, entrypoint.translate({ord(i): None for i in '/_-.'}))
