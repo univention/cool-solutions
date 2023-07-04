@@ -13,8 +13,8 @@ In diesem Paket finden Sie ein Werkzeug, mit dem Sie Benutzerdaten aus SANIS (of
 
 #### Abstimmung
 
-* Für die Verwendung dieser Anbindung von UCS@School an moin.schule ist ein API Key für den Zugriff auf die Schülerdatenbank Niedersachsen. Bitte nehmen Sie [Kontakt mit unserem Vertrieb](https://www.univention.de/kontakt/) auf, so dass auch die entsprechenden Vorraussetzungen mit dem Betreiber N21 geklärt werden können.
-* Falls bereits eine Installation mit UCS@School aktiv ist, müssen die aktuell gesetzen Attribute `record_uid` und `source_uid` genau betrachtet werden. Eine [Migration von record_uid und source_uid](https://help.univention.com/t/q-a-can-i-set-record-uid-and-or-source-uid-to-users-who-were-added-manually/15393) kann notwendig sein. Es wird empfohlen dies zuerst in einem getrenntem Bereich, abgeschirmt von der produktiven Schul-Umgebung, auszuprobieren.
+* Für die Verwendung dieser Anbindung von UCS@School an moin.schule ist ein API Key für den Zugriff auf die Schülerdatenbank Niedersachsen nötig. Bitte nehmen Sie [Kontakt mit unserem Vertrieb](https://www.univention.de/kontakt/) auf, so dass auch die entsprechenden Voraussetzungen mit dem Betreiber N21 geklärt werden können.
+* Falls bereits eine Installation mit UCS@School aktiv ist, müssen die aktuell gesetzten Attribute `record_uid` und `source_uid` genau betrachtet werden. Eine [Migration von record_uid und source_uid](https://help.univention.com/t/q-a-can-i-set-record-uid-and-or-source-uid-to-users-who-were-added-manually/15393) kann notwendig sein. Es wird empfohlen dies zuerst in einem getrenntem Bereich, abgeschirmt von der produktiven Schul-Umgebung, auszuprobieren.
    * die `source_uid` der Benutzer wird dann "sanis" sein.
    * die `record_uid` enthält die eindeutige Id von moin.schule.
 * Es wird die [UCS@school - CLI-Import Schnittstelle](http://docs.software-univention.de/ucsschool-import/5.0/de/) verwendet, mit moin.schule ändert sich ggf. das Mapping der json-Dateien
@@ -43,7 +43,7 @@ Diese Schritte müssen nur einmalig getan werden, bevor man den Import zum erste
 
 Einen Import der SANIS Daten führen Sie dann folgendermaßen durch:
 
-* Erzeugen Sie ein Arbeitsverzeichnis, in dem der Import stattfinden soll, und wechseln Sie in dieses Verzeichnis. Hier werden die Ergebniss des Imports abgelegt in Form von jsons und csv Dateien, sowie Skript erzeugt für den regulären import in UCS@School.
+* Erzeugen Sie ein Arbeitsverzeichnis, in dem der Import stattfinden soll, und wechseln Sie in dieses Verzeichnis. Hier werden die Ergebnisse des Imports abgelegt in Form von json und csv Dateien, sowie Skript erzeugt für den regulären Import in UCS@School.
    * z.b. mkdir ~/sanis; cd ~/sanis
 * Wenn Sie vorher überprüfen wollen, ob der Import alles so tut wie erwartet, rufen Sie nun `/usr/share/univention-sanis/create_import_files --dry-run` auf. Dies erzeugt eine Reihe von Dateien:
    * sanis_<typ>.json: das sind die Daten, die SANIS geliefert hat, jeweils eine Datei pro abgefragten Objekttyp.
