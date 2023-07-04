@@ -1,0 +1,191 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+# Cool solutions -- SANIS import
+#
+# Like what you see? Join us!
+# https://www.univention.com/about-us/careers/vacancies/
+#
+# Copyright 2023 Univention GmbH
+#
+# https://www.univention.de/
+#
+# All rights reserved.
+#
+# The source code of this program is made available
+# under the terms of the GNU Affero General Public License version 3
+# (GNU AGPL V3) as published by the Free Software Foundation.
+#
+# Binary versions of this program provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention and not subject to the GNU AGPL V3.
+#
+# In the case you use this program under the terms of the GNU AGPL V3,
+# the program is provided in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License with the Debian GNU/Linux or Univention distribution in file
+# /usr/share/common-licenses/AGPL-3; if not, see
+# <https://www.gnu.org/licenses/>.
+
+import os
+import stat
+import sys
+from univention.config_registry import ConfigRegistry
+from sanis_import import SanisImport, NoSchoolException
+
+# API URLs
+TOKEN_URL = 'https://auth.stage.niedersachsen-login.schule/realms/SANIS/protocol/openid-connect/token'
+SANIS_API = 'https://api-schulen.stage.niedersachsen-login.schule/v1'
+
+# Config files
+SISOPI_CONFIG = '/usr/share/ucs-school-import/configs/user_import_sisopi.json'
+SANIS_CONFIG = '/var/lib/ucs-school-import/configs/user_import_sanis.json'
+
+# local (workdir) files
+CRED_FILE = '/etc/sanis.secret'
+TEMP_CONFIG = 'config.json'
+SCRIPT_NAME = 'run_import'
+
+
+def main(dry_run=False):
+	""" Main worker. Returns True on success and False on every error.
+		False causes the caller to print a hint about the documentation.
+	"""
+
+	# Check if the config example has been copied into the central directory
+	if not os.path.exists(SANIS_CONFIG):
+		print('FEHLER: Die Datei "%s" existiert nicht.' % SANIS_CONFIG)
+		print('Bevor Sie den SANIS Import starten können, müssen Sie diese Datei erzeugen, indem Sie')
+		print('')
+		print('   /usr/share/univention-sanis/user_import_sanis_example.json')
+		print('')
+		print('kopieren und eventuell anpassen.')
+		return False
+
+	ucr = ConfigRegistry()
+	ucr.load()
+	SANIS_API = ucr.get('sanis_import/url/api')
+	TOKEN_URL = ucr.get('sanis_import/url/token')
+	ucr_ok = True
+	if not SANIS_API:
+		print('Die UCR Variable "sanis_import/url/api" (SANIS API) ist nicht gesetzt.')
+		ucr_ok = False
+	if not TOKEN_URL:
+		print('Die UCR Variable "sanis_import/url/api" (Token URL) ist nicht gesetzt.')
+		ucr_ok = False
+	if not ucr_ok:
+		print('Die einzutragenden URLs haben Sie vom SANIS Projekt bekommen.')
+		return False
+
+	if dry_run:
+		temp_config = 'test_%s' % TEMP_CONFIG
+		script_name = 'test_%s' % SCRIPT_NAME
+	else:
+		temp_config = TEMP_CONFIG
+		script_name = SCRIPT_NAME
+
+	# Check if cred_file exists! (what do do if not?)
+	if not os.path.exists(CRED_FILE):
+		print('FEHLER: Die Datei mit den SANIS Anmeldedaten existiert noch nicht. Diese Daten müssen Sie')
+		print('beim SANIS Projekt anfordern. Haben Sie diese Daten schon? Dann können Sie sie')
+		print('jetzt eingeben. Wenn nicht, drücken Sie <Enter> oder <Strg>-C um abzubrechen.')
+		print('')
+		try:
+			client_id = input('   Ihre CLIENT_ID    > ')
+			if not client_id:
+				print('(abgebrochen)')
+				return False
+			client_pw = input('   Ihr CLIENT_SECRET > ')
+			if not client_pw:
+				print('(abgebrochen)')
+				return False
+		except BaseException:
+			print('(abgebrochen)')
+			return False
+		with open(CRED_FILE, 'w') as out_handle:
+			print(client_id, file=out_handle)
+			print(client_pw, file=out_handle)
+		# u+rw = 0600
+		os.chmod(CRED_FILE, stat.S_IRUSR | stat.S_IWUSR)
+
+	sanis_import = SanisImport(api_url=SANIS_API, token_url=TOKEN_URL, cred_file=CRED_FILE, dry_run=dry_run)
+	sanis_import.read_input_data()
+
+	try:
+		schools = sanis_import.get_school_mapping()
+	except NoSchoolException as ex:
+		print(ex.args[0])
+		print('Bitte korrigieren Sie den obigen Fehler.')
+		print('Der Import kann nur gestartet werden, wenn die Konfiguration korrekt ist.')
+		return False
+
+	# Prepare import configs and data. Will only be done if everything is in tune.
+	if not sanis_import.create_config([SISOPI_CONFIG, SANIS_CONFIG], temp_config):
+		return False
+
+	# extract_school_data writes CSV files for each configured role, and collects
+	# the commands to be executed in an internal variable in SanisImport.
+	print('Schreibe CSV Dateien für den Import...')
+	for school, sanis_id in schools.items():
+		if not sanis_import.extract_school_data(school, sanis_id):
+			print('')
+			print('Die extrahierten Daten sind nicht korrekt bzw. vollständig.')
+			print('Bitte starten Sie keinen Import mit diesen Daten.')
+			return False
+
+	# Now: print the commands out.
+	if not sanis_import.write_command_script(script_name):
+		return False
+
+	return True
+
+
+def print_doc_hint():
+	""" print the full path of the accompanying doc file """
+	print('')
+	print('Die vollständige Dokumentation des Paketes finden Sie in:')
+	print('/usr/share/docs/univention-sanis/sanis-readme.md')
+	print('')
+
+
+def usage():
+	""" print the purpose and a little argument help to STDOUT. """
+
+	print('create_import_files: Ein Werkzeug zum Verarbeiten von SANIS Daten für den UCS@school Import.')
+	print('')
+	print('AUFRUF: %s [argument]' % sys.argv[0])
+	print('')
+	print('Argument kann sein:')
+	print('  -h / --help       Gib diesen Hilfetext aus und verarbeite keine Daten')
+	print('  -n / --dry-run    Erzeuge alle Daten, aber nur für einen Import-Testlauf')
+	print('  (kein Argument)   Erzeuge alle Daten für den produktiven Import.')
+
+
+if __name__ == '__main__':
+
+	dry_run = False
+
+	if len(sys.argv) > 2:
+		print('FEHLER: Zu viele Kommandozeilen-Argumente.')
+		usage()
+		sys.exit(1)
+
+	if len(sys.argv) == 2:
+		if sys.argv[1] in ('-h', '--help'):
+			usage()
+			sys.exit(0)
+		if sys.argv[1] in ('-n', '--dry-run'):
+			dry_run = True
+		else:
+			print('FEHLER: Ungültiges Kommandozeilen-Argument.')
+			usage()
+			sys.exit(1)
+
+	if not main(dry_run=dry_run):
+		print_doc_hint()

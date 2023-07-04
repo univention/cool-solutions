@@ -1,0 +1,23 @@
+{
+	"csv": {
+		"mapping": {
+			"ID":			"record_uid",
+			"Vorname":		"firstname",
+			"Familienname":	"lastname",
+			"Geburtstag":	"birthday",
+			"Klassen":		"school_classes"
+		}
+	},
+	"scheme": {
+		"username": {
+			"default": "<firstname>[0:3].<lastname>[0:3]<:umlauts,lower>[COUNTER2]"
+		}
+	},
+	"mandatory_attributes": ["firstname", "lastname", "birthday"],
+	"output": {
+	},
+	"deletion_grace_period": {
+		"deletion": 90,
+		"deactivation": 0
+	}
+}
