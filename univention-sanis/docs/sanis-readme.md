@@ -25,7 +25,7 @@ In diesem Paket finden Sie ein Werkzeug, mit dem Sie Benutzerdaten aus SANIS (of
 Diese Schritte müssen nur einmalig getan werden, bevor man den Import zum ersten Mal startet, und natürlich auch, wenn sich an den Bedingungen etwas geändert hat.
 
 * Paket-Installation:
-   * Einbinding des [Cool Solutions Repository](https://help.univention.com/t/cool-solutions-articles-and-repository/11517) auf dem primary System.
+   * Einbindung des [Cool Solutions Repository](https://help.univention.com/t/cool-solutions-articles-and-repository/11517) auf dem primary System.
    * Installation des Pakets `univention-install univention-sanis` sowie benötigte Abhänigkeiten werden automatisch installiert.
 * Erzeugen oder überprüfen Sie die UCR Variablen, die von den Skripten benutzt werden:
    * `sanis_import/url/token` und `sanis_import/url/api` sind HTTP(s) Links zu den Eintrittspunkten der SANIS API ("token" für die Anmeldung, "api" für die eigentliche Datenschnittstelle). Das Paket liefert diese beiden Variablen so aus, daß sie auf die Staging-Instanz des Landes Niedersachsen zeigen. Für die Überführung in die produktive Nutzung müssen diese URLs geändert werden.
