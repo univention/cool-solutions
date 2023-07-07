@@ -314,12 +314,12 @@ def process_host(lo, dn, target_dirs):
 	if dn not in cache_hosts:
 		log_error('ERROR: host is not in cache: %s' % dn)
 
-	ldap_filter = (
+	ldap_filter = univention.admin.uldap.ldap.filter.filter_format(
 		'(&'
-			'(objectClass=univentionGroup)'
-			f'(uniqueMember={dn})'
-		')'
-	)
+		'(objectClass=univentionGroup)'
+		'(uniqueMember=%s))'
+		,[dn])
+
 	try:
 		search_result = lo.searchDn(filter=ldap_filter, base=baseDN)
 	except univention.admin.uexceptions.noObject:
