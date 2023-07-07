@@ -134,8 +134,6 @@ def load_backlog(filename):
 
 
 def fetch_object(lo, dn):
-	if isinstance(dn, bytes):
-		dn = dn.decode("utf-8")
 	try:
 		return lo.get(dn)
 	except Exception as e:
@@ -214,6 +212,8 @@ def load_group(lo, dn, obj=None, recursive=True, reload=False):
 	if recursive:
 		# fetch all hosts that are mentioned within this group
 		for memberdn in obj.get('uniqueMember', []):
+			if isinstance(memberdn, bytes):
+				memberdn = memberdn.decode("utf-8")
 			load_host(lo, memberdn, obj=None)
 
 
@@ -230,8 +230,6 @@ def load_host(lo, dn, obj=None, reload=False):
 			b'univentionWindows' not in obj.get('objectClass', []):
 		return
 	# add to cache
-	if isinstance(dn, bytes):
-		dn = dn.decode("utf-8")
 	cache_hosts[dn] = obj
 	log_debug('loaded host %s' % dn)
 
