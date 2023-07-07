@@ -161,15 +161,15 @@ def load_printer(lo, dn, obj=None, recursive=True, reload=False, ignore_missing=
 
 	if recursive or ignore_missing:
 		# fetch all groups that refer to this printer
-		ldap_filter = (
+		ldap_filter = univention.admin.uldap.ldap.filter.filter_format(
 			'(&'
 				'(objectClass=univentionGroup)'
 				'(|'
-					f'(univentionAssignedPrinter={dn})'
-					f'(univentionAssignedPrinterDefault={dn})'
+					'(univentionAssignedPrinter=%s)'
+					'(univentionAssignedPrinterDefault=%s)'
 				')'
 			')'
-		)
+			,[dn,dn])
 		try:
 			search_result = lo.search(filter=ldap_filter, base=baseDN)
 		except univention.admin.uexceptions.noObject:
@@ -178,16 +178,16 @@ def load_printer(lo, dn, obj=None, recursive=True, reload=False, ignore_missing=
 			load_group(lo, grpdn, obj=grpobj)
 
 		# fetch all hosts that refer to this printer
-		ldap_filter = (
+		ldap_filter = univention.admin.uldap.ldap.filter.filter_format(
 			'(&'
 				'(objectClass=univentionHost)'
 				'(objectClass=univentionWindows)'
-				'(|'
-					f'(univentionAssignedPrinter={dn})'
-					f'(univentionAssignedPrinterDefault={dn})'
-				')'
-				')'
-		)
+			'(|'
+				'(univentionAssignedPrinter=%s)'
+				'(univentionAssignedPrinterDefault=%s)'
+			')'
+			')'
+			,[dn,dn])
 		try:
 			search_result = lo.search(filter=ldap_filter, base=baseDN)
 		except univention.admin.uexceptions.noObject:
@@ -268,7 +268,11 @@ def get_printer_unc(lo, printer_dn):
 	if not printer_dn in cache_printers:
 		return None
 	host = cache_printers[printer_dn].get('univentionPrinterSpoolHost', [''])[0]      # TODO FIXME uses only the first spool host
+	if isinstance(host, bytes):
+		host = host.decode("utf-8")
 	queuename = cache_printers[printer_dn].get('univentionPrinterSambaName', [None])[0]
+	if isinstance(queuename, bytes):
+		queuename = queuename.decode("utf-8")
 	settings_file = cache_printers[printer_dn].get('univentionAssignedPrinterSettingsFile', [''])[0]
 	if not queuename:
 		queuename = cache_printers[printer_dn].get('cn', [''])[0]
