@@ -96,7 +96,7 @@ class iterStore:
 		"""
 
 		self.klass = klass
-		self.keyattr = klass._attribs.keys().__iter__().__next__()
+		self.keyattr = next(iter(klass._attribs))
 
 		self.data = []
 		self.fname = None

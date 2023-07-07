@@ -80,7 +80,7 @@ class SanisObject():
 		"""
 
 		# Generic check: we do not accept objects whose key property is empty.
-		keyarg = self._attribs.keys().__iter__().__next__()
+		keyarg = next(iter(self._attribs))
 		jsonkey = self._attribs[keyarg]
 		if not self.extract_value(obj, jsonkey):
 			return False
@@ -104,7 +104,7 @@ class SanisObject():
 				else:
 					value = tmp_obj[keys[0]]
 				keys.pop(0)
-		except BaseException:
+		except Exception:
 			pass
 		return value
 
