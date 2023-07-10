@@ -37,7 +37,7 @@ import tempfile
 
 import univention.admin.modules
 import univention.admin.objects
-import univention.admin.uldap
+from univention.admin.uldap import ldap
 import univention.config_registry
 
 ucr = univention.config_registry.ConfigRegistry()
@@ -159,7 +159,7 @@ def load_printer(lo, dn, obj=None, recursive=True, reload=False, ignore_missing=
 
 	if recursive or ignore_missing:
 		# fetch all groups that refer to this printer
-		ldap_filter = univention.admin.uldap.ldap.filter.filter_format(
+		ldap_filter = ldap.filter.filter_format(
 			'(&'
 				'(objectClass=univentionGroup)'
 				'(|'
@@ -176,7 +176,7 @@ def load_printer(lo, dn, obj=None, recursive=True, reload=False, ignore_missing=
 			load_group(lo, grpdn, obj=grpobj)
 
 		# fetch all hosts that refer to this printer
-		ldap_filter = univention.admin.uldap.ldap.filter.filter_format(
+		ldap_filter = ldap.filter.filter_format(
 			'(&'
 				'(objectClass=univentionHost)'
 				'(objectClass=univentionWindows)'
@@ -300,7 +300,7 @@ def get_assigned_printers_from_obj(lo, obj):
 		if printer_unc:
 			default_printer = printer_unc
 		else:
-			log_error('ERROR: cannot load printer %s (reference found at cn=%s)' % (printer_dn, obj.get('cn',[''])[0].decodsdfe("utf-8")))
+			log_error('ERROR: cannot load printer %s (reference found at cn=%s)' % (printer_dn, obj.get('cn',[''])[0].decode("utf-8")))
 
 	return (printer_list, default_printer)
 
@@ -314,7 +314,7 @@ def process_host(lo, dn, target_dirs):
 	if dn not in cache_hosts:
 		log_error('ERROR: host is not in cache: %s' % dn)
 
-	ldap_filter = univention.admin.uldap.ldap.filter.filter_format(
+	ldap_filter = ldap.filter.filter_format(
 		'(&'
 		'(objectClass=univentionGroup)'
 		'(uniqueMember=%s))'
