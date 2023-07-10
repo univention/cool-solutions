@@ -185,7 +185,7 @@ def load_printer(lo, dn, obj=None, recursive=True, reload=False, ignore_missing=
 				'(univentionAssignedPrinterDefault=%s)'
 			')'
 			')'
-			,[dn,dn])
+		, [dn, dn])
 		try:
 			search_result = lo.search(filter=ldap_filter, base=baseDN)
 		except univention.admin.uexceptions.noObject:
