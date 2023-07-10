@@ -203,7 +203,7 @@ def load_group(lo, dn, obj=None, recursive=True, reload=False):
 		obj = fetch_object(lo, dn)
 	if not obj:
 		return
-	if not b'univentionGroup' in obj.get('objectClass', []):
+	if b'univentionGroup' not in obj.get('objectClass', []):
 		return
 	# add to cache
 	cache_groups[dn] = obj
@@ -212,8 +212,7 @@ def load_group(lo, dn, obj=None, recursive=True, reload=False):
 	if recursive:
 		# fetch all hosts that are mentioned within this group
 		for memberdn in obj.get('uniqueMember', []):
-			if isinstance(memberdn, bytes):
-				memberdn = memberdn.decode("utf-8")
+			memberdn = memberdn.decode("utf-8")
 			load_host(lo, memberdn, obj=None)
 
 
@@ -263,17 +262,13 @@ def load_objects(lo, dnlist):
 def get_printer_unc(lo, printer_dn):
 	log_debug('fetching printer path for %s' % printer_dn)
 	load_printer(lo, printer_dn, recursive=False) # make sure that the cache contains the printer object - NOOP if already in cache
-	if not printer_dn in cache_printers:
+	if printer_dn not in cache_printers:
 		return None
-	host = cache_printers[printer_dn].get('univentionPrinterSpoolHost', [''])[0]      # TODO FIXME uses only the first spool host
-	if isinstance(host, bytes):
-		host = host.decode("utf-8")
-	queuename = cache_printers[printer_dn].get('univentionPrinterSambaName', [None])[0]
-	if isinstance(queuename, bytes):
-		queuename = queuename.decode("utf-8")
-	settings_file = cache_printers[printer_dn].get('univentionAssignedPrinterSettingsFile', [''])[0]
+	host = cache_printers[printer_dn].get('univentionPrinterSpoolHost', [b''])[0].decode("utf-8")     # TODO FIXME uses only the first spool host
+	queuename = cache_printers[printer_dn].get('univentionPrinterSambaName', [b''])[0].decode("utf-8")
+	settings_file = cache_printers[printer_dn].get('univentionAssignedPrinterSettingsFile', [b''])[0].decode("utf-8")
 	if not queuename:
-		queuename = cache_printers[printer_dn].get('cn', [''])[0]
+		queuename = cache_printers[printer_dn].get('cn', [b''])[0].decode("utf-8")
 		if not queuename:
 			log_error('ERROR: cannot determine queuename for %s' % printer_dn)
 			return None
@@ -292,7 +287,7 @@ def get_assigned_printers_from_obj(lo, obj):
 		if printer_unc:
 			printer_list.append(printer_unc)
 		else:
-			log_error('ERROR: cannot load printer %s (reference found at cn=%s)' % (printer_dn, obj.get('cn',[''])[0]))
+			log_error('ERROR: cannot load printer %s (reference found at cn=%s)' % (printer_dn, obj.get('cn', [b''])[0]))
 
 	for printer_dn in obj.get('univentionAssignedPrinterDefault', []):
 		printer_dn = printer_dn.decode("utf-8")
@@ -300,7 +295,7 @@ def get_assigned_printers_from_obj(lo, obj):
 		if printer_unc:
 			default_printer = printer_unc
 		else:
-			log_error('ERROR: cannot load printer %s (reference found at cn=%s)' % (printer_dn, obj.get('cn',[''])[0].decode("utf-8")))
+			log_error('ERROR: cannot load printer %s (reference found at cn=%s)' % (printer_dn, obj.get('cn', [b''])[0].decode("utf-8")))
 
 	return (printer_list, default_printer)
 
@@ -327,7 +322,7 @@ def process_host(lo, dn, target_dirs):
 	for grpdn in search_result:
 		log_debug('checking group %s' % grpdn)
 		load_group(lo, grpdn, recursive=False) # make sure that the cache contains the group object - NOOP if already in cache
-		if not grpdn in cache_groups:
+		if grpdn not in cache_groups:
 			log_error('WARNING: cannot load group %s' % grpdn)
 			continue
 
