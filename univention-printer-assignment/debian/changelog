@@ -1,4 +1,4 @@
-univention-printer-assignment (9.0.0-4) unstable; urgency=low
+univention-printer-assignment (9.0.0-8) unstable; urgency=low
 
   * Issue #43025 Fixed creation of vbs files with UCS 5.0
 
