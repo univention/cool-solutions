@@ -1,3 +1,9 @@
+univention-printer-assignment (9.0.0-4) unstable; urgency=low
+
+  * Issue #43025 Fixed creation of vbs files with UCS 5.0
+
+ -- Andreas Peichert <peichert@univention.de>  Wed, 12 Jul 2023 11:06:03 +0200
+
 univention-printer-assignment (9.0.0-3) unstable; urgency=low
 
   * Issue #34619 Migration to pyhton3 for UCS 5.0
