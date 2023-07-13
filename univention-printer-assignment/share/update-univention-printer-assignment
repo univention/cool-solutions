@@ -38,10 +38,7 @@ import tempfile
 import univention.admin.modules
 import univention.admin.objects
 from univention.admin.uldap import ldap
-import univention.config_registry
-
-ucr = univention.config_registry.ConfigRegistry()
-ucr.load()
+from univention.config_registry import ucr
 
 baseDN = ucr.get('ldap/base', None)
 vbs_filename = ucr.get('printer/assignment/vbs/template', '/usr/share/univention-printer-assignment/printer-assignment-template.vbs')
@@ -167,7 +164,8 @@ def load_printer(lo, dn, obj=None, recursive=True, reload=False, ignore_missing=
 					'(univentionAssignedPrinterDefault=%s)'
 				')'
 			')'
-			,[dn,dn])
+			,[dn,dn]
+                    )
 		try:
 			search_result = lo.search(filter=ldap_filter, base=baseDN)
 		except univention.admin.uexceptions.noObject:
@@ -184,8 +182,9 @@ def load_printer(lo, dn, obj=None, recursive=True, reload=False, ignore_missing=
 				'(univentionAssignedPrinter=%s)'
 				'(univentionAssignedPrinterDefault=%s)'
 			')'
-			')'
-		, [dn, dn])
+			')',
+		    [dn, dn],
+                )
 		try:
 			search_result = lo.search(filter=ldap_filter, base=baseDN)
 		except univention.admin.uexceptions.noObject:
@@ -287,7 +286,7 @@ def get_assigned_printers_from_obj(lo, obj):
 		if printer_unc:
 			printer_list.append(printer_unc)
 		else:
-			log_error('ERROR: cannot load printer %s (reference found at cn=%s)' % (printer_dn, obj.get('cn', [b''])[0]))
+			log_error('ERROR: cannot load printer %s (reference found at cn=%s)' % (printer_dn, obj.get('cn', [b''])[0].decode("utf-8")))
 
 	for printer_dn in obj.get('univentionAssignedPrinterDefault', []):
 		printer_dn = printer_dn.decode("utf-8")
@@ -312,8 +311,9 @@ def process_host(lo, dn, target_dirs):
 	ldap_filter = ldap.filter.filter_format(
 		'(&'
 		'(objectClass=univentionGroup)'
-		'(uniqueMember=%s))'
-		,[dn])
+		'(uniqueMember=%s))',
+		[dn],
+            )
 
 	try:
 		search_result = lo.searchDn(filter=ldap_filter, base=baseDN)
@@ -348,7 +348,7 @@ def process_host(lo, dn, target_dirs):
 		'flagShowDebug': '0',
 		'printerList': ' '.join(assign_list),
 		'defaultPrinter': '',
-		}
+	    }
 	if ucr.is_true('printer/assignment/vbs/removeall', False):
 		settings['flagRemoveAllPrinters'] = '1'
 
