@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 # Univention Nextcloud Samba share configuration
@@ -58,7 +58,7 @@ def handler(dn, new, old, command=''):
 	#Enable group for nextcloud
 	nextcloudEnabled = lo.getAttr(dn, 'nextcloudEnabled')
 	if not nextcloudEnabled:
-		modlist = [('objectClass', '', 'nextcloudGroup'), ('nextcloudEnabled', '', '1')]
+		modlist = [('objectClass', b'', b'nextcloudGroup'), ('nextcloudEnabled', b'', b'1')]
 		lo.modify(dn, modlist)
 		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Enabled Nextcloud for {}".format(dn))
 

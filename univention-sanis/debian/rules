@@ -1,9 +1,7 @@
 #!/usr/bin/make -f
 # -*- coding: utf-8 -*-
 #
-# Univention Nextcloud Samba share configuration
-#
-# Copyright 2018-2019 Univention GmbH
+# Copyright 2023 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -30,13 +28,16 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
+export LC_ALL=C.UTF-8
+
 override_dh_auto_install:
-	univention-install-config-registry
 	dh_auto_install
 
 override_dh_auto_build:
-	ucslint
 	dh_auto_build
 
+override_dh_auto_test:
+	ucslint
+
 %:
-	dh $@ --with python3
+	dh $@ --with python3,ucr
