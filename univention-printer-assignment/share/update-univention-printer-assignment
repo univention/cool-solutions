@@ -37,7 +37,7 @@ import tempfile
 
 import univention.admin.modules
 import univention.admin.objects
-from univention.admin.uldap import ldap
+import ldap
 from univention.config_registry import ucr
 
 baseDN = ucr.get('ldap/base', None)
@@ -366,7 +366,7 @@ def process_host(lo, dn, target_dirs):
 	# open template, read content and replace variables
 	content = open(vbs_filename, 'r').read() % settings
 	for target_dir in target_dirs:
-		target_fn = os.path.join(target_dir, '%s.vbs' % cache_hosts[dn].get('cn', ['UNKNOWN'])[0].decode("utf-8"))
+		target_fn = os.path.join(target_dir, '%s.vbs' % cache_hosts[dn].get('cn', [b'UNKNOWN'])[0].decode("utf-8"))
 		# create and write temporary file
 		temp_fn = tempfile.mkstemp(dir=target_dir)[1]
 		log_debug('Writing temporary file %s' % temp_fn)
