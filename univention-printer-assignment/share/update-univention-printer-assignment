@@ -37,11 +37,8 @@ import tempfile
 
 import univention.admin.modules
 import univention.admin.objects
-from univention.admin.uldap import ldap
-import univention.config_registry
-
-ucr = univention.config_registry.ConfigRegistry()
-ucr.load()
+import ldap
+from univention.config_registry import ucr
 
 baseDN = ucr.get('ldap/base', None)
 vbs_filename = ucr.get('printer/assignment/vbs/template', '/usr/share/univention-printer-assignment/printer-assignment-template.vbs')
@@ -51,12 +48,15 @@ cache_printers = {}
 cache_groups = {}
 cache_hosts = {}
 
+
 def log_debug(msg):
 	if debug:
 		print('DEBUG: %s' % msg)
 
+
 def log_error(msg):
 	print(msg, file=sys.stderr)
+
 
 def main():
 	global debug
@@ -68,7 +68,7 @@ DN per line.
 '''
 
 	parser = argparse.ArgumentParser(description=desc)
-	parser.add_argument('-f', '--file', action='store', dest='backlogfile', default=None, help='path to the backlog file' )
+	parser.add_argument('-f', '--file', action='store', dest='backlogfile', default=None, help='path to the backlog file')
 	parser.add_argument('-d', '--debug', action='store_true', dest='debug', default=False, help='enable debugging output')
 	options, args = parser.parse_known_args()
 
@@ -162,12 +162,13 @@ def load_printer(lo, dn, obj=None, recursive=True, reload=False, ignore_missing=
 		ldap_filter = ldap.filter.filter_format(
 			'(&'
 				'(objectClass=univentionGroup)'
-				'(|'
-					'(univentionAssignedPrinter=%s)'
-					'(univentionAssignedPrinterDefault=%s)'
-				')'
+			'(|'
+				'(univentionAssignedPrinter=%s)'
+				'(univentionAssignedPrinterDefault=%s)'
 			')'
-			,[dn,dn])
+			')',
+			[dn, dn],
+		)
 		try:
 			search_result = lo.search(filter=ldap_filter, base=baseDN)
 		except univention.admin.uexceptions.noObject:
@@ -184,8 +185,9 @@ def load_printer(lo, dn, obj=None, recursive=True, reload=False, ignore_missing=
 				'(univentionAssignedPrinter=%s)'
 				'(univentionAssignedPrinterDefault=%s)'
 			')'
-			')'
-		, [dn, dn])
+			')',
+			[dn, dn],
+		)
 		try:
 			search_result = lo.search(filter=ldap_filter, base=baseDN)
 		except univention.admin.uexceptions.noObject:
@@ -261,7 +263,7 @@ def load_objects(lo, dnlist):
 
 def get_printer_unc(lo, printer_dn):
 	log_debug('fetching printer path for %s' % printer_dn)
-	load_printer(lo, printer_dn, recursive=False) # make sure that the cache contains the printer object - NOOP if already in cache
+	load_printer(lo, printer_dn, recursive=False)  # make sure that the cache contains the printer object - NOOP if already in cache
 	if printer_dn not in cache_printers:
 		return None
 	host = cache_printers[printer_dn].get('univentionPrinterSpoolHost', [b''])[0].decode("utf-8")     # TODO FIXME uses only the first spool host
@@ -277,6 +279,7 @@ def get_printer_unc(lo, printer_dn):
 		ret += ":%s" % settings_file
 	return ret
 
+
 def get_assigned_printers_from_obj(lo, obj):
 	printer_list = []
 	default_printer = None
@@ -287,7 +290,7 @@ def get_assigned_printers_from_obj(lo, obj):
 		if printer_unc:
 			printer_list.append(printer_unc)
 		else:
-			log_error('ERROR: cannot load printer %s (reference found at cn=%s)' % (printer_dn, obj.get('cn', [b''])[0]))
+			log_error('ERROR: cannot load printer %s (reference found at cn=%s)' % (printer_dn, obj.get('cn', [b''])[0].decode("utf-8")))
 
 	for printer_dn in obj.get('univentionAssignedPrinterDefault', []):
 		printer_dn = printer_dn.decode("utf-8")
@@ -312,16 +315,16 @@ def process_host(lo, dn, target_dirs):
 	ldap_filter = ldap.filter.filter_format(
 		'(&'
 		'(objectClass=univentionGroup)'
-		'(uniqueMember=%s))'
-		,[dn])
-
+		'(uniqueMember=%s))',
+		[dn],
+	)
 	try:
 		search_result = lo.searchDn(filter=ldap_filter, base=baseDN)
 	except univention.admin.uexceptions.noObject:
 		search_result = []
 	for grpdn in search_result:
 		log_debug('checking group %s' % grpdn)
-		load_group(lo, grpdn, recursive=False) # make sure that the cache contains the group object - NOOP if already in cache
+		load_group(lo, grpdn, recursive=False)  # make sure that the cache contains the group object - NOOP if already in cache
 		if grpdn not in cache_groups:
 			log_error('WARNING: cannot load group %s' % grpdn)
 			continue
@@ -348,7 +351,7 @@ def process_host(lo, dn, target_dirs):
 		'flagShowDebug': '0',
 		'printerList': ' '.join(assign_list),
 		'defaultPrinter': '',
-		}
+	}
 	if ucr.is_true('printer/assignment/vbs/removeall', False):
 		settings['flagRemoveAllPrinters'] = '1'
 
@@ -363,8 +366,8 @@ def process_host(lo, dn, target_dirs):
 	# open template, read content and replace variables
 	content = open(vbs_filename, 'r').read() % settings
 	for target_dir in target_dirs:
-		target_fn = os.path.join(target_dir, '%s.vbs' % cache_hosts[dn].get('cn', ['UNKNOWN'])[0].decode("utf-8"))
-                # create and write temporary file
+		target_fn = os.path.join(target_dir, '%s.vbs' % cache_hosts[dn].get('cn', [b'UNKNOWN'])[0].decode("utf-8"))
+		# create and write temporary file
 		temp_fn = tempfile.mkstemp(dir=target_dir)[1]
 		log_debug('Writing temporary file %s' % temp_fn)
 		with open(temp_fn, 'w') as fd:
