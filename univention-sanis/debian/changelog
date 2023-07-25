@@ -1,3 +1,10 @@
+univention-sanis (1.0.2) unstable; urgency=medium
+
+  * Added validation against all role assignments that the import cannot
+    handle right now. - #43882
+
+ -- Frank Greif <greif@univention.de>  Tue, 25 Jul 2023 09:56:56 +0200
+
 univention-sanis (1.0.1) unstable; urgency=medium
 
   * Added group processing, validation, documentation etc. - #43882

@@ -311,6 +311,54 @@ class iterStore:
 
 		return None
 
+	def sorted(self, key):
+		""" returns another iterator out of self, keyed by the named key. We need this
+			function to get the input data sorted by a human-recognizable attribute
+			instead of the GUID.
+		"""
+
+		def key_func(obj):
+			return obj[key]
+
+		return sorted(self, key=key_func)
+
+	def remove(self, key):
+		""" We have already filtered away some elements by using the 'validate_object'
+			method directly while reading JSON. But there are situations where we cannot
+			know in advance if a given element has to be ignored. To make it clean we
+			need the possibility to remove elements from the store, and to re-run the
+			validation loop. We know when we can call this function: only while no iterator
+			looping is in progress, so we don't have to care for synchronization or multithreading.
+		"""
+
+		print('Store [%s] removing key [%s]...' % (self.klass.__name__, key))
+
+		# only if key exists
+		if key in self.keyidx:
+			recno = self.keyidx.pop(key)
+			print('  recno = %d' % recno)
+			if len(self.data):
+				self.data.pop(recno)
+			if self.fname:
+				with open(self.fname) as inp:
+					with open('%s.new' % self.fname, 'w') as out:
+						n = 0
+						# read until line is empty (means EOF)
+						while True:
+							line = inp.readline()
+							if not line:
+								break
+							# skip the line we want to delete
+							if n != recno:
+								out.write(line)
+							n += 1
+				# rename .new to the original file
+				os.replace('%s.new' % self.fname, self.fname)
+			# We have to renumber all references in keyidx which are greater than recno!!!
+			for key, idx in self.keyidx.items():
+				if idx > recno:
+					self.keyidx[key] = idx - 1
+
 	# --------------- D e b u g g i n g -------------------
 	# Strictly not needed: these functions help examining the
 	# contents of the store, and should never be used in the

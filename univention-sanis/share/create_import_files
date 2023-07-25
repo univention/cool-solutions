@@ -125,6 +125,23 @@ def main(dry_run=False):
 		print('Der Import kann nur gestartet werden, wenn die Konfiguration korrekt ist.')
 		return False
 
+	# Checks for inconsistencies and reports them. This is mainly done to filter
+	# any input combinations that ucs@school cannot handle as of now.
+	sanis_import.open_log('validation.log')
+	to_remove = sanis_import.validate_users()
+	# If the validation indicated that some objects be removed from their respective
+	# store: do it now. And re-run the validation: it should now get through without
+	# any new encounters.
+	if len(to_remove):
+		sanis_import.remove_records(to_remove)
+		to_remove = sanis_import.validate_users()
+		if len(to_remove):
+			print('')
+			print('Die Daten konnten nicht vollständig bereinigt werden. Lesen Sie')
+			print('in der Datei "validation.log", welche Objekte immer noch ungültig sind.')
+			return False
+	sanis_import.close_log()
+
 	# Prepare import configs and data. Will only be done if everything is in tune.
 	if not sanis_import.create_config([SISOPI_CONFIG, SANIS_CONFIG], temp_config):
 		return False
