@@ -226,18 +226,18 @@ class Organisation(SanisObject):
 		'kuerzel':			'kuerzel',
 	}
 
-	@classmethod
-	def validate_object(self, obj):
-
-		if not super().validate_object(obj):
-			return False
-
-		# ignore organizations that are not schools.
-		# WHY CAN'T I LOOK AT THE 'codelisten' TO SEE WHAT IS VALID HERE?!?
-		if self.extract_value(obj, 'typ') not in Codes.valid_org_types():
-			return False
-
-		return True
+#	@classmethod
+#	def validate_object(self, obj):
+#
+#		if not super().validate_object(obj):
+#			return False
+#
+#		# ignore organizations that are not schools.
+#		# WHY CAN'T I LOOK AT THE 'codelisten' TO SEE WHAT IS VALID HERE?!?
+#		if self.extract_value(obj, 'typ') not in Codes.valid_org_types():
+#			return False
+#
+#		return True
 
 
 class Kontext(SanisObject):
@@ -256,6 +256,23 @@ class Kontext(SanisObject):
 		'status':		'personenkontexte.personenstatus',
 		'person_id':	'person.id',
 	}
+
+	@classmethod
+	def validate_object(self, obj):
+		""" The Sanis frontend strictly does not forbid conflicting roles between
+			the context's role and the role(s) in group memberships. As we now regard
+			the 'basisrolle' (this one in the context) as the relevant one to decide the
+			user's role (in the u@s context) we will strictly discard contexts that do
+			not carry one of the roles we would accept as an user's role.
+		"""
+
+		if not super().validate_object(obj):
+			return False
+
+		if self.extract_value(obj, 'personenkontexte.rolle') not in Codes.valid_user_roles().keys():
+			return False
+
+		return True
 
 
 class Klassen(SanisObject):
@@ -318,29 +335,23 @@ class Mitglieder(SanisObject):
 		if self.extract_value(obj, 'gruppe.typ') not in Codes.valid_group_types():
 			return False
 
-		# For the (slightly convoluted) combination of multiple roles into one
-		# group membership (and the possible contradiction with the context's
-		# role): Ignore any group membership that ucs@school cannot handle.
+		# Roles are now processed additively: the role from the context is simply added
+		# to the roles stemming from group memberships. This means: here we can (silently!)
+		# refuse roles that aren't relevant to us, and any remaining double roles have to
+		# be processed at the aggregate level.
 
 		# STEP #1: filter out roles that we're not about to process
 		myroles = [x for x in self.extract_value(obj, 'gruppenzugehoerigkeiten.rollen') if x in Codes.valid_user_roles().keys()]
 
-		# STEP #2: reject this membership if there are multiple roles remaining
-		# Sorry, we cannot do it here because we don't have the context (which user and which
-		# school this membership is about) -> so we MUST do this in the validation function
-		# of sanisImport, just to print a meaningful diagnostic message.
-		#if len(myroles) > 1:
-		#	print('Membership [%s] [%s] ignored: multiple roles: %s' % (self.extract_value(obj,'gruppe.bezeichnung'),self.extract_value(obj,'gruppenzugehoerigkeiten.ktid'),myroles))
-		#	return False
-
-		# STEP #3: reject this membership if there are no roles remaining. Note that this is a different
-		#	condition than in step #2: here it simply means that this group membership is not relevant.
+		# STEP #2: reject this membership if there are no roles remaining. (this membership is not relevant to us)
 		if len(myroles) == 0:
 			return False
 
-		# STEP #4: replace the input array by a single string. Note that we propagate memberships with
+		# STEP #3: replace the input array by a single string. Note that we propagate memberships with
 		#	multiple roles: it is deferred to the 'validate' function of the sanisImport class to
-		#	recognise and log this condition. (this will accomplish what STEP #2 could not do)
+		#	recognise and log this condition.
+		# NOTE this may seem convoluted (that we don't set roleS to an array) but we must adhere to
+		#	the strict rule that elements of the store are strings an nothing else.
 		self.replace_value(obj, 'gruppenzugehoerigkeiten.rollen', ','.join(myroles))
 
 		# FIXME do we have to honor 'von' and 'bis' validities, and if so, how?

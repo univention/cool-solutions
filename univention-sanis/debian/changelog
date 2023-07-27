@@ -2,6 +2,9 @@ univention-sanis (1.0.2) unstable; urgency=medium
 
   * Added validation against all role assignments that the import cannot
     handle right now. - #43882
+  * Add different import system with one file for all schools, and with
+    different source IDs (allows creation of multiple accounts for one
+    person)
 
  -- Frank Greif <greif@univention.de>  Tue, 25 Jul 2023 09:56:56 +0200
 

@@ -67,6 +67,10 @@ class SanisImport:
 	grp_store = None			# gruppen
 	memb_store = None			# gruppenmitgliedschaften
 
+	school_mapping = None		# mapping UCS->Sanis school identifiers
+	org_attribute = None		# key attribute to match Sanis Org identifier
+	id_to_uschool = {}			# 'id' from org_store -> UCS school name
+
 	tempfiles = []				# files to be cleaned up
 	commands = []				# lines to be written into script
 
@@ -75,9 +79,13 @@ class SanisImport:
 
 	log_handle = None			# output handle for an additional logfile
 
+	invalid_messages = {}		# key = user name + birthdate + home org, value = array of messages
+
 	# Mapping of CSV attributes to their source attributes. currently all of these
 	# attributes come from the person store. 'classes' are retrieved from group memberships
 	# and also stored into the person record directly before exporting.
+	#
+	# If not-sisopi: append 'school' and 'schools' at runtime.
 	headers = {
 		'ID':			'id',
 		'Vorname':		'vorname',
@@ -93,17 +101,6 @@ class SanisImport:
 		'# Importskript für SANIS Lehrer- und Schülerbestände',
 		'#',
 		'',
-		'# Funktion wartet darauf, daß die Notifier/Listener Synchronisation fertig wird',
-		'function wait_for_sync()',
-		'{',
-		'	while true; do',
-		'		if /usr/lib/nagios/plugins/check_univention_replication ; then',
-		'			return',
-		'		fi',
-		'		sleep 5',
-		'	done',
-		'}',
-		'',
 		'cd $(dirname $0)',
 		'(',
 	]
@@ -113,7 +110,7 @@ class SanisImport:
 		') 2>&1 | tee $(basename $0).log',
 	]
 
-	def __init__(self, api_url, token_url, cred_file, dry_run=False):
+	def __init__(self, api_url, token_url, cred_file, dry_run=False, sisopi=False):
 		""" Prepare object for use. Any errors throw exceptions and are not handled here. """
 
 		self.api_url = api_url
@@ -131,6 +128,13 @@ class SanisImport:
 		# Will be used here for JSON files as well as in the stores when switching
 		# to file store. All temp files are cleaned up.
 		self.temp_base = '/tmp/sanis_import_%d_' % os.getpid()
+
+		# Honor variants for SiSoPi and Non-SiSoPi....
+		if not sisopi:
+			self.headers.update({
+				'Schule':	'school',
+				'Schulen':	'schools',
+			})
 
 	def read_input_data(self):
 		""" Read all data from SANIS API and store them in (internal) store objects.
@@ -243,8 +247,8 @@ class SanisImport:
 						person = self.pers_store.find(context['person_id'])
 						if person:
 							# We have some persons without birthdate: fix it with a constant!
-							if person['geburtsdatum'] == '':
-								person['geburtsdatum'] = '1999-09-09'
+							#if person['geburtsdatum'] == '':
+							#	person['geburtsdatum'] = '1999-09-09'
 							# get classes of this user.
 							classes = []
 							for klass in self.memb_store.find_all('ktid', context['id']):
@@ -312,7 +316,6 @@ class SanisImport:
 				self.commands.append('   /usr/share/ucs-school-import/scripts/ucs-school-user-import \\')
 				self.commands.append('      --conffile %s \\' % job_config_file)
 				self.commands.append('      2>&1 | tee import_%s_%s.log' % (school, role))
-				self.commands.append('   wait_for_sync')
 				self.commands.append('')
 		except BaseException as e:
 			print('FEHLER: Beim Erzeugen der Daten ist ein Fehler aufgetreten:')
@@ -324,6 +327,18 @@ class SanisImport:
 		""" Write all the collected commands into the script to be executed.
 			Returns True if successful.
 		"""
+
+		if len(self.invalid_messages):
+			with open('korrekturen.txt', 'w') as outhandle:
+				self.print_invalid_messages(outhandle)
+			print('')
+			print('Aus den Eingabedaten von SANIS mußten einige Elemente ignoriert werden, weil sie')
+			print('nicht den Validierungsregeln des Imports genügen. In der Datei')
+			print('')
+			print('            korrekturen.txt')
+			print('')
+			print('können Sie nachlesen, um welche Elemente es sich handelt, und ob Sie eventuell in SANIS')
+			print('Korrekturen vornehmen können.')
 
 		try:
 			with open(out_filename, 'w') as out_handle:
@@ -448,6 +463,14 @@ class SanisImport:
 		self.config_data = data
 		return True
 
+	def ucs_school_name(self, orgid):
+
+		try:
+			return self.id_to_uschool[orgid]
+		except KeyError:
+			pass
+		return None
+
 	def get_school_mapping(self):
 		""" Read local UCR variables that configure this import. We need:
 
@@ -461,12 +484,19 @@ class SanisImport:
 
 			Function returns a dict with key = <school name in ucs> and val = <org id in Sanis>
 			which can directly be used to iterate over schools for preparing the data.
+
+			Function caches the result in an object-local variable, so it won't have to crawl
+			the data again.
 		"""
 
-		result = {}
+		if self.school_mapping is not None:
+			return self.school_mapping
+
+		result = {}					# ucs school -> sanis identification (by the school_name_attribute)
 		ucr = ConfigRegistry()
 		ucr.load()
 		attrname = ucr.get('sanis_import/school_name_attribute', 'kennung')
+		self.org_attribute = attrname		# cache for later use
 		for key in sorted([x for x in ucr if x.startswith('sanis_import/school/')]):
 			shortkey = re.sub('^sanis_import/school/', '', key)
 			# FIXME call @school library check does this school exists
@@ -475,8 +505,13 @@ class SanisImport:
 			if school is None:
 				raise NoSchoolException('FEHLER: Keine SANIS Organisation mit [%s] = [%s] gefunden' % (attrname, ucr[key]))
 			result[shortkey] = school['id']
+			# Build a second cache: org ID -> UCS school.
+			# Every organisation whose ID is not in this dict -> disregard.
+			self.id_to_uschool[school['id']] = shortkey
 		if len(result) == 0:
 			raise NoSchoolException('FEHLER: Sie haben noch keine Schulen für den Import konfiguriert.')
+
+		self.school_mapping = result
 
 		return result
 
@@ -506,48 +541,136 @@ class SanisImport:
 			To request removal of object 'id' from store 'stor', you'll do:
 
 				to_remove.setdefault('stor',set()).add('id')
+
+			NOTE that this function will not print anything to STDOUT. It will print
+				to a dry_run.log only if dry_run is set. Other output (invalid_messages)
+				is done later, and is always done no matter of dry_run.
 		"""
+
+		if self.dry_run:
+			self.open_log('dry_run.log')
 
 		to_remove = {}
 
 		self.print('Prüfe Eingangsdaten...')
 		for person in self.pers_store.sorted('familienname'):
 			self.print('user ............ %(familienname)s, %(vorname)s [%(id)s]' % person)
-			roles = set()			# roles by context
+			stammorg = self.org_store.find(person['stammorg'])
+			self.print('stammorg .......... [%(kennung)s] [%(kuerzel)s] [%(name)s]' % stammorg)
+			u_org = self.ucs_school_name(stammorg['id'])
+			if not u_org:
+				self.register_invalid(person, 'Die Stammorganisation [%s] des Nutzers wird nicht importiert: Nutzer wird ignoriert.' % (stammorg['name']))
+				self.print('   --> [%s, %s] Die Stammorganisation des Nutzers gehört nicht zu den importierten Schulen, Nutzer wird ignoriert' % (person['familienname'], person['vorname']))
+				to_remove.setdefault('pers', set()).add(person['id'])
+				continue
+			# Now finally corrected: we take the context's ROLE for the user's role, and decide into which CSV it has to be written.
+			# And in the context of THIS context: group memberships with OTHER ROLES must be ignored AND LOGGED.
 			for context in self.cont_store.find_all('person_id', person['id']):
 				self.print('   context ........ %(rolle)s [%(id)s]' % context)
 				school = self.org_store.find(context['org_id'])
-				if school:
-					classes = 0		# count classes, for the "Basisrolle" later
-					self.print('      school ...... %(name)s [%(id)s]' % school)
-					for klass in self.memb_store.find_all('ktid', context['id']):
-						self.print('         class .... %(group_name)s (%(rolle)s) [%(id)s]' % klass)
-						# The JSON importer will flatten arrays to comma-delimited strings. Whenever
-						# there are multiple roles: they won't match any single valid user role string.
-						if klass['rolle'] not in Codes.valid_user_roles():
-							self.print('   --> [%s, %s] Ungültige oder mehrere Rollen (%s-%s: %s), Gruppenmitgliedschaft wird entfernt' % (person['familienname'], person['vorname'], school['name'], klass['group_name'], klass['rolle']))
-							to_remove.setdefault('memb', set()).add(klass['id'])
-						else:
-							classes += 1
-							roles.add(klass['rolle'])
-					# THIS role should only be added if there are no group memberships that dictate a role.
-					if classes == 0:
-						self.print('   --> [%s, %s] Keine Rolle aus Gruppenmitgliedschaften [%s], benutze Basisrolle [%s] vom Personenkontext' % (person['familienname'], person['vorname'], school['name'], context['rolle']))
-						# ... and even then, it is invalid to add a user with 'student' role without groups!
-						if context['rolle'] in Codes.roles_requiring_groups():
-							self.print('   --> [%s, %s] Diese Rolle kann nicht ohne Gruppenmitgliedschaft importiert werden, wird von Schule [%s] entfernt' % (person['familienname'], person['vorname'], school['name']))
-							to_remove.setdefault('cont', set()).add(context['id'])
-						elif context['rolle'] not in Codes.valid_user_roles():
-							self.print('   --> [%s, %s] Für diesen Benutzer gibt es weder Gruppenmitgliedschaften noch eine relevante Rolle an Schule [%s], wird von der Schule entfernt' % (person['familienname'], person['vorname'], school['name']))
-							to_remove.setdefault('cont', set()).add(context['id'])
-						else:
-							roles.add(context['rolle'])
-			if len(roles) > 1:
-				self.print('   --> [%s, %s] Mehrere Rollen (%s), Benutzer wird nicht importiert' % (person['familienname'], person['vorname'], ','.join(roles)))
-				to_remove.setdefault('pers', set()).add(person['id'])
+				if not school:
+					self.register_invalid(person, 'Rolle [%s] verweist auf eine Organisation [%s], die wir nicht importieren' % (context['rolle'], context['org_id']))
+					self.print('   --> [%s, %s] hat eine Rolle an Organisation [%s], die nicht importiert wird' % (person['familienname'], person['vorname'], context['org_id']))
+					to_remove.setdefault('cont', set()).add(context['id'])
+					continue
+				u_school = self.ucs_school_name(school['id'])
+				if not u_school:
+					# If this happens it is mostly a configuration error: the person has roles at organizations that
+					# we're not configured to import. The operator shall decide if he wants to include that school,
+					# or it is simply because the SANIS API returns some data which are simply not relevant to us.
+					self.register_invalid(person, 'Rolle [%s] verweist auf eine Organisation [%s], die wir nicht importieren' % (context['rolle'], school['name']))
+					self.print('   --> [%s, %s] hat eine Rolle an Organisation [%s], die nicht importiert wird' % (person['familienname'], person['vorname'], school['name']))
+					to_remove.setdefault('cont', set()).add(context['id'])
+					continue
+				self.print('   school ......... %(name)s [%(id)s]' % school)
+				classes = 0		# count classes. Relevant if base role is student.
+				for klass in self.memb_store.find_all('ktid', context['id']):
+					self.print('      class ....... %(group_name)s (%(rolle)s) [%(id)s]' % klass)
+					# The JSON importer will flatten arrays to comma-delimited strings. Whenever
+					# there are multiple roles: they won't match any single valid user role string.
+					# *CHANGED* we don't accept a membership if its 'role' attribute is not the same as the base role!
+					if klass['rolle'] != context['rolle']:
+						self.register_invalid(person, 'Rollenkonflikt (Basisrolle=%s, Rolle in Gruppe=%s) an der Gruppenmitgliedschaft (%s-%s)' % (context['rolle'], klass['rolle'], school['name'], klass['group_name']))
+						self.print('   --> [%s, %s] Ungültige oder mehrere Rollen (%s-%s: %s), Gruppenmitgliedschaft wird entfernt' % (person['familienname'], person['vorname'], school['name'], klass['group_name'], klass['rolle']))
+						to_remove.setdefault('memb', set()).add(klass['id'])
+						continue
+					classes += 1
+				# *CHANGED* We don't count roles. base role must be equal to group membership role (as validated above)
+				# THIS role should only be added if there are no group memberships that dictate a role.
+				if classes == 0:
+					if context['rolle'] in Codes.roles_requiring_groups():
+						self.register_invalid(person, 'Rolle [%s] in Schule [%s] verlangt mindestens eine Klassenmitgliedschaft' % (context['rolle'], school['name']))
+						self.print('   --> [%s, %s] Rolle [%s] kann nicht ohne Gruppenmitgliedschaft importiert werden, wird von Schule [%s] entfernt' % (person['familienname'], person['vorname'], context['rolle'], school['name']))
+						to_remove.setdefault('cont', set()).add(context['id'])
+						continue
+
 		self.print('')
+		self.close_log()
 
 		return to_remove
+
+	def print_collected_csv(self, role, config):
+		""" This is the counterpart of extract_school_data(), but for non-sisopi import. It will
+			be called for every output file (resp. role) and collects all occurrences of
+			the person in all schools, using this role.
+		"""
+
+		u_role = Codes.valid_user_roles()[role]
+		records = 0
+		with open('%s.csv' % u_role, 'w') as out_handle:
+
+			print(self._data_line(self.headers.keys()), file=out_handle)
+
+			# better we sort by 'stammorganisation', just to have the records together that
+			# should be corrected by one organization
+			for person in self.pers_store.sorted('familienname'):
+				stammorg = self.org_store.find(person['stammorg'])
+				u_org = self.ucs_school_name(stammorg['id'])
+				schools = set()
+				classes = set()
+				for context in self.cont_store.find_all('person_id', person['id']):
+					school = self.org_store.find(context['org_id'])
+					# not relevant for this run.
+					if context['rolle'] != role:
+						continue
+					if not school:
+						continue
+					u_school = self.ucs_school_name(school['id'])
+					if not u_school:
+						continue
+					schools.add(u_school)
+					for group in self.memb_store.find_all('ktid', context['id']):
+						classes.add('%s-%s' % (u_school, group['group_name']))
+				if not len(schools):
+					continue
+				# We have some persons without birthdate: fix it with a constant!
+				#if person['geburtsdatum'] == '':
+				#	person['geburtsdatum'] = '1999-09-09'
+				person['school'] = u_org
+				person['schools'] = ','.join(schools)
+				person['classes'] = ','.join(classes)
+				record = []
+				for attr, iattr in self.headers.items():
+					if iattr in person:
+						record.append(person[iattr])
+					else:
+						record.append('-')
+				print(self._data_line(record), file=out_handle)
+				records += 1
+
+		print('   Rolle=%s ... %d Sätze' % (u_role, records))
+
+		self.commands.append('   /usr/share/ucs-school-import/scripts/ucs-school-user-import \\')
+		if self.dry_run:
+			self.commands.append('      --dry-run \\')
+		self.commands.append('      --conffile %s \\' % config)
+		self.commands.append('      --user_role %s \\' % u_role)
+		self.commands.append('      --infile %s.csv \\' % u_role)
+		self.commands.append('      --source_uid sanis_%s \\' % u_role)
+		self.commands.append('      2>&1 | tee import_%s.log' % role)
+		self.commands.append('')
+
+		return True
 
 	def remove_records(self, to_remove):
 		""" Removes records from our stores. Expects a dict whose keys are store names
@@ -571,9 +694,10 @@ class SanisImport:
 				self.memb_store.remove(id)
 
 	def print(self, text):
-		""" a print function that prints to STDOUT and optionally to a log file. """
-
-		print(text)
+		""" This function will not print anything if there's no log_handle set. This is
+			used in validate_user() to not clutter each and every log ouput by wrapping
+			it into a conditional expression.
+		"""
 
 		if self.log_handle:
 			print(text, file=self.log_handle)
@@ -592,3 +716,24 @@ class SanisImport:
 		if self.log_handle:
 			self.log_handle.close()
 			self.log_handle = None
+
+	def register_invalid(self, person, message):
+		""" Registers a message about data inconsistencies. These messages will be printed
+			in human-acceptable form after the validation is through.
+		"""
+
+		key = '%(familienname)s, %(vorname)s (%(geburtsdatum)s)' % person
+		org = self.org_store.find(person['stammorg'])
+		if org:
+			key = '%s [%s]' % (key, org['name'])
+
+		self.invalid_messages.setdefault(key, []).append(message)
+
+	def print_invalid_messages(self, outhandle=None):
+		""" Prints all collected 'invalid' messages. """
+
+		for person, msgs in self.invalid_messages.items():
+			print('%s' % person, file=outhandle)
+			for msg in msgs:
+				print('   %s' % msg, file=outhandle)
+			print('', file=outhandle)

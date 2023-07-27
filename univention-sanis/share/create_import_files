@@ -38,6 +38,7 @@ import stat
 import sys
 from univention.config_registry import ConfigRegistry
 from sanis_import import SanisImport, NoSchoolException
+from sanis_models import Codes
 
 # API URLs
 TOKEN_URL = 'https://auth.stage.niedersachsen-login.schule/realms/SANIS/protocol/openid-connect/token'
@@ -53,7 +54,7 @@ TEMP_CONFIG = 'config.json'
 SCRIPT_NAME = 'run_import'
 
 
-def main(dry_run=False):
+def main(dry_run=False, sisopi=False):
 	""" Main worker. Returns True on success and False on every error.
 		False causes the caller to print a hint about the documentation.
 	"""
@@ -125,38 +126,38 @@ def main(dry_run=False):
 		print('Der Import kann nur gestartet werden, wenn die Konfiguration korrekt ist.')
 		return False
 
-	# Checks for inconsistencies and reports them. This is mainly done to filter
-	# any input combinations that ucs@school cannot handle as of now.
-	sanis_import.open_log('validation.log')
+	# Check for inconsistencies (or things that the importer cannot import right now) and
+	# remove them. When in dry_run mode, a detailed log will be written. An info file containing
+	# hints for corrections in SANIS will be written afterwards, no matter if dry_run or not.
 	to_remove = sanis_import.validate_users()
-	# If the validation indicated that some objects be removed from their respective
-	# store: do it now. And re-run the validation: it should now get through without
-	# any new encounters.
 	if len(to_remove):
 		sanis_import.remove_records(to_remove)
-		to_remove = sanis_import.validate_users()
-		if len(to_remove):
-			print('')
-			print('Die Daten konnten nicht vollständig bereinigt werden. Lesen Sie')
-			print('in der Datei "validation.log", welche Objekte immer noch ungültig sind.')
-			return False
-	sanis_import.close_log()
 
-	# Prepare import configs and data. Will only be done if everything is in tune.
-	if not sanis_import.create_config([SISOPI_CONFIG, SANIS_CONFIG], temp_config):
-		return False
-
-	# extract_school_data writes CSV files for each configured role, and collects
-	# the commands to be executed in an internal variable in SanisImport.
 	print('Schreibe CSV Dateien für den Import...')
-	for school, sanis_id in schools.items():
-		if not sanis_import.extract_school_data(school, sanis_id):
-			print('')
-			print('Die extrahierten Daten sind nicht korrekt bzw. vollständig.')
-			print('Bitte starten Sie keinen Import mit diesen Daten.')
+
+	# Big switch: prepare per-school CSVs and configs only if SiSoPi is set
+	if sisopi:
+
+		# Prepare import configs and data. Will only be done if everything is in tune.
+		if not sanis_import.create_config([SISOPI_CONFIG, SANIS_CONFIG], temp_config):
 			return False
 
-	# Now: print the commands out.
+		# extract_school_data writes CSV files for each configured role, and collects
+		# the commands to be executed in an internal variable in SanisImport.
+		for school, sanis_id in schools.items():
+			if not sanis_import.extract_school_data(school, sanis_id):
+				print('')
+				print('Die extrahierten Daten sind nicht korrekt bzw. vollständig.')
+				print('Bitte starten Sie keinen Import mit diesen Daten.')
+				return False
+
+	else:
+		# one output file for each role. all schools in one file.
+		for role in Codes.valid_user_roles().keys():
+			if not sanis_import.print_collected_csv(role, SANIS_CONFIG):
+				return False
+
+	# Now: print the commands out. Does not depend on SiSoPi.
 	if not sanis_import.write_command_script(script_name):
 		return False
 
@@ -181,28 +182,27 @@ def usage():
 	print('Argument kann sein:')
 	print('  -h / --help       Gib diesen Hilfetext aus und verarbeite keine Daten')
 	print('  -n / --dry-run    Erzeuge alle Daten, aber nur für einen Import-Testlauf')
+	print('  -s / --sisopi     Erzeuge Importdateien für jede einzelne Schule')
 	print('  (kein Argument)   Erzeuge alle Daten für den produktiven Import.')
 
 
 if __name__ == '__main__':
 
 	dry_run = False
+	sisopi = False
 
-	if len(sys.argv) > 2:
-		print('FEHLER: Zu viele Kommandozeilen-Argumente.')
-		usage()
-		sys.exit(1)
-
-	if len(sys.argv) == 2:
-		if sys.argv[1] in ('-h', '--help'):
+	for arg in sys.argv[1:]:
+		if arg in ('-h', '--help'):
 			usage()
 			sys.exit(0)
-		if sys.argv[1] in ('-n', '--dry-run'):
+		elif arg in ('-s', '--sisopi'):
+			sisopi = True
+		elif arg in ('-n', '--dry-run'):
 			dry_run = True
 		else:
 			print('FEHLER: Ungültiges Kommandozeilen-Argument.')
 			usage()
 			sys.exit(1)
 
-	if not main(dry_run=dry_run):
+	if not main(dry_run=dry_run, sisopi=sisopi):
 		print_doc_hint()

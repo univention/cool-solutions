@@ -6,6 +6,8 @@
 			"Familienname":	"lastname",
 			"Geburtstag":	"birthday",
 			"Klassen":		"school_classes"
+			"Schule":		"school",
+			"Schulen":		"schools"
 		}
 	},
 	"scheme": {

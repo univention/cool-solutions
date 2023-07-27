@@ -331,12 +331,9 @@ class iterStore:
 			looping is in progress, so we don't have to care for synchronization or multithreading.
 		"""
 
-		print('Store [%s] removing key [%s]...' % (self.klass.__name__, key))
-
 		# only if key exists
 		if key in self.keyidx:
 			recno = self.keyidx.pop(key)
-			print('  recno = %d' % recno)
 			if len(self.data):
 				self.data.pop(recno)
 			if self.fname:
