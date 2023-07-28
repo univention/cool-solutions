@@ -2,7 +2,7 @@ Source: univention-sanis
 Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
-Build-Depends: debhelper (>= 9),
+Build-Depends: debhelper-compat (= 12),
  ucslint,
  dh-python,
  univention-config-dev

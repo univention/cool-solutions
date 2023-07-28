@@ -34,6 +34,50 @@
 # <https://www.gnu.org/licenses/>.
 
 
+class Codes():
+	""" We make an extra object class that holds the enumerations of valid object types,
+		as they ar known in SANIS (mostly german). We do this so we can use (import) this
+		class in all other sources, just to be consistent across the whole process.
+	"""
+
+	@classmethod
+	def valid_user_roles(self):
+		""" return the (SANIS) role names and the mappings to ucs@school roles. """
+
+		return({
+			'Lehr':		'teacher',
+			'Lern':		'student',
+		})
+
+	@classmethod
+	def roles_requiring_groups(self):
+		""" Returns an array of (Sanis) roles that can only be imported if the given user
+			is at least member of one group.
+		"""
+
+		return([
+			'Lern',
+		])
+
+	@classmethod
+	def valid_group_types(self):
+		""" This enumerates the (SANIS) group types we have to process as classes.
+			Any other groups / group assignments have to be ignored.
+		"""
+
+		return([
+			'Klasse',
+		])
+
+	@classmethod
+	def valid_org_types(self):
+		""" Return the organization types that we have to process. """
+
+		return([
+			'Schule',
+		])
+
+
 class SanisObject():
 	""" Base class for all SANIS objects. These objects are read from the SANIS API, and converted
 		(mapped) from JSON into an internal representation that will only hold the attributes
@@ -80,7 +124,7 @@ class SanisObject():
 		"""
 
 		# Generic check: we do not accept objects whose key property is empty.
-		keyarg = self._attribs.keys().__iter__().__next__()
+		keyarg = next(iter(self._attribs))
 		jsonkey = self._attribs[keyarg]
 		if not self.extract_value(obj, jsonkey):
 			return False
@@ -104,9 +148,28 @@ class SanisObject():
 				else:
 					value = tmp_obj[keys[0]]
 				keys.pop(0)
-		except BaseException:
+		except Exception:
 			pass
 		return value
+
+	@classmethod
+	def replace_value(self, obj, key, value):
+		""" Correct the to-be-processed input data. Key must be one that was already resolved
+			by extract_value(). (using the same algorithm here, and each failure shall be
+			silently ignored.)
+		"""
+
+		keys = key.split('.')
+		try:
+			tmp_obj = obj
+			while len(keys):
+				if len(keys) > 1:
+					tmp_obj = tmp_obj[keys[0]]
+				else:
+					tmp_obj[keys[0]] = value
+				keys.pop(0)
+		except Exception:
+			pass
 
 	@classmethod
 	def bless(self, data):
@@ -163,18 +226,18 @@ class Organisation(SanisObject):
 		'kuerzel':			'kuerzel',
 	}
 
-	@classmethod
-	def validate_object(self, obj):
-
-		if not super().validate_object(obj):
-			return False
-
-		# ignore organizations that are not schools.
-		# WHY CAN'T I LOOK AT THE 'codelisten' TO SEE WHAT IS VALID HERE?!?
-		if self.extract_value(obj, 'typ') != 'Schule':
-			return False
-
-		return True
+#	@classmethod
+#	def validate_object(self, obj):
+#
+#		if not super().validate_object(obj):
+#			return False
+#
+#		# ignore organizations that are not schools.
+#		# WHY CAN'T I LOOK AT THE 'codelisten' TO SEE WHAT IS VALID HERE?!?
+#		if self.extract_value(obj, 'typ') not in Codes.valid_org_types():
+#			return False
+#
+#		return True
 
 
 class Kontext(SanisObject):
@@ -193,6 +256,23 @@ class Kontext(SanisObject):
 		'status':		'personenkontexte.personenstatus',
 		'person_id':	'person.id',
 	}
+
+	@classmethod
+	def validate_object(self, obj):
+		""" The Sanis frontend strictly does not forbid conflicting roles between
+			the context's role and the role(s) in group memberships. As we now regard
+			the 'basisrolle' (this one in the context) as the relevant one to decide the
+			user's role (in the u@s context) we will strictly discard contexts that do
+			not carry one of the roles we would accept as an user's role.
+		"""
+
+		if not super().validate_object(obj):
+			return False
+
+		if self.extract_value(obj, 'personenkontexte.rolle') not in Codes.valid_user_roles().keys():
+			return False
+
+		return True
 
 
 class Klassen(SanisObject):
@@ -215,7 +295,7 @@ class Klassen(SanisObject):
 
 		# ignore groups that are not classes.
 		# WHY CAN'T I LOOK AT THE 'codelisten' TO SEE WHAT IS VALID HERE?!?
-		if self.extract_value(obj, 'gruppe.typ') != 'Klasse':
+		if self.extract_value(obj, 'gruppe.typ') not in Codes.valid_group_types():
 			return False
 
 		return True
@@ -233,6 +313,7 @@ class Mitglieder(SanisObject):
 		'ktid':				'gruppenzugehoerigkeiten.ktid',			# context ID: this is the link to the user
 		'von':				'gruppenzugehoerigkeiten.von',
 		'bis':				'gruppenzugehoerigkeiten.bis',
+		'rolle':			'gruppenzugehoerigkeiten.rollen',		# overrides the 'Basisrolle' of 'Personenkontext'
 		# some redundant group properties: save us some recurson cycles
 		# and help debugging selection criteria
 		'group_name':		'gruppe.bezeichnung',
@@ -251,8 +332,27 @@ class Mitglieder(SanisObject):
 
 		# ignore group memberships which don't relate to classes.
 		# WHY CAN'T I LOOK AT THE 'codelisten' TO SEE WHAT IS VALID HERE?!?
-		if self.extract_value(obj, 'gruppe.typ') != 'Klasse':
+		if self.extract_value(obj, 'gruppe.typ') not in Codes.valid_group_types():
 			return False
+
+		# Roles are now processed additively: the role from the context is simply added
+		# to the roles stemming from group memberships. This means: here we can (silently!)
+		# refuse roles that aren't relevant to us, and any remaining double roles have to
+		# be processed at the aggregate level.
+
+		# STEP #1: filter out roles that we're not about to process
+		myroles = [x for x in self.extract_value(obj, 'gruppenzugehoerigkeiten.rollen') if x in Codes.valid_user_roles().keys()]
+
+		# STEP #2: reject this membership if there are no roles remaining. (this membership is not relevant to us)
+		if len(myroles) == 0:
+			return False
+
+		# STEP #3: replace the input array by a single string. Note that we propagate memberships with
+		#	multiple roles: it is deferred to the 'validate' function of the sanisImport class to
+		#	recognise and log this condition.
+		# NOTE this may seem convoluted (that we don't set roleS to an array) but we must adhere to
+		#	the strict rule that elements of the store are strings an nothing else.
+		self.replace_value(obj, 'gruppenzugehoerigkeiten.rollen', ','.join(myroles))
 
 		# FIXME do we have to honor 'von' and 'bis' validities, and if so, how?
 

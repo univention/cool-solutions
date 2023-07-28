@@ -2,22 +2,22 @@
 Description[en] = URL to the SANIS API entry point.
 Description[de] = URL des Eintrittspunkts für die SANIS API.
 Categories = ucsschool-import
-Type = string
+Type = str
 
 [sanis_import/url/token]
 Description[en] = URL to the entry point to acquire an access token for the SANIS API.
 Description[de] = URL zum Eintrittspunkt, an dem man ein Zugriffstoken für die SANIS API erhält.
 Categories = ucsschool-import
-Type = string
+Type = str
 
 [sanis_import/school_name_attribute]
 Description[en] = Name of the SANIS organization attribute that is used to match UCS@school school names.
 Description[de] = Name des Attributes der SANIS Organisation, das benutzt wird, um die Schulen aus UCS@school zuzuordnen.
 Categories = ucsschool-import
-Type = string
+Type = str
 
 [sanis_import/school/.*]
 Description[en] = Association of a school in UCS@school to a SANIS organization.
 Description[de] = Zuordnung einer Schule aus UCS@school zu einer SANIS Organisation.
 Categories = ucsschool-import
-Type = string
+Type = str
