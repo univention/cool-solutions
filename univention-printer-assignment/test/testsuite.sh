@@ -117,7 +117,7 @@ create_default_setup () {
 	create_host "${PREFIX}-Win04" "cn=${PREFIX}-Prn2,cn=printers,$ldap_base" "cn=${PREFIX}-Prn1,cn=printers,$ldap_base"
 	check_changes "Win04 angelegt"
 	create_host "${PREFIX}-Win05"
-	check_changes "Win01 angelegt"
+	check_changes "Win05 angelegt"
 
 	# members of Grp1
 	create_host "${PREFIX}-Win11" "" "" "cn=${PREFIX}-Grp3,cn=groups,$ldap_base"
@@ -151,7 +151,7 @@ cleanup () {
 	for i in 1 2 3 4 ; do
 		udm groups/group remove --dn "cn=${PREFIX}-Grp${i},cn=groups,$ldap_base"
 	done
-	for i in 01 02 03 04 11 12 13 14 ; do
+	for i in 01 02 03 04 05 11 12 13 14 ; do
 		udm computers/windows remove --dn "cn=${PREFIX}-Win${i},cn=computers,$ldap_base"
 	done
 }
