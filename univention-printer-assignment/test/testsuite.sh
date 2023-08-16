@@ -117,7 +117,7 @@ create_default_setup () {
 	create_host "${PREFIX}-Win04" "cn=${PREFIX}-Prn2,cn=printers,$ldap_base" "cn=${PREFIX}-Prn1,cn=printers,$ldap_base"
 	check_changes "Win04 angelegt"
 	create_host "${PREFIX}-Win05"
-	check_changes "Win01 angelegt"
+	check_changes "Win05 angelegt"
 
 	# members of Grp1
 	create_host "${PREFIX}-Win11" "" "" "cn=${PREFIX}-Grp3,cn=groups,$ldap_base"
@@ -133,6 +133,17 @@ create_default_setup () {
 	check_changes "Grp4 angelegt ==> Win01 ==> Prn5 5=def"
 }
 
+test_special_cases () {
+	# planio issue 43025 / gitlab issue 18 --> write thousand objects in the backlog
+	for i in {1000..2000}; do
+		echo -e "cn=win-dummy-${i},cn=computers,$ldap_base\ncn=Windows Hosts,cn=groups,$ldap_base" >> /var/lib/univention-printer-assignment/backlog
+	done
+	# run
+	/usr/share/univention-printer-assignment/update-univention-printer-assignment -d -f /var/lib/univention-printer-assignment/backlog
+	# cleanup
+	: > /var/lib/univention-printer-assignment/backlog
+}
+
 cleanup () {
 	for i in 1 2 3 4 5 ; do
 		udm shares/printer remove --dn "cn=${PREFIX}-Prn${i},cn=printers,$ldap_base"
@@ -140,7 +151,7 @@ cleanup () {
 	for i in 1 2 3 4 ; do
 		udm groups/group remove --dn "cn=${PREFIX}-Grp${i},cn=groups,$ldap_base"
 	done
-	for i in 01 02 03 04 11 12 13 14 ; do
+	for i in 01 02 03 04 05 11 12 13 14 ; do
 		udm computers/windows remove --dn "cn=${PREFIX}-Win${i},cn=computers,$ldap_base"
 	done
 }
@@ -148,3 +159,4 @@ cleanup () {
 trap cleanup EXIT
 
 create_default_setup
+#test_special_cases

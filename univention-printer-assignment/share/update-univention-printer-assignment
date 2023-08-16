@@ -368,7 +368,7 @@ def process_host(lo, dn, target_dirs):
 	for target_dir in target_dirs:
 		target_fn = os.path.join(target_dir, '%s.vbs' % cache_hosts[dn].get('cn', [b'UNKNOWN'])[0].decode("utf-8"))
 		# create and write temporary file
-		temp_fn = tempfile.mkstemp(dir=target_dir)[1]
+		temp_fd, temp_fn = tempfile.mkstemp(dir=target_dir)
 		log_debug('Writing temporary file %s' % temp_fn)
 		with open(temp_fn, 'w') as fd:
 			fd.write(content)
@@ -377,6 +377,8 @@ def process_host(lo, dn, target_dirs):
 		# replace old file
 		log_debug('Replacing file %s' % target_fn)
 		shutil.move(temp_fn, target_fn.lower())
+		# close temporary file
+		os.close(temp_fd)
 
 
 if __name__ == '__main__':

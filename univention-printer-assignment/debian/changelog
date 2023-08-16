@@ -1,3 +1,9 @@
+univention-printer-assignment (9.0.0-10) unstable; urgency=low
+
+  * Issue #43025: Fixed for large environments with thousands of rows in the backlog file
+
+ -- Andreas Peichert <peichert@univention.de>  Wed, 09 Aug 2023 10:41:12 +0200
+
 univention-printer-assignment (9.0.0-9) unstable; urgency=low
 
   * Fixed pep8 issues 
