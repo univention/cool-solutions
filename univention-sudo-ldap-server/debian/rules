@@ -3,7 +3,7 @@
 # UCS - sudo-ldap integration - domain integration
 #  rules file for the debian package
 #
-# Copyright 2013-2022 Univention GmbH
+# Copyright 2013-2023 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -30,7 +30,7 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-PO_FILES := $(shell find modules -name '*.po')
+PO_FILES := $(shell find share/univention-sudo-ldap-server/ -name '*.po')
 MO_FILES := $(PO_FILES:%.po=%.mo)
 
 PACKAGE_NAME = univention-sudo-ldap
@@ -47,15 +47,15 @@ override_dh_auto_install:
 	univention-install-config-registry
 
 	@set -e;\
-	for i in `find modules/univention/admin/handlers/ -name "*.png" -o -name "*.gif"`; do\
-		o=${D}/usr/share/univention-webui-style/icon/$${i#modules/univention/admin/handlers/};\
+	for i in `find share/univention-sudo-ldap-server/ -name "*.png" -o -name "*.gif"`; do\
+		o=${D}/usr/share/univention-webui-style/icon/$${i#share/univention-sudo-ldap-server/};\
 		install -d "`dirname "$$o"`";\
 		install -m 644 "$$i" "$$o";\
 	done
 	@set -e;\
 	for i in $(MO_FILES); do\
 		lang=`basename "$$i" .mo`;\
-		domain=`dirname "$$i" | sed 's,^modules/,,;s,/,-,g'`;\
+		domain=`dirname "$$i" | sed 's,^share/,,;s,/,-,g'`;\
 		o=${D}/usr/share/locale/$$lang/LC_MESSAGES/$$domain.mo;\
 		install -d "`dirname "$$o"`";\
 		install -m 644 "$$i" "$$o";\

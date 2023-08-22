@@ -2,10 +2,11 @@ Source: univention-sudo-ldap-server
 Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
-Build-Depends: debhelper (>= 7.0.50~),
+Build-Depends: debhelper-compat (= 12),
  univention-config-dev,
  ucslint
-Standards-Version: 3.7.2
+Standards-Version: 3.9.8
+Homepage: http://www.univention.de/
 
 Package: univention-sudo-ldap
 Architecture: all

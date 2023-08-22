@@ -3,7 +3,7 @@
 # UCS - sudo-ldap integration - domain integration
 #  join script
 #
-# Copyright 2010-2022 Univention GmbH
+# Copyright 2010-2023 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -33,6 +33,7 @@
 VERSION="1"
 
 . /usr/share/univention-lib/all.sh
+. /usr/share/univention-lib/ldap.sh
 . /usr/share/univention-join/joinscripthelper.lib
 joinscript_init
 
@@ -42,6 +43,9 @@ univention-directory-manager container/cn create "$@" --ignore_exists \
 	--position="cn=univention,$ldap_base" \
 	--set name="sudo-ldap" \
 	--set description="sudo-ldap rules" || die
+
+ucs_registerLDAPExtension "$@" --schema /usr/share/univention-sudo-ldap/sudo-ldap.schema
+ucs_registerLDAPExtension "$@" --udm_module /usr/share/univention-sudo-ldap/sudo-rule.py --ucsversionstart "5.0-4"
 
 # mark current joinscript as "run successfully"
 joinscript_save_current_version

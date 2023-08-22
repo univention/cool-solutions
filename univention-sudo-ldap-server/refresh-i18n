@@ -3,7 +3,7 @@
 # Univention I18N updater
 #  Refresh gettext entries
 #
-# Copyright 2010-2022 Univention GmbH
+# Copyright 2010-2023 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -31,9 +31,9 @@
 # <http://www.gnu.org/licenses/>.
 
 po=de
-i18nfile=./modules/univention/admin/handlers/sudo/"$po"
+i18nfile=./share/univention-sudo-ldap-server/"$po"
 
-xgettext -L Python -o "messages.pot" modules/univention/admin/handlers/sudo/*.py
+xgettext -L Python -o "messages.pot" share/univention-sudo-ldap-server/*.py
 
 if grep -qs "Content-Type: text/plain; charset=CHARSET" "messages.pot"
 then
