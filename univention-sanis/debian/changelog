@@ -1,3 +1,9 @@
+univention-sanis (1.0.3) unstable; urgency=low
+
+  * fix expected separator in user_import_sanis_example.json
+
+ -- Andreas Peichert <peichert@univention.de>  Tue, 22 Aug 2023 11:22:22 +0200
+
 univention-sanis (1.0.2) unstable; urgency=medium
 
   * Added validation against all role assignments that the import cannot
