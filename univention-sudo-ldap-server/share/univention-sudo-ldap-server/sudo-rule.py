@@ -33,7 +33,7 @@ import univention.admin.filter
 import univention.admin.handlers
 import univention.admin.syntax
 
-translation = univention.admin.localization.translation('univention.admin.handlers.sudo')
+translation = univention.admin.localization.translation('univention.admin.handlers.sudo.rule')
 _ = translation.translate
 
 module = 'sudo/rule'

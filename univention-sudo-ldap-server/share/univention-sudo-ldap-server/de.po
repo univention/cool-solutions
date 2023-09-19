@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: univention-sudo-ldap-server 1.0.0\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-07-09 10:09+0200\n"
+"Report-Msgid-Bugs-To: packages@univention.de\n"
+"POT-Creation-Date: 2023-09-19 10:52+0200\n"
 "PO-Revision-Date: 2011-02-18 11:16+0100\n"
 "Last-Translator: Janek Walkenhorst <walkenhorst@univention.de>\n"
 "Language-Team: German <de@li.org>\n"
@@ -15,70 +15,70 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: modules/univention/admin/handlers/sudo/rule.py:42
-msgid "sudo rule"
-msgstr "sudo Regel"
-
-#: modules/univention/admin/handlers/sudo/rule.py:43
-msgid "Rules to control sudo-ldap behaviour"
-msgstr "Regel um das sudo-ldap Verhalten zu steuern"
-
-#: modules/univention/admin/handlers/sudo/rule.py:51
-msgid "Name"
-msgstr "Name"
-
-#: modules/univention/admin/handlers/sudo/rule.py:52
-msgid "Unique name for the rule"
-msgstr "Eindeutiger name für die Regel"
-
-#: modules/univention/admin/handlers/sudo/rule.py:61
-msgid "Description"
-msgstr "Beschreibung"
-
-#: modules/univention/admin/handlers/sudo/rule.py:62
-msgid "Description of the rule"
-msgstr "Beschreibung der Regel"
-
-#: modules/univention/admin/handlers/sudo/rule.py:71
-msgid "Users"
-msgstr "Benutzer"
-
-#: modules/univention/admin/handlers/sudo/rule.py:72
-msgid "Users and groups this rule is for"
-msgstr "Benutzer und Gruppen für diese Regel gilt"
-
-#: modules/univention/admin/handlers/sudo/rule.py:81
-msgid "Hosts"
-msgstr "Rechner"
-
-#: modules/univention/admin/handlers/sudo/rule.py:82
-msgid "Hostnames this rule is for"
-msgstr "Rechnernamen für die diese Regel gilt"
-
-#: modules/univention/admin/handlers/sudo/rule.py:91
-msgid "Command"
-msgstr "Befehl"
-
-#: modules/univention/admin/handlers/sudo/rule.py:92
-msgid "Commands allowed/refused by this rule"
-msgstr "Befehle die diese Regel erlaubt/verbietet"
-
-#: modules/univention/admin/handlers/sudo/rule.py:112
-msgid "General"
-msgstr "Allgemein"
-
-#: modules/univention/admin/handlers/sudo/rule.py:112
-msgid "Basic Settings"
-msgstr "Basis-Einstellungen"
-
-#: modules/univention/admin/handlers/sudo/rule.py:113
-msgid "Sudo Rule"
-msgstr "Sudo-Regel"
-
-#: modules/univention/admin/handlers/sudo/rule.py:116
+#: share/univention-sudo-ldap-server/sudo-rule.py:94
 msgid "Affected users"
 msgstr "Betroffene Benutzer"
 
-#: modules/univention/admin/handlers/sudo/rule.py:120
+#: share/univention-sudo-ldap-server/sudo-rule.py:98
 msgid "Allowed commands"
 msgstr "Erlaubte Befehle"
+
+#: share/univention-sudo-ldap-server/sudo-rule.py:90
+msgid "Basic Settings"
+msgstr "Basis-Einstellungen"
+
+#: share/univention-sudo-ldap-server/sudo-rule.py:81
+msgid "Command"
+msgstr "Befehl"
+
+#: share/univention-sudo-ldap-server/sudo-rule.py:82
+msgid "Commands allowed/refused by this rule"
+msgstr "Befehle die diese Regel erlaubt/verbietet"
+
+#: share/univention-sudo-ldap-server/sudo-rule.py:62
+msgid "Description"
+msgstr "Beschreibung"
+
+#: share/univention-sudo-ldap-server/sudo-rule.py:63
+msgid "Description of the rule"
+msgstr "Beschreibung der Regel"
+
+#: share/univention-sudo-ldap-server/sudo-rule.py:90
+msgid "General"
+msgstr "Allgemein"
+
+#: share/univention-sudo-ldap-server/sudo-rule.py:75
+msgid "Hostnames this rule is for"
+msgstr "Rechnernamen für die diese Regel gilt"
+
+#: share/univention-sudo-ldap-server/sudo-rule.py:74
+msgid "Hosts"
+msgstr "Rechner"
+
+#: share/univention-sudo-ldap-server/sudo-rule.py:55
+msgid "Name"
+msgstr "Name"
+
+#: share/univention-sudo-ldap-server/sudo-rule.py:43
+msgid "Rules to control sudo-ldap behaviour"
+msgstr "Regel um das sudo-ldap Verhalten zu steuern"
+
+#: share/univention-sudo-ldap-server/sudo-rule.py:91
+msgid "Sudo Rule"
+msgstr "Sudo-Regel"
+
+#: share/univention-sudo-ldap-server/sudo-rule.py:56
+msgid "Unique name for the rule"
+msgstr "Eindeutiger name für die Regel"
+
+#: share/univention-sudo-ldap-server/sudo-rule.py:67
+msgid "Users"
+msgstr "Benutzer"
+
+#: share/univention-sudo-ldap-server/sudo-rule.py:68
+msgid "Users and groups this rule is for"
+msgstr "Benutzer und Gruppen für diese Regel gilt"
+
+#: share/univention-sudo-ldap-server/sudo-rule.py:42
+msgid "sudo rule"
+msgstr "sudo Regel"

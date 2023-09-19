@@ -1,3 +1,4 @@
 share/univention-sudo-ldap-server/sudo-rule.py usr/share/univention-sudo-ldap/
 share/univention-sudo-ldap-server/de.po usr/share/univention-sudo-ldap/
+share/univention-sudo-ldap-server/sudo-ldap.schema usr/share/univention-sudo-ldap/
 76univention-sudo-ldap.inst usr/lib/univention-install/

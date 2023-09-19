@@ -1,4 +1,0 @@
-Type: subfile
-Multifile: etc/ldap/slapd.conf
-Subfile: share/univention-sudo-ldap-server/sudo-ldap.schema
-Variables: ldap/server/type

@@ -1,0 +1,10 @@
+[
+	{
+		"input_files": [
+			"share/univention-sudo-ldap-server/.*.py"
+		],
+		"po_subdir": "share/univention-sudo-ldap-server/",
+		"target_type": "mo",
+		"destination": "usr/share/univention-sudo-ldap/de.mo"
+	}
+]

@@ -30,6 +30,8 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
+## joinscript api: bindpwdfile
+
 VERSION="1"
 
 . /usr/share/univention-lib/all.sh
@@ -44,8 +46,9 @@ univention-directory-manager container/cn create "$@" --ignore_exists \
 	--set name="sudo-ldap" \
 	--set description="sudo-ldap rules" || die
 
-ucs_registerLDAPExtension "$@" --schema /usr/share/univention-sudo-ldap/sudo-ldap.schema
-ucs_registerLDAPExtension "$@" --udm_module /usr/share/univention-sudo-ldap/sudo-rule.py --ucsversionstart "5.0-4"
+ucs_registerLDAPExtension "$@" --ucsversionstart 4.4-0 --ucsversionend 5.99-0 --schema /usr/share/univention-sudo-ldap/sudo-ldap.schema
+ucs_registerLDAPExtension "$@" --ucsversionstart 4.4-0 --ucsversionend 5.99-0 --udm_module /usr/share/univention-sudo-ldap/sudo-rule.py \
+	--messagecatalog /usr/share/univention-sudo-ldap/de.mo || die
 
 # mark current joinscript as "run successfully"
 joinscript_save_current_version
