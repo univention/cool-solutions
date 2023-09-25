@@ -119,12 +119,9 @@ def handler(dn: str, new: "dict[str, list[bytes]]", old: "dict[str, list[bytes]]
                             new["uid"][0].decode("utf-8"),
                         ),
                     )
-            elif (ucr["hostname"].decode("UTF-8") in [ucr["hostname"]])[0].decode("UTF-8"):
+            elif (ucr["hostname"].decode("UTF-8") in [ucr["hostname"]])[0]:
                 if new.get("uid"):
-                    path = new.get("automountInformation", [ucr["hostname"]])[0]
-                    if isinstance(path, str) is False:
-                        path = path.decode("UTF-8")
-                    path = path.split(":")[1]
+                    path = new.get("automountInformation", [ucr["hostname"].encode("utf8")])[0].decode("UTF-8").split(":")[1]
                     listener.run(PATH_MKDIR, [PATH_MKDIR, path])
                     listener.run(
                         PATH_CHOWN,
@@ -143,9 +140,6 @@ def handler(dn: str, new: "dict[str, list[bytes]]", old: "dict[str, list[bytes]]
                     )
             else:
                 # debuglevel changes temporary from info to warn
-                # set host var for formatted string
-                host = new.get("automountInformation", [ucr["hostname"].encode("utf-8")])[0].decode('UTF-8')
-                host.split(" ", 1)[0].rsplit(":", 1)[1]
                 ud.debug(
                     ud.LISTENER,
                     ud.WARN,
@@ -154,6 +148,8 @@ def handler(dn: str, new: "dict[str, list[bytes]]", old: "dict[str, list[bytes]]
                         name,
                         new["homeDirectory"][0].decode("utf-8"),
                         new["uid"][0].decode("utf-8"),
-                        host,
+                        new.get("automountInformation", [ucr["hostname"].encode("utf-8")])[0].decode('UTF-8')
+                        .split(" ", 1)[0]
+                        .rsplit(":", 1)[1]
                     ),
                 )
