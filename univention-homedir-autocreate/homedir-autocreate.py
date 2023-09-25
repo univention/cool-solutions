@@ -148,8 +148,6 @@ def handler(dn: str, new: "dict[str, list[bytes]]", old: "dict[str, list[bytes]]
                         name,
                         new["homeDirectory"][0].decode("utf-8"),
                         new["uid"][0].decode("utf-8"),
-                        new.get("automountInformation", [ucr["hostname"].encode("utf-8")])[0].decode('UTF-8')
-                        .split(" ", 1)[0]
-                        .rsplit(":", 1)[1]
+                        new.get("automountInformation", [ucr["hostname"].encode("utf-8")])[0].decode('UTF-8').split(" ", 1)[0].rsplit(":", 1)[1]
                     ),
                 )
