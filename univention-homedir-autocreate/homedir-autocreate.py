@@ -144,10 +144,8 @@ def handler(dn: str, new: "dict[str, list[bytes]]", old: "dict[str, list[bytes]]
             else:
                 # debuglevel changes temporary from info to warn
                 # set host var for formatted string
-                host = new.get("automountInformation", [ucr["hostname"]])[0]
-                if isinstance(host, str) is False:
-                    host.decode("UTF-8")
-                host.split(" ")[0].split(":")[1]
+                host = new.get("automountInformation", [ucr["hostname"].encode("utf-8")])[0].decode('UTF-8')
+                host.split(" ", 1)[0].rsplit(":", 1)[1]
                 ud.debug(
                     ud.LISTENER,
                     ud.WARN,
