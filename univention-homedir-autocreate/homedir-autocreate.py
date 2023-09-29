@@ -31,8 +31,6 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
-
 import listener
 import os
 import univention.debug as ud
@@ -104,11 +102,10 @@ def handler(dn: str, new: "dict[str, list[bytes]]", old: "dict[str, list[bytes]]
                             new["homeDirectory"][0].decode("utf-8"),
                         ),
                     )
-                    with SetUID():
-                        listener.run(
-                            PATH_SU,
-                            [PATH_SU, "-c", "echo", "-", new["uid"][0].decode("utf-8")],
-                        )
+                    listener.run(
+                        PATH_SU,
+                        [PATH_SU, "-c", "echo", "-", new["uid"][0].decode("utf-8")],
+                    )
                     ud.debug(
                         ud.LISTENER,
                         ud.WARN,
@@ -119,7 +116,7 @@ def handler(dn: str, new: "dict[str, list[bytes]]", old: "dict[str, list[bytes]]
                             new["uid"][0].decode("utf-8"),
                         ),
                     )
-            elif (ucr["hostname"].decode("UTF-8") in [ucr["hostname"]])[0]:
+            elif (new.get("automountInformation")[0].decode("UTF-8") in ucr["hostname"]):
                 if new.get("uid"):
                     path = new.get("automountInformation", [ucr["hostname"].encode("utf8")])[0].decode("UTF-8").split(":")[1]
                     listener.run(PATH_MKDIR, [PATH_MKDIR, path])
@@ -148,6 +145,8 @@ def handler(dn: str, new: "dict[str, list[bytes]]", old: "dict[str, list[bytes]]
                         name,
                         new["homeDirectory"][0].decode("utf-8"),
                         new["uid"][0].decode("utf-8"),
-                        new.get("automountInformation", [ucr["hostname"].encode("utf-8")])[0].decode('UTF-8').split(" ", 1)[0].rsplit(":", 1)[1]
+                        new.get("automountInformation", [ucr["hostname"].encode("utf-8")])[0].decode('UTF-8')
+                        .split(" ", 1)[0]
+                        .rsplit(":", 1)[1]
                     ),
                 )
