@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 #
 # Univention Nextcloud Samba share configuration
@@ -50,8 +50,8 @@ else:
 	occ_path = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ"
 
 def isDomainUsersCn(dn):
-	domainUsersRegex = r'^cn=Domain\ Users\ [A-Za-z0-9_]*'
-	domainUsersOuRegex = r'^cn=Domain\ Users\ '
+	domainUsersRegex = '^cn=Domain\ Users\ [A-Za-z0-9_]*'
+	domainUsersOuRegex = '^cn=Domain\ Users\ '
 	domainUsersMatch = re.match(domainUsersRegex, dn)
 	return domainUsersMatch
 
@@ -86,11 +86,11 @@ def getShareObj(lo, cn):
 	return shareObj[0][1]
 
 def getShareHost(share):
-	shareHost = b''.join(share['univentionShareHost']).decode('UTF-8')
+	shareHost = ''.join(share['univentionShareHost'])
 	return shareHost
 
 def getShareSambaName(share):
-	shareSambaName = b''.join(share['univentionShareSambaName']).decode('UTF-8')
+	shareSambaName = ''.join(share['univentionShareSambaName'])
 	return shareSambaName
 
 def getBase():

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 #
 # Univention Nextcloud Samba share configuration
@@ -66,8 +66,8 @@ for shareCn in commonShares:
         sys.exit(1)
 
     if share:
-        shareHost = b''.join(share[0][1]['univentionShareHost']).decode('UTF-8')
-        shareSambaName = b''.join(share[0][1]['univentionShareSambaName']).decode('UTF-8')
+        shareHost = ''.join(share[0][1]['univentionShareHost'])
+        shareSambaName = ''.join(share[0][1]['univentionShareSambaName'])
         mountName=shareSambaName
         mountId = common.getMountId(mountName)
         if not mountId:

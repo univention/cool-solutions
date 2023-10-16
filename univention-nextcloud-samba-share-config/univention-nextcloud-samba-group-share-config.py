@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 #
 # Univention Nextcloud Samba share configuration
@@ -73,7 +73,7 @@ def handler(dn, new, old, command=''):
 
 	if domainUsersMatch:
 		shareName = "Marktplatz"
-		domainUsersOuRegex = r'^cn=Domain\ Users\ '
+		domainUsersOuRegex = '^cn=Domain\ Users\ '
 		ou = re.sub(domainUsersOuRegex, '', domainUsersMatch.group())
 		mountName = "Marktplatz {}".format(ou)
 		base = common.getBase()
