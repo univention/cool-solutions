@@ -1,0 +1,174 @@
+#!/bin/sh
+#
+# Test module and script
+#
+# Copyright 2010-2023 Univention GmbH
+#
+# http://www.univention.de/
+#
+# All rights reserved.
+#
+# The source code of this program is made available
+# under the terms of the GNU Affero General Public License version 3
+# (GNU AGPL V3) as published by the Free Software Foundation.
+#
+# Binary versions of this program provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention and not subject to the GNU AGPL V3.
+#
+# In the case you use this program under the terms of the GNU AGPL V3,
+# the program is provided in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License with the Debian GNU/Linux or Univention distribution in file
+# /usr/share/common-licenses/AGPL-3; if not, see
+# <http://www.gnu.org/licenses/>.
+
+set -e
+set -u
+
+alias udm=univention-directory-manager
+
+position="cn=sudo-ldap,cn=univention,$(ucr get ldap/base)"
+
+udm sudo/rule create --position="$position" --set name=rule1 --set description='Beschreibungstext' --append users=Administrator --append users='%Domain Admins' --append hosts=ALL --append command=/bin/echo --append command='!/bin/*sh'
+univention-ldapsearch -xLLL cn=rule1
+
+dn=$(udm sudo/rule list --filter name=rule1 | sed -ne 's/^DN: //p')
+udm sudo/rule modify --dn "$dn" --append users=foobar --remove users=Administrator
+univention-ldapsearch -xLLL cn=rule1
+
+udm sudo/rule create --position="$position" --set name=rule2 --set description='Beschreibungstext' --append users=Administrator --append users='%Domain Admins' --append hosts=ALL --append command=/bin/echo --append command='!/bin/*sh'
+univention-ldapsearch -xLLL cn=rule2
+
+udm sudo/rule modify --dn "$dn" --set users=ALL
+univention-ldapsearch -xLLL cn=rule1
+
+udm sudo/rule remove --dn "$dn"
+udm sudo/rule remove --filter name=rule2
+
+LOGFILE=~/test-reports/univention-sudo-ldap-test.log
+
+. /usr/share/univention-lib/all.sh
+create_logfile_if_missing "${LOGFILE}" "root:adm" 640
+
+package1="univention-sudo-ldap"
+package2="univention-sudo-ldap-host"
+
+testuser1="coolsolutiontestuser1"
+testuser2="coolsolutiontestuser2"
+testuser3="coolsolutiontestuser3"
+testuser4="coolsolutiontestuser4"
+testuser5="coolsolutiontestuser5"
+password="univention"
+lastname="coolsolutiontester"
+
+#store stdout, it's redirected to the logfile later on
+exec 5>&1
+
+msg () {
+	echo "$(date): ${@}" | tee -a "${LOGFILE}" >&5
+}
+
+#check if package is installed
+check_package(){
+	msg "Test if package $1 is installed."
+    installed=$(dpkg -l $1|grep -w $1|wc -l)
+    if [ $installed -eq 1 ]
+    then
+        msg "OK: Package $1 is installed."
+    else
+        msg "FAIL: Package $1 is not installed correctly."
+		exit 1
+    fi
+}
+
+#create user method, example: create_user uid password lastname
+create_user (){
+	udm users/user create --ignore_exists\
+	--position $position\
+	--set username="$1"\
+	--set password="$2"\
+	--set lastname="$3"
+	check_entry "uid=$1"
+}
+
+#create sudo-rule method, example: create_rule rule_name rule_description users_for_rule command_for_sudo
+create_rule(){
+	udm sudo/rule create --ignore_exists\
+	--position="$position"\
+	--set name="$1"\
+	--set description="$2"\
+	--set hosts="$(hostname -f)"\
+	--append users="$3"\
+	--append command="$4"
+	check_entry "cn=$1"
+}
+
+#check if LDAP-entry exists
+check_entry(){
+	if [ $(univention-ldapsearch -xLLL "$1"|wc -l) -eq 0 ]
+	then
+		msg "FAIL: LDAP entry $1 could not be found."
+		exit 1
+	else
+		msg "OK: LDAP entry $1 created successfully."
+	fi
+}
+
+#check if user can use sudo-command
+check_command(){
+	msg "Check if $1 can use sudo-command."
+	if sudo -lU $1 | grep -q "apt-get"
+	then
+		msg "OK: $1 can use the sudo-command."
+	else
+		msg "FAIL: $1 can't use the sudo-command."
+		exit 1
+	fi
+}
+
+#check if needed packages are installed on system
+check_package $package1
+check_package $package2
+
+msg "Create test users."
+create_user "$testuser1" "$password" "$lastname"
+create_user "$testuser2" "$password" "$lastname"
+create_user "$testuser3" "$password" "$lastname"
+create_user "$testuser4" "$password" "$lastname"
+create_user "$testuser5" "$password" "$lastname"
+
+msg "Create test rule."
+create_rule "Package Management" "Package handling with apt-get" "$testuser1" "/usr/bin/apt-get"
+
+msg "Check if $testuser1 can use apt-get command."
+check_command "$testuser1"
+
+#modification of sudo-rule
+msg 'Change the "Package Management"-rule users to ALL.'
+dn=$(udm sudo/rule list --filter name="Package Management" | sed -ne 's/^DN: //p')
+udm sudo/rule modify --dn "$dn" --set users=ALL
+udm sudo/rule list --filter name="Package Management"| tee -a $LOGFILE >&5
+
+#test whether modification works
+msg 'Check modified "Package Management"-rule.'
+check_command "$testuser2"
+check_command "$testuser3"
+check_command "$testuser4"
+check_command "$testuser5"
+
+msg "Remove users and rule."
+udm sudo/rule remove --filter name="Package Management"
+udm users/user remove --filter username="$testuser1"
+udm users/user remove --filter username="$testuser2"
+udm users/user remove --filter username="$testuser3"
+udm users/user remove --filter username="$testuser4"
+udm users/user remove --filter username="$testuser5"
+
+echo "Success."
