@@ -1,3 +1,9 @@
+univention-sudo-ldap-host (4.0.0-1) unstable; urgency=low
+
+  * Build for UCS 5.0.  Issue #20
+
+ -- Irina Kolesnikova <irina.kolesnikova@univention.de>  Mon, 28 Aug 2023 12:45:29 +0200
+
 univention-sudo-ldap-host (3.0.0-1) unstable; urgency=medium
 
   * Build for UCS 4.0.  Issue #2040

@@ -1,3 +1,14 @@
+univention-sudo-ldap-server (4.0.0-1) unstable; urgency=low
+
+  * Added joinscript api bindpwdfile in join script
+  * Fixed Build-Depends entry
+  * Package univention-sudo-ldap-schema not nessesary
+  * sudo-ldap.schema
+  * has been moved to univention-sudo-ldap package.
+  * Build for UCS 5.0. Issue #20
+
+ -- Irina Kolesnikova <irina.kolesnikova@univention.de>  Mon, 28 Aug 2023 11:58:06 +0200
+
 univention-sudo-ldap-server (3.0.0-1) unstable; urgency=medium
 
   * Build for UCS 4.0.  Issue #2040
