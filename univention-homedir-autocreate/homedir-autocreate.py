@@ -31,13 +31,14 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-import listener
+import re
 import os
+from typing import List
+
+import listener
+
 import univention.debug as ud
 from univention.config_registry import ucr
-from typing import Dict
-from typing import List
-from listener import SetUID
 
 name = "homedir-autocreate"
 description = "Generate homedir on usercreation"
@@ -72,7 +73,7 @@ PATH_CHOWN = "/bin/chown"
 PATH_CHMOD = "/bin/chmod"
 
 
-def handler(dn: str, new: "dict[str, list[bytes]]", old: "dict[str, list[bytes]]") -> None:  
+def handler(dn: str, new: "dict[str, list[bytes]]", old: "dict[str, list[bytes]]") -> None:
     # create users homedir only on user creation
      if not old and new:
         ud.debug(
@@ -118,7 +119,8 @@ def handler(dn: str, new: "dict[str, list[bytes]]", old: "dict[str, list[bytes]]
                     )
             elif (new.get("automountInformation")[0].decode("UTF-8") in ucr["hostname"]):
                 if new.get("uid"):
-                    path = new.get("automountInformation", [ucr["hostname"].encode("utf8")])[0].decode("UTF-8").split(":")[1]
+                    automount_information = new.get("automountInformation", [ucr["hostname"].encode("utf8")])
+                    path = re.split(b' +', automount_information, 1)[1].split(b':', 1)[1].decode('UTF-8')
                     listener.run(PATH_MKDIR, [PATH_MKDIR, path])
                     listener.run(
                         PATH_CHOWN,
@@ -135,18 +137,3 @@ def handler(dn: str, new: "dict[str, list[bytes]]", old: "dict[str, list[bytes]]
                             new["uid"][0].decode("utf-8"),
                         ),
                     )
-            else:
-                # debuglevel changes temporary from info to warn
-                ud.debug(
-                    ud.LISTENER,
-                    ud.WARN,
-                    "%s: created home directory %s onfor user %s on host %s"
-                    % (
-                        name,
-                        new["homeDirectory"][0].decode("utf-8"),
-                        new["uid"][0].decode("utf-8"),
-                        new.get("automountInformation", [ucr["hostname"].encode("utf-8")])[0].decode('UTF-8')
-                        .split(" ", 1)[0]
-                        .rsplit(":", 1)[1]
-                    ),
-                )

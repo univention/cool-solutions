@@ -29,7 +29,7 @@
 
 #DEBHELPER#
 
-# restart directory listener due to new listener module
+# restart directory listener due to removed listener module
 deb-systemd-invoke restart univention-directory-listener
 
 exit 0
