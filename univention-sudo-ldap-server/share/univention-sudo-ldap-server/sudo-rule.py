@@ -1,7 +1,7 @@
 #!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 #
-# Copyright 2004-2022 Univention GmbH
+# Copyright 2004-2023 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -33,7 +33,7 @@ import univention.admin.filter
 import univention.admin.handlers
 import univention.admin.syntax
 
-translation = univention.admin.localization.translation('univention.admin.handlers.sudo')
+translation = univention.admin.localization.translation('univention.admin.handlers.sudo.rule')
 _ = translation.translate
 
 module = 'sudo/rule'
