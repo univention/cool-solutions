@@ -16,7 +16,7 @@ If you are using SAML, you will need to set up a simple authentication account f
 **Installing the Cool Solution Listener**
 Please enable the [Cool-Solutions Repository for UCS 5.0](https://help.univention.com/t/cool-solutions-articles-and-repository/11517) Afterward, you can install the Listener with:
 ```
-uninvention-install univention-moodle-group
+univention-install univention-moodle-group
 ```
 The listener will now place students in univentionFreeAttribute20 and teachers into univentionFreeAttribute19.
 
