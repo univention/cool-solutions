@@ -15,7 +15,6 @@
 	"gpghome": "/root/importgnupg",
 	"passphrase_file": "/root/schoolimporttool.secret",
 	"lusd_normalize_classes": true,
-	"lusd_normalize_classes": true,
 	"lusd_fix_no_class_in_input_data": {
 		"key_name": "Klassenname",
 		"class_name": "KeineKlasse"
