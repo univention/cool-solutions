@@ -2,23 +2,24 @@ Source: univention-lusd
 Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
-Build-Depends: debhelper (>= 9),
+Build-Depends:
+ debhelper (>= 9),
+ dh-python,
  ucslint,
- dh-python
 Standards-Version: 3.8.2
 Homepage: http://www.univention.de/
 
 Package: python-univention-lusd
 Architecture: all
 Depends:
+ python-gnupg,
  python-ucsschool-lib (>= 12.2.29),
- ucs-school-import,
  python-univention,
  python-xmltodict,
- python-gnupg,
+ ucs-school-import,
  univention-lusd,
  ${misc:Depends},
- ${python:Depends}
+ ${python:Depends},
 Provides:
  ${python:Provides},
 Description: Custom UCS@school import reader class for an import of XML encrypted data (LUSD).
@@ -28,14 +29,14 @@ Description: Custom UCS@school import reader class for an import of XML encrypte
 Package: python3-univention-lusd
 Architecture: all
 Depends:
+ python-gnupg,
  python-ucsschool-lib (>= 12.2.29),
- ucs-school-import,
  python-univention,
  python-xmltodict,
- python-gnupg,
+ ucs-school-import,
  univention-lusd,
  ${misc:Depends},
- ${python3:Depends}
+ ${python3:Depends},
 Provides:
  ${python3:Provides},
 Description: Custom UCS@school import reader class for an import of XML encrypted data (LUSD).
@@ -45,14 +46,13 @@ Description: Custom UCS@school import reader class for an import of XML encrypte
 Package: univention-lusd
 Architecture: all
 Depends:
- ucs-school-import,
- python-univention-lusd,
- python-univention,
- python-xmltodict,
  python-gnupg,
+ python-univention,
  python-univention-lusd,
+ python-xmltodict,
  python3-univention-lusd
  ${misc:Depends},
+ ucs-school-import,
 Provides:
  ${python3:Provides},
 Description: Custom UCS@school import reader class for an import of XML encrypted data (LUSD).
