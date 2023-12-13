@@ -17,7 +17,7 @@ set -e
 case "$1" in
     configure)
     . /usr/share/univention-lib/all.sh
-    call_joinscript 99MoodleGroupSetter.inst
+    call_joinscript 99MoodleGroupSetter.inst || true
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

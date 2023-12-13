@@ -1,3 +1,9 @@
+univention-moodle-group (1.0.0-5) unstable; urgency=low
+
+  * Fix extended-attribute Teacher in joinscript. Thanks to Roy Brannath
+
+ -- Andreas Peichert <peichert@univention.de>  Thu, 07 Dec 2023 10:10:57 +0100
+
 univention-moodle-group (1.0.0-4) unstable; urgency=medium
 
   * Add README.md and debian/docs
