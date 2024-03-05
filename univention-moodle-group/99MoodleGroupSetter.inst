@@ -67,7 +67,7 @@ if [ "$server_role" = "domaincontroller_master" ]; then
 	--set tabName=Class \
 	--set tabPosition=2 \
 	--set valueRequired=0 \
-	--set version=2 
+	--set version=2
 
 	/usr/sbin/univention-directory-manager settings/extended_attribute create "$@" --ignore_exists --position "cn=custom attributes,cn=univention,${ldap_base}" \
 	--set CLIName=Teacher \
@@ -93,7 +93,7 @@ if [ "$server_role" = "domaincontroller_master" ]; then
 	--set tabName=Class \
 	--set tabPosition=2 \
 	--set valueRequired=0 \
-	--set version=2 
+	--set version=2
 fi
 
 joinscript_save_current_version

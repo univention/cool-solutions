@@ -42,7 +42,7 @@
 
 # main packaging script based on dh7 syntax
 %:
-	dh $@  
+	dh $@
 
 # debmake generated override targets
 # Multiarch package requires library files to be installed to
