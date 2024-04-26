@@ -32,7 +32,7 @@
 
 ## joinscript api: bindpwdfile
 
-VERSION="1"
+VERSION="2"
 
 . /usr/share/univention-lib/all.sh
 . /usr/share/univention-lib/ldap.sh
@@ -46,7 +46,7 @@ univention-directory-manager container/cn create "$@" --ignore_exists \
 	--set name="sudo-ldap" \
 	--set description="sudo-ldap rules" || die
 
-ucs_registerLDAPExtension "$@" --ucsversionstart 4.4-0 --ucsversionend 5.99-0 --schema /usr/share/univention-sudo-ldap/sudo-ldap.schema
+ucs_registerLDAPExtension "$@" --ucsversionstart 4.4-0 --ucsversionend 5.99-0 --schema /usr/share/univention-sudo-ldap/sudo-ldap.schema || die
 ucs_registerLDAPExtension "$@" --ucsversionstart 4.4-0 --ucsversionend 5.99-0 --udm_module /usr/share/univention-sudo-ldap/sudo-rule.py \
 	--messagecatalog /usr/share/univention-sudo-ldap/de.mo || die
 
