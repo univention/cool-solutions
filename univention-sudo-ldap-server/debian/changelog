@@ -1,3 +1,9 @@
+univention-sudo-ldap-server (4.0.0-2) unstable; urgency=low
+
+  * fix joinscript to be executed on update from UCS 4 to UCS 5 #23
+
+ -- Andreas Peichert <peichert@univention.de>  Wed, 12 Jun 2024 14:14:31 +0200
+
 univention-sudo-ldap-server (4.0.0-1) unstable; urgency=low
 
   * Added joinscript api bindpwdfile in join script
