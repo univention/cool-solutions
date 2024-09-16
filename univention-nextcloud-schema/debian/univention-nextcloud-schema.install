@@ -1,0 +1,2 @@
+85univention-nextcloud-schema.inst usr/lib/univention-install/
+nextcloud.schema usr/share/univention-nextcloud-schema

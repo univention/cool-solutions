@@ -1,0 +1,139 @@
+#!/bin/bash
+
+# Copyright (C) 2024 Univention GmbH
+#
+# http://www.univention.de/
+#
+# All rights reserved.
+#
+# The source code of the software contained in this package
+# as well as the source package itself are made available
+# under the terms of the GNU Affero General Public License version 3
+# (GNU AGPL V3) as published by the Free Software Foundation.
+#
+# Binary versions of this package provided by Univention to you as
+# well as other copyrighted, protected or trademarked materials like
+# Logos, graphics, fonts, specific documentations and configurations,
+# cryptographic keys etc. are subject to a license agreement between
+# you and Univention and not subject to the GNU AGPL V3.
+#
+# In the case you use the software under the terms of the GNU AGPL V3,
+# the program is provided in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License with the Debian GNU/Linux or Univention distribution in file
+# /usr/share/common-licenses/AGPL-3; if not, see
+# <http://www.gnu.org/licenses/>.
+
+## joinscript api: bindpwdfile
+
+# Join script version:
+VERSION=1
+
+# Join script helper:
+. /usr/share/univention-join/joinscripthelper.lib
+joinscript_init
+
+# Evaluate UCR
+eval "$(ucr shell)"
+
+# source LDAP shell library, register LDAP schema extension and create container:
+. /usr/share/univention-lib/ldap.sh
+
+ucs_registerLDAPExtension "$@" \
+	--schema /usr/share/univention-nextcloud-schema/nextcloud.schema || die
+
+univention-directory-manager container/cn create "$@" --ignore_exists \
+    --position "cn=custom attributes,cn=univention,$ldap_base" \
+    --set name=nextcloud
+
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+    --position "cn=nextcloud,cn=custom attributes,cn=univention,$ldap_base" --set module="users/user" \
+    --set ldapMapping='univentionNextcloudEnabled' \
+    --set objectClass='univentionNextcloudUser' \
+    --set name='univentionNextcloudUserEnabled' \
+    --set shortDescription='Access to Nextcloud' \
+    --set longDescription='Whether user may access Nextcloud' \
+    --set translationShortDescription='"de_DE" "Zugang für Nextloud"' \
+    --set translationLongDescription='"de_DE" "Der Benutzer kann auf Nextcloud zugreifen"' \
+    --set tabName='Nextcloud' \
+    --set translationTabName='"de_DE" "Nextcloud"' \
+    --set overwriteTab='0' \
+    --set valueRequired='0' \
+    --set CLIName='nextcloudEnabled' \
+    --set syntax='boolean' \
+    --set default="1" \
+    --set tabAdvanced='1' \
+    --set mayChange='1' \
+    --set multivalue='0' \
+    --set deleteObjectClass='0' \
+    --set tabPosition='1' \
+    --set overwritePosition='0' \
+    --set doNotSearch='0' \
+    --set hook='None' || \
+univention-directory-manager settings/extended_attribute modify "$@" \
+    --dn "cn=nextcloudUserEnabled,cn=nextcloud,cn=custom attributes,cn=univention,$ldap_base" \
+    --set tabAdvanced='1' \
+    --set default="1" || die "Could not modify nextcloudUserEnabled extended attribute"
+
+univention-directory-manager settings/extended_attribute create "$@"  --ignore_exists \
+    --position "cn=nextcloud,cn=custom attributes,cn=univention,$ldap_base" --set module="users/user" \
+    --set ldapMapping='univentionNextcloudQuota' \
+    --set objectClass='univentionNextcloudUser' \
+    --set name='univentionNextcloudUserQuota' \
+    --set shortDescription='Nextcloud Quota' \
+    --set longDescription='Amount of storage available to the user (ex: 512 MB or 12 GB)' \
+    --set translationShortDescription='"de_DE" "Nextcloud Quota"' \
+    --set translationLongDescription='"de_DE" "Der verfügbare Speicherplatz für den Benutzer (z.B. 512 MB oder 12 GB)"' \
+    --set tabName='Nextcloud' \
+    --set translationTabName='"de_DE" "Nextcloud"' \
+    --set overwriteTab='0' \
+    --set valueRequired='0' \
+    --set CLIName='nextcloudQuota' \
+    --set syntax='string' \
+    --set default="" \
+    --set tabAdvanced='1' \
+    --set mayChange='1' \
+    --set multivalue='0' \
+    --set deleteObjectClass='0' \
+    --set tabPosition='1' \
+    --set overwritePosition='0' \
+    --set doNotSearch='0' \
+    --set hook='None' || \
+univention-directory-manager settings/extended_attribute modify "$@" \
+    --dn "cn=nextcloudUserQuota,cn=nextcloud,cn=custom attributes,cn=univention,$ldap_base" \
+    --set tabAdvanced='1' || die "Could not modify nextcloudUserQuota extended attribute"
+
+univention-directory-manager settings/extended_attribute create "$@" --ignore_exists \
+    --position "cn=nextcloud,cn=custom attributes,cn=univention,$ldap_base" --set module="groups/group" \
+    --set ldapMapping='univentionNextcloudEnabled' \
+    --set objectClass='univentionNextcloudGroup' \
+    --set name='univentionNextcloudGroupEnabled' \
+    --set shortDescription='Available in Nextcloud' \
+    --set longDescription='The group is available in Nextcloud' \
+    --set translationShortDescription='"de_DE" "In Nextcloud verfügbar"' \
+    --set translationLongDescription='"de_DE" "Die Gruppe ist in Nextcloud verfügbar"' \
+    --set tabName='Nextcloud' \
+    --set translationTabName='"de_DE" "Nextcloud"' \
+    --set overwriteTab='0' \
+    --set valueRequired='0' \
+    --set CLIName='nextcloudEnabled' \
+    --set syntax='boolean' \
+    --set default="0" \
+    --set tabAdvanced='0' \
+    --set mayChange='1' \
+    --set multivalue='0' \
+    --set deleteObjectClass='0' \
+    --set tabPosition='1' \
+    --set overwritePosition='0' \
+    --set doNotSearch='0' \
+    --set hook='None' || \
+univention-directory-manager settings/extended_attribute modify "$@" \
+    --dn "cn=nextcloudGroupEnabled,cn=nextcloud,cn=custom attributes,cn=univention,$ldap_base" \
+    --set tabAdvanced='1' || die "Could not modify nextcloudGroupEnabled extended attribute"
+
+joinscript_save_current_version
+exit 0
