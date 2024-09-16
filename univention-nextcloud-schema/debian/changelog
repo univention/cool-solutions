@@ -1,0 +1,23 @@
+univention-nextcloud-schema (1.0.3) unstable; urgency=medium
+
+  * fix typo
+
+ -- Jannik Ahlers <ahlers@univention.de>  Tue, 10 Sep 2024 11:36:58 +0200
+
+univention-nextcloud-schema (1.0.2) unstable; urgency=medium
+
+  * rename objectClasses for extended attributes in joinscript
+
+ -- Jannik Ahlers <ahlers@univention.de>  Tue, 10 Sep 2024 09:36:51 +0200
+
+univention-nextcloud-schema (1.0.1) unstable; urgency=medium
+
+  * rename attributes to avoid name/oid collisions with the nextcloud app
+
+ -- Jannik Ahlers <ahlers@univention.de>  Mon, 02 Sep 2024 08:59:32 +0200
+
+univention-nextcloud-schema (1.0.0) unstable; urgency=medium
+
+  * Initial release.
+
+ -- Jannik Ahlers <ahlers@univention.de>  Mon, 12 Aug 2024 23:22:49 +0200
