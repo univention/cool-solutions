@@ -1,3 +1,11 @@
+univention-usercert (6.0.0-1) unstable; urgency=low
+
+  * feat: UCS 5.1 version bump
+  * remove python 2 compatibility
+  * cleanup for Pre-Commit-Hooks
+
+ -- Andreas Peichert <peichert@univention.de>  Mon, 31 Mar 2025 14:29:54 +0200
+
 univention-usercert (5.0.0-4) unstable; urgency=medium
 
   * fix: add objectclass pkiUser to users/ldap and computer/windows objects
@@ -35,17 +43,17 @@ univention-usercert (4.2.0-5) unstable; urgency=low
   * Issue #14962
 
  -- Hendrik Peter <hpeter@univention.de>  Wed, 27 Feb 2019 16:24:23 +0100
- 
- univention-usercert (4.2.0-4) unstable; urgency=low
+
+univention-usercert (4.2.0-4) unstable; urgency=low
 
   * Added certificates for Simple Authentication Accounts
   * Issue #14962
 
  -- Hendrik Peter <hpeter@univention.de>  Wed, 27 Feb 2019 15:45:02 +0100
- 
+
 univention-usercert (4.1.0-2) unstable; urgency=low
 
-  * Bug #48061: UMC Error on Backup Server in computer Module 
+  * Bug #48061: UMC Error on Backup Server in computer Module
   * Issue #13287
 
  -- Alexander Ulpts <ulpts@univention.de>  Fri, 09 Nov 2018 10:43:51 +0100
