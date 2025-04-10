@@ -15,9 +15,12 @@ In the Univention Management Console, Software tab, open the module *Repository 
 
 Alternatively, set the following Univention Configuration Registry variables on the console:
 
-> ucr set repository/online/component/cool-solutions=yes \\
-> repository/online/component/cool-solutions/version=current \\
-> repository/online/component/cool-solutions/unmaintained=yes
+```
+ucr set \
+  repository/online/component/cool-solutions=yes \
+  repository/online/component/cool-solutions/version=current \
+  repository/online/component/cool-solutions/unmaintained=yes
+```
 
 # Upgrade
 
