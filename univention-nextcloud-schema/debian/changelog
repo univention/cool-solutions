@@ -1,3 +1,9 @@
+univention-nextcloud-schema (2.0.1) unstable; urgency=low
+
+  * release for UCS5.2
+
+ -- Tim Breidenbach <breidenbach@univention.de>  Thu, 08 May 2025 15:11:00 +0200
+
 univention-nextcloud-schema (1.0.3) unstable; urgency=medium
 
   * fix typo
