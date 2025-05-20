@@ -2,20 +2,22 @@ Source: univention-sudo-ldap-server
 Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
-Build-Depends: debhelper-compat (= 12),
- univention-config-dev,
+Build-Depends:
+ debhelper-compat (= 12),
  ucslint,
- univention-l10n-dev
+ univention-config-dev,
+ univention-l10n-dev,
 Standards-Version: 3.9.8
 Homepage: http://www.univention.de/
 
 Package: univention-sudo-ldap
 Architecture: all
-Depends: univention-directory-manager-tools,
+Depends:
  shell-univention-lib (>> 1.0.1-1),
+ univention-directory-manager-tools,
  univention-l10n-dev | univention-ucs-translation-template
  ${misc:Depends},
- ${python:Depends}
+ ${python:Depends},
 Description: UCS - sudo-ldap integration - domain integration
  This package contains an Univention Directory Manager module to
  manage sudo-ldap rule LDAP objects.

@@ -1,7 +1,7 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# Copyright 2004-2023 Univention GmbH
+# Copyright 2004-2025 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -33,84 +33,110 @@ import univention.admin.filter
 import univention.admin.handlers
 import univention.admin.syntax
 
-translation = univention.admin.localization.translation('univention.admin.handlers.sudo.rule')
+translation = univention.admin.localization.translation(
+    "univention.admin.handlers.sudo.rule"
+)
 _ = translation.translate
 
-module = 'sudo/rule'
-superordinate = 'settings/cn'
+module = "sudo/rule"
+superordinate = "settings/cn"
 childs = False
-short_description = _(u'sudo rule')
-long_description = _(u'Rules to control sudo-ldap behaviour')
-operations = ['add', 'edit', 'remove', 'search']
+short_description = _("sudo rule")
+long_description = _("Rules to control sudo-ldap behaviour")
+operations = ["add", "edit", "remove", "search"]
 
 options = {
-	'default': univention.admin.option(
-		short_description='',
-		objectClasses=['top', 'sudoRole'],
-	),
+    "default": univention.admin.option(
+        short_description="",
+        objectClasses=["top", "sudoRole"],
+    ),
 }
 
 property_descriptions = {
-	'name': univention.admin.property(
-		short_description=_(u'Name'),
-		long_description=_(u'Unique name for the rule'),
-		syntax=univention.admin.syntax.string,
-		required=True,
-		identifies=True,
-	),
-	'description': univention.admin.property(
-		short_description=_(u'Description'),
-		long_description=_(u'Description of the rule'),
-		syntax=univention.admin.syntax.string,
-	),
-	'users': univention.admin.property(
-		short_description=_(u'Users'),
-		long_description=_(u'Users and groups this rule is for'),
-		syntax=univention.admin.syntax.string,
-		multivalue=True,
-		required=True,
-	),
-	'hosts': univention.admin.property(
-		short_description=_(u'Hosts'),
-		long_description=_(u'Hostnames this rule is for'),
-		syntax=univention.admin.syntax.string,
-		multivalue=True,
-		required=True,
-	),
-	'command': univention.admin.property(
-		short_description=_(u'Command'),
-		long_description=_(u'Commands allowed/refused by this rule'),
-		syntax=univention.admin.syntax.string,
-		multivalue=True,
-		required=True,
-	),
+    "name": univention.admin.property(
+        short_description=_("Name"),
+        long_description=_("Unique name for the rule"),
+        syntax=univention.admin.syntax.string,
+        required=True,
+        identifies=True,
+    ),
+    "description": univention.admin.property(
+        short_description=_("Description"),
+        long_description=_("Description of the rule"),
+        syntax=univention.admin.syntax.string,
+    ),
+    "users": univention.admin.property(
+        short_description=_("Users"),
+        long_description=_("Users and groups this rule is for"),
+        syntax=univention.admin.syntax.string,
+        multivalue=True,
+        required=True,
+    ),
+    "hosts": univention.admin.property(
+        short_description=_("Hosts"),
+        long_description=_("Hostnames this rule is for"),
+        syntax=univention.admin.syntax.string,
+        multivalue=True,
+        required=True,
+    ),
+    "command": univention.admin.property(
+        short_description=_("Command"),
+        long_description=_("Commands allowed/refused by this rule"),
+        syntax=univention.admin.syntax.string,
+        multivalue=True,
+        required=True,
+    ),
 }
 
 layout = [
-	Tab(_(u'General'), _(u'Basic Settings'), layout=[
-		Group(_('Sudo Rule'), layout=[
-			["name", "description", ]
-		]),
-		Group(_('Affected users'), layout=[
-			["users", ],
-			["hosts", ],
-		]),
-		Group(_('Allowed commands'), layout=[
-			["command", ],
-		]),
-	])
+    Tab(
+        _("General"),
+        _("Basic Settings"),
+        layout=[
+            Group(
+                _("Sudo Rule"),
+                layout=[
+                    [
+                        "name",
+                        "description",
+                    ]
+                ],
+            ),
+            Group(
+                _("Affected users"),
+                layout=[
+                    [
+                        "users",
+                    ],
+                    [
+                        "hosts",
+                    ],
+                ],
+            ),
+            Group(
+                _("Allowed commands"),
+                layout=[
+                    [
+                        "command",
+                    ],
+                ],
+            ),
+        ],
+    )
 ]
 
 mapping = univention.admin.mapping.mapping()
-mapping.register('name', 'cn', None, univention.admin.mapping.ListToString)
-mapping.register('description', 'description', None, univention.admin.mapping.ListToString)
-mapping.register('users', 'sudoUser')
-mapping.register('hosts', 'sudoHost')
-mapping.register('command', 'sudoCommand')
+mapping.register("name", "cn", None, univention.admin.mapping.ListToString)
+mapping.register(
+    "description", "description", None, univention.admin.mapping.ListToString
+)
+mapping.register("users", "sudoUser")
+mapping.register("hosts", "sudoHost")
+mapping.register("command", "sudoCommand")
 
 
 class object(univention.admin.handlers.simpleLdap):
-	module = module
+    module = module
 
 
 lookup = object.lookup
