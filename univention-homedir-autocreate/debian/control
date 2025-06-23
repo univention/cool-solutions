@@ -2,8 +2,8 @@ Source: univention-homedir-autocreate
 Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
-Build-Depends: debhelper-compat (= 10), univention-config-dev
-Standards-Version: 3.5.2
+Build-Depends: debhelper-compat (= 12), univention-config-dev
+Standards-Version: 4.7.0
 
 Package: univention-homedir-autocreate
 Architecture: all
