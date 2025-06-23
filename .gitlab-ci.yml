@@ -1,0 +1,11 @@
+---
+stages:
+  - lint
+
+include:
+  - project: univention/infrastructure/docker-services
+    file:
+      - pre-commit.yml
+run pre-commit:
+  stage: lint
+  extends: .pre-commit
