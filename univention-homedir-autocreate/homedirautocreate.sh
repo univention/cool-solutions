@@ -5,7 +5,7 @@
 # Univention homedir autocreation
 #  listener module
 #
-# Copyright 2023 Univention GmbH
+# Copyright 2023-2025 Univention GmbH
 #
 # https://www.univention.de/
 #
