@@ -6,16 +6,14 @@ Standards-Version: 3.5.5
 Build-Depends:
  debhelper (>> 7),
  dh-python,
- python-all,
  python3-all,
  ucslint,
  univention-config-dev,
-X-Python-Version: 2.7
 
 Package: univention-usercert
 Architecture: all
 Depends:
- python-univention-directory-manager,
+ python3-univention-directory-manager,
  univention-config,
  univention-directory-manager-tools,
  univention-ldap-usercert (= ${binary:Version}),
