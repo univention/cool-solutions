@@ -28,10 +28,10 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-from univention.admin.layout import Tab, Group
 import univention.admin.filter
 import univention.admin.handlers
 import univention.admin.syntax
+from univention.admin.layout import Group, Tab
 
 translation = univention.admin.localization.translation(
     "univention.admin.handlers.sudo.rule"
