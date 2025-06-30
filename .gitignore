@@ -73,3 +73,6 @@ cookbooks/in8-univention
 
 #Vscode
 .vscode/settings.json
+
+#pyenv
+.python-version
