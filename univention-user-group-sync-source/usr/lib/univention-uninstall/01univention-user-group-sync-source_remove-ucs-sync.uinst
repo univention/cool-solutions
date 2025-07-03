@@ -1,7 +1,7 @@
 #!/bin/bash
 # removal unjoinscript for univention-user-group-sync-source
 #
-# Copyright (C) 2020 Univention GmbH
+# Copyright (C) 2020-2022 Univention GmbH
 #
 # http://www.univention.de/
 #

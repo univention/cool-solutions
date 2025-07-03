@@ -1,9 +1,9 @@
 #!/bin/sh
 #
 # user group sync source
-#  postrm script
+#  prerm script
 #
-# Copyright 2013-2019 Univention GmbH
+# Copyright 2013-2022 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -34,8 +34,8 @@ case "$1" in
 #    purge)
 #        ;;
 
-    remove|purge)
-        /usr/lib/univention-uninstall/99univention-user-group-sync-source_remove-ucs-sync.uinst
+    remove)
+        /usr/lib/univention-uninstall/01univention-user-group-sync-source_remove-ucs-sync.uinst
         # Restart the directory listener to unload our module
 	echo "Restarting univention-directory-listener Service"
 	systemctl restart univention-directory-listener.service
@@ -48,11 +48,11 @@ case "$1" in
     	echo "Reloading systemd daemon"
     	systemctl daemon-reload
         ;;
-    upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+    upgrade|failed-upgrade)
         ;;
 
     *)
-        echo "postrm called with unknown argument \`$1'" >&2
+        echo "prerm called with unknown argument \`$1'" >&2
         exit 1
         ;;
 esac
