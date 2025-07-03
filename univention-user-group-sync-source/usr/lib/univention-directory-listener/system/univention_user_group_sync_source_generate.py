@@ -1,10 +1,10 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 """user group sync source
     listener module"""
 #
-# Copyright 2013-2019 Univention GmbH
+# Copyright 2013-2022 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -31,8 +31,7 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-__package__ = '' # workaround for PEP 366, pylint: disable-msg=W0622
-import cPickle as pickle
+import pickle
 import pwd
 import grp
 import os
@@ -43,6 +42,9 @@ import univention.debug
 import univention.uldap
 import univention.config_registry
 import listener
+from typing import Dict, List
+
+from ldap.dn import dn2str, str2dn
 
 name = 'univention_user_group_sync_source_generate'
 description = 'Store user and group information to be transferred to another system.'
@@ -67,7 +69,7 @@ filter = """\
     (!(uidNumber=0))
     (!(uid=ucs-sync))
     (!(uid=*$))
-)""".translate(None, '\t\n\r ')
+)""".translate(str.maketrans('', '', '\t\n\r '))
 filter_custom = ""
 
 #TODO: getpwnam seems to fail at least sometimes
@@ -86,28 +88,28 @@ def ucr_map_identifier():
 ucr_map_identifier()
 
 # Log Messages
-def _log(message, level):
+def _log(message: str, level: int):
     """log a <message> (str) with log<level>"""
     message = '[%s] %s' % (name, message, )
     univention.debug.debug(univention.debug.LISTENER, level, message)
-def _log_debug(message):
+def _log_debug(message: str):
     """log a "debug" <message> (str)"""
     return _log(message, univention.debug.ALL)
-def _log_info(message):
+def _log_info(message: str):
     """log a "info" <message> (str)"""
     return _log(message, univention.debug.INFO)
-def _log_process(message):
+def _log_process(message: str):
     """log a "process" <message> (str)"""
     return _log(message, univention.debug.PROCESS)
-def _log_warn(message):
+def _log_warn(message: str):
     """log a "warn" <message> (str)"""
     return _log(message, univention.debug.WARN)
-def _log_error(message):
+def _log_error(message: str):
     """log a "error" <message> (str)"""
     return _log(message, univention.debug.ERROR)
 
 # Format a unix timestamp into a filename
-def _format_filename(timestamp):
+def _format_filename(timestamp: float) -> str:
     """format a unix timestamp into a filename
     guaranteed to generate a unique name for every different <float> timestamp
     (if timestamp is after 2011)"""
@@ -118,7 +120,7 @@ def _format_filename(timestamp):
     return '%019.7f' % (timestamp, )
 
 # Write the given data into a file
-def _write_file(filename, path, data):
+def _write_file(filename: str, path: str, data: bytes):
     """write the <data> to <filename> in <DB_PATH> atomically
     does not return before the data is stored on disk (fsync)"""
     temporary_file = tempfile.NamedTemporaryFile(dir=path, delete=False)
@@ -133,17 +135,17 @@ def _write_file(filename, path, data):
     final_file.close()
     listener.setuid(0)
     os.chown(filename, owning_user_number, owning_group_number)
-    os.chmod(filename, 0640)
+    os.chmod(filename, 0o640)
     listener.unsetuid()
 
 #
-def _wait_until_after(timestamp):
+def _wait_until_after(timestamp: float):
     """wait until the current (system) time is later than <timestamp>"""
     while time.time() <= timestamp:
         time.sleep(0.01)
 
 # Pickle the given data
-def _format_data(object_dn, new_attributes, command):
+def _format_data(object_dn: str, new_attributes: Dict[str, List[bytes]], command: str):
     """encode (serialise) object data"""
     data = (object_dn, command, new_attributes, )
     return pickle.dumps(data, protocol=2)
@@ -153,15 +155,17 @@ def _get_remove_config():
     attributes = ucr.get('ldap/sync/remove/attribute')
     if attributes:
         attributes = attributes.split(',')
+        attributes = [attribute.encode('UTF-8') for attribute in attributes]
     objectClasses = ucr.get('ldap/sync/remove/objectClass')
     if objectClasses:
         objectClasses = objectClasses.split(',')
+        objectClasses = [objectClass.encode('UTF-8') for objectClass in objectClasses]
     return attributes, objectClasses
 
 def _get_whitelist_config():
-    apply_whitelist = ucr.is_true('ldap/sync/whitelist')
+    apply_whitelist: bool = ucr.is_true('ldap/sync/whitelist')
 
-    keep_attributes = [
+    keep_attributes: List[str] = [
     # USER
     'cn',
     'createTimestamp',
@@ -217,13 +221,13 @@ def _get_whitelist_config():
     'univentionGroupType'
     ]
     #keep_attributes = ['uid', 'givenName', 'sn', 'displayName', 'title', 'mailPrimaryAddress', 'description', 'univentionBirthday', 'objectClass', 'userPassword', 'pwhistory']
-    attributes = ucr.get('ldap/sync/whitelist/attribute')
+    attributes: str = ucr.get('ldap/sync/whitelist/attribute')
     if attributes:
-        attributes = attributes.split(',')
+        attributes: List[str] = attributes.split(',')
         for attr in attributes:
             keep_attributes.append(attr)
 
-    keep_objectClasses = [
+    keep_objectClasses: List[str] = [
     # USER
     'automount',
     'sambaSamAccount',
@@ -245,22 +249,22 @@ def _get_whitelist_config():
     # GROUP
     'sambaGroupMapping'
     ]
-    objectClasses = ucr.get('ldap/sync/whitelist/objectClass')
+    objectClasses: str = ucr.get('ldap/sync/whitelist/objectClass')
     if objectClasses:
-        objectClasses = objectClasses.split(',')
-        for objectClass in objectClasses:
+        objectClasses: List[str] = objectClasses.split(',')
+        for objectClass in objectClasses:  # TODO: Warum ist objectClass 'int'?
             keep_objectClasses.append(objectClass)
 
     return apply_whitelist, keep_attributes, keep_objectClasses
 
 # Get prefix from UCR
-def _get_prefix():
-    prefix = ucr.get('ldap/sync/prefix')
+def _get_prefix() -> str:
+    prefix: str = ucr.get('ldap/sync/prefix')
     return prefix
 
 # Get custom attributes to be modified
-def _get_prefix_custom_attrs(attrs, object_type):
-    custom_attrs = ucr.get('ldap/sync/prefix/{}/attributes'.format(object_type))
+def _get_prefix_custom_attrs(attrs: List[str], object_type: str):
+    custom_attrs = ucr.get(f'ldap/sync/prefix/{object_type}/attributes')
     if custom_attrs:
         for attr in custom_attrs.split(','):
             if not attr in attrs:
@@ -270,9 +274,9 @@ def _get_prefix_custom_attrs(attrs, object_type):
 # Get user attributes to be taken into consideration
 def _get_username_prefix_config():
     # Attributes which contain the uid of the object in some way
-    attrs = ['uid', 'krb5PrincipalName', 'homeDirectory', 'entryDN']
+    attrs: List[str] = ['uid', 'krb5PrincipalName', 'homeDirectory', 'entryDN']
     # Attributes which contain DNs other than the DN of the object itself
-    other_dn_attrs = ['memberOf', 'creatorsName', 'modifiersName']
+    other_dn_attrs: List[str] = ['memberOf', 'creatorsName', 'modifiersName']
     attrs = _get_prefix_custom_attrs(attrs, 'user')
     return attrs, other_dn_attrs
 
@@ -287,85 +291,95 @@ def _get_group_name_prefix_config():
     attrs = _get_prefix_custom_attrs(attrs, 'group')
     return attrs, other_dn_attrs, other_attrs
 
-def _get_remove_if_univentionUserGroupSyncEnabled_removed_config():
+def _get_remove_if_univentionUserGroupSyncEnabled_removed_config() -> bool:
+    """Set this UCRV to TRUE if you'd like to remove users from the destination by deactivating the sync for user (with univentionUserGroupSyncEnabled)."""
     return ucr.is_true('ldap/sync/remove/deactivated_user')
 
 # Apply prefix to attributes which contain the uid or cn of the current object
-def _add_prefix_to_attrs(name, new_attributes, prefix, attrs, object_dn):
+def _add_prefix_to_attrs(name: str, new_attributes: Dict[str, List[bytes]], prefix: str, attrs: List[str], object_dn: str):
     prefixed_new_attributes = {}
     for attr in attrs:
         if attr in new_attributes:
             prefixed_new_attributes[attr] = []
             for attr_item in new_attributes[attr]:
-                prefixed_attr_item = re.sub(name, '{}{}'.format(prefix, name), attr_item)
+                attr_item = attr_item.decode('UTF-8')
+                prefixed_attr_item = re.sub(name, prefix+name, attr_item)
                 prefixed_new_attributes[attr].append(prefixed_attr_item)
             new_attributes[attr] = prefixed_new_attributes[attr]
         else:
-            _log_warn("Couldn't remove non-existent attribute '{}' from object with DN {}".format(attr, object_dn))
+            _log_warn(f"Couldn't remove non-existent attribute '{attr}' from object with DN {object_dn}")
     return new_attributes
 
 # Apply prefix to DNs different from the one of the edited object itself
-def _add_prefix_to_dns(new_attributes, prefix, attrs, get_regex, remove_regex, name_attr, object_dn):
+def _add_prefix_to_dns(new_attributes: Dict[str, List[bytes]], prefix: str, attrs: List[str], get_regex: str, remove_regex: str, name_attr: str, object_dn: str):
     prefixed_new_attributes = {}
     for attr in attrs:
         if attr in new_attributes:
             prefixed_new_attributes[attr] = []
             for attr_item in new_attributes[attr]:
+                attr_item = attr_item.decode('UTF-8')
                 other_dn_id_match = re.match(get_regex, attr_item)
                 if other_dn_id_match:
                     other_dn_id = re.sub(remove_regex, '', other_dn_id_match.group())
-                    other_dn_with_prefix = re.sub(get_regex, '{}={}{}'.format(name_attr, prefix, other_dn_id), attr_item)
+                    other_dn_with_prefix = re.sub(get_regex, f'{name_attr}={prefix}{other_dn_id}', attr_item)
                     prefixed_new_attributes[attr].append(other_dn_with_prefix)
             new_attributes[attr] = prefixed_new_attributes[attr]
         else:
-            _log_warn("Couldn't remove non-existent attribute '{}' from object with DN {}".format(attr, object_dn))
+            _log_warn(f"Couldn't remove non-existent attribute '{attr}' from object with DN {object_dn}")
     return new_attributes
 
 # Just apply prefix to given attributes without any regex matching
-def _just_add_prefix(new_attributes, prefix, attrs, object_dn):
+def _just_add_prefix(new_attributes: Dict[str, List[bytes]], prefix: str, attrs: List[str], object_dn: str):
     prefixed_new_attributes = {}
     for attr in attrs:
-        if attr in new_attributes:
+        if attr in new_attributes:  # if 'key' in Dict[str, List[bytes]]
             prefixed_new_attributes[attr] = []
             for attr_item in new_attributes[attr]:
+                attr_item = attr_item.decode('UTF-8')
                 prefixed_attr_item = prefix + attr_item
                 prefixed_new_attributes[attr].append(prefixed_attr_item)
             new_attributes[attr] = prefixed_new_attributes[attr]
         else:
-            _log_warn("Couldn't remove non-existent attribute '{}' from object with DN {}".format(attr, object_dn))
+            _log_warn(f"Couldn't remove non-existent attribute '{attr}' from object with DN {object_dn}")
     return new_attributes
 
 # Apply prefix to user
-def _add_prefix_to_user(object_dn_with_prefix, new_attributes, prefix, command, old_attributes, attrs, other_dn_attrs, object_dn):
-    uid_regex = '^uid=[a-zA-Z0-9-_.]*'
+def _add_prefix_to_user(object_dn_with_prefix: str, new_attributes: Dict[str, List[bytes]], prefix: str, command: str, old_attributes: Dict[str, List[bytes]], attrs: List[str
+], other_dn_attrs: List[str], object_dn: str):
     if command == 'd' or command == 'r':
-        object_dn_with_prefix = re.sub(uid_regex, 'uid={}{}'.format(prefix, old_attributes['uid'][0]), object_dn_with_prefix)
+        object_dn_with_prefix = _add_prefix_to_object(object_dn_with_prefix, prefix, old_attributes["uid"][0].decode("UTF-8"))
         return object_dn_with_prefix, new_attributes
     else:
-        username = new_attributes['uid'][0]
-        object_dn_with_prefix = re.sub(uid_regex, 'uid={}{}'.format(prefix, new_attributes['uid'][0]), object_dn_with_prefix)
+        username = new_attributes['uid'][0].decode('UTF-8')
+        object_dn_with_prefix = _add_prefix_to_object(object_dn_with_prefix, prefix, username)
         new_attributes = _add_prefix_to_attrs(username, new_attributes, prefix, attrs, object_dn)
         new_attributes = _add_prefix_to_dns(new_attributes, prefix, other_dn_attrs, '^cn=[a-zA-Z0-9-_. ]*', '^cn=', 'cn', object_dn)
     return object_dn_with_prefix, new_attributes
 
 # Apply prefix to group
-def _add_prefix_to_group(object_dn_with_prefix, new_attributes, prefix, command, old_attributes, attrs, other_dn_attrs, other_attrs, object_dn):
-    cn_regex = '^cn=[a-zA-Z0-9-_. ]*'
+def _add_prefix_to_group(object_dn_with_prefix: str, new_attributes: Dict[str, List[bytes]], prefix: str, command: str, old_attributes: Dict[str, List[bytes]], attrs: List[str], other_dn_attrs: List[str], other_attrs: List[str], object_dn: str):
     if command == 'd' or command == 'r':
-        object_dn_with_prefix = re.sub(cn_regex, 'cn={}{}'.format(prefix, old_attributes['cn'][0]), object_dn_with_prefix)
+
+        object_dn_with_prefix = _add_prefix_to_object(object_dn_with_prefix, prefix, old_attributes['cn'][0].decode('UTF-8'))
         return object_dn_with_prefix, new_attributes
     else:
-        group_name = new_attributes['cn'][0]
-        object_dn_with_prefix = re.sub(cn_regex, 'cn={}{}'.format(prefix, new_attributes['cn'][0]), object_dn_with_prefix)
+        group_name = new_attributes['cn'][0].decode('UTF-8')
+        object_dn_with_prefix = _add_prefix_to_object(object_dn_with_prefix, prefix, group_name)
         new_attributes = _add_prefix_to_attrs(group_name, new_attributes, prefix, attrs, object_dn)
         new_attributes = _add_prefix_to_dns(new_attributes, prefix, other_dn_attrs, '^uid=[a-zA-Z0-9-_.]*', '^uid=', 'uid', object_dn)
         new_attributes = _just_add_prefix(new_attributes, prefix, other_attrs, object_dn)
     return object_dn_with_prefix, new_attributes
 
-#
-def handler(object_dn, new_attributes, old_attributes, command):
+# Apply the Prefix
+def _add_prefix_to_object(object_dn_with_prefix: str, prefix: str, uid: str):
+    exploded_dn = str2dn(object_dn_with_prefix)
+    exploded_dn[0][0] = (exploded_dn[0][0][0], '{}{}'.format(prefix, uid), exploded_dn[0][0][2])
+
+    return dn2str(exploded_dn)
+
+def handler(object_dn: str, new_attributes: Dict[str, List[bytes]], old_attributes: Dict[str, List[bytes]], command: str):
     """called for each uniqueMember-change on a group"""
-    _log_debug("handler for: %r %r" % (object_dn, command, ))
+    _log_debug(f"handler for: {object_dn} {command}")
     _wait_until_after(handler.last_time)
     timestamp = time.time()
     filename = _format_filename(timestamp)
@@ -374,15 +388,15 @@ def handler(object_dn, new_attributes, old_attributes, command):
     resync = False
     if 'univentionUserGroupSyncEnabled' in new_attributes and 'univentionUserGroupSyncEnabled' in old_attributes:
         if remove_if_univentionUserGroupSyncEnabled_removed:
-            if new_attributes['univentionUserGroupSyncEnabled'] == ['FALSE'] and old_attributes['univentionUserGroupSyncEnabled'] == ['TRUE']:
+            if new_attributes['univentionUserGroupSyncEnabled'] == [b'FALSE'] and old_attributes['univentionUserGroupSyncEnabled'] == [b'TRUE']:
                 _log_warn('Object was deactivated for sync, deleting in destination...')
                 command = 'd'
-        if new_attributes['univentionUserGroupSyncEnabled'] == ['TRUE'] and old_attributes['univentionUserGroupSyncEnabled'] == ['FALSE']:
+        if new_attributes['univentionUserGroupSyncEnabled'] == [b'TRUE'] and old_attributes['univentionUserGroupSyncEnabled'] == [b'FALSE']:
             _log_warn('Object was activated for sync, adding in destination...')
             command = 'n'
             resync = True
     elif 'univentionUserGroupSyncEnabled' in new_attributes and not 'univentionUserGroupSyncEnabled' in old_attributes:
-        if new_attributes['univentionUserGroupSyncEnabled'] == ['TRUE']:
+        if new_attributes['univentionUserGroupSyncEnabled'] == [b'TRUE']:
             _log_warn('Object was activated for sync, adding in destination...')
             command = 'n'
 
@@ -393,25 +407,29 @@ def handler(object_dn, new_attributes, old_attributes, command):
         if not ldap.search(filter=filter_custom, base=object_dn):
             return
 
-    #Remove univention-user-group-sync attribute and objectClass if set
+    # Remove univention-user-group-sync attribute and objectClass if set
     if 'univentionUserGroupSyncEnabled' in new_attributes:
-        new_attributes['objectClass'].remove('univentionUserGroupSync')
+        new_attributes['objectClass'].remove(b'univentionUserGroupSync')
         if not resync:
             new_attributes.pop('univentionUserGroupSyncEnabled')
 
-    #Remove attributes and objectClasses not present in whitelist, if whitelist exists
+    # Remove attributes and objectClasses not present in whitelist, if whitelist exists
+    apply_whitelist: bool
+    keep_attributes: List[str]
+    keep_objectClasses: List[str]
     apply_whitelist, keep_attributes, keep_objectClasses = _get_whitelist_config()
     if apply_whitelist:
         if keep_attributes:
             for attribute in new_attributes.keys():
-                if not attribute in keep_attributes:
+                if attribute not in keep_attributes:
                     new_attributes.pop(attribute)
         if keep_objectClasses and 'objectClass' in new_attributes:
             for objectClass in new_attributes['objectClass']:
+                objectClass: str = objectClass.decode("UTF-8")
                 if objectClass not in keep_objectClasses:
                     new_attributes['objectClass'].remove(objectClass)
 
-    #Remove other attributes and objectClass specified via ucr
+    # Remove other attributes and objectClass specified via ucr
     remove_attributes, remove_objectClasses = _get_remove_config()
     if remove_attributes:
         for attribute in remove_attributes:
