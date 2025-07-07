@@ -2,7 +2,7 @@
 #
 # rules file for the debian package
 #
-# Copyright 2020-2023 Univention GmbH
+# Copyright 2020-2025 Univention GmbH
 #
 # http://www.univention.de/
 #
@@ -30,4 +30,4 @@
 # <http://www.gnu.org/licenses/>.
 
 %:
-	dh $@ --with ucr 
+	dh $@ --with ucr

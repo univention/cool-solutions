@@ -6,7 +6,7 @@
 '
 '         /usr/share/univention-printer-assignment/printer-assignment-template.vbs
 ' Univention Printer Assignment
-' Copyright 2007-2023 Univention GmbH
+' Copyright 2007-2025 Univention GmbH
 '
 ' http://www.univention.de/
 '

@@ -1,3 +1,9 @@
+univention-printer-assignment (10.0.0) unstable; urgency=low
+
+  * Version Bump for UCS 5.2
+
+ -- Jonas Einnolf <einnolf@univention.de>  Thu, 03 Jul 2025 09:08:03 +0200
+
 univention-printer-assignment (9.0.0-10) unstable; urgency=low
 
   * Issue #43025: Fixed for large environments with thousands of rows in the backlog file
