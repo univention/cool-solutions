@@ -4,7 +4,7 @@
 #
 # small and ugly test script
 #
-# Copyright 2013-2023 Univention GmbH
+# Copyright 2013-2025 Univention GmbH
 #
 # http://www.univention.de/
 #

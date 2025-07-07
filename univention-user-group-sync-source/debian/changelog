@@ -1,3 +1,9 @@
+univention-user-group-sync-source (4.0.0-1) unstable; urgency=low
+
+  * Version Bump for UCS52
+
+ -- Jonas Einnolf <einnolf@univention.de>  Thu, 03 Jul 2025 12:42:29 +0200
+
 univention-user-group-sync-source (3.0.0-1) unstable; urgency=medium
 
   * Update for UCS5

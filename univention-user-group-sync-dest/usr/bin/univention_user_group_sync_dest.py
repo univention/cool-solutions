@@ -4,7 +4,7 @@
 """user group sync dest
     data import program"""
 #
-# Copyright 2013-2024 Univention GmbH
+# Copyright 2013-2025 Univention GmbH
 #
 # https://www.univention.de/
 #
@@ -287,6 +287,46 @@ def getUCRCertificatesEnabled():
     certificatesEnabled = ucr.is_true('ldap/sync/certificates')
 
 
+def _safe_mapping_wrapper(original_mapping_func):
+    """
+    Wrapper for UDM mapping functions to ensure proper byte string handling
+    while preserving correct data types for dates, numbers, etc.
+    """
+    def wrapper(value):
+        # Safety check: if original_mapping_func is None or not callable, fallback to ListToString
+        if original_mapping_func is None or not callable(original_mapping_func):
+            return univention.admin.mapping.ListToString(value)
+
+        # If the original mapping function is ListToString, it already handles bytes properly
+        if original_mapping_func == univention.admin.mapping.ListToString:
+            return original_mapping_func(value)
+
+        # For other mapping functions, pre-decode byte strings if needed
+        if isinstance(value, list):
+            decoded_value = []
+            for item in value:
+                if isinstance(item, bytes):
+                    try:
+                        decoded_value.append(item.decode('utf-8'))
+                    except UnicodeDecodeError:
+                        # If decode fails, keep as bytes (e.g., for binary data)
+                        decoded_value.append(item)
+                else:
+                    decoded_value.append(item)
+            value = decoded_value
+        elif isinstance(value, bytes):
+            try:
+                value = value.decode('utf-8')
+            except UnicodeDecodeError:
+                # If decode fails, keep as bytes (e.g., for binary data)
+                pass
+
+        # Now call the original mapping function with properly decoded strings
+        return original_mapping_func(value)
+
+    return wrapper
+
+
 def get_additional_user_mapping():
     '''Apply additional user attribute mapping from UCR'''
     global _translate_user_mapping
@@ -309,9 +349,19 @@ def get_additional_user_mapping():
             print("W: UDM attribute of additional mapping {} doesn't exist. Ignoring mapping".format(keep_attribute))
             continue
 
-        # Add given attribute to mapping
-        mapping_func = univention.admin.handlers.users.user.mapping._map[keep_attribute[1]][1]
-        _translate_user_mapping[keep_attribute[0]] = (keep_attribute[1], mapping_func, )
+        # Get the proper UDM mapping function and wrap it for safe byte handling
+        try:
+            original_mapping_func = univention.admin.handlers.users.user.mapping._map[keep_attribute[1]][1]
+            # Check if mapping function is None or not callable
+            if original_mapping_func is None or not callable(original_mapping_func):
+                raise ValueError("Mapping function is None or not callable")
+            safe_mapping_func = _safe_mapping_wrapper(original_mapping_func)
+            _translate_user_mapping[keep_attribute[0]] = (keep_attribute[1], safe_mapping_func, )
+        except (KeyError, IndexError, ValueError):
+            # Fallback to ListToString if mapping function not found or is None
+            _log_message("W: No mapping function found for UDM attribute {}. Using ListToString as fallback".format(keep_attribute[1]))
+            print("W: No mapping function found for UDM attribute {}. Using ListToString as fallback".format(keep_attribute[1]))
+            _translate_user_mapping[keep_attribute[0]] = (keep_attribute[1], univention.admin.mapping.ListToString, )
 
 
 def get_ucr_process_files_limit():
