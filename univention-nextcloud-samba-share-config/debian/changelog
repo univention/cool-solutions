@@ -1,3 +1,46 @@
+univention-nextcloud-samba-share-config (2.0.0-1) unstable; urgency=low
+
+  * Version Bump For UCS52
+
+ -- Jonas Einnolf <einnolf@univention.de>  Mon, 07 Jul 2025 01:23:12 +0200
+
+univention-nextcloud-samba-share-config (1.0.0-27) unstable; urgency=medium
+
+  * refactor(univention-nextcloud-samba-share-config): Code refactoringo according to guidelines #36716 
+
+ -- Björn Usling <bjoern.usling@univention.de>  Wed, 15 Feb 2023 06:02:45 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-26) unstable; urgency=medium
+
+  * fix(univention-nextcloud-samba-share-config): Fixed univention-directory-listener restart after installation
+
+ -- Björn Usling <bjoern.usling@univention.de>  Fri, 04 Nov 2022 07:55:40 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-25) unstable; urgency=medium
+
+  * fix(univention-nextcloud-samba-share-config): Fixed home share mount on external Nextcloud
+
+ -- Björn Usling <bjoern.usling@univention.de>  Thu, 03 Nov 2022 14:38:53 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-24) unstable; urgency=medium
+
+  * fix(univention-nextcloud-samba-share-config): Fixed home share mount on external Nextcloud
+
+ -- Björn Usling <bjoern.usling@univention.de>  Thu, 03 Nov 2022 08:54:16 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-23) unstable; urgency=medium
+
+  * Fix share mount on external Nextcloud
+
+ -- Bjoern Usling <bjoern.usling@.univention.de>  Mon, 31 Oct 2022 16:34:08 +0100
+
+univention-nextcloud-samba-share-config (1.0.0-22) unstable; urgency=medium
+
+  * Fix traceback for share creation
+  * Python 3 Migration
+
+ -- Bjoern Usling <bjoern.usling@.univention.de>  Wed, 12 Oct 2022 15:17:12 +0200
+
 univention-nextcloud-samba-share-config (1.0.0-21) unstable; urgency=low
 
   * Refactor: template file univention-nextcloud-samba-share-config.py

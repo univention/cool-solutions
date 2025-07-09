@@ -1,12 +1,12 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 # Univention Nextcloud Samba share configuration
 # UCR hook
 #
-# Copyright 2018-2019 Univention GmbH
+# Copyright 2018-2025 Univention GmbH
 #
-# http://www.univention.de/
+# https://www.univention.de/
 #
 # All rights reserved.
 #
@@ -31,49 +31,55 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-#__package__='' 	# workaround for PEP 366
-
-#import listener
-import subprocess
 import sys
-import time
-import univention.nextcloud_samba.common as common
-import univention.debug
+
 import univention.admin.uldap
+import univention.nextcloud_samba.common as common
 from univention.config_registry import ConfigRegistry
+
 ucr = ConfigRegistry()
 ucr.load()
 
 lo, po = univention.admin.uldap.getMachineConnection(ldap_master=False)
 
-commonShares = ucr.get('ucsschool/userlogon/commonshares')
+commonShares = ucr.get("ucsschool/userlogon/commonshares")
 if not commonShares:
     sys.exit(1)
 
-commonShares = commonShares.split(',')
-if 'Marktplatz' in commonShares:
-    commonShares.remove('Marktplatz')
+commonShares = commonShares.split(",")
+if "Marktplatz" in commonShares:
+    commonShares.remove("Marktplatz")
 windomain = common.getWinDomain()
-remoteUser = ucr.get('nextcloud-samba-share-config/remoteUser')
-remotePwFile = ucr.get('nextcloud-samba-share-config/remotePwFile')
-remoteHost = ucr.get('nextcloud-samba-share-config/remoteHost')
-applicableGroup = ucr.get('nextcloud-samba-share-config/nextcloudGroup')
-groupCn=applicableGroup
+remoteUser = ucr.get("nextcloud-samba-share-config/remoteUser")
+remotePwFile = ucr.get("nextcloud-samba-share-config/remotePwFile")
+remoteHost = ucr.get("nextcloud-samba-share-config/remoteHost")
+applicableGroup = ucr.get("nextcloud-samba-share-config/nextcloudGroup")
+nc_admin = ucr.get("nextcloud-samba-share-config/nc_admin")
 
 for shareCn in commonShares:
-    share = lo.search("(&(objectClass=univentionShareSamba)(cn={}))".format(shareCn))
+    # share = lo.search("(&(objectClass=univentionShareSamba)(cn={}))".format(shareCn))
+    share = common.getShareObj(lo, shareCn)
     if share is False:
-        sys.exit(1)
+        break
 
     if share:
-        shareHost = ''.join(share[0][1]['univentionShareHost'])
-        shareSambaName = ''.join(share[0][1]['univentionShareSambaName'])
-        mountName=shareSambaName
+        # Enable files_external Nextcloud app; moved to postinst, too much overhead to do this on every single change
+        # ud.debug(ud.LISTENER, ud.WARN, "Making sure files_external app is enabled")
+        # enableAppCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ app:enable files_external"
+        # subprocess.call(enableAppCmd, shell=True)
+
+        # shareHost = ''.join(share[0][1]['univentionShareHost'])
+        # shareSambaName = ''.join(share[0][1]['univentionShareSambaName'])
+        shareHost = common.getShareHost(share)
+        shareSambaName = common.getShareSambaName(share)
+        mountName = shareSambaName
         mountId = common.getMountId(mountName)
         if not mountId:
             print("Creating new mount {} ...".format(mountName))
-            mountId = common.createMount(mountName, True, remoteUser, remotePwFile, remoteHost)
+            mountId = common.createMount(mountName)
 
-        common.setMountConfig(mountId, shareHost, shareSambaName, windomain, groupCn,True, remoteUser, remotePwFile, remoteHost, applicableGroup)
+        common.setMountConfig(
+            mountId, shareHost, shareSambaName, windomain, applicableGroup
+        )
     else:
         print("Nothing to do: no share was found for CN {}".format(shareCn))

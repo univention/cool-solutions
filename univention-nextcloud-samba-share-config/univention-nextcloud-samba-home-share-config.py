@@ -1,12 +1,12 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 # Univention Nextcloud Samba share configuration
 # listener module
 #
-# Copyright 2018-2019 Univention GmbH
+# Copyright 2018-2025 Univention GmbH
 #
-# http://www.univention.de/
+# https://www.univention.de/
 #
 # All rights reserved.
 #
@@ -31,64 +31,53 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-__package__='' 	# workaround for PEP 366
+from typing import List
 
-import listener
-import re
-import subprocess
-import time
-import univention.nextcloud_samba.common as common
-import univention.debug
 import univention.admin.uldap
+import univention.debug as ud
+import univention.nextcloud_samba.common as common
+import listener
 
-name='nextcloud-samba-home-share-config'
-description='Configure access to Samba home shares in Nextcloud'
-filter='(&(objectClass=nextcloudGroup)(nextcloudEnabled=1)(cn=Domain Users *))'
-attributes=[]
-modrdn="1"
+name = "nextcloud-samba-home-share-config"
+description = "Configure access to Samba home shares in Nextcloud"
+filter = "(&(objectClass=nextcloudGroup)(nextcloudEnabled=1)(cn=Domain Users *))"
+attributes = []  # type: List
+modrdn = "1"
 
-def initialize():
-	univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "{}: initialize".format(name))
-	return
 
-def handler(dn, new, old, command=''):
-	univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "DN {}".format(dn))
-	listener.setuid(0)
-	lo, po = univention.admin.uldap.getMachineConnection()
-	listener.unsetuid()
+def handler(dn, new, old, command=""):
+    ud.debug(ud.LISTENER, ud.WARN, "DN {}".format(dn))
+    listener.setuid(0)
+    try:
+        lo, po = univention.admin.uldap.getMachineConnection()
+    finally:
+        listener.unsetuid()
 
-	windomain = common.getWinDomain()
-	domain = common.getDomain()
-	base = common.getBase()
+    windomain = common.getWinDomain()
+    domain = common.getDomain()
+    base = common.getBase()
 
-	domainUsersMatch = common.isDomainUsersCn(dn)
+    domainUsersMatch = common.isDomainUsersCn(dn)
 
-	groupCn = common.getGroupCn(dn)
-	domainUsersOuRegex = '^cn=Domain\ Users\ '
-	ou = re.sub(domainUsersOuRegex, '', domainUsersMatch.group())
-	mountName = "Home {}".format(ou)
-	shareName = '$user'
+    groupCn = common.getGroupCn(dn)
+    ou = domainUsersMatch[2][0][1]
+    mountName = "Home {}".format(ou)
+    shareName = "$user"
 
-	ouObject = lo.get('ou={},{}'.format(ou, base))
-	shareHostDn = ouObject['ucsschoolHomeShareFileServer'][0]
-	shareHostCn = lo.get(shareHostDn)['cn'][0]
+    ouObject = lo.get("ou={},{}".format(ou, base))
+    shareHostDn = ouObject["ucsschoolHomeShareFileServer"][0].decode("UTF-8")
+    shareHostCn = lo.get(shareHostDn)["cn"][0].decode("UTF-8")
 
-	shareHost = "{}.{}".format(shareHostCn, domain)
+    shareHost = "{}.{}".format(shareHostCn, domain)
 
-	mountId = common.getMountId(mountName)
-	if not mountId:
-		univention.debug.debug(univention.debug.LISTENER, univention.debug.WARN, "Creating new mount {} ...".format(mountName))
-		mountId = common.createMount(mountName)
+    mountId = common.getMountId(mountName)
+    if not mountId:
+        ud.debug(ud.LISTENER, ud.WARN, "Creating new mount {} ...".format(mountName))
+        mountId = common.createMount(mountName)
 
-	if command == 'd':
-		mountId = common.getMountId(mountName)
-		common.deleteMount(mountId)
-		return
+    if command == "d":
+        mountId = common.getMountId(mountName)
+        common.deleteMount(mountId)
+        return
 
-	common.setMountConfig(mountId, shareHost, shareName, windomain, groupCn)
-
-def clean():
-	return
-
-def postrun():
-	return
+    common.setMountConfig(mountId, shareHost, shareName, windomain, groupCn)

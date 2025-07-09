@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# mypy
+.dmypy.json
+.mypy_cache
+
 # Distribution / packaging
 *.egg-info/
 .installed.cfg
