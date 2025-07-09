@@ -42,7 +42,7 @@ ucs_removeServiceFromLocalhost "$SERVICE" "$@" || die
 
 echo -e "Removing guacamole searchuser... "
 udm users/user remove "$@" \
-    --dn "uid=guacamole-${hostname},cn=users,${ldap_base}"
+	--dn "uid=guacamole-${hostname},cn=users,${ldap_base}"
 echo -e "Done!"
 
 joinscript_remove_script_from_status_file univention_guacamole_searchuser

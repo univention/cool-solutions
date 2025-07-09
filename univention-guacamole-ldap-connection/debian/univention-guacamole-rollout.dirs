@@ -1,4 +1,4 @@
-usr/share/guacamole
+usr/bin
 usr/lib/univention-install
 usr/lib/univention-uninstall
-usr/bin
+usr/share/guacamole

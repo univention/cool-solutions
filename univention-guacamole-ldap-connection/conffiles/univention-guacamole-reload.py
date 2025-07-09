@@ -29,10 +29,12 @@
 # <http://www.gnu.org/licenses/>.
 import subprocess
 
+
 def preinst(baseConfig, changes):
     pass
 
+
 def postinst(baseConfig, changes):
     # Altered Guacamole port, reload apache after postinst of '/etc/apache2/sites-available/guacamole.conf'
-    command = ['systemctl', 'reload', 'apache2']
+    command = ["systemctl", "reload", "apache2"]
     return subprocess.call(command, shell=False)
