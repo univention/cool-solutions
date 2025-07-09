@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# Copyright 2018-2019 Univention GmbH
+# Copyright 2023-2025 Univention GmbH
 #
-# http://www.univention.de/
+# https://www.univention.de/
 #
 # All rights reserved.
 #
@@ -25,13 +25,12 @@
 # You should have received a copy of the GNU Affero General Public
 # License with the Debian GNU/Linux or Univention distribution in file
 # /usr/share/common-licenses/AGPL-3; if not, see
-# <http://www.gnu.org/licenses/>.A
+# <http://www.gnu.org/licenses/>.
 
 #DEBHELPER#
 
-# restart directory listener due to new listener module
-if [ -f "/etc/init.d/univention-directory-listener" ] ; then
-   /etc/init.d/univention-directory-listener crestart
-fi
+# restart directory listener due to new or changed listener module
+deb-systemd-invoke restart univention-directory-listener
+univention-directory-listener-ctrl resync nextcloud-samba-group-share-config
 
 exit 0

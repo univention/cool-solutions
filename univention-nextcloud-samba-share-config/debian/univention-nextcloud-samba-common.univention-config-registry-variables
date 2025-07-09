@@ -2,3 +2,4 @@
 Description[de]=Pfad zur occ Executable. Leer lassen, wenn eine App Center Nextcloud auf diesem System verwendet wird
 Description[en]=Path to occ executable. Leave empty, if an App Center Nextcloud is being used on this system
 Type=String
+Categories=Nextcloud-Samba-Share
