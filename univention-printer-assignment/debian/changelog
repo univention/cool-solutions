@@ -1,3 +1,9 @@
+univention-printer-assignment (10.0.2) unstable; urgency=low
+
+  * Register Syntax via LDAP  
+
+ -- Jonas Einnolf <einnolf@univention.de>  Thu, 31 Jul 2025 18:45:41 +0200
+
 univention-printer-assignment (10.0.1) unstable; urgency=low
 
   * Add UniventionPrinterSyntax class and update extended attributes to use it 
