@@ -38,38 +38,40 @@ joinscript_init
 
 eval "$(/usr/sbin/ucr shell)"
 
+ucs_registerLDAPExtension "$@" --ucsversionstart 4.4-0 --ucsversionend 5.99-0 --udm_syntax usr/share/univention-printer-assignment-schema/syntax/UniventionPrinterSyntax.py || die
+
 if [ $JS_LAST_EXECUTED_VERSION = 1 ]; then
 	echo "Removing old UDM syntax and updating extended attributes..."
 
 	# Delete the old settings/syntax object from previous joinscript
-	udm settings/syntax remove \
+	udm settings/syntax remove "$@" \
 		--dn "cn=univention-printer-syntax,cn=printer-assignment,cn=custom attributes,cn=univention,$ldap_base" \
-		--ignore_not_exists || die
+		--ignore_not_exists
 	echo "Removed old syntax object: univention-printer-syntax"
 
 	# Modify extended attributes to use new syntax
-	udm settings/extended_attribute modify \
+	udm settings/extended_attribute modify "$@" \
 		--dn "cn=univention-printer-list-host,cn=printer-assignment,cn=custom attributes,cn=univention,$ldap_base" \
-		--set syntax="UniventionPrinterSyntax" || die
+		--set syntax="UniventionPrinterSyntax"
 	echo "Updated univention-printer-list-host syntax"
 
-	udm settings/extended_attribute modify \
+	udm settings/extended_attribute modify "$@" \
 		--dn "cn=univention-printer-list-group,cn=printer-assignment,cn=custom attributes,cn=univention,$ldap_base" \
-		--set syntax="UniventionPrinterSyntax" || die
+		--set syntax="UniventionPrinterSyntax"
 	echo "Updated univention-printer-list-group syntax"
 
-	udm settings/extended_attribute modify \
+	udm settings/extended_attribute modify "$@" \
 		--dn "cn=univention-printer-default-host,cn=printer-assignment,cn=custom attributes,cn=univention,$ldap_base" \
-		--set syntax="UniventionPrinterSyntax" || die
+		--set syntax="UniventionPrinterSyntax"
 	echo "Updated univention-printer-default-host syntax"
 
-	udm settings/extended_attribute modify \
+	udm settings/extended_attribute modify "$@" \
 		--dn "cn=univention-printer-default-group,cn=printer-assignment,cn=custom attributes,cn=univention,$ldap_base" \
-		--set syntax="UniventionPrinterSyntax" || die
+		--set syntax="UniventionPrinterSyntax"
 	echo "Updated univention-printer-default-group syntax"
 
 	echo "Migration from version 1 completed successfully"
-fi
+fi || die
 
 add_ext_attr() {
 	local SUFFIX="$1"

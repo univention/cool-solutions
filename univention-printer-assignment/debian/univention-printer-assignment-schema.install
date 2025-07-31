@@ -1,4 +1,4 @@
 92univention-printer-assignment-schema.inst usr/lib/univention-install/
 92univention-printer-assignment-schema.uinst usr/lib/univention-uninstall/
 schema/univention-printer-assignment.schema usr/share/univention-printer-assignment-schema/
-syntax/UniventionPrinterSyntax.py /usr/lib/python3/dist-packages/univention/admin/syntax.d/
+syntax/UniventionPrinterSyntax.py usr/share/univention-printer-assignment-schema/syntax/
