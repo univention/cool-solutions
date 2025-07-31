@@ -1,3 +1,9 @@
+univention-printer-assignment (10.0.1) unstable; urgency=low
+
+  * Add UniventionPrinterSyntax class and update extended attributes to use it 
+
+ -- Jonas Einnolf <einnolf@univention.de>  Thu, 31 Jul 2025 13:25:44 +0200
+
 univention-printer-assignment (10.0.0) unstable; urgency=low
 
   * Version Bump for UCS 5.2
