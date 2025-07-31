@@ -31,12 +31,45 @@
 
 ## joinscript api: bindpwdfile
 
-VERSION=1
+VERSION=2
 . /usr/share/univention-lib/all.sh
 . /usr/share/univention-join/joinscripthelper.lib
 joinscript_init
 
 eval "$(/usr/sbin/ucr shell)"
+
+if [ $JS_LAST_EXECUTED_VERSION = 1 ]; then
+	echo "Removing old UDM syntax and updating extended attributes..."
+
+	# Delete the old settings/syntax object from previous joinscript
+	udm settings/syntax remove \
+		--dn "cn=univention-printer-syntax,cn=printer-assignment,cn=custom attributes,cn=univention,$ldap_base" \
+		--ignore_not_exists || die
+	echo "Removed old syntax object: univention-printer-syntax"
+
+	# Modify extended attributes to use new syntax
+	udm settings/extended_attribute modify \
+		--dn "cn=univention-printer-list-host,cn=printer-assignment,cn=custom attributes,cn=univention,$ldap_base" \
+		--set syntax="UniventionPrinterSyntax" || die
+	echo "Updated univention-printer-list-host syntax"
+
+	udm settings/extended_attribute modify \
+		--dn "cn=univention-printer-list-group,cn=printer-assignment,cn=custom attributes,cn=univention,$ldap_base" \
+		--set syntax="UniventionPrinterSyntax" || die
+	echo "Updated univention-printer-list-group syntax"
+
+	udm settings/extended_attribute modify \
+		--dn "cn=univention-printer-default-host,cn=printer-assignment,cn=custom attributes,cn=univention,$ldap_base" \
+		--set syntax="UniventionPrinterSyntax" || die
+	echo "Updated univention-printer-default-host syntax"
+
+	udm settings/extended_attribute modify \
+		--dn "cn=univention-printer-default-group,cn=printer-assignment,cn=custom attributes,cn=univention,$ldap_base" \
+		--set syntax="UniventionPrinterSyntax" || die
+	echo "Updated univention-printer-default-group syntax"
+
+	echo "Migration from version 1 completed successfully"
+fi
 
 add_ext_attr() {
 	local SUFFIX="$1"
@@ -60,7 +93,7 @@ add_ext_attr() {
 		--append translationLongDescription='"de_DE" "Liste mit Druckern, die bei der Benutzeranmeldung automatisch zugewiesen werden."' \
 		--set objectClass="univentionAssignedPrinterClass" \
 		--set ldapMapping="univentionAssignedPrinter" \
-		--set syntax="univention-printer-syntax" \
+		--set syntax="UniventionPrinterSyntax" \
 		--set tabAdvanced=1 \
 		--set mayChange=1 \
 		--set multivalue=1 || die
@@ -82,7 +115,7 @@ add_ext_attr() {
 		--append translationLongDescription='"de_DE" "Drucker, der bei der Benutzeranmeldung als Standarddrucker zugewiesen wird."' \
 		--set objectClass="univentionAssignedPrinterClass" \
 		--set ldapMapping="univentionAssignedPrinterDefault" \
-		--set syntax="univention-printer-syntax" \
+		--set syntax="UniventionPrinterSyntax" \
 		--set tabAdvanced=1 \
 		--set mayChange=1 \
 		--set multivalue=0 || die
@@ -94,17 +127,6 @@ univention-directory-manager container/cn create "$@" --ignore_exists \
 	--position="cn=custom attributes,cn=univention,$ldap_base" \
 	--set name="printer-assignment" \
 	--set description="Extended Attributes for univention-printer-assignment" || die
-
-univention-directory-manager settings/syntax create "$@" --ignore_exists \
-	--position "cn=printer-assignment,cn=custom attributes,cn=univention,$ldap_base" \
-	--set name="univention-printer-syntax" \
-	--set description="syntax for extended attribute univention-printer-list" \
-	--set attribute="shares/printer: name" \
-	--set value="shares/printer: dn" \
-	--set filter="(objectclass=univentionPrinter)" \
-	--set base="$ldap_base" \
-	--set addEmptyValue="FALSE" \
-	--set viewonly="FALSE" || die
 
 add_ext_attr "host" "computers/windows" "$@"
 add_ext_attr "group" "groups/group" "$@"
