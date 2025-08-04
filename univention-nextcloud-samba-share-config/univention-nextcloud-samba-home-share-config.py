@@ -33,6 +33,7 @@
 
 from typing import List
 
+import ldap.dn
 import univention.admin.uldap
 import univention.debug as ud
 import univention.nextcloud_samba.common as common
@@ -57,27 +58,27 @@ def handler(dn, new, old, command=""):
     domain = common.getDomain()
     base = common.getBase()
 
-    domainUsersMatch = common.isDomainUsersCn(dn)
+    domain_users_match = common.isDomainUsersCn(dn)
 
-    groupCn = common.getGroupCn(dn)
-    ou = domainUsersMatch[2][0][1]
-    mountName = "Home {}".format(ou)
-    shareName = "$user"
+    group_cn = common.getGroupCn(dn)
+    ou = domain_users_match[2][0][1]
+    mount_name = "Home {}".format(ou)
+    share_name = "$user"
 
-    ouObject = lo.get("ou={},{}".format(ou, base))
-    shareHostDn = ouObject["ucsschoolHomeShareFileServer"][0].decode("UTF-8")
-    shareHostCn = lo.get(shareHostDn)["cn"][0].decode("UTF-8")
+    ou_object = lo.get("ou={},{}".format(ldap.dn.escape_dn_chars(ou), base))
+    share_host_dn = ou_object["ucsschoolHomeShareFileServer"][0].decode("UTF-8")
+    share_host_cn = lo.get(share_host_dn)["cn"][0].decode("UTF-8")
 
-    shareHost = "{}.{}".format(shareHostCn, domain)
+    share_host = "{}.{}".format(share_host_cn, domain)
 
-    mountId = common.getMountId(mountName)
-    if not mountId:
-        ud.debug(ud.LISTENER, ud.WARN, "Creating new mount {} ...".format(mountName))
-        mountId = common.createMount(mountName)
+    mount_id = common.getMountId(mount_name)
+    if not mount_id:
+        ud.debug(ud.LISTENER, ud.WARN, "Creating new mount {} ...".format(mount_name))
+        mount_id = common.createMount(mount_name)
 
     if command == "d":
-        mountId = common.getMountId(mountName)
-        common.deleteMount(mountId)
+        mount_id = common.getMountId(mount_name)
+        common.deleteMount(mount_id)
         return
 
-    common.setMountConfig(mountId, shareHost, shareName, windomain, groupCn)
+    common.setMountConfig(mount_id, share_host, share_name, windomain, group_cn)

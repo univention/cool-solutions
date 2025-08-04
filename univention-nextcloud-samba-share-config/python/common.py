@@ -31,6 +31,7 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <https://www.gnu.org/licenses/>.
 
+import pipes
 import subprocess
 import time
 from typing import List
@@ -63,25 +64,25 @@ else:
 
 
 def isDomainUsersCn(dn):
-    DomainUsersDn = str2dn(dn)
-    if "Domain Users " in DomainUsersDn[0][0][1]:
-        return DomainUsersDn
+    domain_users_dn = str2dn(dn)
+    if domain_users_dn[0][0][1].startswith("Domain Users "):
+        return domain_users_dn
     return None
 
 
 # The prefix 'schueler-" assumes ucsschool/ldap/default/groupprefix/students to be default
 def isSchuelerCn(dn):
-    SchuelerUsersDn = str2dn(dn)
-    if "schueler-" in SchuelerUsersDn[0][0][1]:
-        return SchuelerUsersDn
+    schueler_users_dn = str2dn(dn)
+    if schueler_users_dn[0][0][1].startswith("schueler-"):
+        return schueler_users_dn
     return None
 
 
 # The prefix 'lehrer-" assumes ucsschool/ldap/default/groupprefix/teachers to be default
 def isLehrerCn(dn):
-    LehrerUsersDn = str2dn(dn)
-    if "lehrer-" in LehrerUsersDn[0][0][1]:
-        return LehrerUsersDn
+    lehrer_users_dn = str2dn(dn)
+    if lehrer_users_dn[0][0][1].startswith("lehrer-"):
+        return lehrer_users_dn
     return None
 
 
@@ -193,7 +194,7 @@ def createMount(mountName):
         sshCommand = getSshCommand(remotePwFile, remoteUser, remoteHost)
         createMountCmd: List = sshCommand + \
             occ_cmd + ["files_external:create"] + \
-            ["\'" + mountName + "\'"] + ["smb", "'password::sessioncredentials'"]
+            [pipes.quote(mountName)] + ["smb", "password::sessioncredentials"]
     else:
         createMountCmd: List = occ_cmd + ["files_external:create"] + \
             [mountName] + ["smb", "password::sessioncredentials"]
@@ -239,18 +240,18 @@ def setMountConfig(
             ["files_external:config", mountId, "share", "/"]
         addShareNameCmd: List = sshCommand + occ_cmd + \
             ["files_external:config", mountId, "root",
-             shareName.replace("$", "\\$")]
+             pipes.quote(shareName)]
         addShareDomainCmd: List = sshCommand + occ_cmd + \
             ["files_external:config", mountId, "domain",
              windomain]
         checkApplicableGroupCmd: List = sshCommand + occ_cmd + \
-            ["group:adduser", "\'" + groupCn + "\'", nc_admin]
+            ["group:adduser", pipes.quote(groupCn), nc_admin]
         checkLdapApplicableGroupCmd: List = sshCommand + occ_cmd + \
-            ["ldap:search", "--group", "\'" + groupCn + "\'"]
+            ["ldap:search", "--group", pipes.quote(groupCn)]
         cleanupApplicableGroupCmd: List = sshCommand + occ_cmd + \
-            ["group:removeuser", "\'" + groupCn + "\'", nc_admin]
+            ["group:removeuser", pipes.quote(groupCn), nc_admin]
         addApplicableGroupCmd: List = sshCommand + occ_cmd + \
-            ["files_external:applicable", "--add-group", "\'" + groupCn + "\'", mountId]
+            ["files_external:applicable", "--add-group", pipes.quote(groupCn), mountId]
         addNcAdminApplicableUserCmd: List = sshCommand + occ_cmd + \
             ["files_external:applicable", "--add-user", nc_admin, mountId]
     else:
@@ -260,7 +261,7 @@ def setMountConfig(
             ["files_external:config", mountId, "share", "/"]
         addShareNameCmd: List = occ_cmd + \
             ["files_external:config", mountId, "root",
-             shareName.replace("$", "\\$")]
+             pipes.quote(shareName)]
         addShareDomainCmd: List = occ_cmd + \
             ["files_external:config", mountId, "domain",
              windomain]

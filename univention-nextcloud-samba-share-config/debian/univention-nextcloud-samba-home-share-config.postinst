@@ -29,8 +29,12 @@
 
 #DEBHELPER#
 
-# restart directory listener due to new or changed listener module
+# restart directory listener due to new listener module
 deb-systemd-invoke restart univention-directory-listener
-univention-directory-listener-ctrl resync nextcloud-samba-home-share-config
+
+# Only resync on initial installation to process existing nextcloud-enabled Domain Users groups that are already there before listener creation
+if [ -z "$2" ]; then
+    univention-directory-listener-ctrl resync nextcloud-samba-home-share-config
+fi
 
 exit 0

@@ -42,23 +42,23 @@ ucr.load()
 
 lo, po = univention.admin.uldap.getMachineConnection(ldap_master=False)
 
-commonShares = ucr.get("ucsschool/userlogon/commonshares")
-if not commonShares:
+common_shares = ucr.get("ucsschool/userlogon/commonshares")
+if not common_shares:
     sys.exit(1)
 
-commonShares = commonShares.split(",")
-if "Marktplatz" in commonShares:
-    commonShares.remove("Marktplatz")
+common_shares = common_shares.split(",")
+if "Marktplatz" in common_shares:
+    common_shares.remove("Marktplatz")
 windomain = common.getWinDomain()
-remoteUser = ucr.get("nextcloud-samba-share-config/remoteUser")
-remotePwFile = ucr.get("nextcloud-samba-share-config/remotePwFile")
-remoteHost = ucr.get("nextcloud-samba-share-config/remoteHost")
-applicableGroup = ucr.get("nextcloud-samba-share-config/nextcloudGroup")
+remote_user = ucr.get("nextcloud-samba-share-config/remoteUser")
+remote_pw_file = ucr.get("nextcloud-samba-share-config/remotePwFile")
+remote_host = ucr.get("nextcloud-samba-share-config/remoteHost")
+applicable_group = ucr.get("nextcloud-samba-share-config/nextcloudGroup")
 nc_admin = ucr.get("nextcloud-samba-share-config/nc_admin")
 
-for shareCn in commonShares:
-    # share = lo.search("(&(objectClass=univentionShareSamba)(cn={}))".format(shareCn))
-    share = common.getShareObj(lo, shareCn)
+for share_cn in common_shares:
+    # share = lo.search("(&(objectClass=univentionShareSamba)(cn={}))".format(share_cn))
+    share = common.getShareObj(lo, share_cn)
     if share is False:
         break
 
@@ -68,18 +68,18 @@ for shareCn in commonShares:
         # enableAppCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ app:enable files_external"
         # subprocess.call(enableAppCmd, shell=True)
 
-        # shareHost = ''.join(share[0][1]['univentionShareHost'])
-        # shareSambaName = ''.join(share[0][1]['univentionShareSambaName'])
-        shareHost = common.getShareHost(share)
-        shareSambaName = common.getShareSambaName(share)
-        mountName = shareSambaName
-        mountId = common.getMountId(mountName)
-        if not mountId:
-            print("Creating new mount {} ...".format(mountName))
-            mountId = common.createMount(mountName)
+        # share_host = ''.join(share[0][1]['univentionShareHost'])
+        # share_samba_name = ''.join(share[0][1]['univentionShareSambaName'])
+        share_host = common.getShareHost(share)
+        share_samba_name = common.getShareSambaName(share)
+        mount_name = share_samba_name
+        mount_id = common.getMountId(mount_name)
+        if not mount_id:
+            print("Creating new mount {} ...".format(mount_name))
+            mount_id = common.createMount(mount_name)
 
         common.setMountConfig(
-            mountId, shareHost, shareSambaName, windomain, applicableGroup
+            mount_id, share_host, share_samba_name, windomain, applicable_group
         )
     else:
-        print("Nothing to do: no share was found for CN {}".format(shareCn))
+        print("Nothing to do: no share was found for CN {}".format(share_cn))

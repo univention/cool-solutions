@@ -33,6 +33,7 @@
 
 from typing import List
 
+import ldap.dn
 import univention.admin.uldap
 import univention.debug as ud
 import univention.nextcloud_samba.common as common
@@ -59,106 +60,106 @@ def handler(dn, new, old, command=""):
 
     windomain = common.getWinDomain()
 
-    domainUsersMatch = common.isDomainUsersCn(dn)
-    lehrerMatch = common.isLehrerCn(dn)
-    schuelerMatch = common.isSchuelerCn(dn)
+    domain_users_match = common.isDomainUsersCn(dn)
+    lehrer_match = common.isLehrerCn(dn)
+    schueler_match = common.isSchuelerCn(dn)
 
-    groupCn = common.getGroupCn(dn)
+    group_cn = common.getGroupCn(dn)
 
     shares = {}
     share = None
 
-    if domainUsersMatch:
-        shareName = "Marktplatz"
-        ou = domainUsersMatch[2][0][1]
-        mountName = "Marktplatz {}".format(ou)
+    if domain_users_match:
+        share_name = "Marktplatz"
+        ou = domain_users_match[2][0][1]
+        mount_name = "Marktplatz {}".format(ou)
         base = common.getBase()
-        share = lo.get("cn=Marktplatz,cn=shares,ou={},{}".format(ou, base))
+        share = lo.get("cn=Marktplatz,cn=shares,ou={},{}".format(ldap.dn.escape_dn_chars(ou), base))
         if share:
-            shares[mountName] = [(share, shareName)]
+            shares[mount_name] = [(share, share_name)]
         if ucr.is_true("nextcloud-samba-group-share-config/ignoreMarktplatz"):
             ud.debug(
                 ud.LISTENER,
                 ud.WARN,
                 "UCR var nextcloud-samba-group-share-config/ignoreMarktplatz is true: Not creating mount for share {}".format(
-                    mountName
+                    mount_name
                 ),
             )
             return
-    elif lehrerMatch or schuelerMatch:
-        if lehrerMatch:
-            ou = lehrerMatch[2][0][1]
-            mountName = "Lehrer {}".format(ou)
-            shareName = "lehrer-{}".format(ou)
-        elif schuelerMatch:
-            ou = schuelerMatch[2][0][1]
-            groupCn = "lehrer-{}".format(ou)
-            mountName = "Schueler {}".format(ou)
-            shareName = "schueler-{}".format(ou)
+    elif lehrer_match or schueler_match:
+        if lehrer_match:
+            ou = lehrer_match[2][0][1]
+            mount_name = "Lehrer {}".format(ou)
+            share_name = "lehrer-{}".format(ou)
+        elif schueler_match:
+            ou = schueler_match[2][0][1]
+            group_cn = "lehrer-{}".format(ou)
+            mount_name = "Schueler {}".format(ou)
+            share_name = "schueler-{}".format(ou)
         base = common.getBase()
-        share = lo.get("cn={},cn=shares,ou={},{}".format(shareName, ou, base))
+        share = lo.get("cn={},cn=shares,ou={},{}".format(ldap.dn.escape_dn_chars(share_name), ldap.dn.escape_dn_chars(ou), base))
         if ucr.is_true("nextcloud-samba-group-share-config/configureRoleshares"):
             if share:
-                shares[mountName] = [(share, shareName)]
+                shares[mount_name] = [(share, share_name)]
         else:
             ud.debug(
                 ud.LISTENER,
                 ud.WARN,
                 "UCR var nextcloud-samba-group-share-config/configureRoleshares is not true: Not creating mount for share {}".format(
-                    mountName
+                    mount_name
                 ),
             )
 
         if ucr.is_true("nextcloud-samba-group-share-config/configureLehreraustausch"):
-            shareName = "Lehrer-Austausch"
-            mountName = "Lehrer-Austausch {}".format(ou)
-            share = lo.get("cn={},cn=shares,ou={},{}".format(shareName, ou, base))
+            share_name = "Lehrer-Austausch"
+            mount_name = "Lehrer-Austausch {}".format(ou)
+            share = lo.get("cn={},cn=shares,ou={},{}".format(ldap.dn.escape_dn_chars(share_name), ldap.dn.escape_dn_chars(ou), base))
             if share:
-                shares[mountName] = [(share, shareName)]
+                shares[mount_name] = [(share, share_name)]
     else:
         if command != "d":
-            share = common.getShareObj(lo, groupCn)
+            share = common.getShareObj(lo, group_cn)
             if share is False:
                 return
-        shareName = groupCn
-        mountName = groupCn
+        share_name = group_cn
+        mount_name = group_cn
         if share:
-            shares[mountName] = [(share, shareName)]
+            shares[mount_name] = [(share, share_name)]
 
     if command == "d":
-        mountId = common.getMountId(mountName)
-        common.deleteMount(mountId)
+        mount_id = common.getMountId(mount_name)
+        common.deleteMount(mount_id)
         return
 
     if shares:
-        for mountName in shares:
+        for mount_name in shares:
             # Enable files_external Nextcloud app; moved to postinst, too much overhead to do this on every single change
             # ud.debug(ud.LISTENER, ud.WARN, "Making sure files_external app is enabled")
             # enableAppCmd = "univention-app shell nextcloud sudo -u www-data /var/www/html/occ app:enable files_external"
             # subprocess.call(enableAppCmd, shell=True)
-            share = shares[mountName][0][0]
-            shareName = shares[mountName][0][1]
-            shareHost = common.getShareHost(share)
-            mountId = common.getMountId(mountName)
-            if not mountId:
+            share = shares[mount_name][0][0]
+            share_name = shares[mount_name][0][1]
+            share_host = common.getShareHost(share)
+            mount_id = common.getMountId(mount_name)
+            if not mount_id:
                 ud.debug(
-                    ud.LISTENER, ud.WARN, "Creating new mount {} ...".format(mountName)
+                    ud.LISTENER, ud.WARN, "Creating new mount {} ...".format(mount_name)
                 )
-                mountId = common.createMount(mountName)
-            if not mountId:
+                mount_id = common.createMount(mount_name)
+            if not mount_id:
                 ud.debug(
                     ud.LISTENER,
                     ud.WARN,
                     "New mount {} could not be created. Check if Nextcloud container is running or nextcloud-samba-common/occ_path is set correctly in UCR if you are not using an App Center Nextcloud...".format(
-                        mountName
+                        mount_name
                     ),
                 )
                 continue
 
-            common.setMountConfig(mountId, shareHost, shareName, windomain, groupCn)
+            common.setMountConfig(mount_id, share_host, share_name, windomain, group_cn)
     else:
         ud.debug(
             ud.LISTENER,
             ud.WARN,
-            "Nothing to do: no shares were found: {}".format(mountName),
+            "Nothing to do: no shares were found: {}".format(mount_name),
         )

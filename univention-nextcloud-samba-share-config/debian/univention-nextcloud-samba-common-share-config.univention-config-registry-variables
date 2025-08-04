@@ -25,5 +25,5 @@ Categories=Nextcloud-Samba-Share
 [nextcloud-samba-share-config/nc_admin]
 Description[de]=Name des Nextcloud Administrator. Leer lassen, wenn eine App Center Nextcloud auf diesem System verwendet wird
 Description[en]=NAme of Nextcloud Administrator. Leave empty, if an App Center Nextcloud is being used on this system
-Type=String
+Type=str
 Categories=Nextcloud-Samba-Share
