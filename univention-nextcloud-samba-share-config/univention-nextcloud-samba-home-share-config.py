@@ -41,13 +41,19 @@ import listener
 
 name = "nextcloud-samba-home-share-config"
 description = "Configure access to Samba home shares in Nextcloud"
-filter = "(&(objectClass=nextcloudGroup)(nextcloudEnabled=1)(cn=Domain Users *))"
+filter = "(&(objectClass=univentionGroup)(objectClass=nextcloudGroup)(nextcloudEnabled=1)(cn=Domain Users*))"
 attributes = []  # type: List
 modrdn = "1"
 
 
 def handler(dn, new, old, command=""):
     ud.debug(ud.LISTENER, ud.WARN, "DN {}".format(dn))
+
+    # Skip Builtin groups
+    if ",cn=Builtin," in dn:
+        ud.debug(ud.LISTENER, ud.INFO, "Skipping Builtin group: {}".format(dn))
+        return
+
     listener.setuid(0)
     try:
         lo, po = univention.admin.uldap.getMachineConnection()

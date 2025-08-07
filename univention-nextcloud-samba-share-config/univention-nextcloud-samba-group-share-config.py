@@ -45,13 +45,19 @@ ucr.load()
 
 name = "nextcloud-samba-group-share-config"
 description = "Configure access to Samba shares in Nextcloud"
-filter = "(&(objectClass=nextcloudGroup)(nextcloudEnabled=1))"
+filter = "(&(objectClass=univentionGroup)(objectClass=nextcloudGroup)(nextcloudEnabled=1))"
 attributes = []  # type: List
 modrdn = "1"
 
 
 def handler(dn, new, old, command=""):
     ud.debug(ud.LISTENER, ud.WARN, "DN {}".format(dn))
+
+    # Skip Builtin groups
+    if ",cn=Builtin," in dn:
+        ud.debug(ud.LISTENER, ud.INFO, "Skipping Builtin group: {}".format(dn))
+        return
+
     listener.setuid(0)
     try:
         lo, po = univention.admin.uldap.getMachineConnection()
@@ -90,12 +96,12 @@ def handler(dn, new, old, command=""):
         if lehrer_match:
             ou = lehrer_match[2][0][1]
             mount_name = "Lehrer {}".format(ou)
-            share_name = "lehrer-{}".format(ou)
+            share_name = "lehrer-{}".format(ou.lower())
         elif schueler_match:
             ou = schueler_match[2][0][1]
-            group_cn = "lehrer-{}".format(ou)
+            group_cn = "lehrer-{}".format(ou.lower())
             mount_name = "Schueler {}".format(ou)
-            share_name = "schueler-{}".format(ou)
+            share_name = "schueler-{}".format(ou.lower())
         base = common.getBase()
         share = lo.get("cn={},cn=shares,ou={},{}".format(ldap.dn.escape_dn_chars(share_name), ldap.dn.escape_dn_chars(ou), base))
         if ucr.is_true("nextcloud-samba-group-share-config/configureRoleshares"):
