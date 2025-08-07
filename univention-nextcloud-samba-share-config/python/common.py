@@ -238,9 +238,13 @@ def setMountConfig(
             ["files_external:config", mountId, "host", shareHost]
         addShareRootCmd: List = sshCommand + occ_cmd + \
             ["files_external:config", mountId, "share", "/"]
+        # Handle Nextcloud variables so it doesnt show up with '' in the share name
+        if shareName == "$user":
+            share_root_value = shareName
+        else:
+            share_root_value = pipes.quote(shareName)
         addShareNameCmd: List = sshCommand + occ_cmd + \
-            ["files_external:config", mountId, "root",
-             pipes.quote(shareName)]
+            ["files_external:config", mountId, "root", share_root_value]
         addShareDomainCmd: List = sshCommand + occ_cmd + \
             ["files_external:config", mountId, "domain",
              windomain]
@@ -259,9 +263,13 @@ def setMountConfig(
             ["files_external:config", mountId, "host", shareHost]
         addShareRootCmd: List = occ_cmd + \
             ["files_external:config", mountId, "share", "/"]
+        # Handle Nextcloud variables so it doesnt show up with '' in the share name
+        if shareName == "$user":
+            share_root_value = shareName
+        else:
+            share_root_value = pipes.quote(shareName)
         addShareNameCmd: List = occ_cmd + \
-            ["files_external:config", mountId, "root",
-             pipes.quote(shareName)]
+            ["files_external:config", mountId, "root", share_root_value]
         addShareDomainCmd: List = occ_cmd + \
             ["files_external:config", mountId, "domain",
              windomain]
