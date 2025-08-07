@@ -1,3 +1,9 @@
+univention-nextcloud-samba-share-config (2.0.0-3) unstable; urgency=low
+
+  * Listener Fixes, Wrong Type Annotation, Prevent LDAP Errors 
+
+ -- Jonas Einnolf <einnolf@univention.de>  Thu, 07 Aug 2025 09:25:23 +0200
+
 univention-nextcloud-samba-share-config (2.0.0-2) unstable; urgency=low
 
   * Security Hardening 

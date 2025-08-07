@@ -45,7 +45,7 @@ import listener
 ucr = ConfigRegistry()
 ucr.load()
 
-occ_path_ucr: str = ucr.get("nextcloud-samba-common/occ_path", False)
+occ_path_ucr = ucr.get("nextcloud-samba-common/occ_path")
 if occ_path_ucr:
     useSSH = True
     ud.debug(ud.LISTENER, ud.WARN, "External Nextcloud".format())

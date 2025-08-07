@@ -62,10 +62,27 @@ def handler(dn, new, old, command=''):
 
     # Enable group for nextcloud
     nextcloudEnabled = lo.getAttr(dn, "nextcloudEnabled")
-    if not nextcloudEnabled:
-        modlist = [
-            ("objectClass", b"", b"nextcloudGroup"),  # type: (str, bytes, bytes)
-            ("nextcloudEnabled", b"", b"1"),
-        ]
+    objectClasses = lo.getAttr(dn, "objectClass")
+
+    # Check what needs to be added
+    modlist = []
+
+    # Add objectClass if not present
+    if b"nextcloudGroup" not in objectClasses:
+        modlist.append(("objectClass", b"", b"nextcloudGroup"))
+
+    # Add nextcloudEnabled if not present or not set to 1
+    if not nextcloudEnabled or nextcloudEnabled[0] != b"1":
+        if nextcloudEnabled:
+            # Replace existing value
+            modlist.append(("nextcloudEnabled", nextcloudEnabled[0], b"1"))
+        else:
+            # Add new attribute
+            modlist.append(("nextcloudEnabled", b"", b"1"))
+
+    # Only modify if thers something to change
+    if modlist:
         lo.modify(dn, modlist)
         ud.debug(ud.LISTENER, ud.WARN, "Enabled Nextcloud for {}".format(dn))
+    else:
+        ud.debug(ud.LISTENER, ud.INFO, "Nextcloud already enabled for {}".format(dn))
