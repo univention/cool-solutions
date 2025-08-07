@@ -1,12 +1,18 @@
+univention-nextcloud-samba-share-config (2.0.0-4) unstable; urgency=low
+
+  * Fix quoting of nextcloud variables
+
+ -- Jonas Einnolf <einnolf@univention.de>  Thu, 07 Aug 2025 14:30:41 +0200
+
 univention-nextcloud-samba-share-config (2.0.0-3) unstable; urgency=low
 
-  * Listener Fixes, Wrong Type Annotation, Prevent LDAP Errors 
+  * Listener Fixes, Wrong Type Annotation, Prevent LDAP Errors
 
  -- Jonas Einnolf <einnolf@univention.de>  Thu, 07 Aug 2025 09:25:23 +0200
 
 univention-nextcloud-samba-share-config (2.0.0-2) unstable; urgency=low
 
-  * Security Hardening 
+  * Security Hardening
 
  -- Jonas Einnolf <einnolf@univention.de>  Mon, 04 Aug 2025 10:20:07 +0200
 
@@ -18,7 +24,7 @@ univention-nextcloud-samba-share-config (2.0.0-1) unstable; urgency=low
 
 univention-nextcloud-samba-share-config (1.0.0-27) unstable; urgency=medium
 
-  * refactor(univention-nextcloud-samba-share-config): Code refactoringo according to guidelines #36716 
+  * refactor(univention-nextcloud-samba-share-config): Code refactoringo according to guidelines #36716
 
  -- Björn Usling <bjoern.usling@univention.de>  Wed, 15 Feb 2023 06:02:45 +0100
 
@@ -56,7 +62,7 @@ univention-nextcloud-samba-share-config (1.0.0-22) unstable; urgency=medium
 univention-nextcloud-samba-share-config (1.0.0-21) unstable; urgency=low
 
   * Refactor: template file univention-nextcloud-samba-share-config.py
-  * Fix: setting UCRV for commonshares failed with remote access to nc host 
+  * Fix: setting UCRV for commonshares failed with remote access to nc host
 
  -- Tim Breidenbach <breidenbach@univention.de>  Fri, 08 Apr 2022 15:29:57 +0200
 
