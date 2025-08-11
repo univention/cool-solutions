@@ -1,3 +1,13 @@
+univention-nextcloud-samba-share-config (2.0.0-5) unstable; urgency=low
+
+  * fix: univention-nextcloud-enable-for-classes-and-workgroups.py to high
+    level Listener. Reason: ldap filter wasn't working as expected.
+  * refactor univention-nextcloud-samba-home-share-config.py to high level
+  * refactor univention-nextcloud-samba-group-share-config.py to high level
+    Listener
+
+ -- Tim Breidenbach <breidenbach@univention.de>  Fri, 08 Aug 2025 17:48:24 +0200
+
 univention-nextcloud-samba-share-config (2.0.0-4) unstable; urgency=low
 
   * Fix quoting of nextcloud variables
