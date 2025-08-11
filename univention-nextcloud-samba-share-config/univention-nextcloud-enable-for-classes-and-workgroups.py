@@ -1,88 +1,60 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
-#
+#!/usr/bin/env python3
+
 # Univention Nextcloud Samba share configuration
 # listener module
-#
-# Copyright 2018-2025 Univention GmbH
-#
-# https://www.univention.de/
-#
-# All rights reserved.
-#
-# The source code of this program is made available
-# under the terms of the GNU Affero General Public License version 3
-# (GNU AGPL V3) as published by the Free Software Foundation.
-#
-# Binary versions of this program provided by Univention to you as
-# well as other copyrighted, protected or trademarked materials like
-# Logos, graphics, fonts, specific documentations and configurations,
-# cryptographic keys etc. are subject to a license agreement between
-# you and Univention and not subject to the GNU AGPL V3.
-#
-# In the case you use this program under the terms of the GNU AGPL V3,
-# the program is provided in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public
-# License with the Debian GNU/Linux or Univention distribution in file
-# /usr/share/common-licenses/AGPL-3; if not, see
-# <https://www.gnu.org/licenses/>.
 
-from typing import List
+# SPDX-FileCopyrightText: 2018-2025 Univention GmbH
+# SPDX-License-Identifier: AGPL-3.0-only <https://www.gnu.org/licenses/>.
 
-import univention.admin.uldap
-import univention.debug as ud
-import listener
-
-name = "nextcloud-enable-for-classes-and-workgroups"
-description = "Enable Nextcloud for all classes, workgroups, Domain Users <ou>, lehrer-<ou> and schueler-<ou>"
-filter = "(|\
-            (cn=Domain Users *)\
-            (cn=lehrer-*)\
-            (cn=schueler-*)\
-            (ucsschoolRole=school_class:school:*)\
-            (ucsschoolRole=workgroup:school:*)\
-        )"
-attributes = []  # type: List
-modrdn = "1"
+from typing import List, Dict, Optional
+from univention.listener import ListenerModuleHandler
+from univention.udm import UDM
+from univention.udm.exceptions import NoObject, ModifyError
 
 
-def handler(dn, new, old, command=''):
-    if command == "d":
+class NextcloudEnableForClassesAndWorkgroups(ListenerModuleHandler):
+    """Enable Classes and Workgroups for Nextcloud"""
+
+    class Configuration:
+        name = 'nextcloud-enable-for-classes-and-workgroups'
+        description = 'Enable Nextcloud for all classes, workgroups, Domain Users <ou>, lehrer-<ou> and schueler-<ou>'
+        ldap_filter = '(|(cn=Domain Users *)(cn=lehrer-*)(cn=schueler-*)(ucsschoolRole=school_class:school:*)(ucsschoolRole=workgroup:school:*))'
+        attributes = []
+
+    def ensure_nextcloud_enabled(self, dn: str) -> None:
+        """Set nextcloudEnabled on group if not set before."""
+        with self.as_root():
+            # Enable group for nextcloud
+            group_mod = UDM.admin().version(3).get('groups/group')
+            try:
+                group = group_mod.get(dn)
+                if group.props.nextcloudEnabled != '1':
+                    group.props.nextcloudEnabled = '1'
+                    group.save()
+                    self.logger.warning('Enabled Nextcloud for %s', dn)
+                else:
+                    self.logger.info('Group already enabled: %s', dn)
+            except NoObject:
+                self.logger.warning('Group not found %s', dn)
+            except ModifyError as exc:
+                self.logger.error('Failed to modify group %s: %s', dn, exc)
+
+    def create(self, dn: str, new: Dict[str, List[bytes]]) -> None:
+        """Called when the change on the object was a create or listener initialize."""
+        self.logger.info('create group with dn: %r', dn)
+        self.ensure_nextcloud_enabled(dn)
+
+    def modify(
+        self,
+        dn: str,
+        old: Dict[str, List[bytes]],
+        new: Dict[str, List[bytes]],
+        old_dn: Optional[str],
+    ) -> None:
+        """Called when the change on the object was a modify."""
+        self.logger.info('modify group with dn: %r', dn)
+        self.ensure_nextcloud_enabled(dn)
+
+    def remove(self, dn: str, old: Dict[str, List[bytes]]) -> None:
+        """Called when the change on the object was a remove."""
         return
-    ud.debug(ud.LISTENER, ud.WARN, "DN {}".format(dn))
-    listener.setuid(0)
-    try:
-        lo, po = univention.admin.uldap.getAdminConnection()
-    finally:
-        listener.unsetuid()
-
-    # Enable group for nextcloud
-    nextcloudEnabled = lo.getAttr(dn, "nextcloudEnabled")
-    objectClasses = lo.getAttr(dn, "objectClass")
-
-    # Check what needs to be added
-    modlist = []
-
-    # Add objectClass if not present
-    if b"nextcloudGroup" not in objectClasses:
-        modlist.append(("objectClass", b"", b"nextcloudGroup"))
-
-    # Add nextcloudEnabled if not present or not set to 1
-    if not nextcloudEnabled or nextcloudEnabled[0] != b"1":
-        if nextcloudEnabled:
-            # Replace existing value
-            modlist.append(("nextcloudEnabled", nextcloudEnabled[0], b"1"))
-        else:
-            # Add new attribute
-            modlist.append(("nextcloudEnabled", b"", b"1"))
-
-    # Only modify if thers something to change
-    if modlist:
-        lo.modify(dn, modlist)
-        ud.debug(ud.LISTENER, ud.WARN, "Enabled Nextcloud for {}".format(dn))
-    else:
-        ud.debug(ud.LISTENER, ud.INFO, "Nextcloud already enabled for {}".format(dn))
