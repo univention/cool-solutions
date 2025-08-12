@@ -1,3 +1,11 @@
+univention-nextcloud-samba-share-config (2.0.0-6) unstable; urgency=low
+
+  * Create Marktplatz only when handling domain users
+  * Listener clears its temporary state each run so mounts don’t inherit groups from earlier event
+  * Honor nextcloud-samba-group-share-config/ignoreMarktplatz before adding any “Marktplatz” mount  
+
+ -- Jonas Einnolf <einnolf@univention.de>  Tue, 12 Aug 2025 09:47:19 +0200
+
 univention-nextcloud-samba-share-config (2.0.0-5) unstable; urgency=low
 
   * fix: univention-nextcloud-enable-for-classes-and-workgroups.py to high
