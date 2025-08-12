@@ -1,3 +1,12 @@
+univention-lusd (1.0.1-1) unstable; urgency=low
+
+  * version bump and rebase
+  * add link to help.univention
+  * release for UCS5.2
+  * rm package specific python libs: xmltodict & gnupg
+
+ -- Tim Breidenbach <breidenbach@univention.de>  Wed, 23 Jul 2025 18:59:29 +0200
+
 univention-lusd (1.0.0-7) unstable; urgency=low
 
   * fix XML encoding
