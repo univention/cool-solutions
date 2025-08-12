@@ -64,16 +64,18 @@ class NextcloudSambaGroupShareConfig(ListenerModuleHandler):
 
     def run(self, dn: str, remove: bool = False) -> None:
         """Do it"""
+        # Stop leaking mounts between different group events
+        self.shares = {}
+        self.mount_name = ""
+
         domain_users_match, lehrer_match, schueler_match, base, windomain = self.get_common_settings(dn)
 
         if domain_users_match:
             self.create_share_marktplatz(domain_users_match, base)
-            return
-
         elif lehrer_match or schueler_match:
             self.create_role_shares(lehrer_match, schueler_match, base)
         else:
-            self.handle_non_match(remove)
+            self.handle_non_lehrer_or_schueler(remove)
 
         if remove:
             mount_id = common.getMountId(self.mount_name)
@@ -122,7 +124,8 @@ class NextcloudSambaGroupShareConfig(ListenerModuleHandler):
         if ucr.is_true("nextcloud-samba-group-share-config/configureLehreraustausch"):
             share_name = "Lehrer-Austausch"
             self.mount_name = f"Lehrer-Austausch {ou}"
-            share = self.lo.get(f"cn={ldap.dn.escape_dn_chars(share_name)},cn=shares,ou={ldap.dn.escape_dn_chars(ou)},{self.base}")
+            # use the provided base parameter
+            share = self.lo.get(f"cn={ldap.dn.escape_dn_chars(share_name)},cn=shares,ou={ldap.dn.escape_dn_chars(ou)},{base}")
             if share:
                 self.shares[self.mount_name] = [(share, share_name)]
 
@@ -131,12 +134,13 @@ class NextcloudSambaGroupShareConfig(ListenerModuleHandler):
         share_name = "Marktplatz"
         ou = match[2][0][1]
         self.mount_name = f"Marktplatz {ou}"
-        share = self.lo.get(f"cn=Marktplatz,cn=shares,ou={ldap.dn.escape_dn_chars(ou)},{base}")
-        if share:
-            self.shares[self.mount_name] = [(share, share_name)]
+        # respect ignore flag before adding any mount
         if ucr.is_true("nextcloud-samba-group-share-config/ignoreMarktplatz"):
             self.logger.warning("UCR var nextcloud-samba-group-share-config/ignoreMarktplatz is true: Not creating mount for share %s", self.mount_name)
             return
+        share = self.lo.get(f"cn=Marktplatz,cn=shares,ou={ldap.dn.escape_dn_chars(ou)},{base}")
+        if share:
+            self.shares[self.mount_name] = [(share, share_name)]
 
     def handle_non_lehrer_or_schueler(self, remove: bool = False) -> None:
         """If none of schueler/leherer/domain users matches"""
