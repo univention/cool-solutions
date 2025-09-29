@@ -70,7 +70,7 @@ Description[en]=Certificate locality value to ldap attribut mapping
 Type=str
 Categories=SSL
 
-[ssl/usercert/extendedkeyusage]
+[ssl/usercert/extended-key-usage]
 Description[de]=Wert für extendedKeyUsage, der den Benutzerzertifikaten hinzugefügt wird
 Description[en]=Value for extendedKeyUsage to be added to the user certificates
 Type=str
