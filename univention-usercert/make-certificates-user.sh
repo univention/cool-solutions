@@ -35,6 +35,7 @@
 # http://www.pca.dfn.de/dfnpca/certify/ssl/handbuch/ossl092/
 
 DEFAULT_DAYS=$(/usr/sbin/univention-config-registry get ssl/usercert/days)
+EXTENDED_KEY_USAGE=$(/usr/sbin/univention-config-registry get ssl/usercert/extendedkeyusage)
 . /usr/share/univention-ssl/make-certificates.sh
 [ -n "$ca" ] && CA="${ca}"
 
@@ -167,6 +168,7 @@ authorityKeyIdentifier  = keyid,issuer:always
 basicConstraints = critical, CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 ${SAN_txt:+subjectAltName = $SAN_txt}
+${EXTENDED_KEY_USAGE:+extendedKeyUsage = $EXTENDED_KEY_USAGE}
 
 [ v3_ca ]
 
