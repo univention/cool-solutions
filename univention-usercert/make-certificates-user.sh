@@ -168,6 +168,7 @@ authorityKeyIdentifier  = keyid,issuer:always
 basicConstraints = critical, CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 ${SAN_txt:+subjectAltName = $SAN_txt}
+${EXTENDED_KEY_USAGE:+extendedKeyUsage = $EXTENDED_KEY_USAGE}
 
 [ v3_ca ]
 
