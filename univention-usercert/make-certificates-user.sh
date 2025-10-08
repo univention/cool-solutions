@@ -3,9 +3,9 @@
 # Univention SSL
 #  gencertificate script
 #
-# Copyright 2004-2021 Univention GmbH
+# Copyright 2004-2025 Univention GmbH
 #
-# http://www.univention.de/
+# https://www.univention.de/
 #
 # All rights reserved.
 #
@@ -31,14 +31,14 @@
 # <http://www.gnu.org/licenses/>.
 
 # See:
-# http://www.ibiblio.org/pub/Linux/docs/HOWTO/other-formats/html_single/SSL-Certificates-HOWTO.html
-# http://www.pca.dfn.de/dfnpca/certify/ssl/handbuch/ossl092/
+# https://www.ibiblio.org/pub/Linux/docs/HOWTO/other-formats/html_single/SSL-Certificates-HOWTO.html
 
-DEFAULT_DAYS=$(/usr/sbin/univention-config-registry get ssl/usercert/days)
+DEFAULT_DAYS=$(ucr get ssl/usercert/days)
+EXTENDED_KEY_USAGE=$(ucr get ssl/usercert/extended-key-usage)
 . /usr/share/univention-ssl/make-certificates.sh
 [ -n "$ca" ] && CA="${ca}"
 
-mk_config () {
+mk_config() {
 	local outfile=$1
 	local password=$2
 	local days=$3
@@ -50,33 +50,33 @@ mk_config () {
 	local ssl_state=$8
 	local ssl_locality=$9
 	local ssl_organization=${10}
-	
-	if test -z $ssl_country; then eval `univention-config-registry shell ssl/country`; fi
-	if test -z $ssl_state; then eval `univention-config-registry shell ssl/state`; fi
-	if test -z $ssl_locality; then eval `univention-config-registry shell ssl/locality`; fi
-	if test -z $ssl_organization; then eval `univention-config-registry shell ssl/organization`; fi
-	if test -z $ssl_organizationalunit; then eval `univention-config-registry shell ssl/organizationalunit`; fi
-	if test -z $ssl_email; then eval `univention-config-registry shell ssl/email`; fi
 
-	if test -e $outfile; then
-		rm $outfile
+	if test -z "$ssl_country"; then eval "$(ucr shell ssl/country)"; fi
+	if test -z "$ssl_state"; then eval "$(ucr shell ssl/state)"; fi
+	if test -z "$ssl_locality"; then eval "$(ucr shell ssl/locality)"; fi
+	if test -z "$ssl_organization"; then eval "$(ucr shell ssl/organization)"; fi
+	if test -z "$ssl_organizationalunit"; then eval "$(ucr shell ssl/organizationalunit)"; fi
+	if test -z "$ssl_email"; then eval "$(ucr shell ssl/email)"; fi
+
+	if test -e "$outfile"; then
+		rm "$outfile"
 	fi
-	touch $outfile
-	chmod 0600 $outfile
+	touch "$outfile"
+	chmod 0600 "$outfile"
 
-    cat <<EOF >>$outfile
+	cat <<EOF >>"$outfile"
 
-# HOME			= .
-# RANDFILE		= \$ENV::HOME/.rnd
-# oid_section		= new_oids
+# HOME      = .
+# RANDFILE    = \$ENV::HOME/.rnd
+# oid_section   = new_oids
 #
 # [ new_oids ]
 #
 
-path		= $SSLBASE
+path    = $SSLBASE
 
 [ ca ]
-default_ca	= CA_default
+default_ca  = CA_default
 
 [ CA_default ]
 
@@ -104,33 +104,33 @@ policy              = policy_match
 
 [ policy_match ]
 
-countryName		= match
-stateOrProvinceName	= supplied
-localityName		= optional
-organizationName	= supplied
-organizationalUnitName	= optional
-commonName		= supplied
-emailAddress		= optional
+countryName   = match
+stateOrProvinceName = supplied
+localityName    = optional
+organizationName  = supplied
+organizationalUnitName  = optional
+commonName    = supplied
+emailAddress    = optional
 
 [ policy_anything ]
 
-countryName		= match
-stateOrProvinceName	= optional
-localityName		= optional
-organizationName	= optional
-organizationalUnitName	= optional
-commonName		= supplied
-emailAddress		= optional
+countryName   = match
+stateOrProvinceName = optional
+localityName    = optional
+organizationName  = optional
+organizationalUnitName  = optional
+commonName    = supplied
+emailAddress    = optional
 
 [ req ]
 
-default_bits		= \$ENV::DEFAULT_BITS
-default_keyfile 	= privkey.pem
+default_bits    = \$ENV::DEFAULT_BITS
+default_keyfile   = privkey.pem
 default_md          = \$ENV::DEFAULT_MD
-distinguished_name	= req_distinguished_name
-attributes		= req_attributes
-x509_extensions		= v3_ca
-prompt		= no
+distinguished_name  = req_distinguished_name
+attributes    = req_attributes
+x509_extensions   = v3_ca
+prompt    = no
 ${password:+input_password = $password}
 ${password:+output_password = $password}
 string_mask = nombstr
@@ -138,18 +138,18 @@ req_extensions = v3_req
 
 [ req_distinguished_name ]
 
-C	= $(echo -n "$ssl_country" | _escape)
-ST	= $(echo -n "$ssl_state" | _escape)
-L	= $(echo -n "$ssl_locality" | _escape)
-O	= $(echo -n "$ssl_organization" | _escape)
-OU	= $(echo -n "$ssl_organizationalunit" | _escape)
-CN	= $(echo -n "$name" | _escape)
-emailAddress	= $(echo -n "$ssl_email" | _escape)
+C = $(echo -n "$ssl_country" | _escape)
+ST  = $(echo -n "$ssl_state" | _escape)
+L = $(echo -n "$ssl_locality" | _escape)
+O = $(echo -n "$ssl_organization" | _escape)
+OU  = $(echo -n "$ssl_organizationalunit" | _escape)
+CN  = $(echo -n "$name" | _escape)
+emailAddress  = $(echo -n "$ssl_email" | _escape)
 
 [ req_attributes ]
 
-challengePassword		= A challenge password
-unstructuredName	= Univention GmbH
+challengePassword   = A challenge password
+unstructuredName  = Univention GmbH
 
 [ ${CA}_ext ]
 
@@ -167,6 +167,7 @@ authorityKeyIdentifier  = keyid,issuer:always
 basicConstraints = critical, CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 ${SAN_txt:+subjectAltName = $SAN_txt}
+${EXTENDED_KEY_USAGE:+extendedKeyUsage = $EXTENDED_KEY_USAGE}
 
 [ v3_ca ]
 
@@ -184,22 +185,22 @@ nsComment               = This certificate is a Root CA Certificate
 issuerAltName           = issuer:copy
 authorityKeyIdentifier  = keyid:always,issuer:always
 EOF
-chmod 0600 $outfile
+	chmod 0600 $outfile
 }
 
-_escape () {
+_escape() {
 	sed 's/["$]/\\\0/g'
 }
 
-renew_cert () {
-	local OPWD=`pwd`
+renew_cert() {
+	local OPWD=$(pwd)
 	local path="$1"
 	local cn="$2"
 	local days="$3"
 	local owner="$4"
 	local extfile="$5"
 	cd "$SSLBASE"
-	
+
 	if [ -z "$owner" ]; then
 		owner="cert"
 	fi
@@ -208,20 +209,20 @@ renew_cert () {
 		echo "missing certificate name" 1>&2
 		return 1
 	fi
-	
-	local NUM=`list_cert_names | grep "$cn$" | sed -e 's/^\([0-9A-Fa-f]*\).*/\1/1'`
+
+	local NUM=$(list_cert_names | grep "$cn$" | sed -e 's/^\([0-9A-Fa-f]*\).*/\1/1')
 	if [ -z "$NUM" ]; then
 		echo "no certificate for $cn registered" 1>&2
 		return 1
 	fi
-	
+
 	if [ -z "$days" ]; then
 		days=$DEFAULT_DAYS
 	fi
-	
+
 	# revoke cert
 	revoke_cert "$cn"
-	
+
 	# extensions?
 	if [ -f "$extfile" ]; then
 		local ext="-extfile $(bash ${extfile})"
@@ -236,7 +237,7 @@ renew_cert () {
 	# sign the request
 	openssl ca -batch -config openssl.cnf $ext -days $days -in "$path/req.pem" -out "$path/cert.pem" -passin pass:"$PASSWD"
 	openssl x509 -outform der -in "$path/cert.pem" -out "$path/cert.cer"
-	makepasswd $chars > "$path/$owner-p12-password.txt"
+	makepasswd $chars >"$path/$owner-p12-password.txt"
 	openssl pkcs12 -export -in "$path/cert.pem" -inkey "$path/private.key" -chain -CAfile ucsCA/CAcert.pem -out "$path/$owner.p12" -passout file:"$path/$owner-p12-password.txt"
 
 	# move the new certificate to its place
@@ -252,7 +253,7 @@ renew_cert () {
 # Parameter 3 (opt): email Adresse
 # Parameter 4 (opt): Organisation
 
-gencert () {
+gencert() {
 	local path="$1"
 	local cn="$2"
 
@@ -270,10 +271,10 @@ gencert () {
 		owner="cert"
 	fi
 
-	local OPWD=`pwd`
+	local OPWD=$(pwd)
 	cd "$SSLBASE"
 	if has_valid_cert "$2"; then
-	    revoke_cert "$2"
+		revoke_cert "$2"
 	fi
 
 	if [ -z "$days" ]; then
@@ -300,7 +301,7 @@ gencert () {
 	# sign the key
 	openssl ca -batch -config openssl.cnf $ext -days $days -in "$path/req.pem" -out "$path/cert.pem" -passin pass:"$PASSWD"
 	openssl x509 -outform der -in "$path/cert.pem" -out "$path/cert.cer"
-	makepasswd $chars > "$path/$owner-p12-password.txt"
+	makepasswd "$chars" >"$path/$owner-p12-password.txt"
 	openssl pkcs12 -export -in "$path/cert.pem" -inkey "$path/private.key" -chain -CAfile ucsCA/CAcert.pem -out "$path/$owner.p12" -passout file:"$path/$owner-p12-password.txt"
 
 	# move the new certificate to its place
