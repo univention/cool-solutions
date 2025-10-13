@@ -200,7 +200,7 @@ renew_cert() {
 	local owner="$4"
 	local extfile="$5"
 	cd "$SSLBASE"
-
+	
 	if [ -z "$owner" ]; then
 		owner="cert"
 	fi
@@ -211,18 +211,19 @@ renew_cert() {
 	fi
 
 	local NUM=$(list_cert_names | grep "$cn$" | sed -e 's/^\([0-9A-Fa-f]*\).*/\1/1')
+	
 	if [ -z "$NUM" ]; then
 		echo "no certificate for $cn registered" 1>&2
 		return 1
 	fi
-
+	
 	if [ -z "$days" ]; then
 		days=$DEFAULT_DAYS
 	fi
-
+	
 	# revoke cert
 	revoke_cert "$cn"
-
+	
 	# extensions?
 	if [ -f "$extfile" ]; then
 		local ext="-extfile $(bash ${extfile})"
