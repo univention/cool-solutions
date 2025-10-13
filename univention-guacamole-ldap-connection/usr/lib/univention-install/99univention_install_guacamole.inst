@@ -34,10 +34,10 @@ VERSION=3
 joinscript_init
 
 if joinscript_check_any_version_executed; then
-    echo -n "Removing old Guacd container... "
-    /usr/bin/docker stop guacd > /dev/null
-    /usr/bin/docker rm guacd > /dev/null
-    echo -e "Done!"
+	echo -n "Removing old Guacd container... "
+	/usr/bin/docker stop guacd >/dev/null
+	/usr/bin/docker rm guacd >/dev/null
+	echo -e "Done!"
 fi
 
 echo -n "Downloading guacd... "
@@ -45,10 +45,10 @@ echo -n "Downloading guacd... "
 echo -e "Done!"
 
 if joinscript_check_any_version_executed; then
-    echo -n "Removing old Guacamole container to provision new container with new settings... "
-    /usr/bin/docker stop guacamole > /dev/null
-    /usr/bin/docker rm guacamole > /dev/null
-    echo -e "Done!"
+	echo -n "Removing old Guacamole container to provision new container with new settings... "
+	/usr/bin/docker stop guacamole >/dev/null
+	/usr/bin/docker rm guacamole >/dev/null
+	echo -e "Done!"
 fi
 
 echo -n "Downloading Guacamole... "
@@ -62,11 +62,11 @@ echo -e "Done!"
 
 echo -e "Create overview site link... "
 /usr/sbin/univention-config-registry set \
-    ucs/web/overview/entries/service/guacamole/link="/guacamole" \
-    ucs/web/overview/entries/service/guacamole/label="Guacamole" \
-    ucs/web/overview/entries/service/guacamole/description="Guacamole is a clientless remote desktop gateway." \
-    ucs/web/overview/entries/service/guacamole/description/de="Guacamole ist ein clientloses Gateway für Remote-Verbindungen." \
-    ucs/web/overview/entries/service/guacamole/icon="/guacamole/images/logo-64.png"
+	ucs/web/overview/entries/service/guacamole/link="/guacamole" \
+	ucs/web/overview/entries/service/guacamole/label="Guacamole" \
+	ucs/web/overview/entries/service/guacamole/description="Guacamole is a clientless remote desktop gateway." \
+	ucs/web/overview/entries/service/guacamole/description/de="Guacamole ist ein clientloses Gateway für Remote-Verbindungen." \
+	ucs/web/overview/entries/service/guacamole/icon="/guacamole/images/logo-64.png"
 echo -e "Done!"
 
 echo -e "Calling univention-guacamole-renew..."

@@ -51,11 +51,11 @@ echo -e "Done!"
 
 echo -e "Removing Guacamole from the overview site... "
 /usr/sbin/univention-config-registry unset \
-    ucs/web/overview/entries/service/guacamole/link \
-    ucs/web/overview/entries/service/guacamole/label \
-    ucs/web/overview/entries/service/guacamole/description \
-    ucs/web/overview/entries/service/guacamole/description/de \
-    ucs/web/overview/entries/service/guacamole/icon
+	ucs/web/overview/entries/service/guacamole/link \
+	ucs/web/overview/entries/service/guacamole/label \
+	ucs/web/overview/entries/service/guacamole/description \
+	ucs/web/overview/entries/service/guacamole/description/de \
+	ucs/web/overview/entries/service/guacamole/icon
 echo -e "Done!"
 
 service apache2 reload

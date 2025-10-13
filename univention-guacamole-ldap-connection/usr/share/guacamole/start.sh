@@ -47,17 +47,17 @@ GUACAMOLE_PROPERTIES="$GUACAMOLE_HOME/guacamole.properties"
 ##
 set_property() {
 
-    NAME="$1"
-    VALUE="$2"
+	NAME="$1"
+	VALUE="$2"
 
-    # Ensure guacamole.properties exists
-    if [ ! -e "$GUACAMOLE_PROPERTIES" ]; then
-        mkdir -p "$GUACAMOLE_HOME"
-        echo "# guacamole.properties - generated `date`" > "$GUACAMOLE_PROPERTIES"
-    fi
+	# Ensure guacamole.properties exists
+	if [ ! -e "$GUACAMOLE_PROPERTIES" ]; then
+		mkdir -p "$GUACAMOLE_HOME"
+		echo "# guacamole.properties - generated $(date)" >"$GUACAMOLE_PROPERTIES"
+	fi
 
-    # Set property
-    echo "$NAME: $VALUE" >> "$GUACAMOLE_PROPERTIES"
+	# Set property
+	echo "$NAME: $VALUE" >>"$GUACAMOLE_PROPERTIES"
 
 }
 
@@ -74,13 +74,13 @@ set_property() {
 ##
 set_optional_property() {
 
-    NAME="$1"
-    VALUE="$2"
+	NAME="$1"
+	VALUE="$2"
 
-    # Set the property only if a value is provided
-    if [ -n "$VALUE" ]; then
-        set_property "$NAME" "$VALUE"
-    fi
+	# Set the property only if a value is provided
+	if [ -n "$VALUE" ]; then
+		set_property "$NAME" "$VALUE"
+	fi
 
 }
 
@@ -93,18 +93,18 @@ set_optional_property() {
 ##
 associate_mysql() {
 
-    # Use linked container if specified
-    if [ -n "$MYSQL_NAME" ]; then
-        MYSQL_HOSTNAME="$MYSQL_PORT_3306_TCP_ADDR"
-        MYSQL_PORT="$MYSQL_PORT_3306_TCP_PORT"
-    fi
+	# Use linked container if specified
+	if [ -n "$MYSQL_NAME" ]; then
+		MYSQL_HOSTNAME="$MYSQL_PORT_3306_TCP_ADDR"
+		MYSQL_PORT="$MYSQL_PORT_3306_TCP_PORT"
+	fi
 
-    # Use default port if none specified
-    MYSQL_PORT="${MYSQL_PORT-3306}"
+	# Use default port if none specified
+	MYSQL_PORT="${MYSQL_PORT-3306}"
 
-    # Verify required connection information is present
-    if [ -z "$MYSQL_HOSTNAME" -o -z "$MYSQL_PORT" ]; then
-        cat <<END
+	# Verify required connection information is present
+	if [ -z "$MYSQL_HOSTNAME" -o -z "$MYSQL_PORT" ]; then
+		cat <<END
 FATAL: Missing MYSQL_HOSTNAME or "mysql" link.
 -------------------------------------------------------------------------------
 If using a MySQL database, you must either:
@@ -122,12 +122,12 @@ If using a MySQL database, you must either:
                        connections. This environment variable is option. If
                        omitted, the standard MySQL port of 3306 will be used.
 END
-        exit 1;
-    fi
+		exit 1
+	fi
 
-    # Verify required parameters are present
-    if [ -z "$MYSQL_USER" -o -z "$MYSQL_PASSWORD" -o -z "$MYSQL_DATABASE" ]; then
-        cat <<END
+	# Verify required parameters are present
+	if [ -z "$MYSQL_USER" -o -z "$MYSQL_PASSWORD" -o -z "$MYSQL_DATABASE" ]; then
+		cat <<END
 FATAL: Missing required environment variables
 -------------------------------------------------------------------------------
 If using a MySQL database, you must provide each of the following
@@ -142,39 +142,39 @@ environment variables:
     MYSQL_DATABASE     The name of the MySQL database to use for Guacamole
                        authentication.
 END
-        exit 1;
-    fi
+		exit 1
+	fi
 
-    # Update config file
-    set_property "mysql-hostname" "$MYSQL_HOSTNAME"
-    set_property "mysql-port"     "$MYSQL_PORT"
-    set_property "mysql-database" "$MYSQL_DATABASE"
-    set_property "mysql-username" "$MYSQL_USER"
-    set_property "mysql-password" "$MYSQL_PASSWORD"
+	# Update config file
+	set_property "mysql-hostname" "$MYSQL_HOSTNAME"
+	set_property "mysql-port" "$MYSQL_PORT"
+	set_property "mysql-database" "$MYSQL_DATABASE"
+	set_property "mysql-username" "$MYSQL_USER"
+	set_property "mysql-password" "$MYSQL_PASSWORD"
 
-    set_optional_property               \
-        "mysql-absolute-max-connections" \
-        "$MYSQL_ABSOLUTE_MAX_CONNECTIONS"
+	set_optional_property \
+		"mysql-absolute-max-connections" \
+		"$MYSQL_ABSOLUTE_MAX_CONNECTIONS"
 
-    set_optional_property               \
-        "mysql-default-max-connections" \
-        "$MYSQL_DEFAULT_MAX_CONNECTIONS"
+	set_optional_property \
+		"mysql-default-max-connections" \
+		"$MYSQL_DEFAULT_MAX_CONNECTIONS"
 
-    set_optional_property                     \
-        "mysql-default-max-group-connections" \
-        "$MYSQL_DEFAULT_MAX_GROUP_CONNECTIONS"
+	set_optional_property \
+		"mysql-default-max-group-connections" \
+		"$MYSQL_DEFAULT_MAX_GROUP_CONNECTIONS"
 
-    set_optional_property                        \
-        "mysql-default-max-connections-per-user" \
-        "$MYSQL_DEFAULT_MAX_CONNECTIONS_PER_USER"
+	set_optional_property \
+		"mysql-default-max-connections-per-user" \
+		"$MYSQL_DEFAULT_MAX_CONNECTIONS_PER_USER"
 
-    set_optional_property                              \
-        "mysql-default-max-group-connections-per-user" \
-        "$MYSQL_DEFAULT_MAX_GROUP_CONNECTIONS_PER_USER"
+	set_optional_property \
+		"mysql-default-max-group-connections-per-user" \
+		"$MYSQL_DEFAULT_MAX_GROUP_CONNECTIONS_PER_USER"
 
-    # Add required .jar files to GUACAMOLE_LIB and GUACAMOLE_EXT
-    ln -s /opt/guacamole/mysql/mysql-connector-*.jar "$GUACAMOLE_LIB"
-    ln -s /opt/guacamole/mysql/guacamole-auth-*.jar "$GUACAMOLE_EXT"
+	# Add required .jar files to GUACAMOLE_LIB and GUACAMOLE_EXT
+	ln -s /opt/guacamole/mysql/mysql-connector-*.jar "$GUACAMOLE_LIB"
+	ln -s /opt/guacamole/mysql/guacamole-auth-*.jar "$GUACAMOLE_EXT"
 
 }
 
@@ -187,18 +187,18 @@ END
 ##
 associate_postgresql() {
 
-    # Use linked container if specified
-    if [ -n "$POSTGRES_NAME" ]; then
-        POSTGRES_HOSTNAME="$POSTGRES_PORT_5432_TCP_ADDR"
-        POSTGRES_PORT="$POSTGRES_PORT_5432_TCP_PORT"
-    fi
+	# Use linked container if specified
+	if [ -n "$POSTGRES_NAME" ]; then
+		POSTGRES_HOSTNAME="$POSTGRES_PORT_5432_TCP_ADDR"
+		POSTGRES_PORT="$POSTGRES_PORT_5432_TCP_PORT"
+	fi
 
-    # Use default port if none specified
-    POSTGRES_PORT="${POSTGRES_PORT-5432}"
+	# Use default port if none specified
+	POSTGRES_PORT="${POSTGRES_PORT-5432}"
 
-    # Verify required connection information is present
-    if [ -z "$POSTGRES_HOSTNAME" -o -z "$POSTGRES_PORT" ]; then
-        cat <<END
+	# Verify required connection information is present
+	if [ -z "$POSTGRES_HOSTNAME" -o -z "$POSTGRES_PORT" ]; then
+		cat <<END
 FATAL: Missing POSTGRES_HOSTNAME or "postgres" link.
 -------------------------------------------------------------------------------
 If using a PostgreSQL database, you must either:
@@ -218,12 +218,12 @@ If using a PostgreSQL database, you must either:
                        omitted, the standard PostgreSQL port of 5432 will be
                        used.
 END
-        exit 1;
-    fi
+		exit 1
+	fi
 
-    # Verify required parameters are present
-    if [ -z "$POSTGRES_USER" -o -z "$POSTGRES_PASSWORD" -o -z "$POSTGRES_DATABASE" ]; then
-        cat <<END
+	# Verify required parameters are present
+	if [ -z "$POSTGRES_USER" -o -z "$POSTGRES_PASSWORD" -o -z "$POSTGRES_DATABASE" ]; then
+		cat <<END
 FATAL: Missing required environment variables
 -------------------------------------------------------------------------------
 If using a PostgreSQL database, you must provide each of the following
@@ -238,39 +238,39 @@ environment variables:
     POSTGRES_DATABASE  The name of the PostgreSQL database to use for Guacamole
                        authentication.
 END
-        exit 1;
-    fi
+		exit 1
+	fi
 
-    # Update config file
-    set_property "postgresql-hostname" "$POSTGRES_HOSTNAME"
-    set_property "postgresql-port"     "$POSTGRES_PORT"
-    set_property "postgresql-database" "$POSTGRES_DATABASE"
-    set_property "postgresql-username" "$POSTGRES_USER"
-    set_property "postgresql-password" "$POSTGRES_PASSWORD"
+	# Update config file
+	set_property "postgresql-hostname" "$POSTGRES_HOSTNAME"
+	set_property "postgresql-port" "$POSTGRES_PORT"
+	set_property "postgresql-database" "$POSTGRES_DATABASE"
+	set_property "postgresql-username" "$POSTGRES_USER"
+	set_property "postgresql-password" "$POSTGRES_PASSWORD"
 
-    set_optional_property               \
-        "postgresql-absolute-max-connections" \
-        "$POSTGRES_ABSOLUTE_MAX_CONNECTIONS"
+	set_optional_property \
+		"postgresql-absolute-max-connections" \
+		"$POSTGRES_ABSOLUTE_MAX_CONNECTIONS"
 
-    set_optional_property                    \
-        "postgresql-default-max-connections" \
-        "$POSTGRES_DEFAULT_MAX_CONNECTIONS"
+	set_optional_property \
+		"postgresql-default-max-connections" \
+		"$POSTGRES_DEFAULT_MAX_CONNECTIONS"
 
-    set_optional_property                          \
-        "postgresql-default-max-group-connections" \
-        "$POSTGRES_DEFAULT_MAX_GROUP_CONNECTIONS"
+	set_optional_property \
+		"postgresql-default-max-group-connections" \
+		"$POSTGRES_DEFAULT_MAX_GROUP_CONNECTIONS"
 
-    set_optional_property                             \
-        "postgresql-default-max-connections-per-user" \
-        "$POSTGRES_DEFAULT_MAX_CONNECTIONS_PER_USER"
+	set_optional_property \
+		"postgresql-default-max-connections-per-user" \
+		"$POSTGRES_DEFAULT_MAX_CONNECTIONS_PER_USER"
 
-    set_optional_property                                   \
-        "postgresql-default-max-group-connections-per-user" \
-        "$POSTGRES_DEFAULT_MAX_GROUP_CONNECTIONS_PER_USER"
+	set_optional_property \
+		"postgresql-default-max-group-connections-per-user" \
+		"$POSTGRES_DEFAULT_MAX_GROUP_CONNECTIONS_PER_USER"
 
-    # Add required .jar files to GUACAMOLE_LIB and GUACAMOLE_EXT
-    ln -s /opt/guacamole/postgresql/postgresql-*.jar "$GUACAMOLE_LIB"
-    ln -s /opt/guacamole/postgresql/guacamole-auth-*.jar "$GUACAMOLE_EXT"
+	# Add required .jar files to GUACAMOLE_LIB and GUACAMOLE_EXT
+	ln -s /opt/guacamole/postgresql/postgresql-*.jar "$GUACAMOLE_LIB"
+	ln -s /opt/guacamole/postgresql/guacamole-auth-*.jar "$GUACAMOLE_EXT"
 
 }
 
@@ -281,9 +281,9 @@ END
 ##
 associate_ldap() {
 
-    # Verify required parameters are present
-    if [ -z "$LDAP_HOSTNAME" -o -z "$LDAP_USER_BASE_DN" ]; then
-        cat <<END
+	# Verify required parameters are present
+	if [ -z "$LDAP_HOSTNAME" -o -z "$LDAP_USER_BASE_DN" ]; then
+		cat <<END
 FATAL: Missing required environment variables
 -------------------------------------------------------------------------------
 If using an LDAP directory, you must provide each of the following environment
@@ -296,29 +296,29 @@ variables:
                        authenticate via LDAP must exist within the subtree of
                        this DN.
 END
-        exit 1;
-    fi
+		exit 1
+	fi
 
-    # Update config file
-    set_property          "ldap-hostname"           "$LDAP_HOSTNAME"
-    set_optional_property "ldap-port"               "$LDAP_PORT"
-    set_optional_property "ldap-encryption-method"  "$LDAP_ENCRYPTION_METHOD"
-    set_property          "ldap-user-base-dn"       "$LDAP_USER_BASE_DN"
-    set_optional_property "ldap-username-attribute" "$LDAP_USERNAME_ATTRIBUTE"
-    set_optional_property "ldap-group-base-dn"      "$LDAP_GROUP_BASE_DN"
-    set_optional_property "ldap-config-base-dn"     "$LDAP_CONFIG_BASE_DN"
+	# Update config file
+	set_property "ldap-hostname" "$LDAP_HOSTNAME"
+	set_optional_property "ldap-port" "$LDAP_PORT"
+	set_optional_property "ldap-encryption-method" "$LDAP_ENCRYPTION_METHOD"
+	set_property "ldap-user-base-dn" "$LDAP_USER_BASE_DN"
+	set_optional_property "ldap-username-attribute" "$LDAP_USERNAME_ATTRIBUTE"
+	set_optional_property "ldap-group-base-dn" "$LDAP_GROUP_BASE_DN"
+	set_optional_property "ldap-config-base-dn" "$LDAP_CONFIG_BASE_DN"
 
-    set_optional_property     \
-        "ldap-search-bind-dn" \
-        "$LDAP_SEARCH_BIND_DN"
+	set_optional_property \
+		"ldap-search-bind-dn" \
+		"$LDAP_SEARCH_BIND_DN"
 
-    set_optional_property           \
-        "ldap-search-bind-password" \
-        "$LDAP_SEARCH_BIND_PASSWORD"
-    set_optional_property "ldap-user-search-filter" "$LDAP_USER_SEARCH_FILTER"
+	set_optional_property \
+		"ldap-search-bind-password" \
+		"$LDAP_SEARCH_BIND_PASSWORD"
+	set_optional_property "ldap-user-search-filter" "$LDAP_USER_SEARCH_FILTER"
 
-    # Add required .jar files to GUACAMOLE_EXT
-    ln -s /opt/guacamole/ldap/guacamole-auth-*.jar "$GUACAMOLE_EXT"
+	# Add required .jar files to GUACAMOLE_EXT
+	ln -s /opt/guacamole/ldap/guacamole-auth-*.jar "$GUACAMOLE_EXT"
 
 }
 
@@ -329,12 +329,12 @@ END
 ##
 start_guacamole() {
 
-    # Install webapp
-    ln -sf /opt/guacamole/guacamole.war /usr/local/tomcat/webapps/
+	# Install webapp
+	ln -sf /opt/guacamole/guacamole.war /usr/local/tomcat/webapps/
 
-    # Start tomcat
-    cd /usr/local/tomcat
-    exec catalina.sh run
+	# Start tomcat
+	cd /usr/local/tomcat
+	exec catalina.sh run
 
 }
 
@@ -349,7 +349,7 @@ rm -Rf "$GUACAMOLE_HOME"
 #
 
 if [ -n "$GUACAMOLE_HOME_TEMPLATE" ]; then
-    cp -a "$GUACAMOLE_HOME_TEMPLATE/." "$GUACAMOLE_HOME/"
+	cp -a "$GUACAMOLE_HOME_TEMPLATE/." "$GUACAMOLE_HOME/"
 fi
 
 #
@@ -365,8 +365,8 @@ mkdir -p "$GUACAMOLE_LIB"
 
 # Use linked container for guacd if specified
 if [ -n "$GUACD_NAME" ]; then
-    GUACD_HOSTNAME="$GUACD_PORT_4822_TCP_ADDR"
-    GUACD_PORT="$GUACD_PORT_4822_TCP_PORT"
+	GUACD_HOSTNAME="$GUACD_PORT_4822_TCP_ADDR"
+	GUACD_PORT="$GUACD_PORT_4822_TCP_PORT"
 fi
 
 # Use default guacd port if none specified
@@ -374,7 +374,7 @@ GUACD_PORT="${GUACD_PORT-4822}"
 
 # Verify required guacd connection information is present
 if [ -z "$GUACD_HOSTNAME" -o -z "$GUACD_PORT" ]; then
-    cat <<END
+	cat <<END
 FATAL: Missing GUACD_HOSTNAME or "guacd" link.
 -------------------------------------------------------------------------------
 Every Guacamole instance needs a corresponding copy of guacd running. To
@@ -393,12 +393,12 @@ GUACD_PORT         The port on which guacd is listening for TCP connections.
                    This environment variable is optional. If omitted, the
                    standard guacd port of 4822 will be used.
 END
-    exit 1;
+	exit 1
 fi
 
 # Update config file
 set_property "guacd-hostname" "$GUACD_HOSTNAME"
-set_property "guacd-port"     "$GUACD_PORT"
+set_property "guacd-port" "$GUACD_PORT"
 
 #
 # Track which authentication backends are installed
@@ -408,20 +408,20 @@ INSTALLED_AUTH=""
 
 # Use MySQL if database specified
 if [ -n "$MYSQL_DATABASE" ]; then
-    associate_mysql
-    INSTALLED_AUTH="$INSTALLED_AUTH mysql"
+	associate_mysql
+	INSTALLED_AUTH="$INSTALLED_AUTH mysql"
 fi
 
 # Use PostgreSQL if database specified
 if [ -n "$POSTGRES_DATABASE" ]; then
-    associate_postgresql
-    INSTALLED_AUTH="$INSTALLED_AUTH postgres"
+	associate_postgresql
+	INSTALLED_AUTH="$INSTALLED_AUTH postgres"
 fi
 
 # Use LDAP directory if specified
 if [ -n "$LDAP_HOSTNAME" ]; then
-    associate_ldap
-    INSTALLED_AUTH="$INSTALLED_AUTH ldap"
+	associate_ldap
+	INSTALLED_AUTH="$INSTALLED_AUTH ldap"
 fi
 
 #
@@ -429,7 +429,7 @@ fi
 #
 
 if [ -z "$INSTALLED_AUTH" -a -z "$GUACAMOLE_HOME_TEMPLATE" ]; then
-    cat <<END
+	cat <<END
 FATAL: No authentication configured
 -------------------------------------------------------------------------------
 The Guacamole Docker container needs at least one authentication mechanism in
@@ -438,7 +438,7 @@ directory.  Please specify at least the MYSQL_DATABASE or POSTGRES_DATABASE
 environment variables, or check Guacamole's Docker documentation regarding
 configuring LDAP and/or custom extensions.
 END
-    exit 1;
+	exit 1
 fi
 
 #
@@ -446,4 +446,3 @@ fi
 #
 
 start_guacamole
-

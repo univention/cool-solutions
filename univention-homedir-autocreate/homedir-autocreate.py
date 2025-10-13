@@ -31,18 +31,16 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <http://www.gnu.org/licenses/>.
 
-import re
 import os
-from typing import List
+import re
 
 import listener
-
 import univention.debug as ud
 from univention.config_registry import ucr
 
 name = "homedir-autocreate"
 description = "Generate homedir on usercreation"
-prettyFilter = '(&\
+prettyFilter = "(&\
                     (|\
                         (&\
                             (objectClass=posixAccount)\
@@ -63,7 +61,7 @@ prettyFilter = '(&\
                     (!\
                         (uid=*$)\
                     )\
-                )'
+                )"
 filter = "".join(prettyFilter.split())
 attributes = []  # type: List
 
@@ -73,9 +71,11 @@ PATH_CHOWN = "/bin/chown"
 PATH_CHMOD = "/bin/chmod"
 
 
-def handler(dn: str, new: "dict[str, list[bytes]]", old: "dict[str, list[bytes]]") -> None:
+def handler(
+    dn: str, new: "dict[str, list[bytes]]", old: "dict[str, list[bytes]]"
+) -> None:
     # create users homedir only on user creation
-     if not old and new:
+    if not old and new:
         ud.debug(
             ud.LISTENER,
             ud.WARN,
@@ -105,7 +105,8 @@ def handler(dn: str, new: "dict[str, list[bytes]]", old: "dict[str, list[bytes]]
                     )
                     listener.run(
                         PATH_SU,
-                        [PATH_SU, "-c", "echo", "-", new["uid"][0].decode("utf-8")],
+                        [PATH_SU, "-c", "echo", "-",
+                            new["uid"][0].decode("utf-8")],
                     )
                     ud.debug(
                         ud.LISTENER,
@@ -117,10 +118,17 @@ def handler(dn: str, new: "dict[str, list[bytes]]", old: "dict[str, list[bytes]]
                             new["uid"][0].decode("utf-8"),
                         ),
                     )
-            elif (new.get("automountInformation")[0].decode("UTF-8") in ucr["hostname"]):
+            elif new.get("automountInformation")[0].decode("UTF-8") in ucr["hostname"]:
                 if new.get("uid"):
-                    automount_information = new.get("automountInformation", [ucr["hostname"].encode("utf8")])
-                    path = re.split(b' +', automount_information, 1)[1].split(b':', 1)[1].decode('UTF-8')
+                    automount_information = new.get(
+                        "automountInformation", [
+                            ucr["hostname"].encode("utf8")]
+                    )
+                    path = (
+                        re.split(b" +", automount_information, 1)[1]
+                        .split(b":", 1)[1]
+                        .decode("UTF-8")
+                    )
                     listener.run(PATH_MKDIR, [PATH_MKDIR, path])
                     listener.run(
                         PATH_CHOWN,

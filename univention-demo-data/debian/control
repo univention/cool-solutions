@@ -2,12 +2,18 @@ Source: univention-demo-data
 Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
-Build-Depends: debhelper (>= 9), ucslint, quilt, univention-config-dev
+Build-Depends:
+ debhelper (>= 9),
+ quilt,
+ ucslint,
+ univention-config-dev,
 Standards-Version: 3.9.5
 Homepage: http://www.univention.de/
 
 Package: univention-demo-data
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
 Description: Demo data provied by the "Deutsche Wolke"
  Demo data provided by the "Deutsche Wolke" and images by freedigitalphotos.net

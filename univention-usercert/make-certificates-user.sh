@@ -211,6 +211,7 @@ renew_cert() {
 	fi
 
 	local NUM=$(list_cert_names | grep "$cn$" | sed -e 's/^\([0-9A-Fa-f]*\).*/\1/1')
+
 	if [ -z "$NUM" ]; then
 		echo "no certificate for $cn registered" 1>&2
 		return 1

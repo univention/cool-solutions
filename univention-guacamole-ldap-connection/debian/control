@@ -2,18 +2,29 @@ Source: univention-guacamole-ldap-connection
 Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
-Build-Depends: debhelper (>= 9), ucslint-univention, quilt, univention-config-dev, libunivention-config-dev, python, dh-python
+Build-Depends:
+ debhelper (>= 9),
+ dh-python,
+ libunivention-config-dev,
+ python,
+ quilt,
+ ucslint-univention,
+ univention-config-dev,
 Standards-Version: 3.9.8
 Homepage: http://www.univention.de/
 
 Package: univention-guacamole-schema
 Architecture: all
-Depends: ${python:Depends}, ${misc:Depends}
+Depends:
+ ${misc:Depends},
+ ${python:Depends},
 Description: Guacamole schema file
  This package contains the Guacamole schema file.
 
 Package: univention-guacamole-rollout
 Architecture: all
-Depends: univention-guacamole-schema, ${misc:Depends}
+Depends:
+ univention-guacamole-schema,
+ ${misc:Depends},
 Description: Guacamole installation wrapper
  Guacamole installer and Apache2 configuration

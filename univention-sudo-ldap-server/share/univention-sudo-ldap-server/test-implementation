@@ -71,49 +71,44 @@ lastname="coolsolutiontester"
 #store stdout, it's redirected to the logfile later on
 exec 5>&1
 
-msg () {
+msg() {
 	echo "$(date): ${@}" | tee -a "${LOGFILE}" >&5
 }
 
 #check if package is installed
-check_package(){
+check_package() {
 	msg "Test if package $1 is installed."
-    installed=$(dpkg -l $1|grep -w $1|wc -l)
-    if [ $installed -eq 1 ]
-    then
-        msg "OK: Package $1 is installed."
-    else
-        msg "FAIL: Package $1 is not installed correctly."
+	installed=$(dpkg -l $1 | grep -w $1 | wc -l)
+	if [ $installed -eq 1 ]; then
+		msg "OK: Package $1 is installed."
+	else
+		msg "FAIL: Package $1 is not installed correctly."
 		exit 1
-    fi
+	fi
 }
 
 #create user method, example: create_user uid password lastname
-create_user (){
-	udm users/user create --ignore_exists\
-	--position $position\
-	--set username="$1"\
-	--set password="$2"\
-	--set lastname="$3"
+create_user() {
+	udm users/user create --ignore_exists --position $position --set username="$1" \
+		--set password="$2" \
+		--set lastname="$3"
 	check_entry "uid=$1"
 }
 
 #create sudo-rule method, example: create_rule rule_name rule_description users_for_rule command_for_sudo
-create_rule(){
-	udm sudo/rule create --ignore_exists\
-	--position="$position"\
-	--set name="$1"\
-	--set description="$2"\
-	--set hosts="$(hostname -f)"\
-	--append users="$3"\
-	--append command="$4"
+create_rule() {
+	udm sudo/rule create --ignore_exists --position="$position" \
+		--set name="$1" \
+		--set description="$2" \
+		--set hosts="$(hostname -f)" \
+		--append users="$3" \
+		--append command="$4"
 	check_entry "cn=$1"
 }
 
 #check if LDAP-entry exists
-check_entry(){
-	if [ $(univention-ldapsearch -xLLL "$1"|wc -l) -eq 0 ]
-	then
+check_entry() {
+	if [ $(univention-ldapsearch -xLLL "$1" | wc -l) -eq 0 ]; then
 		msg "FAIL: LDAP entry $1 could not be found."
 		exit 1
 	else
@@ -122,10 +117,9 @@ check_entry(){
 }
 
 #check if user can use sudo-command
-check_command(){
+check_command() {
 	msg "Check if $1 can use sudo-command."
-	if sudo -lU $1 | grep -q "apt-get"
-	then
+	if sudo -lU $1 | grep -q "apt-get"; then
 		msg "OK: $1 can use the sudo-command."
 	else
 		msg "FAIL: $1 can't use the sudo-command."
@@ -154,7 +148,7 @@ check_command "$testuser1"
 msg 'Change the "Package Management"-rule users to ALL.'
 dn=$(udm sudo/rule list --filter name="Package Management" | sed -ne 's/^DN: //p')
 udm sudo/rule modify --dn "$dn" --set users=ALL
-udm sudo/rule list --filter name="Package Management"| tee -a $LOGFILE >&5
+udm sudo/rule list --filter name="Package Management" | tee -a $LOGFILE >&5
 
 #test whether modification works
 msg 'Check modified "Package Management"-rule.'

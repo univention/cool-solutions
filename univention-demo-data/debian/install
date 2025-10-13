@@ -1,9 +1,9 @@
-99univention-demo-data.inst usr/lib/univention-install
 01univention-demo-data.uinst usr/lib/univention-uninstall
+99univention-demo-data.inst usr/lib/univention-install
 images/anna.alster.jpg usr/share/univention-demo-data/images
 images/anton.aktie.jpg usr/share/univention-demo-data/images
-images/bärbel.bitte.jpg usr/share/univention-demo-data/images
 images/bernd.brotox.jpg usr/share/univention-demo-data/images
+images/bärbel.bitte.jpg usr/share/univention-demo-data/images
 images/christian.cux.jpg usr/share/univention-demo-data/images
 images/claudia.conrad.jpg usr/share/univention-demo-data/images
 images/dagmar.dackel.jpg usr/share/univention-demo-data/images

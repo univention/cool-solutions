@@ -38,7 +38,7 @@ univention-demo-data (2.0.1-1) unstable; urgency=medium
   * Renamed joinscript
   * Renamed unjoinscript
   * Fixed files containing old unjoinscript and joinscript
-  * Added creation of new parent ou "univention-demo-data" in the joinscript to save all objects into, to prevent accidental deletion of productive data* 
+  * Added creation of new parent ou "univention-demo-data" in the joinscript to save all objects into, to prevent accidental deletion of productive data*
   * Added new parent ou "univention-demo-data" in unjoinscript
   * Issue #2115
 

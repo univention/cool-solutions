@@ -43,16 +43,16 @@ eval "$(ucr shell hostname)"
 
 echo -e "Creating search user for guacamole... "
 guacamole_pwd="$(create_machine_password)"
-echo -n "${guacamole_pwd}" > /etc/guacamole.secret
+echo -n "${guacamole_pwd}" >/etc/guacamole.secret
 chmod 600 /etc/guacamole.secret
 
 udm users/user create "$@" \
-    --ignore_exists \
-    --position "cn=users,${ldap_base}" \
-    --set username="guacamole-${hostname}" \
-    --set lastname="Guacamole search user, system '${hostname}'" \
-    --set password="${guacamole_pwd}" \
-    --option=ldap_pwd
+	--ignore_exists \
+	--position "cn=users,${ldap_base}" \
+	--set username="guacamole-${hostname}" \
+	--set lastname="Guacamole search user, system '${hostname}'" \
+	--set password="${guacamole_pwd}" \
+	--option=ldap_pwd
 unset guacamole_pwd
 echo -e "Done!"
 

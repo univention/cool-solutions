@@ -29,10 +29,12 @@
 # <http://www.gnu.org/licenses/>.
 import subprocess
 
+
 def preinst(ucr, changes):
     pass
 
+
 def postinst(ucr, changes):
     # Altered allowed hosts of munin-node, restart munin-node after postinst of '/etc/munin/munin-node.conf'
-    command = ['systemctl', 'reload-or-restart', 'munin-node']
+    command = ["systemctl", "reload-or-restart", "munin-node"]
     return subprocess.call(command, shell=False)

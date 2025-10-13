@@ -39,15 +39,15 @@ eval "$(ucr shell ldap/base)"
 # Don't, if still needed
 . /usr/share/univention-lib/ldap.sh
 if ucs_isServiceUnused "$SERVICE" "$@"; then
-    echo -e "Removing extended attribute for the Guacamole protocol... "
-    udm settings/extended_attribute remove "$@" \
-        --dn "cn=guacConfigProtocol,cn=custom attributes,cn=univention,${ldap_base}"
-    echo -e "Done!"
+	echo -e "Removing extended attribute for the Guacamole protocol... "
+	udm settings/extended_attribute remove "$@" \
+		--dn "cn=guacConfigProtocol,cn=custom attributes,cn=univention,${ldap_base}"
+	echo -e "Done!"
 
-    echo -e "Removing extended attribute for the Guacamole parameters... "
-    udm settings/extended_attribute remove "$@" \
-        --dn="cn=guacConfigParameter,cn=custom attributes,cn=univention,${ldap_base}"
-    echo -e "Done!"
+	echo -e "Removing extended attribute for the Guacamole parameters... "
+	udm settings/extended_attribute remove "$@" \
+		--dn="cn=guacConfigParameter,cn=custom attributes,cn=univention,${ldap_base}"
+	echo -e "Done!"
 fi
 
 joinscript_remove_script_from_status_file univention_register_guacamole_schema
