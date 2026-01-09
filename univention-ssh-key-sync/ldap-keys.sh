@@ -2,7 +2,7 @@
 
 # bash script to be used in `
 
-# Copyright (C) 2023 Univention GmbH
+# Copyright (C) 2023-2025 Univention GmbH
 #
 # https://www.univention.de/
 #
