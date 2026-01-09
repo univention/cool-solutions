@@ -3,14 +3,14 @@ Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
 Build-Depends:
- debhelper,
+ debhelper-compat (= 12),
 Standards-Version: 4.1.4
 Homepage: https://univention.de
 
 Package: univention-ssh-key-sync
 Architecture: all
 Depends:
- shell-univention-lib (>= 2.0.17-1),
+ shell-univention-lib (>= 9.0.11-9),
  univention-join (>= 5.0.20-1),
  ${misc:Depends},
  ${shlibs:Depends},
