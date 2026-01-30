@@ -32,7 +32,7 @@
 # License with the Debian GNU/Linux or Univention distribution in file
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <https://www.gnu.org/licenses/>.
-
+from univention.config_registry import ConfigRegistry
 
 class Codes():
 	""" We make an extra object class that holds the enumerations of valid object types,
@@ -64,10 +64,17 @@ class Codes():
 		""" This enumerates the (SANIS) group types we have to process as classes.
 			Any other groups / group assignments have to be ignored.
 		"""
-
-		return([
-			'Klasse',
-		])
+		ucr = ConfigRegistry()
+		ucr.load()
+		if ucr.get('sanis_import/activate_courses_import') == 'yes':
+			return([
+				'Klasse',
+				'Kurs',
+			])
+		else:
+			return([
+				'Klasse',
+			])
 
 	@classmethod
 	def valid_org_types(self):

@@ -1,3 +1,35 @@
+univention-sanis (1.0.8) unstable; urgency=low
+
+  * feat(univention-sanis): Add Feature To Import E-Mails #45906 
+
+ -- Jonas Einnolf <einnolf@univention.de>  Tue, 01 Jul 2025 03:23:34 +0200
+
+univention-sanis (1.0.7) unstable; urgency=medium
+
+  * fix(univention-sanis): correct course name normalization #45642
+
+ -- Timo Hollwedel <hollwedel@univention.de>  Fri, 13 Dec 2024 10:37:31 +0100
+
+univention-sanis (1.0.6) unstable; urgency=medium
+
+  * fix(univention-sanis): fix activate courses UCRV default value handling
+    #45642
+
+ -- Timo Hollwedel <hollwedel@univention.de>  Tue, 10 Dec 2024 08:35:51 +0100
+
+univention-sanis (1.0.5) unstable; urgency=medium
+
+  * feat(univention-sanis): add configurable prefix with UCRV for courses import
+
+ -- Timo Hollwedel <hollwedel@univention.de>  Wed, 27 Nov 2024 15:27:56 +0100
+
+univention-sanis (1.0.4) unstable; urgency=medium
+
+  * feat(univention-sanis): implement handling of courses with UCRV activation
+    #45642
+
+ -- Timo Hollwedel <hollwedel@univention.de>  Tue, 26 Nov 2024 14:48:30 +0100
+
 univention-sanis (1.0.3) unstable; urgency=low
 
   * fix expected separator in user_import_sanis_example.json
