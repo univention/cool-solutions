@@ -21,3 +21,23 @@ Description[en] = Association of a school in UCS@school to a SANIS organization.
 Description[de] = Zuordnung einer Schule aus UCS@school zu einer SANIS Organisation.
 Categories = ucsschool-import
 Type = str
+
+[sanis_import/activate_courses_import]
+Description[en] = Activate the usage of courses via the SANIS API to process as classes for UCS@school. Only the value "yes" activates the output.
+Description[de] = Aktivierung der Abfrage von Kursen über die SANIS API um diese als Klassen in UCS@school zu verarbeiten. Nur der Wert "yes" aktiviert die Ausgabe der Kurse als Klassen.
+Categories = ucsschool-import
+Default = inactive
+Type = str
+
+[sanis_import/courses_prefix]
+Description[en] = Defines the prefix for importing courses from the SANIS API as classes in UCS@school. Case sensitive. A separator can be defined, e.g. “K_”. A space and a “-” as a separator are not permitted and will cause errors for the import. Separators are subject to the school_classes_invalid_character_replacement function of the import configuration.
+Description[de] = Definiert den Prefix für den Import von Kursen aus der SANIS API als Klassen in UCS@school. Case sensitive. Es kann ein Trennzeichen definiert werden, z.B. "K_". Ein Leerzeichen und ein "-" als Trennzeichen sind nicht zulässig und sorgen für Fehlverhalten beim Importer. Trennzeichen unterliegen der Funktion school_classes_invalid_character_replacement der Import-Konfiguration.
+Categories = ucsschool-import
+Type = str
+
+[sanis_import/include_school_email]
+Description[en] = If true, include the school-specific email address from SANIS (person context contact info) in the export.
+Description[de] = Falls aktiviert, wird die schulische E-Mail-Adresse aus SANIS (Erreichbarkeit im Personenkontext) beim Export berücksichtigt.
+Categories = ucsschool-import
+Type = str
+

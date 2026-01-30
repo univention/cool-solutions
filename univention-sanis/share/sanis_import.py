@@ -123,6 +123,9 @@ class SanisImport:
 		self.script_header[3] = '# (erzeugt %s für %s)' % (today, purpose)
 
 		self.token = self.get_token()
+		ucr = ConfigRegistry()
+		ucr.load()
+		self.include_school_email = ucr.get('sanis_import/include_school_email', 'false').lower() == 'true'
 
 		# invent a prefix for temp files. Can be a directory or only a filename prefix.
 		# Will be used here for JSON files as well as in the stores when switching
@@ -135,6 +138,9 @@ class SanisImport:
 				'Schule':	'school',
 				'Schulen':	'schools',
 			})
+		# Email header will be added dynamically if needed
+		if self.include_school_email:
+			print("Email support enabled - header will be added when processing")
 
 	def read_input_data(self):
 		""" Read all data from SANIS API and store them in (internal) store objects.
@@ -230,6 +236,15 @@ class SanisImport:
 				print('   Schule=%s  Rolle=%s ... ' % (school, role), end='')
 				out_filename = 'import_%s_%s.csv' % (school, role)
 				records = 0
+				# Issue 45642: handle Kurs with prefix
+				ucr = ConfigRegistry()
+				ucr.load()
+				courses_prefix = ucr.get('sanis_import/courses_prefix')
+				# Add email header dynamically ONLY if email support is enabled
+				if self.include_school_email:
+					if 'EMail' not in self.headers:
+						self.headers['EMail'] = 'schulmail'
+						print(f"Added EMail header for {school}-{role}")
 				with open(out_filename, 'w') as out_handle:
 					print(self._data_line(self.headers.keys()), file=out_handle)
 					# Build a mapping of valid groups (GUID -> name) of this school.
@@ -252,6 +267,12 @@ class SanisImport:
 							# get classes of this user.
 							classes = []
 							for klass in self.memb_store.find_all('ktid', context['id']):
+								# Issue 45642: handle Kurs with prefix and normalize
+								if klass['group_type'] == 'Kurs':
+									kurs = klass['group_name']
+									kurs = re.sub(r'[^a-zA-Z0-9]', '', kurs)
+									kurs = "%s%s" % (courses_prefix, kurs)
+									klass['group_name'] = kurs
 								classes.append(klass['group_name'])
 							person['classes'] = classes
 							# Skip students without at least one class
@@ -259,12 +280,21 @@ class SanisImport:
 								# DEBUG?
 								# print('  No classes for [%(familienname)s, %(vorname)s], skipping user.' % person)
 								continue
+							# fetch email
+							if self.include_school_email:
+								email = self.get_context_email(context['id'])
+								if email:
+									print(f"Email for {person['vorname']} {person['familienname']}: {email}")
+									person['schulmail'] = email
+								else:
+									person['schulmail'] = ''
+									print(f"No email found for {person['vorname']} {person['familienname']}")
 							record = []
 							for attr, iattr in self.headers.items():
 								if iattr in person:
 									record.append(person[iattr])
 								else:
-									record.append('-')
+									record.append('')
 							print(self._data_line(record), file=out_handle)
 							records += 1
 				print('%d Sätze' % records)
@@ -614,11 +644,22 @@ class SanisImport:
 			be called for every output file (resp. role) and collects all occurrences of
 			the person in all schools, using this role.
 		"""
+		# Issue 45642: handle Kurs with prefix
+		ucr = ConfigRegistry()
+		ucr.load()
+		courses_prefix = ucr.get('sanis_import/courses_prefix')
 
 		u_role = Codes.valid_user_roles()[role]
 		records = 0
+		# Add email header dynamically ONLY if email support is enabled
+		if self.include_school_email:
+			if 'EMail' not in self.headers:
+				self.headers['EMail'] = 'schulmail'
+				print(f"Added EMail header for role {u_role}")
 		with open('%s.csv' % u_role, 'w') as out_handle:
-
+			for context in self.cont_store.find_all('rolle', role):
+				if context['status'] != 'aktiv':
+					continue
 			print(self._data_line(self.headers.keys()), file=out_handle)
 
 			# better we sort by 'stammorganisation', just to have the records together that
@@ -628,6 +669,15 @@ class SanisImport:
 				u_org = self.ucs_school_name(stammorg['id'])
 				schools = set()
 				classes = set()
+				# Collect email if email support is enabled
+				person_email = ''
+				if self.include_school_email:
+					for context in self.cont_store.find_all('person_id', person['id']):
+						if context['rolle'] == role:
+							email = self.get_context_email(context['id'])
+							if email:
+								person_email = email
+								break
 				for context in self.cont_store.find_all('person_id', person['id']):
 					school = self.org_store.find(context['org_id'])
 					# not relevant for this run.
@@ -640,21 +690,29 @@ class SanisImport:
 						continue
 					schools.add(u_school)
 					for group in self.memb_store.find_all('ktid', context['id']):
+						# Issue 45642: handle Kurs with prefix and normalize
+						if group['group_type'] == 'Kurs':
+							kurs = group['group_name']
+							kurs = re.sub(r'[^a-zA-Z0-9]', '', kurs)
+							kurs = "%s%s" % (courses_prefix, kurs)
+							group['group_name'] = kurs
 						classes.add('%s-%s' % (u_school, group['group_name']))
 				if not len(schools):
 					continue
 				# We have some persons without birthdate: fix it with a constant!
-				#if person['geburtsdatum'] == '':
-				#	person['geburtsdatum'] = '1999-09-09'
+				# if person['geburtsdatum'] == '':
+				# person['geburtsdatum'] = '1999-09-09'
 				person['school'] = u_org
 				person['schools'] = ','.join(schools)
 				person['classes'] = ','.join(classes)
+				if self.include_school_email:
+					person['schulmail'] = person_email
 				record = []
 				for attr, iattr in self.headers.items():
 					if iattr in person:
 						record.append(person[iattr])
 					else:
-						record.append('-')
+						record.append('')
 				print(self._data_line(record), file=out_handle)
 				records += 1
 
@@ -737,3 +795,90 @@ class SanisImport:
 			for msg in msgs:
 				print('   %s' % msg, file=outhandle)
 			print('', file=outhandle)
+
+	# def get_context_email(self, context_id):
+	# 	"""Liefert die E-Mail-Adresse eines bestimmten Personenkontexts über die SANIS API"""
+	# 	endpoint = f'/personenkontexte/{context_id}/erreichbarkeiten'
+	# 	try:
+	# 		req = request.Request(f'{self.api_url}{endpoint}')
+	# 		req.add_header('Authorization', f'Bearer {self.token}')
+	# 		with request.urlopen(req) as resp:
+	# 			data = json.loads(resp.read())
+	# 			for eintrag in data:
+	# 				if eintrag.get('typ') == 'E-Mail':
+	# 					return eintrag.get('kennung')
+	# 	except Exception as e:
+	# 		print(f'Fehler beim Abrufen der E-Mail für Kontext {context_id}: {e}')
+	# 	return ''
+
+	def get_context_email(self, context_id):
+		"""Fetch the E-Mail address for a personenkontext from person data"""
+
+		# First, find which person this context belongs to
+		context = self.cont_store.find(context_id)
+		if not context:
+			if self.dry_run:
+				print(f"DEBUG: Context {context_id} not found in cont_store")
+			return ''
+
+		person_id = context.get('person_id')
+		if not person_id:
+			if self.dry_run:
+				print(f"DEBUG: No person_id found for context {context_id}")
+			return ''
+
+		# Now look in the original person data for this person's contexts
+		# We need to look in the raw JSON data, not the processed stores
+		try:
+			# Read the raw person file to get the full data including personenkontexte
+			pers_file = None
+			for filename in self.tempfiles:
+				if 'api_personen.json' in filename:
+					pers_file = filename
+					break
+
+			if not pers_file:
+				if self.dry_run:
+					print(f"DEBUG: Could not find persons JSON file")
+				return ''
+
+			import json
+			with open(pers_file, 'r') as f:
+				all_persons = json.load(f)
+
+			# Find our person in the raw data
+			person_data = None
+			for person_entry in all_persons:
+				if person_entry.get('person', {}).get('id') == person_id:
+					person_data = person_entry
+					break
+
+			if not person_data:
+				if self.dry_run:
+					print(f"DEBUG: Person {person_id} not found in raw data")
+				return ''
+
+			# Look through the person's contexts for the matching context_id
+			for kontext in person_data.get('personenkontexte', []):
+				if kontext.get('id') == context_id:
+					# Found the right context, now look for email
+					for eintrag in kontext.get('erreichbarkeiten', []):
+						if eintrag.get('typ') == 'E-Mail':
+							email = eintrag.get('kennung', '')
+							if email:
+								if self.dry_run:
+									print(f"DEBUG: Found email {email} for context {context_id}")
+								return email
+
+					if self.dry_run:
+						print(f"DEBUG: Context {context_id} found but no email in erreichbarkeiten: {kontext.get('erreichbarkeiten', [])}")
+					return ''
+
+			if self.dry_run:
+				print(f"DEBUG: Context {context_id} not found in person {person_id} contexts")
+			return ''
+
+		except Exception as e:
+			if self.dry_run:
+				print(f"DEBUG: Error reading person data for context {context_id}: {e}")
+			return ''

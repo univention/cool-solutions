@@ -9,6 +9,73 @@ In diesem Paket finden Sie ein Werkzeug, mit dem Sie Benutzerdaten aus SANIS (of
 * Eine für diesen Anwendungsfall vorbereitete Konfiguration. Zusätzlich wird die beschriebene Konfiguration für "[Single source, Partial import](http://docs.software-univention.de/ucsschool-umc-user-import/5.0/de/single-source.html)" benutzt, um einen Schulwechsel zu ermöglichen
    * z.B. /usr/share/ucs-school-import/scripts/create_ou limbo
 
+### E-Mail Support
+
+Der SANIS-Connector kann E-Mail-Adressen aus moin.schule extrahieren und in die CSV-Importdateien einbinden.
+
+#### Konfiguration
+
+```bash
+# E-Mail-Support aktivieren
+ucr set sanis_import/include_school_email=true
+
+# E-Mail-Support deaktivieren (Standard)
+ucr set sanis_import/include_school_email=false
+# oder
+ucr unset sanis_import/include_school_email
+```
+
+#### CSV-Mapping für E-Mails
+
+Wenn E-Mail-Support aktiviert ist, enthält die CSV-Datei eine "EMail"-Spalte. Um diese E-Mails in UCS zu importieren, konfigurieren Sie das Mapping in `/var/lib/ucs-school-import/configs/user_import_sanis.json`:
+
+```json
+{
+    "csv": {
+        "mapping": {
+            "ID": "record_uid",
+            "Vorname": "firstname",
+            "Familienname": "lastname",
+            "Geburtstag": "birthday",
+            "Klassen": "school_classes",
+            "Schule": "school",
+            "Schulen": "schools",
+            "EMail": "email"
+        }
+    }
+}
+```
+
+**Standard-Verhalten:** Das `"EMail"`-Feld wird auf `email`und dadurch auf`mailPrimaryAddress` in UCS gemappt.
+
+**Alternative E-Mail-Felder:** Sie können E-Mails auch in andere UCS-Felder mappen:
+```json
+"EMail": "mailAlternativeAddress"    // Alternative E-Mail
+"EMail": "e-mail"                    // Kontakt-E-Mail
+```
+
+**Mehrere E-Mail-Felder:** Für die Verteilung einer E-Mail auf mehrere UCS-Felder können Sie Schemes verwenden:
+
+```json
+{
+    "csv": {
+        "mapping": {
+            "EMail": "mailAlternativeAddress"
+        }
+    },
+    "scheme": {
+        "e-mail": "<mailAlternativeAddress>[0]",
+        "testmail": "<mailAlternativeAddress>[0]"
+    }
+}
+```
+https://docs.software-univention.de/ucsschool-import/5.0/de/configuration/format.html#cmdoption-arg-scheme-udm
+
+#### Mail-Domains
+
+**Wichtig:** Die E-Mail-Domain muss in UCS konfiguriert sein, damit E-Mails in `mailPrimaryAddress` importiert werden können:
+Alternativ können Sie E-Mails etwa in `mailAlternativeAddress` importieren, welches keine Domain-Validierung hat.
+
 ### Benutzung
 
 #### Abstimmung
@@ -38,6 +105,10 @@ Diese Schritte müssen nur einmalig getan werden, bevor man den Import zum erste
    * Sie können diesen Schritt auch überspringen: der Skript `create_input_files` kann die Datei auch anlegen, wenn sie noch nicht existiert. Dann werden Sie nach diesen beiden Angaben gefragt, und die Datei wird für Sie angelegt.
    * ACHTUNG: Wenn Sie vom Testbetrieb auf den Produktivbetrieb übergehen, werden Sie neue Zugangsdaten bekommen. Entweder Sie ändern die Zugangsdaten manuell mit einem Editor, oder Sie löschen die Datei /etc/sanis.secret und lassen sie beim nächsten Import wieder erzeugen.
 * Kopieren Sie die Datei `/usr/share/univention-sanis/user_import_sanis_example.json` nach `/var/lib/ucs-school-import/configs/user_import_sanis.json`. Überprüfen und ergänzen Sie die kopierte Datei bezüglich der 'csv->mapping' und 'schema' Einträge entsprechend den Vorgaben Ihrer Einrichtung.
+* Optionale Aktivierung des Imports von Kursen aus SANIS:
+   * Über die Variable `sanis_import/activate_courses_import` kann mit dem Wert `yes` das Auslesen von Gruppenmitgliedschaften des Typs "Kurs" aus SANIS aktiviert werden. Die Kurse werden dann wie die Klassen in die Ausgabedateien geschrieben und bei einem Import auch als UCS@school Klassen behandelt. Zur Identifizierung können Kurse einen zusätzlichen Prefix für den Import erhalten.
+   * Der Prefix für Kurse lässt sich über die Variable `sanis_import/courses_prefix` definieren. Ein Trennzeichen, wie z.B. `_`, kann am Ende des Prefix verwendet werden. Ein Leerzeichen und `-` sind als Trennzeichen nicht zulässig, da sie zu Fehlverhalten im Importer führen. Trennzeichen unterliegen ebenfalls der Funktion des Konfigurationsparameter `school_classes_invalid_character_replacement` des Imports, mehr Informationen dazu in der [Dokumentation](https://docs.software-univention.de/ucsschool-import/latest/de/configuration/format.html#cmdoption-arg-school_classes_invalid_character_replacement). Wird kein Prefix definiert, wird nur der aus SANIS ausgelesene Name des Kurses in die Ausgabedatei geschrieben.
+   * Kursnamen werden auf Buchstaben und Zahlen bereinigt, Umlaute und Sonderzeichen sowie Leerzeichen werden aus dem Kursnamen entfernt.
 
 #### Run import
 
