@@ -33,19 +33,20 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <https://www.gnu.org/licenses/>.
 
-import os
-import datetime
-import stat
-import re
-import subprocess
-import json
 import base64
 import copy
+import datetime
+import json
+import os
+import re
+import stat
+import subprocess
 from urllib import request
-from univention.config_registry import ConfigRegistry
 
+from sanis_models import (Codes, Klassen, Kontext, Mitglieder, Organisation,
+                          Person)
 from sanis_tools import iterStore
-from sanis_models import Person, Organisation, Kontext, Klassen, Mitglieder, Codes
+from univention.config_registry import ConfigRegistry
 
 
 class NoSchoolException(BaseException):

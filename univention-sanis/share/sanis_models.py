@@ -34,6 +34,7 @@
 # <https://www.gnu.org/licenses/>.
 from univention.config_registry import ConfigRegistry
 
+
 class Codes():
 	""" We make an extra object class that holds the enumerations of valid object types,
 		as they ar known in SANIS (mostly german). We do this so we can use (import) this
