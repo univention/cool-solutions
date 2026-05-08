@@ -840,9 +840,9 @@ class SanisImport:
 			with open(pers_file, 'r') as f:
 				all_persons = json.load(f)
 			self._persons_by_id = {
-				p.get('person', {}).get('id'): p
+				p['person']['id']: p
 				for p in all_persons
-				if p.get('person', {}).get('id')
+				if p.get('person', {}).get('id') is not None
 			}
 		except Exception as e:
 			if self.dry_run:
