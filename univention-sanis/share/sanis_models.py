@@ -6,7 +6,7 @@
 # Like what you see? Join us!
 # https://www.univention.com/about-us/careers/vacancies/
 #
-# Copyright 2023 Univention GmbH
+# Copyright 2023-2026 Univention GmbH
 #
 # https://www.univention.de/
 #
@@ -34,11 +34,16 @@
 # <https://www.gnu.org/licenses/>.
 from univention.config_registry import ConfigRegistry
 
+
 class Codes():
 	""" We make an extra object class that holds the enumerations of valid object types,
 		as they ar known in SANIS (mostly german). We do this so we can use (import) this
 		class in all other sources, just to be consistent across the whole process.
 	"""
+
+	# Issue 46456: cache the result list to avoid reloading UCR on every
+	# validate_object() call during JSON parsing (thousands of calls per import).
+	_valid_group_types_cache = None
 
 	@classmethod
 	def valid_user_roles(self):
@@ -64,17 +69,16 @@ class Codes():
 		""" This enumerates the (SANIS) group types we have to process as classes.
 			Any other groups / group assignments have to be ignored.
 		"""
+		if self._valid_group_types_cache is not None:
+			return self._valid_group_types_cache
+
 		ucr = ConfigRegistry()
 		ucr.load()
 		if ucr.get('sanis_import/activate_courses_import') == 'yes':
-			return([
-				'Klasse',
-				'Kurs',
-			])
+			self._valid_group_types_cache = ['Klasse', 'Kurs']
 		else:
-			return([
-				'Klasse',
-			])
+			self._valid_group_types_cache = ['Klasse']
+		return self._valid_group_types_cache
 
 	@classmethod
 	def valid_org_types(self):

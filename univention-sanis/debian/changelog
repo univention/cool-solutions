@@ -1,6 +1,18 @@
+univention-sanis (1.0.9) unstable; urgency=medium
+
+  * chore(univention-sanis): validate package works for UCS 5.2 #47016
+  * perf(univention-sanis): cache UCR to avoid repeated reloads during JSON parsing #46456
+  * perf(univention-sanis): cache persons JSON in get_context_email on first call #46456
+  * fix(univention-sanis): wording and missing format-string in script generation messages
+  * fix(univention-sanis): handle erreichbarkeiten=null returned from API
+    instead of raising TypeError
+  * chore(univention-sanis): bump copyright year to 2026
+
+ -- Jonas Einnolf <einnolf@univention.de>  Fri, 08 May 2026 10:50:00 +0200
+
 univention-sanis (1.0.8) unstable; urgency=low
 
-  * feat(univention-sanis): Add Feature To Import E-Mails #45906 
+  * feat(univention-sanis): Add Feature To Import E-Mails #45906
 
  -- Jonas Einnolf <einnolf@univention.de>  Tue, 01 Jul 2025 03:23:34 +0200
 

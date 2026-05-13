@@ -6,7 +6,7 @@
 # Like what you see? Join us!
 # https://www.univention.com/about-us/careers/vacancies/
 #
-# Copyright 2023 Univention GmbH
+# Copyright 2023-2026 Univention GmbH
 #
 # https://www.univention.de/
 #
@@ -36,9 +36,10 @@
 import os
 import stat
 import sys
-from univention.config_registry import ConfigRegistry
-from sanis_import import SanisImport, NoSchoolException
+
+from sanis_import import NoSchoolException, SanisImport
 from sanis_models import Codes
+from univention.config_registry import ConfigRegistry
 
 # API URLs
 TOKEN_URL = 'https://auth.stage.niedersachsen-login.schule/realms/SANIS/protocol/openid-connect/token'

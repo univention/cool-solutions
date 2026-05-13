@@ -6,7 +6,7 @@
 # Like what you see? Join us!
 # https://www.univention.com/about-us/careers/vacancies/
 #
-# Copyright 2023 Univention GmbH
+# Copyright 2023-2026 Univention GmbH
 #
 # https://www.univention.de/
 #
@@ -33,9 +33,10 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <https://www.gnu.org/licenses/>.
 
-import os
-import ijson
 import copy
+import os
+
+import ijson
 
 
 class iterStore:

@@ -6,7 +6,7 @@
 # Like what you see? Join us!
 # https://www.univention.com/about-us/careers/vacancies/
 #
-# Copyright 2023 Univention GmbH
+# Copyright 2023-2026 Univention GmbH
 #
 # https://www.univention.de/
 #
@@ -33,19 +33,20 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <https://www.gnu.org/licenses/>.
 
-import os
-import datetime
-import stat
-import re
-import subprocess
-import json
 import base64
 import copy
+import datetime
+import json
+import os
+import re
+import stat
+import subprocess
 from urllib import request
-from univention.config_registry import ConfigRegistry
 
+from sanis_models import (Codes, Klassen, Kontext, Mitglieder, Organisation,
+                          Person)
 from sanis_tools import iterStore
-from sanis_models import Person, Organisation, Kontext, Klassen, Mitglieder, Codes
+from univention.config_registry import ConfigRegistry
 
 
 class NoSchoolException(BaseException):
@@ -123,9 +124,13 @@ class SanisImport:
 		self.script_header[3] = '# (erzeugt %s für %s)' % (today, purpose)
 
 		self.token = self.get_token()
-		ucr = ConfigRegistry()
-		ucr.load()
-		self.include_school_email = ucr.get('sanis_import/include_school_email', 'false').lower() == 'true'
+		# Issue 46456: load UCR once and cache on self for all later UCR lookups
+		self.ucr = ConfigRegistry()
+		self.ucr.load()
+		self.include_school_email = self.ucr.get('sanis_import/include_school_email', 'false').lower() == 'true'
+		# Issue 46456: cache for the raw persons JSON, keyed by person id.
+		# Avoids reloading and scanning the file on every get_context_email() call.
+		self._persons_by_id = None
 
 		# invent a prefix for temp files. Can be a directory or only a filename prefix.
 		# Will be used here for JSON files as well as in the stores when switching
@@ -237,9 +242,8 @@ class SanisImport:
 				out_filename = 'import_%s_%s.csv' % (school, role)
 				records = 0
 				# Issue 45642: handle Kurs with prefix
-				ucr = ConfigRegistry()
-				ucr.load()
-				courses_prefix = ucr.get('sanis_import/courses_prefix')
+				# Issue 46456: reuse cached UCR instance (loaded in __init__)
+				courses_prefix = self.ucr.get('sanis_import/courses_prefix')
 				# Add email header dynamically ONLY if email support is enabled
 				if self.include_school_email:
 					if 'EMail' not in self.headers:
@@ -383,14 +387,14 @@ class SanisImport:
 			os.chmod(out_filename, stat.S_IXUSR | stat.S_IRUSR | stat.S_IWUSR | stat.S_IXGRP | stat.S_IRGRP | stat.S_IWGRP)
 
 			print('')
-			print('Der Skript für den %s ist fertig und kann mit' % ("Import-Test" if self.dry_run else "Import"))
+			print('Das Skript für den %s ist fertig und kann mit' % ("Import-Test" if self.dry_run else "Import"))
 			print('')
 			print('  ./%s' % out_filename)
 			print('')
 			print('aufgerufen werden.')
 			return True
 		except BaseException as e:
-			print('FEHLER: der Skript "%s" konnte nicht erzeugt werden:')
+			print('FEHLER: das Skript "%s" konnte nicht erzeugt werden:' % out_filename)
 			print(str(e))
 			return False
 
@@ -523,17 +527,16 @@ class SanisImport:
 			return self.school_mapping
 
 		result = {}					# ucs school -> sanis identification (by the school_name_attribute)
-		ucr = ConfigRegistry()
-		ucr.load()
-		attrname = ucr.get('sanis_import/school_name_attribute', 'kennung')
+		# Issue 46456: reuse cached UCR instance (loaded in __init__)
+		attrname = self.ucr.get('sanis_import/school_name_attribute', 'kennung')
 		self.org_attribute = attrname		# cache for later use
-		for key in sorted([x for x in ucr if x.startswith('sanis_import/school/')]):
+		for key in sorted([x for x in self.ucr if x.startswith('sanis_import/school/')]):
 			shortkey = re.sub('^sanis_import/school/', '', key)
 			# FIXME call @school library check does this school exists
 			# check if we can match this school to a SANIS organization
-			school = self.org_store.find(ucr[key], key=attrname)
+			school = self.org_store.find(self.ucr[key], key=attrname)
 			if school is None:
-				raise NoSchoolException('FEHLER: Keine SANIS Organisation mit [%s] = [%s] gefunden' % (attrname, ucr[key]))
+				raise NoSchoolException('FEHLER: Keine SANIS Organisation mit [%s] = [%s] gefunden' % (attrname, self.ucr[key]))
 			result[shortkey] = school['id']
 			# Build a second cache: org ID -> UCS school.
 			# Every organisation whose ID is not in this dict -> disregard.
@@ -645,9 +648,8 @@ class SanisImport:
 			the person in all schools, using this role.
 		"""
 		# Issue 45642: handle Kurs with prefix
-		ucr = ConfigRegistry()
-		ucr.load()
-		courses_prefix = ucr.get('sanis_import/courses_prefix')
+		# Issue 46456: reuse cached UCR instance (loaded in __init__)
+		courses_prefix = self.ucr.get('sanis_import/courses_prefix')
 
 		u_role = Codes.valid_user_roles()[role]
 		records = 0
@@ -811,6 +813,44 @@ class SanisImport:
 	# 		print(f'Fehler beim Abrufen der E-Mail für Kontext {context_id}: {e}')
 	# 	return ''
 
+	def _get_persons_by_id(self):
+		""" Issue 46456: load the personen JSON into a dict keyed by person id
+			the first time it is needed. Later calls return the cached dict
+			directly instead of re-reading the file and searching it from
+			scratch each time, which is much faster when many contexts are
+			processed.
+			Returns an empty dict if the file is unavailable.
+		"""
+		if self._persons_by_id is not None:
+			return self._persons_by_id
+
+		pers_file = None
+		for filename in self.tempfiles:
+			if 'api_personen.json' in filename:
+				pers_file = filename
+				break
+
+		if not pers_file:
+			if self.dry_run:
+				print("DEBUG: Could not find persons JSON file")
+			self._persons_by_id = {}
+			return self._persons_by_id
+
+		try:
+			with open(pers_file, 'r') as f:
+				all_persons = json.load(f)
+			self._persons_by_id = {
+				p['person']['id']: p
+				for p in all_persons
+				if p.get('person', {}).get('id') is not None
+			}
+		except Exception as e:
+			if self.dry_run:
+				print(f"DEBUG: Error reading person data: {e}")
+			self._persons_by_id = {}
+
+		return self._persons_by_id
+
 	def get_context_email(self, context_id):
 		"""Fetch the E-Mail address for a personenkontext from person data"""
 
@@ -827,58 +867,33 @@ class SanisImport:
 				print(f"DEBUG: No person_id found for context {context_id}")
 			return ''
 
-		# Now look in the original person data for this person's contexts
-		# We need to look in the raw JSON data, not the processed stores
-		try:
-			# Read the raw person file to get the full data including personenkontexte
-			pers_file = None
-			for filename in self.tempfiles:
-				if 'api_personen.json' in filename:
-					pers_file = filename
-					break
-
-			if not pers_file:
-				if self.dry_run:
-					print(f"DEBUG: Could not find persons JSON file")
-				return ''
-
-			import json
-			with open(pers_file, 'r') as f:
-				all_persons = json.load(f)
-
-			# Find our person in the raw data
-			person_data = None
-			for person_entry in all_persons:
-				if person_entry.get('person', {}).get('id') == person_id:
-					person_data = person_entry
-					break
-
-			if not person_data:
-				if self.dry_run:
-					print(f"DEBUG: Person {person_id} not found in raw data")
-				return ''
-
-			# Look through the person's contexts for the matching context_id
-			for kontext in person_data.get('personenkontexte', []):
-				if kontext.get('id') == context_id:
-					# Found the right context, now look for email
-					for eintrag in kontext.get('erreichbarkeiten', []):
-						if eintrag.get('typ') == 'E-Mail':
-							email = eintrag.get('kennung', '')
-							if email:
-								if self.dry_run:
-									print(f"DEBUG: Found email {email} for context {context_id}")
-								return email
-
-					if self.dry_run:
-						print(f"DEBUG: Context {context_id} found but no email in erreichbarkeiten: {kontext.get('erreichbarkeiten', [])}")
-					return ''
-
+		# Issue 46456: lookup in cached dict
+		person_data = self._get_persons_by_id().get(person_id)
+		if not person_data:
 			if self.dry_run:
-				print(f"DEBUG: Context {context_id} not found in person {person_id} contexts")
+				print(f"DEBUG: Person {person_id} not found in raw data")
 			return ''
 
-		except Exception as e:
-			if self.dry_run:
-				print(f"DEBUG: Error reading person data for context {context_id}: {e}")
-			return ''
+		# Look through the person's contexts for the matching context_id
+		for kontext in person_data.get('personenkontexte') or []:
+			if kontext.get('id') != context_id:
+                                continue
+		        # Found the right context, now look for email.
+			# 'or []' in case the API returns erreichbarkeiten=null
+			for eintrag in kontext.get('erreichbarkeiten') or []:
+				if eintrag.get('typ') != 'E-Mail':
+					continue
+				email = eintrag.get('kennung', '')
+				if not email:
+					continue
+				if self.dry_run:
+					print(f"DEBUG: Found email {email} for context {context_id}")
+				return email
+
+				if self.dry_run:
+					print(f"DEBUG: Context {context_id} found but no email in erreichbarkeiten: {kontext.get('erreichbarkeiten')}")
+				return ''
+
+		if self.dry_run:
+			print(f"DEBUG: Context {context_id} not found in person {person_id} contexts")
+		return ''
