@@ -885,7 +885,7 @@ class SanisImport:
 					continue
 				email = eintrag.get('kennung', '')
 				if not email:
-					continue	
+					continue
 				if self.dry_run:
 					print(f"DEBUG: Found email {email} for context {context_id}")
 				return email
