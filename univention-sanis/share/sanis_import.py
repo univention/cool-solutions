@@ -876,16 +876,19 @@ class SanisImport:
 
 		# Look through the person's contexts for the matching context_id
 		for kontext in person_data.get('personenkontexte') or []:
-			if kontext.get('id') == context_id:
-				# Found the right context, now look for email.
-				# 'or []' in case the API returns erreichbarkeiten=null
-				for eintrag in kontext.get('erreichbarkeiten') or []:
-					if eintrag.get('typ') == 'E-Mail':
-						email = eintrag.get('kennung', '')
-						if email:
-							if self.dry_run:
-								print(f"DEBUG: Found email {email} for context {context_id}")
-							return email
+			if kontext.get('id') != context_id:
+                                continue
+		        # Found the right context, now look for email.
+			# 'or []' in case the API returns erreichbarkeiten=null
+			for eintrag in kontext.get('erreichbarkeiten') or []:
+				if eintrag.get('typ') != 'E-Mail':
+					continue
+				email = eintrag.get('kennung', '')
+				if not email:
+					continue	
+				if self.dry_run:
+					print(f"DEBUG: Found email {email} for context {context_id}")
+				return email
 
 				if self.dry_run:
 					print(f"DEBUG: Context {context_id} found but no email in erreichbarkeiten: {kontext.get('erreichbarkeiten')}")
