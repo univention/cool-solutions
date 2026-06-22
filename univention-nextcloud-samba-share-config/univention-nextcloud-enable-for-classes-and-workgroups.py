@@ -6,10 +6,11 @@
 # SPDX-FileCopyrightText: 2018-2025 Univention GmbH
 # SPDX-License-Identifier: AGPL-3.0-only <https://www.gnu.org/licenses/>.
 
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
+
 from univention.listener import ListenerModuleHandler
 from univention.udm import UDM
-from univention.udm.exceptions import NoObject, ModifyError
+from univention.udm.exceptions import ModifyError, NoObject
 
 
 class NextcloudEnableForClassesAndWorkgroups(ListenerModuleHandler):
