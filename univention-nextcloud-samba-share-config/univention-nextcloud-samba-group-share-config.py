@@ -6,14 +6,13 @@
 # SPDX-FileCopyrightText: 2018-2025 Univention GmbH
 # SPDX-License-Identifier: AGPL-3.0-only <https://www.gnu.org/licenses/>.
 
-from typing import List
+import contextlib
+from typing import Dict, List, Optional  # noqa: F811
 
 import ldap.dn
-from univention.nextcloud_samba import common
 from univention.config_registry import ConfigRegistry
-from typing import Dict, Optional, List  # noqa: F811
 from univention.listener import ListenerModuleHandler
-import contextlib
+from univention.nextcloud_samba import common
 
 ucr = ConfigRegistry()
 ucr.load()

@@ -31,16 +31,16 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <https://www.gnu.org/licenses/>.
 
-import pipes
+import shlex
 import subprocess
 import time
 from typing import List
 
-import univention.debug as ud
-from ldap.filter import filter_format
-from ldap.dn import str2dn
-from univention.config_registry import ConfigRegistry
 import listener
+import univention.debug as ud
+from ldap.dn import str2dn
+from ldap.filter import filter_format
+from univention.config_registry import ConfigRegistry
 
 ucr = ConfigRegistry()
 ucr.load()
@@ -194,7 +194,7 @@ def createMount(mountName):
         sshCommand = getSshCommand(remotePwFile, remoteUser, remoteHost)
         createMountCmd: List = sshCommand + \
             occ_cmd + ["files_external:create"] + \
-            [pipes.quote(mountName)] + ["smb", "password::sessioncredentials"]
+            [shlex.quote(mountName)] + ["smb", "password::sessioncredentials"]
     else:
         createMountCmd: List = occ_cmd + ["files_external:create"] + \
             [mountName] + ["smb", "password::sessioncredentials"]
@@ -238,24 +238,21 @@ def setMountConfig(
             ["files_external:config", mountId, "host", shareHost]
         addShareRootCmd: List = sshCommand + occ_cmd + \
             ["files_external:config", mountId, "share", "/"]
-        # Handle Nextcloud variables so it doesnt show up with '' in the share name
-        if shareName == "$user":
-            share_root_value = shareName
-        else:
-            share_root_value = pipes.quote(shareName)
+        # The remote shell consumes the quotes, so the literal value (incl.
+        # Nextcloud variables like $user) arrives unquoted at occ.
         addShareNameCmd: List = sshCommand + occ_cmd + \
-            ["files_external:config", mountId, "root", share_root_value]
+            ["files_external:config", mountId, "root", shlex.quote(shareName)]
         addShareDomainCmd: List = sshCommand + occ_cmd + \
             ["files_external:config", mountId, "domain",
              windomain]
         checkApplicableGroupCmd: List = sshCommand + occ_cmd + \
-            ["group:adduser", pipes.quote(groupCn), nc_admin]
+            ["group:adduser", shlex.quote(groupCn), nc_admin]
         checkLdapApplicableGroupCmd: List = sshCommand + occ_cmd + \
-            ["ldap:search", "--group", pipes.quote(groupCn)]
+            ["ldap:search", "--group", shlex.quote(groupCn)]
         cleanupApplicableGroupCmd: List = sshCommand + occ_cmd + \
-            ["group:removeuser", pipes.quote(groupCn), nc_admin]
+            ["group:removeuser", shlex.quote(groupCn), nc_admin]
         addApplicableGroupCmd: List = sshCommand + occ_cmd + \
-            ["files_external:applicable", "--add-group", pipes.quote(groupCn), mountId]
+            ["files_external:applicable", "--add-group", shlex.quote(groupCn), mountId]
         addNcAdminApplicableUserCmd: List = sshCommand + occ_cmd + \
             ["files_external:applicable", "--add-user", nc_admin, mountId]
     else:
@@ -263,13 +260,10 @@ def setMountConfig(
             ["files_external:config", mountId, "host", shareHost]
         addShareRootCmd: List = occ_cmd + \
             ["files_external:config", mountId, "share", "/"]
-        # Handle Nextcloud variables so it doesnt show up with '' in the share name
-        if shareName == "$user":
-            share_root_value = shareName
-        else:
-            share_root_value = pipes.quote(shareName)
+        # No shell parses the argv list here (subprocess -> docker exec), so
+        # quoting would end up literally in the Nextcloud config. Pass as-is.
         addShareNameCmd: List = occ_cmd + \
-            ["files_external:config", mountId, "root", share_root_value]
+            ["files_external:config", mountId, "root", shareName]
         addShareDomainCmd: List = occ_cmd + \
             ["files_external:config", mountId, "domain",
              windomain]

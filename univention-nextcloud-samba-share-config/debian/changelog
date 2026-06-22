@@ -1,8 +1,17 @@
+univention-nextcloud-samba-share-config (2.0.0-7) unstable; urgency=low
+
+  * Fix share root quoting: pass value unquoted to occ in the local case,
+    quotes ended up literally in the Nextcloud mount config
+  * Always quote in the remote (SSH) case, including $user
+  * Replace deprecated pipes.quote with shlex.quote
+
+ -- Jonas Einnolf <einnolf@univention.de>  Wed, 10 Jun 2026 09:12:00 +0200
+
 univention-nextcloud-samba-share-config (2.0.0-6) unstable; urgency=low
 
   * Create Marktplatz only when handling domain users
   * Listener clears its temporary state each run so mounts don’t inherit groups from earlier event
-  * Honor nextcloud-samba-group-share-config/ignoreMarktplatz before adding any “Marktplatz” mount  
+  * Honor nextcloud-samba-group-share-config/ignoreMarktplatz before adding any “Marktplatz” mount
 
  -- Jonas Einnolf <einnolf@univention.de>  Tue, 12 Aug 2025 09:47:19 +0200
 

@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2018-2025 Univention GmbH
 # SPDX-License-Identifier: AGPL-3.0-only <https://www.gnu.org/licenses/>.
 
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
 import ldap.dn
 import univention.nextcloud_samba.common as common
