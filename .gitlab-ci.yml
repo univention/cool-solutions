@@ -1,6 +1,7 @@
 ---
 stages:
   - lint
+  - tests
 
 include:
   - project: univention/infrastructure/docker-services
@@ -9,3 +10,28 @@ include:
 run pre-commit:
   stage: lint
   extends: .pre-commit
+  allow_failure: true
+
+variables:
+  SONAR_USER_HOME:
+    value: "${CI_PROJECT_DIR}/.sonar"
+    description: "Defines the location of the analysis task cache"
+  GIT_DEPTH:
+    value: "0"
+    description: "Tells git to fetch all the branches of the project, required by the analysis task"
+
+sonarqube-check:
+  interruptible: true
+  image:
+    name: sonarsource/sonar-scanner-cli:11
+    entrypoint: [""]
+  stage: tests
+  script:
+    - sonar-scanner -Dsonar.host.url="${SONAR_HOST_URL}"
+  allow_failure: true
+  cache:
+    policy: pull-push
+    key: "sonar-cache-$CI_COMMIT_REF_SLUG"
+    paths:
+      - "${SONAR_USER_HOME}/cache"
+      - sonar-scanner/
