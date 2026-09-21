@@ -35,10 +35,7 @@ import sys
 
 import univention.admin.uldap
 import univention.nextcloud_samba.common as common
-from univention.config_registry import ConfigRegistry
-
-ucr = ConfigRegistry()
-ucr.load()
+from univention.config_registry import ucr
 
 lo, po = univention.admin.uldap.getMachineConnection(ldap_master=False)
 

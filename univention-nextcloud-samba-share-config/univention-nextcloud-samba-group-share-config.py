@@ -10,12 +10,9 @@ import contextlib
 from typing import Dict, List, Optional  # noqa: F811
 
 import ldap.dn
-from univention.config_registry import ConfigRegistry
+from univention.config_registry import ucr
 from univention.listener import ListenerModuleHandler
 from univention.nextcloud_samba import common
-
-ucr = ConfigRegistry()
-ucr.load()
 
 
 class NextcloudSambaGroupShareConfig(ListenerModuleHandler):
