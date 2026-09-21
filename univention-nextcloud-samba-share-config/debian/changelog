@@ -1,3 +1,20 @@
+univention-nextcloud-samba-share-config (2.0.0-8) unstable; urgency=low
+
+  * home-share-config: skip groups whose home share file server cannot be
+    resolved (foreign OUs on a school server) instead of crashing with
+    KeyError, which spammed the listener log with full old/new dumps (#46177)
+  * home-share-config: guard against non "Domain Users <OU>" groups
+  * common: quote all variable values consistently in the remote (SSH) occ
+    calls, strip padding from the parsed mount id
+  * common: replace univention.debug with Python logging and use the ucr
+    singleton instead of instantiating ConfigRegistry
+  * group-share-config and the common-share-config UCR hook: use the ucr
+    singleton too
+  * store the share name in Nextcloud's "share" field and the subpath in "root"
+    (Nextcloud's standard field usage) instead of "/" + name (#46177)
+
+ -- Jonas Einnolf <einnolf@univention.de>  Tue, 25 Aug 2026 08:50:16 +0200
+
 univention-nextcloud-samba-share-config (2.0.0-7) unstable; urgency=low
 
   * Fix share root quoting: pass value unquoted to occ in the local case,

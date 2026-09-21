@@ -4,7 +4,7 @@
 # Univention Nextcloud Samba share configuration
 # common class
 #
-# Copyright 2018-2025 Univention GmbH
+# Copyright 2018-2026 Univention GmbH
 #
 # https://www.univention.de/
 #
@@ -31,26 +31,25 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <https://www.gnu.org/licenses/>.
 
+import logging
 import shlex
 import subprocess
 import time
 from typing import List
 
 import listener
-import univention.debug as ud
 from ldap.dn import str2dn
 from ldap.filter import filter_format
-from univention.config_registry import ConfigRegistry
+from univention.config_registry import ucr
 
-ucr = ConfigRegistry()
-ucr.load()
+# Child of the high-level listener root logger, so messages are forwarded to
+# the listener log the same way the modules' self.logger is.
+logger = logging.getLogger("listener module.nextcloud_samba.common")
 
 occ_path_ucr = ucr.get("nextcloud-samba-common/occ_path")
 if occ_path_ucr:
     useSSH = True
-    ud.debug(ud.LISTENER, ud.WARN, "External Nextcloud".format())
     occ_cmd: List = ["sudo", "-u", "www-data", "php", occ_path_ucr]
-    ud.debug(ud.LISTENER, ud.WARN, "occ Command: {}".format(occ_cmd))
     remoteUser = ucr.get("nextcloud-samba-share-config/remoteUser")
     remotePwFile = ucr.get("nextcloud-samba-share-config/remotePwFile")
     remoteHost = ucr.get("nextcloud-samba-share-config/remoteHost")
@@ -58,11 +57,12 @@ if occ_path_ucr:
     nc_admin = ucr.get("nextcloud-samba-share-config/nc_admin")
 else:
     useSSH = False
-    ud.debug(ud.LISTENER, ud.WARN, "Univention Nextcloud App")
     occ_cmd: List = ["univention-app", "shell", "nextcloud", "sudo", "-u", "www-data", "/var/www/html/occ"]
-    ud.debug(ud.LISTENER, ud.WARN, "occ Command: {}".format(occ_cmd))
 
 
+# "Domain Users <OU>" is the fixed UCS@school per-OU primary group name and is
+# not configurable (unlike the schueler-/lehrer- prefixes below, which follow
+# ucsschool/ldap/default/groupprefix/*).
 def isDomainUsersCn(dn):
     domain_users_dn = str2dn(dn)
     if domain_users_dn[0][0][1].startswith("Domain Users "):
@@ -96,24 +96,16 @@ def getShareObj(lo, cn):
         filter_format("(&(objectClass=univentionShareSamba)(cn=%s))", (cn,))
     )
     while not shareObj:
-        ud.debug(
-            ud.LISTENER,
-            ud.WARN,
-            "Share {} does not yet exist in LDAP, waiting until it exists with 30s timeout".format(
-                cn
-            ),
+        logger.warning(
+            "Share %s does not yet exist in LDAP, waiting until it exists with 30s timeout", cn
         )
         shareObj = lo.search(
             filter_format("(&(objectClass=univentionShareSamba)(cn=%s))", (cn,))
         )
         time.sleep(1)
         if time.time() > timeout:
-            ud.debug(
-                ud.LISTENER,
-                ud.WARN,
-                "Share {} does not exist in LDAP after 30s timeout. Share mount won't be created".format(
-                    cn
-                ),
+            logger.warning(
+                "Share %s does not exist in LDAP after 30s timeout. Share mount won't be created", cn
             )
             return False
     return shareObj[0][1]
@@ -167,20 +159,17 @@ def getMountId(mountName):
     """
     for line in mountId.decode("UTF-8").split("\n"):
         if mountName in line:
-            mountId: str = line.split("| ")[1]
+            # strip() removes the table column padding, otherwise the ID would
+            # carry trailing spaces into the occ calls
+            mountId: str = line.split("| ")[1].strip()
 
     if isinstance(mountId, str) and mountId:
-        ud.debug(
-            ud.LISTENER,
-            ud.WARN,
-            "Mount for {} is already configured with ID {}. Re-setting config if command is not delete...".format(
-                mountName, mountId
-            ),
+        logger.info(
+            "Mount for %s is already configured with ID %s. Re-setting config if command is not delete...",
+            mountName, mountId,
         )
     else:
-        ud.debug(
-            ud.LISTENER, ud.WARN, "No mount for {} configured yet.".format(mountName)
-        )
+        logger.info("No mount for %s configured yet.", mountName)
         mountId = False
     return mountId
 
@@ -211,14 +200,18 @@ def createMount(mountName):
 
 def deleteMount(mountId):
     if useSSH:
+        # univention-ssh runs the arguments through a remote shell, so every
+        # variable value has to be shell-quoted.
         sshCommand = getSshCommand(remotePwFile, remoteUser, remoteHost)
         deleteMountCmd: List = sshCommand + \
-            occ_cmd + ["files_external:delete", "--yes", mountId]
+            occ_cmd + ["files_external:delete", "--yes", shlex.quote(mountId)]
     else:
+        # Local occ runs as an argv list without a shell, so quoting would end
+        # up literally in the value. Pass everything as-is.
         deleteMountCmd: List = \
             occ_cmd + ["files_external:delete", "--yes", mountId]
 
-    ud.debug(ud.LISTENER, ud.WARN, "Deleting mount with ID {}".format(mountId))
+    logger.info("Deleting mount with ID %s", mountId)
 
     listener.setuid(0)
     try:
@@ -226,44 +219,51 @@ def deleteMount(mountId):
     finally:
         listener.unsetuid()
 
-    ud.debug(ud.LISTENER, ud.WARN, "Deleted mount with ID {}".format(mountId))
+    logger.info("Deleted mount with ID %s", mountId)
 
 
 def setMountConfig(
     mountId, shareHost, shareName, windomain, groupCn, applicableGroup=None
 ):
+    # Nextcloud's SMB storage takes the share name in the "share" field and a
+    # path inside it in "root". Split shareName at the first "/": the leading
+    # segment is the SMB share, the remainder (if any) is the subfolder.
+    shareField, _, subFolder = shareName.partition("/")
+    rootField = "/" + subFolder
     if useSSH:
+        # univention-ssh space-joins the arguments and runs them through a
+        # remote shell (even with --no-split), so every variable value has to be
+        # shell-quoted. Fixed command tokens ("host", "share", ...) do not.
         sshCommand = getSshCommand(remotePwFile, remoteUser, remoteHost)
         addHostCmd: List = sshCommand + occ_cmd + \
-            ["files_external:config", mountId, "host", shareHost]
+            ["files_external:config", shlex.quote(mountId), "host", shlex.quote(shareHost)]
         addShareRootCmd: List = sshCommand + occ_cmd + \
-            ["files_external:config", mountId, "share", "/"]
-        # The remote shell consumes the quotes, so the literal value (incl.
-        # Nextcloud variables like $user) arrives unquoted at occ.
+            ["files_external:config", shlex.quote(mountId), "share", shlex.quote(shareField)]
         addShareNameCmd: List = sshCommand + occ_cmd + \
-            ["files_external:config", mountId, "root", shlex.quote(shareName)]
+            ["files_external:config", shlex.quote(mountId), "root", shlex.quote(rootField)]
         addShareDomainCmd: List = sshCommand + occ_cmd + \
-            ["files_external:config", mountId, "domain",
-             windomain]
+            ["files_external:config", shlex.quote(mountId), "domain",
+             shlex.quote(windomain)]
         checkApplicableGroupCmd: List = sshCommand + occ_cmd + \
-            ["group:adduser", shlex.quote(groupCn), nc_admin]
+            ["group:adduser", shlex.quote(groupCn), shlex.quote(nc_admin)]
         checkLdapApplicableGroupCmd: List = sshCommand + occ_cmd + \
             ["ldap:search", "--group", shlex.quote(groupCn)]
         cleanupApplicableGroupCmd: List = sshCommand + occ_cmd + \
-            ["group:removeuser", shlex.quote(groupCn), nc_admin]
+            ["group:removeuser", shlex.quote(groupCn), shlex.quote(nc_admin)]
         addApplicableGroupCmd: List = sshCommand + occ_cmd + \
-            ["files_external:applicable", "--add-group", shlex.quote(groupCn), mountId]
+            ["files_external:applicable", "--add-group", shlex.quote(groupCn), shlex.quote(mountId)]
         addNcAdminApplicableUserCmd: List = sshCommand + occ_cmd + \
-            ["files_external:applicable", "--add-user", nc_admin, mountId]
+            ["files_external:applicable", "--add-user", shlex.quote(nc_admin), shlex.quote(mountId)]
     else:
+        # No shell parses the argv list here (subprocess -> docker exec), so
+        # quoting would end up literally in the Nextcloud config. Pass every
+        # value as-is (host, share root, $user paths, group name, ...).
         addHostCmd: List = occ_cmd + \
             ["files_external:config", mountId, "host", shareHost]
         addShareRootCmd: List = occ_cmd + \
-            ["files_external:config", mountId, "share", "/"]
-        # No shell parses the argv list here (subprocess -> docker exec), so
-        # quoting would end up literally in the Nextcloud config. Pass as-is.
+            ["files_external:config", mountId, "share", shareField]
         addShareNameCmd: List = occ_cmd + \
-            ["files_external:config", mountId, "root", shareName]
+            ["files_external:config", mountId, "root", rootField]
         addShareDomainCmd: List = occ_cmd + \
             ["files_external:config", mountId, "domain",
              windomain]
@@ -287,19 +287,13 @@ def setMountConfig(
         ret = subprocess.call(checkApplicableGroupCmd)
         timeout = time.time() + 600
         while ret != 0:
-            ud.debug(
-                ud.LISTENER,
-                ud.WARN,
-                "Group {} does not yet exist in Nextcloud, waiting until it exists with 600s timeout".format(
-                    groupCn
-                ),
+            logger.warning(
+                "Group %s does not yet exist in Nextcloud, waiting until it exists with 600s timeout",
+                groupCn,
             )
-            ud.debug(
-                ud.LISTENER,
-                ud.WARN,
-                "Performing LDAP search via occ for group {} to make Nextcloud aware of it".format(
-                    groupCn
-                ),
+            logger.info(
+                "Performing LDAP search via occ for group %s to make Nextcloud aware of it",
+                groupCn,
             )
             subprocess.call(checkLdapApplicableGroupCmd)
             ret = subprocess.call(checkApplicableGroupCmd)
@@ -308,18 +302,11 @@ def setMountConfig(
         if ret == 0:
             subprocess.call(addApplicableGroupCmd)
             subprocess.call(cleanupApplicableGroupCmd)
-            ud.debug(
-                ud.LISTENER,
-                ud.WARN,
-                "Finished share mount configuration for share {}".format(groupCn),
-            )
+            logger.info("Finished share mount configuration for share %s", groupCn)
         else:
-            ud.debug(
-                ud.LISTENER,
-                ud.WARN,
-                "Group {} for share {} was not found in Nextcloud. Check ldapBaseGroups in Nextcloud ldap config. Adding nc_admin as applicable user to hide share mount from all other users.".format(
-                    groupCn, shareName
-                ),
+            logger.warning(
+                "Group %s for share %s was not found in Nextcloud. Check ldapBaseGroups in Nextcloud ldap config. Adding nc_admin as applicable user to hide share mount from all other users.",
+                groupCn, shareName,
             )
             subprocess.call(addNcAdminApplicableUserCmd)
     finally:
