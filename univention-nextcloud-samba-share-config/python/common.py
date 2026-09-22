@@ -44,7 +44,7 @@ from univention.config_registry import ucr
 
 # Child of the high-level listener root logger, so messages are forwarded to
 # the listener log the same way the modules' self.logger is.
-logger = logging.getLogger("listener module.nextcloud_samba.common")
+logger = logging.getLogger("LISTENER").getChild('nextcloud_samba')
 
 occ_path_ucr = ucr.get("nextcloud-samba-common/occ_path")
 if occ_path_ucr:
