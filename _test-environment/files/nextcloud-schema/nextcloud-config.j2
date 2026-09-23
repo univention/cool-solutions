@@ -1,0 +1,20 @@
+ldapHost {{ schema_ip }}
+ldapPort 7389
+ldapBase {{ schema_ldap_base }}
+ldapAgentName uid=Administrator,cn=users,{{ schema_ldap_base }}
+ldapAgentPassword {{ schema_admin_password }}
+ldapBaseUsers {{ schema_ldap_base }}
+ldapBaseGroups {{ schema_ldap_base }}
+ldapUserFilterMode 1
+ldapLoginFilterMode 1
+ldapExpertUsernameAttr uid
+ldapExperiencedAdmin 1
+ldapEmailAttribute mail
+ldapConfigurationActive 1
+ldapBackupPort 7389
+ldapUserFilter (&(objectclass=univentionNextcloudUser)(univentionNextcloudEnabled=1))
+ldapLoginFilter (&(objectclass=univentionNextcloudUser)(univentionNextcloudEnabled=1)(uid=%uid))
+ldapGroupMemberAssocAttr uniqueMember
+ldapGroupFilterObjectclass nextcloudGroup
+ldapGroupFilter (&(objectclass=univentionNextcloudGroup)(univentionNextcloudEnabled=1))
+ldapAttributesForUserSearch	uid;givenName;sn;employeeNumber;mailPrimaryAddress

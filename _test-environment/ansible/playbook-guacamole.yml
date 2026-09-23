@@ -1,0 +1,216 @@
+---
+# univention-guacamole-rollout is a self-contained, non-App-Center Guacamole deployment: its
+# join script downloads guacd/guacamole Docker images itself, wires the guacamole container's
+# bundled LDAP auth plugin (guacamole-auth-ldap, bundled as a .jar in this package) directly at
+# our OpenLDAP via UCR variables the postinst pre-sets, and creates its own search-bind user
+# (univention-guacamole-schema's 98univention_guacamole_searchuser.inst join script).
+# univention-guacamole-schema separately registers guacConfigProtocol/guacConfigParameter as
+# extended attributes on the *groups/group* UDM module (not a dedicated "guacamole/config"
+# module) -- confirmed by reading 99univention_register_guacamole_schema.inst directly. The old
+# cfg's `udm guacamole/config create` targeted an unrelated App Center "guacamole" app's own UDM
+# module (via `univention-app install guacamole`), not anything this source package provides --
+# dropped entirely; we install and test our own package's actual mechanism instead.
+#
+# docker.io is a hard runtime dependency of the join script but isn't declared in
+# debian/control (a real, pre-existing packaging gap) -- installed explicitly here.
+#
+# No license import: every pre-joined template in the Images pool is fixed at
+# ldap/base dc=ucs,dc=test, not dc=ucs,dc=example -- see the same note in
+# playbook-sudo_ldap.yml / playbook-moodle.yml. The Windows domain name below is derived
+# from that (ucs.test), not the old cfg's hardcoded "ucs.example".
+#
+# win1/win2's local Administrator password (Univention.99) is the win2k22 template's actual
+# baked-in default -- see finding #2 in .claude/skills/tdp-migrate/SKILL.md. pdn's own
+# Administrator password is whatever was baked into ITS template, not "univention" -- same
+# pattern as playbook-nextcloud_schema.yml/playbook-printer.yml.
+#
+# No univention-s4-connector needed here (unlike playbook-printer.yml): Guacamole's RDP targets
+# only need to be DNS-resolvable (Samba4's own AD-integrated DNS handles that once joined) --
+# nothing needs win1/win2's computer objects reflected in UDM.
+
+- name: Provision pdn (samba4 + known Administrator password) ahead of the domain-joins
+  hosts: pdn
+  become: true
+  gather_facts: false
+
+  vars:
+    pdn_admin_password: "PrinterTest.99"
+
+  tasks:
+    - name: Determine the domain's LDAP base
+      ansible.builtin.command:
+        cmd: ucr get ldap/base
+      register: ldap_base
+      changed_when: false
+
+    - name: Expose the Windows domain name and a known Administrator password to the windows play
+      ansible.builtin.set_fact:
+        windows_domain: "{{ ldap_base.stdout | regex_replace('dc=', '') | regex_replace(',', '.') }}"
+        pdn_admin_password: "{{ pdn_admin_password }}"
+
+    - name: Enable the cool-solutions customer-scope repository component
+      ansible.builtin.command:
+        cmd: >-
+          univention-config-registry set
+          repository/online/component/cool-solutions=yes
+          repository/online/component/cool-solutions/version=current
+          repository/online/component/cool-solutions/unmaintained=yes
+      changed_when: true
+
+    # Hard dependency, not baked into this pre-joined template (confirmed live in
+    # playbook-generic.yml's package group). Own join script provisions the AD DC.
+    - name: Install univention-samba4
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-samba4
+      changed_when: true
+
+    # Both win1/win2 failed domain-join with a generic DC-locator error ("Element not
+    # found") even after ruling out concurrency and Docker/iptables as causes. Suspect:
+    # without s4-connector, Samba4's AD DNS/SRV records (_ldap._tcp, _kerberos._tcp, etc.)
+    # never sync into the LDAP-backed zone the domain's regular BIND9 actually serves,
+    # so a joining client's DC-locator SRV lookup fails -- printer's environment (which
+    # DOES install this) never hit this. Installing it here too, to test that theory.
+    - name: Install univention-s4-connector
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-s4-connector
+      changed_when: true
+
+    - name: Set a known Administrator password for the Windows domain-joins
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user modify
+          --dn "uid=Administrator,cn=users,{{ ldap_base.stdout }}"
+          --set password="{{ pdn_admin_password }}"
+      changed_when: true
+      register: admin_pw_result
+      failed_when:
+        - admin_pw_result.rc != 0
+        - "'used before' not in admin_pw_result.stderr"
+
+- name: Join win1 and win2 to the domain over WinRM
+  hosts: windows
+  gather_facts: false
+  # Kept serialized as a harmless safety margin against concurrent machine-account creation
+  # on the DC. The join failed identically even with serial: 1, so the actual suspected
+  # cause is docker.io's own iptables changes interfering with Samba4 AD traffic between
+  # win1/win2 and pdn -- the pdn-side Docker/guacamole install is now ordered AFTER this
+  # join play to test that theory.
+  serial: 1
+
+  tasks:
+    - name: Wait for WinRM to accept connections
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Ping the Windows guest
+      ansible.windows.win_ping:
+
+    - name: Point DNS at pdn (needed to discover the domain via SRV records)
+      ansible.windows.win_dns_client:
+        adapter_names: "*"
+        dns_servers:
+          - "{{ hostvars['pdn']['ansible_host'] }}"
+
+    - name: Rename the computer to match its inventory name
+      ansible.windows.win_hostname:
+        name: "{{ inventory_hostname | upper }}"
+      register: rename_result
+
+    - name: Reboot after rename, if required
+      ansible.windows.win_reboot:
+        reboot_timeout: 600
+      when: rename_result.reboot_required
+
+    # microsoft.ad.membership's own idempotency check (.NET's Domain.GetComputerDomain())
+    # fails with "A more secure authentication method is required for this server" when run
+    # over plain NTLM/HTTP WinRM against an ALREADY domain-joined host -- confirmed live,
+    # blocking every re-run of this playbook against an environment reused across CI
+    # retries. A plain WMI query doesn't hit that restriction, so check membership that way
+    # first and skip the join entirely if already done.
+    - name: Check current domain membership via WMI (avoids the module's own broken check)
+      ansible.windows.win_shell: (Get-CimInstance Win32_ComputerSystem).PartOfDomain
+      register: already_domain_joined
+      changed_when: false
+
+    - name: Join the UCS domain
+      microsoft.ad.membership:
+        dns_domain_name: "{{ hostvars['pdn']['windows_domain'] }}"
+        domain_admin_user: "Administrator@{{ hostvars['pdn']['windows_domain'] }}"
+        domain_admin_password: "{{ hostvars['pdn']['pdn_admin_password'] }}"
+        state: domain
+      register: join_result
+      when: "'True' not in already_domain_joined.stdout"
+
+    - name: Reboot after domain-join, if required
+      ansible.windows.win_reboot:
+        reboot_timeout: 600
+      when: join_result is not skipped and join_result.reboot_required
+
+    - name: Confirm the guest is reachable again after joining
+      ansible.windows.win_ping:
+
+- name: Install univention-guacamole-schema/-rollout now that both hosts are domain-joined
+  hosts: pdn
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Determine the domain's LDAP base
+      ansible.builtin.command:
+        cmd: ucr get ldap/base
+      register: ldap_base
+      changed_when: false
+
+    # Hard runtime dependency of univention-guacamole-rollout's own join script, not declared
+    # in debian/control (a real, pre-existing packaging gap).
+    - name: Install docker.io
+      ansible.builtin.command:
+        cmd: univention-install --yes docker.io
+      changed_when: true
+
+    - name: Install univention-guacamole-schema and univention-guacamole-rollout
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-guacamole-schema univention-guacamole-rollout
+      changed_when: true
+
+    - name: Create a test user to authenticate against Guacamole's LDAP auth plugin
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user create --ignore_exists
+          --position "cn=users,{{ ldap_base.stdout }}"
+          --set username="guactest"
+          --set firstname="guac"
+          --set lastname="test"
+          --set password="GuacTest.99"
+          --set pwdChangeNextLogin=0
+      changed_when: true
+
+    # Guacamole's LDAP auth plugin does a real bind as the user after locating their DN;
+    # a newly created UDM user's pwdChangeNextLogin=1 default makes OpenLDAP's ppolicy
+    # overlay reject that bind outright ("Permission denied. INVALID_CREDENTIALS") even
+    # with the correct password -- confirmed live via a real login attempt returning
+    # exactly that error. --ignore_exists above won't apply this to an already-existing
+    # user from a prior run, so guarantee it explicitly.
+    - name: Ensure the test user doesn't require a password change (idempotent)
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user modify
+          --dn "uid=guactest,cn=users,{{ ldap_base.stdout }}"
+          --set pwdChangeNextLogin=0
+      changed_when: true
+
+    - name: Create RDP connection groups for win1 and win2 (guacConfigProtocol/-Parameter)
+      ansible.builtin.command:
+        cmd: >-
+          udm groups/group create --ignore_exists
+          --position "cn=groups,{{ ldap_base.stdout }}"
+          --set name="guacamole-{{ item }}"
+          --set users="uid=guactest,cn=users,{{ ldap_base.stdout }}"
+          --set guacConfigProtocol="rdp"
+          --append guacConfigParameter="hostname={{ item }}.{{ hostvars['pdn']['windows_domain'] }}"
+          --append guacConfigParameter="security=any"
+          --append guacConfigParameter="ignore-cert=true"
+      loop:
+        - win1
+        - win2
+      changed_when: true

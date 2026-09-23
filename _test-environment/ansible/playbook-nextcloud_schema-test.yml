@@ -1,0 +1,68 @@
+---
+# Two checks (a third, for univention-nextcloud-groupfolders-sync, is a TODO -- see
+# below):
+# 1. Re-run occ ldap:test-config against the "s02" config to confirm Nextcloud can still
+#    reach and bind to pdn-schema's LDAP (not ldap:search: it iterates every configured
+#    backend, including the App Center's own default self-integration config against its
+#    *own* domain, which is unrelated and would fail the whole command if it ever has
+#    connectivity trouble of its own -- see the same note in nextcloud-configuration.sh).
+# 2. A direct ldapsearch on pdn-schema using the exact objectClass/filter Nextcloud's
+#    config uses, confirming univention-nextcloud-schema's schema and
+#    nextcloudEnabled/nextcloudQuota extended attributes actually produced matching,
+#    queryable LDAP entries for both test users -- this is the actual package under test,
+#    checked independently of Nextcloud's own occ tooling.
+#
+# TODO(univention-nextcloud-groupfolders-sync): no functional test here yet.
+# playbook-nextcloud_schema.yml's install of this package is expected to fail --
+# its CLI script is #!/usr/bin/python2.7 and both python2.7 and
+# python-univention-config-registry are not installable on UCS 5.2 (Debian 12 dropped
+# Python 2 entirely), confirmed live via univention-install. This needs a Python 3 port
+# of the package itself before it can be installed or tested at all; once that lands,
+# add back: `univention-nextcloud-groupfolders-sync list`, `create <name> Nextcloud-Group`,
+# assert via `list`, then `delete <name>` (the group is already provisioned by
+# playbook-nextcloud_schema.yml and synced into Nextcloud via the same s02 LDAP config).
+
+- name: Verify Nextcloud's LDAP integration against pdn-schema
+  hosts: pdn-nextcloud-host
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Re-test the existing LDAP config
+      ansible.builtin.command:
+        cmd: univention-app shell nextcloud sudo -u www-data php /var/www/html/occ ldap:test-config s02
+      changed_when: false
+
+- name: Verify the schema-registered users are queryable via the Nextcloud filter
+  hosts: pdn-schema
+  become: true
+  gather_facts: false
+
+  vars:
+    schema_admin_password: "NcSchemaTest.99"
+
+  tasks:
+    - name: Determine the domain's LDAP base
+      ansible.builtin.command:
+        cmd: ucr get ldap/base
+      register: ldap_base
+      changed_when: false
+
+    - name: Run the same LDAP filter Nextcloud's config uses
+      ansible.builtin.command:
+        cmd: >-
+          ldapsearch -x -H ldap://127.0.0.1:7389
+          -D "uid=Administrator,cn=users,{{ ldap_base.stdout }}"
+          -w "{{ schema_admin_password }}"
+          -b "{{ ldap_base.stdout }}"
+          (&(objectclass=univentionNextcloudUser)(univentionNextcloudEnabled=1))
+          uid
+      register: ldap_filter_search
+      changed_when: false
+
+    - name: Assert both enabled test users are found
+      ansible.builtin.assert:
+        that:
+          - "'uid: nextclouduser' in ldap_filter_search.stdout"
+          - "'uid: nextclouduser2' in ldap_filter_search.stdout"
+        fail_msg: "Nextcloud's LDAP filter did not find the enabled test users on pdn-schema"

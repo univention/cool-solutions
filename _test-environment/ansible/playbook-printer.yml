@@ -1,0 +1,215 @@
+---
+# univention-printer-assignment assigns printers to Windows computers (directly, or via a
+# group of computers) by generating a per-computer VBS netlogon script from LDAP changes
+# (see univention-printer-assignment/listener/univention-printer-assignment.py). Exercising
+# that for real needs: a working Samba4 AD DC (not baked into this pre-joined template --
+# same finding as playbook-generic.yml), univention-s4-connector to sync the Windows
+# computer object Samba4 creates on domain-join into UDM, and a real domain-joined Windows
+# client to trigger that sync.
+#
+# No license import: every pre-joined template in the Images pool is fixed at
+# ldap/base dc=ucs,dc=test, not dc=ucs,dc=example -- see the same note in
+# playbook-sudo_ldap.yml / playbook-moodle.yml. The Windows domain name below is derived
+# from that (ucs.test), not the old cfg's hardcoded "ucs.example".
+#
+# win1's local Administrator password (Univention.99) is the win2k22 template's actual
+# baked-in default -- see finding #2 in .claude/skills/tdp-migrate/SKILL.md. pdn's own
+# Administrator password is whatever was baked into ITS template, not "univention" --
+# same pattern as playbook-nextcloud_schema.yml: set it explicitly to a known value so the
+# domain-join has a real credential to authenticate with.
+
+- name: Install printer-assignment and provision pdn for a real domain-join test
+  hosts: pdn
+  become: true
+  gather_facts: false
+
+  vars:
+    pdn_admin_password: "PrinterTest.99"
+
+  tasks:
+    - name: Determine the domain's LDAP base
+      ansible.builtin.command:
+        cmd: ucr get ldap/base
+      register: ldap_base
+      changed_when: false
+
+    - name: Expose the Windows domain name and a known Administrator password to the win1 play
+      ansible.builtin.set_fact:
+        windows_domain: "{{ ldap_base.stdout | regex_replace('dc=', '') | regex_replace(',', '.') }}"
+        pdn_admin_password: "{{ pdn_admin_password }}"
+
+    - name: Enable the cool-solutions customer-scope repository component
+      ansible.builtin.command:
+        cmd: >-
+          univention-config-registry set
+          repository/online/component/cool-solutions=yes
+          repository/online/component/cool-solutions/version=current
+          repository/online/component/cool-solutions/unmaintained=yes
+      changed_when: true
+
+    # Hard dependency, not baked into this pre-joined template (confirmed live in
+    # playbook-generic.yml's package group). Own join script provisions the AD DC.
+    - name: Install univention-samba4
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-samba4
+      changed_when: true
+
+    # Syncs Samba4 AD objects (e.g. the Windows computer account created by domain-join)
+    # into UDM/OpenLDAP -- required for the later "assign printer to WIN1" udm command.
+    - name: Install univention-s4-connector
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-s4-connector
+      changed_when: true
+
+    - name: Install univention-printserver-pdf
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-printserver-pdf
+      changed_when: true
+
+    - name: Install univention-printer-assignment and univention-printer-assignment-schema
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-printer-assignment univention-printer-assignment-schema
+      changed_when: true
+
+    - name: Enable printer-assignment debug logging
+      ansible.builtin.command:
+        cmd: >-
+          univention-config-registry set
+          printer/assignment/update/debug=yes
+          printer/assignment/vbs/debug=yes
+      changed_when: true
+
+    - name: Restart univention-directory-listener to pick up the new listener module
+      ansible.builtin.systemd:
+        name: univention-directory-listener
+        state: restarted
+
+    - name: Set a known Administrator password for the Windows domain-join
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user modify
+          --dn "uid=Administrator,cn=users,{{ ldap_base.stdout }}"
+          --set password="{{ pdn_admin_password }}"
+      changed_when: true
+      register: admin_pw_result
+      failed_when:
+        - admin_pw_result.rc != 0
+        - "'used before' not in admin_pw_result.stderr"
+
+    - name: Determine pdn's own FQDN
+      ansible.builtin.command:
+        cmd: hostname -f
+      register: pdn_fqdn
+      changed_when: false
+
+    - name: Create the pdf1 printer share
+      ansible.builtin.command:
+        cmd: >-
+          udm shares/printer create --ignore_exists
+          --position "cn=printers,{{ ldap_base.stdout }}"
+          --set name="pdf1"
+          --set uri="cups-pdf:/"
+          --set model="cups-pdf/CUPS-PDF_noopt.ppd"
+          --set spoolHost="{{ pdn_fqdn.stdout }}"
+      changed_when: true
+
+    - name: Create a test user with a netlogon logon script
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user create --ignore_exists
+          --position "cn=users,{{ ldap_base.stdout }}"
+          --set username="user2"
+          --set firstname="us"
+          --set lastname="er2"
+          --set password="univention2.99"
+          --set scriptpath="user.bat"
+      changed_when: true
+
+    - name: Render the netlogon user.bat script
+      ansible.builtin.copy:
+        dest: "/var/lib/samba/sysvol/{{ windows_domain }}/scripts/user.bat"
+        content: |
+          call %LOGONSERVER%\sysvol\{{ windows_domain }}\scripts\printerassignment\%COMPUTERNAME%.vbs
+        mode: "0755"
+
+- name: Join win1 to the domain over WinRM
+  hosts: win1
+  gather_facts: false
+
+  tasks:
+    - name: Wait for WinRM to accept connections
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Ping the Windows guest
+      ansible.windows.win_ping:
+
+    - name: Point win1's DNS at pdn (needed to discover the domain via SRV records)
+      ansible.windows.win_dns_client:
+        adapter_names: "*"
+        dns_servers:
+          - "{{ hostvars['pdn']['ansible_host'] }}"
+
+    - name: Rename the computer to WIN1
+      ansible.windows.win_hostname:
+        name: WIN1
+      register: rename_result
+
+    - name: Reboot after rename, if required
+      ansible.windows.win_reboot:
+        reboot_timeout: 600
+      when: rename_result.reboot_required
+
+    - name: Join the UCS domain
+      microsoft.ad.membership:
+        dns_domain_name: "{{ hostvars['pdn']['windows_domain'] }}"
+        domain_admin_user: "Administrator@{{ hostvars['pdn']['windows_domain'] }}"
+        domain_admin_password: "{{ hostvars['pdn']['pdn_admin_password'] }}"
+        state: domain
+      register: join_result
+
+    - name: Reboot after domain-join, if required
+      ansible.windows.win_reboot:
+        reboot_timeout: 600
+      when: join_result.reboot_required
+
+    - name: Confirm win1 is reachable again after joining
+      ansible.windows.win_ping:
+
+- name: Assign the test printer to WIN1 once its computer object has synced via s4-connector
+  hosts: pdn
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Determine the domain's LDAP base
+      ansible.builtin.command:
+        cmd: ucr get ldap/base
+      register: ldap_base
+      changed_when: false
+
+    - name: Wait for the WIN1 computer object to appear in UDM (synced from Samba4 AD)
+      ansible.builtin.command:
+        cmd: udm computers/windows list --filter cn=WIN1
+      register: win1_udm_lookup
+      until: "'cn=WIN1' in win1_udm_lookup.stdout"
+      retries: 30
+      delay: 10
+      changed_when: false
+
+    - name: Assign the pdf1 printer to WIN1 (default and available)
+      ansible.builtin.command:
+        cmd: >-
+          udm computers/windows modify
+          --dn "cn=WIN1,cn=computers,{{ ldap_base.stdout }}"
+          --append univention-printer-default="cn=pdf1,cn=printers,{{ ldap_base.stdout }}"
+          --append univention-printer-list="cn=pdf1,cn=printers,{{ ldap_base.stdout }}"
+      changed_when: true
+
+    - name: Set user.bat as Administrator's netlogon script
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user modify
+          --dn "uid=Administrator,cn=users,{{ ldap_base.stdout }}"
+          --append scriptpath="user.bat"
+      changed_when: true

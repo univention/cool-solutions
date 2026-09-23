@@ -1,0 +1,92 @@
+---
+# Installs univention-user-group-sync-dest on pdn-dest and
+# univention-user-group-sync-source on pdn-source, then wires up the
+# cross-VM SSH trust the sync mechanism needs:
+#
+# - dest's preinst creates a UDM user "ucs-sync" with a random password
+#   (stored root-only at /etc/univention-user-group-sync-dest.secret) and
+#   sets auth/sshd/user/ucs-sync=yes (a core UCS sshd_config mechanism that
+#   allows password auth for this one service user even though the domain
+#   otherwise requires key auth).
+# - source's join script (runs automatically on install, since the domain
+#   is already joined) creates its own UDM "ucs-sync" user and generates an
+#   SSH keypair at /var/lib/univention-user-group-sync/.ssh/id_rsa.
+# - source needs dest's one-time secret to `ssh-copy-id` its pubkey onto
+#   dest's ucs-sync account; from then on sync runs key-based via cron
+#   (univention_user_group_sync_source_synchronize / _dest.py, every 5
+#   min). We fetch the secret via Ansible directly (both hosts are already
+#   reachable over our own tech SSH key) instead of the old cfg's
+#   root-password scp hop.
+
+- name: Install univention-user-group-sync-dest on pdn-dest
+  hosts: pdn-dest
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Enable the cool-solutions customer-scope repository component
+      ansible.builtin.command:
+        cmd: >-
+          univention-config-registry set
+          repository/online/component/cool-solutions=yes
+          repository/online/component/cool-solutions/version=current
+          repository/online/component/cool-solutions/unmaintained=yes
+      changed_when: true
+
+    - name: Install univention-user-group-sync-dest
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-user-group-sync-dest
+      changed_when: true
+
+    - name: Read the generated ucs-sync secret
+      ansible.builtin.slurp:
+        src: /etc/univention-user-group-sync-dest.secret
+      register: ugs_dest_secret_raw
+
+    - name: Expose the secret to the pdn-source play
+      ansible.builtin.set_fact:
+        ugs_dest_secret: "{{ ugs_dest_secret_raw.content | b64decode }}"
+
+- name: Install univention-user-group-sync-source on pdn-source
+  hosts: pdn-source
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Enable the cool-solutions customer-scope repository component
+      ansible.builtin.command:
+        cmd: >-
+          univention-config-registry set
+          repository/online/component/cool-solutions=yes
+          repository/online/component/cool-solutions/version=current
+          repository/online/component/cool-solutions/unmaintained=yes
+      changed_when: true
+
+    - name: Install univention-user-group-sync-source
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-user-group-sync-source
+      changed_when: true
+
+    - name: Install sshpass (needed for the one-time password-based ssh-copy-id)
+      ansible.builtin.command:
+        cmd: univention-install --yes sshpass
+      changed_when: true
+
+    - name: Drop dest's one-time secret onto source
+      ansible.builtin.copy:
+        content: "{{ hostvars['pdn-dest'].ugs_dest_secret }}"
+        dest: /etc/univention-user-group-sync-dest.secret
+        mode: "0600"
+
+    - name: Authorize source's ucs-sync SSH key on dest
+      ansible.builtin.shell: >-
+        sshpass -f /etc/univention-user-group-sync-dest.secret
+        ssh-copy-id -i /var/lib/univention-user-group-sync/.ssh/id_rsa
+        -o StrictHostKeyChecking=no -o PubkeyAuthentication=no
+        ucs-sync@{{ hostvars['pdn-dest'].ansible_host }}
+      changed_when: true
+
+    - name: Point the sync source at pdn-dest
+      ansible.builtin.command:
+        cmd: "univention-config-registry set ldap/sync/destination={{ hostvars['pdn-dest'].ansible_host }}"
+      changed_when: true

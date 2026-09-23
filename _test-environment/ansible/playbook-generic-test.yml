@@ -1,0 +1,157 @@
+---
+# Functional checks for the 5 "generic" packages, in the same order they're installed in
+# playbook-generic.yml.
+
+- name: Verify the generic packages on pdn
+  hosts: pdn
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Determine the domain's LDAP base
+      ansible.builtin.command:
+        cmd: ucr get ldap/base
+      register: ldap_base
+      changed_when: false
+
+    # --- univention-demo-data -------------------------------------------------------
+    - name: Look up the demo-data OU
+      ansible.builtin.command:
+        cmd: >-
+          udm container/ou list --filter name=univention-demo-data
+      register: demo_data_ou
+      changed_when: false
+
+    - name: Look up users under the demo-data OU
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user list
+          --position "ou=univention-demo-data,{{ ldap_base.stdout }}"
+      register: demo_data_users
+      changed_when: false
+
+    - name: Assert the demo-data OU and its users exist
+      ansible.builtin.assert:
+        that:
+          - "'univention-demo-data' in demo_data_ou.stdout"
+          - "'DN: ' in demo_data_users.stdout"
+        fail_msg: "univention-demo-data did not create its OU/demo users"
+
+    # --- univention-ldap-restore ------------------------------------------------------
+    - name: Create a test user to exercise the restore CLI
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user create --ignore_exists
+          --position "cn=users,{{ ldap_base.stdout }}"
+          --set username="cs-restore-test" --set lastname="RestoreTest" --set password="univention"
+      changed_when: true
+
+    - name: Snapshot the LDAP directory to a backup file
+      ansible.builtin.shell:
+        cmd: slapcat | gzip > /root/ldap-restore-test-backup.ldif.gz
+      changed_when: true
+
+    - name: Delete the test user
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user remove
+          --dn "uid=cs-restore-test,cn=users,{{ ldap_base.stdout }}"
+      changed_when: true
+
+    - name: Confirm the test user is really gone
+      ansible.builtin.command:
+        cmd: udm users/user list --filter uid=cs-restore-test
+      register: restore_precheck
+      changed_when: false
+
+    - name: Restore the test user from the backup
+      ansible.builtin.command:
+        cmd: >-
+          univention-restore-ldap-object-from-backup
+          -d "uid=cs-restore-test,cn=users,{{ ldap_base.stdout }}"
+          -b /root/ldap-restore-test-backup.ldif.gz
+      changed_when: true
+
+    - name: Look up the restored test user
+      ansible.builtin.command:
+        cmd: udm users/user list --filter uid=cs-restore-test
+      register: restore_postcheck
+      changed_when: false
+
+    - name: Assert the deleted user was actually restored
+      ansible.builtin.assert:
+        that:
+          - "'DN: ' not in restore_precheck.stdout"
+          - "'DN: ' in restore_postcheck.stdout"
+        fail_msg: "univention-restore-ldap-object-from-backup did not restore the deleted test user"
+
+    # --- univention-munin ---------------------------------------------------------
+    - name: Confirm munin-node is active
+      ansible.builtin.command:
+        cmd: systemctl is-active munin-node
+      register: munin_node_status
+      changed_when: false
+      failed_when: munin_node_status.stdout != "active"
+
+    - name: Confirm munin-node is listening on its port
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: 4949
+        timeout: 15
+
+    # --- univention-set-samba4-profile-path -----------------------------------------
+    - name: Create a test user to exercise the profile-path script
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user create --ignore_exists
+          --position "cn=users,{{ ldap_base.stdout }}"
+          --set username="cs-samba-profile-test" --set lastname="ProfileTest" --set password="univention"
+      changed_when: true
+
+    - name: Run the profile-path script scoped to just the test user
+      ansible.builtin.command:
+        cmd: >-
+          /usr/lib/univention-set-samba4-profile-path/univention-set-samba4-profile-path.sh
+          testserver.example.com cs-samba-profile-test
+      changed_when: true
+
+    - name: Look up the test user's profile path
+      ansible.builtin.command:
+        cmd: udm users/user list --filter uid=cs-samba-profile-test
+      register: samba_profile_result
+      changed_when: false
+
+    - name: Assert the profile path was set correctly
+      ansible.builtin.assert:
+        that:
+          - "'profilepath: \\\\\\\\testserver.example.com\\%UserName%\\windows-profiles' in samba_profile_result.stdout"
+        fail_msg: "univention-set-samba4-profile-path did not set the expected profilepath"
+
+    # --- univention-ssh-key-sync -----------------------------------------------------
+    - name: Create a test user to exercise ssh-key-sync
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user create --ignore_exists
+          --position "cn=users,{{ ldap_base.stdout }}"
+          --set username="cs-sshkey-test" --set lastname="SshKeyTest" --set password="univention"
+      changed_when: true
+
+    - name: Set a test SSH public key on the user
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user modify
+          --dn "uid=cs-sshkey-test,cn=users,{{ ldap_base.stdout }}"
+          --set sshPublicKey="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAItestkeymaterialdata cs-sshkey-test"
+      changed_when: true
+
+    - name: Look up the key via ldap-keys.sh
+      ansible.builtin.command:
+        cmd: /usr/share/univention-ssh-key-sync/ldap-keys.sh cs-sshkey-test
+      register: ssh_key_lookup
+      changed_when: false
+
+    - name: Assert ldap-keys.sh returned the test key
+      ansible.builtin.assert:
+        that:
+          - "'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAItestkeymaterialdata cs-sshkey-test' in ssh_key_lookup.stdout"
+        fail_msg: "ldap-keys.sh did not return the sshPublicKey attribute set via UDM"

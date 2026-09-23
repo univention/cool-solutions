@@ -1,0 +1,59 @@
+---
+# Verifies univention-printer-assignment's actual core function: the listener module
+# (univention-printer-assignment/listener/univention-printer-assignment.py) reacting to
+# WIN1's printer assignment by generating a netlogon VBS script
+# (univention-printer-assignment/share/update-univention-printer-assignment writes
+# <sysvol>/scripts/printerassignment/<hostname>.vbs, always lowercased).
+#
+# This is a server-side-only check -- the package's advertised behavior is generating the
+# script for any real Windows client to pick up at next logon, not actually running a
+# logon session inside the Windows guest, which playbook-printer.yml's domain-join already
+# exercises for real (proving the computer object legitimately syncs via s4-connector).
+
+- name: Verify the printer-assignment VBS logon script was generated for WIN1
+  hosts: pdn
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Determine the domain's LDAP base
+      ansible.builtin.command:
+        cmd: ucr get ldap/base
+      register: ldap_base
+      changed_when: false
+
+    - name: Determine pdn's own FQDN (the printer share's spoolHost)
+      ansible.builtin.command:
+        cmd: hostname -f
+      register: pdn_fqdn
+      changed_when: false
+
+    - name: Derive the Windows domain name (same regex as playbook-printer.yml)
+      ansible.builtin.set_fact:
+        windows_domain: "{{ ldap_base.stdout | regex_replace('dc=', '') | regex_replace(',', '.') }}"
+
+    - name: Wait for win1.vbs to appear in the netlogon scripts directory
+      ansible.builtin.stat:
+        path: "/var/lib/samba/sysvol/{{ windows_domain }}/scripts/printerassignment/win1.vbs"
+      register: vbs_stat
+      until: vbs_stat.stat.exists
+      retries: 30
+      delay: 10
+
+    - name: Read the generated VBS script
+      ansible.builtin.slurp:
+        src: "/var/lib/samba/sysvol/{{ windows_domain }}/scripts/printerassignment/win1.vbs"
+      register: vbs_content
+
+    - name: Compute the expected printer UNC path
+      ansible.builtin.set_fact:
+        expected_printer_unc: '\\{{ pdn_fqdn.stdout }}\pdf1'
+
+    - name: Assert the script references the assigned pdf1 printer
+      ansible.builtin.assert:
+        that:
+          - expected_printer_unc in (vbs_content.content | b64decode)
+        fail_msg: >-
+          win1.vbs was generated but does not reference the expected printer UNC path
+          ({{ expected_printer_unc }}) -- printer assignment may not have propagated.
+        success_msg: "win1.vbs correctly assigns the pdf1 printer."

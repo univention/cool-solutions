@@ -1,0 +1,75 @@
+---
+# Installs the 5 "generic" packages that fit this plain 4-role domain (pdn/bdn1/rdn1/mn1)
+# as-is -- all 5 only need the primary. The other 3 packages originally grouped here
+# (univention-ro-wo-group-dirs, univention-sanis, univention-lusd) are UCS@school-specific
+# and were folded into the moodle package's job group instead (see playbook-moodle.yml),
+# per the same "share the environment with something that already has the prerequisite"
+# pattern used for nextcloud_groupfolders-sync -> nextcloud_schema.
+#
+# The old cfg's command3 ran `univention-install [ENV:INSTALL_PACKAGE] -y --force-yes`,
+# but no job ever actually set INSTALL_PACKAGE -- so nothing was ever really installed or
+# tested here. Moved to explicit per-package installs below instead.
+
+- name: Install the generic packages on pdn
+  hosts: pdn
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Determine the domain's LDAP base
+      ansible.builtin.command:
+        cmd: ucr get ldap/base
+      register: ldap_base
+      changed_when: false
+
+    - name: Enable the cool-solutions customer-scope repository component
+      ansible.builtin.command:
+        cmd: >-
+          univention-config-registry set
+          repository/online/component/cool-solutions=yes
+          repository/online/component/cool-solutions/version=current
+          repository/online/component/cool-solutions/unmaintained=yes
+      changed_when: true
+
+    # univention-demo-data: App Center-style package, join script creates demo
+    # users/computers/groups under a new ou=univention-demo-data container automatically.
+    - name: Install univention-demo-data
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-demo-data
+      changed_when: true
+
+    # univention-ldap-restore: CLI restoring LDAP objects/attributes/memberships from a
+    # gzipped ldif backup. Confirmed Python 3 (both the CLI and its library module).
+    - name: Install univention-ldap-restore
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-ldap-restore
+      changed_when: true
+
+    # univention-munin: -server depends on -node, so installing just -server pulls both in.
+    - name: Install univention-munin-server
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-munin-server
+      changed_when: true
+
+    # univention-set-samba4-profile-path: bulk-sets every user's Windows roaming-profile
+    # path. Hard-depends on univention-samba4 -- NOT baked into this pre-joined template
+    # (confirmed live: "package 'univention-samba4' is not installed"), so install it
+    # first. Its own join script (Samba4 AD DC provisioning) runs automatically and
+    # takes a little while; confirmed live it completes cleanly on this already-joined
+    # domain.
+    - name: Install univention-samba4 (hard dependency, not on this template)
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-samba4
+      changed_when: true
+
+    - name: Install univention-set-samba4-profile-path
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-set-samba4-profile-path
+      changed_when: true
+
+    # univention-ssh-key-sync: join script registers the sshPublicKey extended attribute
+    # automatically on this already-joined domain.
+    - name: Install univention-ssh-key-sync
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-ssh-key-sync
+      changed_when: true

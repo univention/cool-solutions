@@ -1,24 +1,197 @@
 ---
-stages:
-  - lint
-  - tests
+# =============================================================================
+# cool-solutions CI/CD Pipeline
+# =============================================================================
+# This pipeline builds Debian packages, creates test environments per package
+# group (only when changed), and installs the packages on those environments.
+#
+# It integrates:
+# - pre-commit for linting
+# - deb-pipeline for Debian package builds
+# - test-dev-pipeline (TDP) for VM provisioning, Aptly repos, and deployment
+# =============================================================================
 
+# -----------------------------------------------------------------------------
+# Change Detection Anchors
+# Each anchor defines which directories trigger a specific test environment.
+# _test-environment changes always trigger all environments.
+# -----------------------------------------------------------------------------
+.sudo_ldap_changes: &SUDO_LDAP_CHANGES
+  - univention-sudo-ldap-host/**/*
+  - univention-sudo-ldap-server/**/*
+  - _test-environment/**/*
+
+.homedir_changes: &HOMEDIR_CHANGES
+  - univention-homedir-autocreate/**/*
+  - _test-environment/**/*
+
+.printer_changes: &PRINTER_CHANGES
+  - univention-printer-assignment/**/*
+  - _test-environment/**/*
+
+.usercert_changes: &USERCERT_CHANGES
+  - univention-usercert/**/*
+  - _test-environment/**/*
+
+# Covers both univention-nextcloud-schema and univention-nextcloud-groupfolders-sync:
+# per the user's direction, these two share one job group/environment (both need a live
+# Nextcloud on pdn-nextcloud-host, so groupfolders-sync's install+test were folded into
+# this group's playbooks instead of standing up a second Nextcloud) and so should react
+# to changes in either package.
+.nextcloud_schema_changes: &NEXTCLOUD_SCHEMA_CHANGES
+  - univention-nextcloud-schema/**/*
+  - univention-nextcloud-groupfolders-sync/**/*
+  - _test-environment/**/*
+
+.nextcloud_samba_changes: &NEXTCLOUD_SAMBA_CHANGES
+  - univention-nextcloud-samba-share-config/**/*
+  - _test-environment/**/*
+
+.sync_changes: &SYNC_CHANGES
+  - univention-user-group-sync-dest/**/*
+  - univention-user-group-sync-source/**/*
+  - _test-environment/**/*
+
+# Covers univention-moodle-group plus 3 UCS@school-specific packages folded in from the
+# "generic" group (univention-ro-wo-group-dirs, univention-sanis, univention-lusd): all
+# three need a UCS@school host, which this job group already has, rather than a second
+# one -- same pattern as nextcloud_groupfolders-sync -> nextcloud_schema.
+.moodle_changes: &MOODLE_CHANGES
+  - univention-moodle-group/**/*
+  - univention-ro-wo-group-dirs/**/*
+  - univention-sanis/**/*
+  - univention-lusd/**/*
+  - _test-environment/**/*
+
+.guacamole_changes: &GUACAMOLE_CHANGES
+  - univention-guacamole-ldap-connection/**/*
+  - _test-environment/**/*
+
+# Packages that use the generic (plain 4-role domain) test environment. The other 3
+# packages this group originally covered (ro-wo-group-dirs, sanis, lusd) moved to
+# MOODLE_CHANGES above -- they're UCS@school-specific, not a fit for this plain domain.
+.generic_changes: &GENERIC_CHANGES
+  - univention-demo-data/**/*
+  - univention-ldap-restore/**/*
+  - univention-munin/**/*
+  - univention-set-samba4-profile-path/**/*
+  - univention-ssh-key-sync/**/*
+  - _test-environment/**/*
+
+# Combined: all package directories
+.all_changes: &ALL_CHANGES
+  - univention-*/**/*
+  - _test-environment/**/*
+
+.mr_pipeline_condition: &MR_PIPELINE_CONDITION '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_OPEN_MERGE_REQUESTS'
+
+# -----------------------------------------------------------------------------
+# Variables
+# -----------------------------------------------------------------------------
+variables:
+  DEB_PIPELINE_VERSION: &DEB_PIPELINE_VERSION "v2.16.0"
+  DEB_PACKAGE_UCS_RELEASE:
+    value: "5.2"
+    description: "For which UCS release should the packages be released?"
+  DEB_PACKAGE_CUSTOMER_ID: "00000"
+  DEB_PACKAGE_CUSTOMER_SCOPE: "cool-solutions"
+  # Pinned to hotfix/v9.0.0-downstream-findings@cd08ed48 (TDP MR !61, unreleased) instead of a
+  # tagged release: fixes "export: `_IP_<section>=...`: not a valid identifier" in
+  # .tdp_create_vms's inventory-building step for any hyphenated section name (first hit via this
+  # project's nextcloud-samba-share-config-52.cfg's primary-samba/member-nextcloud, then again via
+  # sync-users-and-groups-52.cfg's pdn-dest/pdn-source). NOTE: an earlier pin to 89c5098f *looked*
+  # green for nextcloud-samba but that was a false negative -- 89c5098f still had the unfixed
+  # "export _IP_<section>=..." line (confirmed by reading jobs-library.yml at that SHA); 5ce4c7ff is
+  # the commit that actually drops the export/source round-trip. Also picks up the rest of that
+  # hotfix branch (nmap in the image, admin-credential defaults, disk-resize/DNS/cache-key skill
+  # notes) plus later hardening bumped past the previous f326cd5f pin: Proxmox VM recovery/
+  # snapshotting, SSH ControlMaster/reachability fixes, WinRM support, and per-CI-job VM
+  # provenance tracking. Re-pin to the next tagged release once MR !61 merges.
+  TDP_VERSION: &TDP_VERSION "cd08ed48"
+  UCS_VERSION:
+    value: "5.2-6"
+    description: "UCS version for VM deployment"
+  FF_SCRIPT_SECTIONS:
+    value: "true"
+    options:
+      - "true"
+      - "false"
+    description: "Enable or disable collapsible job logs"
+  TDP_DEPLOYMENT_RESULTS_DIR: "${CI_PROJECT_DIR}/_tdp_deployment_results"
+  ENVIRONMENT_STATE_FILE: "${TDP_DEPLOYMENT_RESULTS_DIR}/.environment_state"
+  ANSIBLE_INVENTORY: "${TDP_DEPLOYMENT_RESULTS_DIR}/inventory.ini"
+  CI_REGISTRY:
+    value: "docker-registry.knut.univention.de"
+    description: "URI for GitLab CI Container Registry"
+  SONAR_USER_HOME:
+    value: "${CI_PROJECT_DIR}/.sonar"
+    description: "Defines the location of the analysis task cache"
+  # Needed pipeline-wide, not just for sonarqube-check's blame/analysis: deb-pipeline's
+  # per-package build/ucslint/upload jobs and this file's own *_CHANGES-gated jobs all rely
+  # on `changes:` rules diffing against the target branch, which silently falls back to
+  # "assume changed" (running the job unconditionally) when GitLab can't fetch enough
+  # history for the diff on a shallow clone -- this is what was actually causing every
+  # package to attempt a build regardless of whether it changed. A prior attempt at this
+  # (commit 62689e7) hit repeated "fatal: error in object: unshallow <sha>" failures on a
+  # runner slot reusing a persistent shallow git cache; scoping GIT_DEPTH=0 down to just
+  # sonarqube-check (0017ded) worked around that but broke changes:-based build filtering
+  # everywhere else. Re-enabling pipeline-wide per zit-sh's proven working config -- if the
+  # unshallow failures resurface, they're a runner-cache issue to fix at that layer, not a
+  # reason to keep every other job's changes: rules broken.
+  GIT_DEPTH:
+    value: "0"
+    description: "Fetch full history pipeline-wide -- required for changes: rules (deb-pipeline's per-package build gating, this file's *_CHANGES anchors) and sonarqube-check's blame/analysis to work correctly"
+
+# -----------------------------------------------------------------------------
+# Workflow
+# -----------------------------------------------------------------------------
+workflow:
+  auto_cancel:
+    on_new_commit: interruptible
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_OPEN_MERGE_REQUESTS
+    - if: &PUSH_TO_DEFAULT_BRANCH $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: &SCHEDULED_PIPELINE $CI_PIPELINE_SOURCE == "schedule"
+    - if: &RUN_VIA_WEB_UI_ON_DEFAULT_BRANCH $CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: &RUN_VIA_WEB_UI_ON_FEATURE_BRANCH $CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+
+# -----------------------------------------------------------------------------
+# Includes
+# -----------------------------------------------------------------------------
 include:
+  - project: univention/prof-services/internal/devops/deb-pipeline
+    ref: *DEB_PIPELINE_VERSION
+    file:
+      - library-deb-pipeline.yml
+      - library-deb-package.yml
+
+  - project: univention/prof-services/internal/devops/test-dev-pipeline
+    ref: *TDP_VERSION
+    file:
+      - jobs-library.yml
+
   - project: univention/infrastructure/docker-services
     file:
       - pre-commit.yml
+
+# -----------------------------------------------------------------------------
+# Stages
+# -----------------------------------------------------------------------------
+stages:
+  - lint
+  - prepare
+  - build
+  - repo_setup
+  - deploy
+  - tests
+
+# =============================================================================
+# LINT
+# =============================================================================
 run pre-commit:
   stage: lint
   extends: .pre-commit
   allow_failure: true
-
-variables:
-  SONAR_USER_HOME:
-    value: "${CI_PROJECT_DIR}/.sonar"
-    description: "Defines the location of the analysis task cache"
-  GIT_DEPTH:
-    value: "0"
-    description: "Tells git to fetch all the branches of the project, required by the analysis task"
 
 sonarqube-check:
   interruptible: true
@@ -35,3 +208,980 @@ sonarqube-check:
     paths:
       - "${SONAR_USER_HOME}/cache"
       - sonar-scanner/
+
+# =============================================================================
+# BUILD - Debian Packages via deb-pipeline
+# =============================================================================
+generate-deb-pipeline:
+  stage: prepare
+  interruptible: true
+  extends: .create_deb_pipeline
+  rules:
+    - if: *RUN_VIA_WEB_UI_ON_DEFAULT_BRANCH
+      when: manual
+    - if: *SCHEDULED_PIPELINE
+      when: never
+    - if: *PUSH_TO_DEFAULT_BRANCH
+      changes: *ALL_CHANGES
+    - when: always
+      changes: *ALL_CHANGES
+
+run-generated-deb-pipeline:
+  stage: build
+  interruptible: true
+  needs:
+    - job: generate-deb-pipeline
+  rules:
+    - if: *RUN_VIA_WEB_UI_ON_DEFAULT_BRANCH
+      when: manual
+    - if: *SCHEDULED_PIPELINE
+      when: never
+    # A _test-environment change can affect any package's test, and the playbooks
+    # themselves need real .debs to install against -- force every package to build so
+    # this branch's test repo actually has something for every job group to install.
+    # deb-pipeline's own per-package rules:changes (see multi-deb-pipeline.yml.jinja2)
+    # unions "touched by any commit in the compared range", not a clean base..head diff,
+    # so a changelog bump-then-revert still poisons that evaluation -- DEB_PIPELINE_BUILD_ALL
+    # forces the build without touching any package file at all, avoiding that trap.
+    - changes:
+        - _test-environment/**/*
+      variables:
+        DEB_PIPELINE_BUILD_ALL: "true"
+    - when: always
+      changes: *ALL_CHANGES
+  trigger:
+    include:
+      - artifact: deb-pipeline.yml
+        job: generate-deb-pipeline
+    strategy: depend
+    forward:
+      pipeline_variables: true
+
+publish_packages:
+  stage: deploy
+  interruptible: false
+  extends: .deb_package_publish
+  needs:
+    - job: run-generated-deb-pipeline
+  rules:
+    - if: *RUN_VIA_WEB_UI_ON_DEFAULT_BRANCH
+      when: manual
+    - if: *SCHEDULED_PIPELINE
+      when: never
+    - if: *PUSH_TO_DEFAULT_BRANCH
+      variables:
+        DEB_PIPELINE_UPLOAD_PACKAGES: "true"
+
+# =============================================================================
+# SHARED APTLY SETUP
+# =============================================================================
+setup_aptly_repo:
+  stage: build
+  interruptible: true
+  extends: .repo_setup:aptly
+  environment:
+    name: test/cool-solutions/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: run-generated-deb-pipeline
+  rules:
+    - if: *RUN_VIA_WEB_UI_ON_DEFAULT_BRANCH
+      when: manual
+    - if: *RUN_VIA_WEB_UI_ON_FEATURE_BRANCH
+      when: always
+    - if: *MR_PIPELINE_CONDITION
+      changes: *ALL_CHANGES
+    - if: *PUSH_TO_DEFAULT_BRANCH
+      when: never
+
+# =============================================================================
+# REUSABLE JOB TEMPLATES
+# =============================================================================
+
+# Template for creating VMs
+.cs_create_vms:
+  extends: .tdp_create_vms
+  needs: []
+  # TDP's own cache key (${CI_COMMIT_REF_SLUG}-deployment) is shared by every job on the
+  # branch regardless of package group -- fine for a single-environment-per-branch project,
+  # but this repo runs up to 11 independent package environments that can be live on the same
+  # branch at once. Scope the cache per package group so they can't collide (see
+  # TDP_ENV_NAME set on each create_vms_<pkg>/configure_aptly_<pkg>/run_playbooks_<pkg>/
+  # test_<pkg>/terminate_<pkg> job below).
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-${TDP_ENV_NAME}-deployment
+  artifacts:
+    when: always
+  before_script:
+    - !reference [.tdp_create_vms, before_script]
+    - apt update
+    - apt install --yes nmap
+  rules:
+    - if: *RUN_VIA_WEB_UI_ON_DEFAULT_BRANCH
+      when: manual
+    - if: *RUN_VIA_WEB_UI_ON_FEATURE_BRANCH
+      when: always
+    - if: *PUSH_TO_DEFAULT_BRANCH
+      when: never
+
+# Template for configuring Aptly on VMs
+.cs_configure_aptly:
+  extends: .run_playbooks:after_repo
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-${TDP_ENV_NAME}-deployment
+  rules:
+    - if: *RUN_VIA_WEB_UI_ON_DEFAULT_BRANCH
+      when: never
+    - if: *RUN_VIA_WEB_UI_ON_FEATURE_BRANCH
+      when: always
+    - if: *PUSH_TO_DEFAULT_BRANCH
+      when: never
+
+# Template for running playbooks (package update)
+.cs_run_playbooks:
+  extends: .tdp_run_playbooks
+  variables:
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-update-packages.yml"
+    ANSIBLE_CONFIG: "${CI_PROJECT_DIR}/_test-environment/ansible/ansible.cfg"
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-${TDP_ENV_NAME}-deployment
+  rules:
+    - if: *RUN_VIA_WEB_UI_ON_DEFAULT_BRANCH
+      when: manual
+    - if: *RUN_VIA_WEB_UI_ON_FEATURE_BRANCH
+      when: always
+    - if: *PUSH_TO_DEFAULT_BRANCH
+      when: never
+
+# Template for terminating VMs
+.cs_terminate:
+  extends: .tdp_stop_deployment
+  needs: []
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-${TDP_ENV_NAME}-deployment
+  rules:
+    - if: *PUSH_TO_DEFAULT_BRANCH
+      when: never
+
+# =============================================================================
+# TEST ENVIRONMENTS PER PACKAGE GROUP
+# =============================================================================
+# Each group defines: create_vms, configure_aptly, run_playbooks, terminate
+# Jobs are only triggered when the relevant package directories change.
+# =============================================================================
+
+# ---------------------
+# sudo-ldap
+# ---------------------
+create_vms_sudo_ldap:
+  extends: .cs_create_vms
+  variables:
+    TDP_ENV_NAME: sudo_ldap
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/sudo-ldap-ucs52.cfg"
+    JOB_BASE_NAME: "cs-sudo-ldap-${CI_COMMIT_REF_SLUG}"
+  environment:
+    name: test/sudo-ldap/${CI_COMMIT_REF_SLUG}
+    on_stop: terminate_sudo_ldap
+  rules:
+    - !reference [.cs_create_vms, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *SUDO_LDAP_CHANGES
+
+configure_aptly_sudo_ldap:
+  extends: .cs_configure_aptly
+  variables:
+    TDP_ENV_NAME: sudo_ldap
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/sudo-ldap-ucs52.cfg"
+  environment:
+    name: test/sudo-ldap/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: setup_aptly_repo
+    - job: create_vms_sudo_ldap
+  rules:
+    - !reference [.cs_configure_aptly, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *SUDO_LDAP_CHANGES
+
+run_playbooks_sudo_ldap:
+  extends: .cs_run_playbooks
+  variables:
+    TDP_ENV_NAME: sudo_ldap
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/sudo-ldap-ucs52.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-sudo_ldap.yml"
+  environment:
+    name: test/sudo-ldap/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: configure_aptly_sudo_ldap
+      optional: true
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *SUDO_LDAP_CHANGES
+
+test_sudo_ldap:
+  extends: .cs_run_playbooks
+  stage: tests
+  variables:
+    TDP_ENV_NAME: sudo_ldap
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/sudo-ldap-ucs52.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-sudo_ldap-test.yml"
+  environment:
+    name: test/sudo-ldap/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: run_playbooks_sudo_ldap
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *SUDO_LDAP_CHANGES
+
+terminate_sudo_ldap:
+  extends: .cs_terminate
+  variables:
+    TDP_ENV_NAME: sudo_ldap
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/sudo-ldap-ucs52.cfg"
+  environment:
+    name: test/sudo-ldap/${CI_COMMIT_REF_SLUG}
+  rules:
+    - !reference [.cs_terminate, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *SUDO_LDAP_CHANGES
+      when: manual
+    - if: *RUN_VIA_WEB_UI_ON_FEATURE_BRANCH
+      when: manual
+
+# ---------------------
+# homedir-autocreate
+# ---------------------
+create_vms_homedir:
+  extends: .cs_create_vms
+  variables:
+    TDP_ENV_NAME: homedir
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/homedir-autocreate-ucs52.cfg"
+    JOB_BASE_NAME: "cs-homedir-${CI_COMMIT_REF_SLUG}"
+  environment:
+    name: test/homedir/${CI_COMMIT_REF_SLUG}
+    on_stop: terminate_homedir
+  rules:
+    - !reference [.cs_create_vms, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *HOMEDIR_CHANGES
+
+configure_aptly_homedir:
+  extends: .cs_configure_aptly
+  variables:
+    TDP_ENV_NAME: homedir
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/homedir-autocreate-ucs52.cfg"
+  environment:
+    name: test/homedir/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: setup_aptly_repo
+    - job: create_vms_homedir
+  rules:
+    - !reference [.cs_configure_aptly, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *HOMEDIR_CHANGES
+
+run_playbooks_homedir:
+  extends: .cs_run_playbooks
+  variables:
+    TDP_ENV_NAME: homedir
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/homedir-autocreate-ucs52.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-homedir.yml"
+  environment:
+    name: test/homedir/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: configure_aptly_homedir
+      optional: true
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *HOMEDIR_CHANGES
+
+test_homedir:
+  extends: .cs_run_playbooks
+  stage: tests
+  variables:
+    TDP_ENV_NAME: homedir
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/homedir-autocreate-ucs52.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-homedir-test.yml"
+  environment:
+    name: test/homedir/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: run_playbooks_homedir
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *HOMEDIR_CHANGES
+
+terminate_homedir:
+  extends: .cs_terminate
+  variables:
+    TDP_ENV_NAME: homedir
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/homedir-autocreate-ucs52.cfg"
+  environment:
+    name: test/homedir/${CI_COMMIT_REF_SLUG}
+  rules:
+    - !reference [.cs_terminate, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *HOMEDIR_CHANGES
+      when: manual
+    - if: *RUN_VIA_WEB_UI_ON_FEATURE_BRANCH
+      when: manual
+
+# ---------------------
+# printer-assignment
+# ---------------------
+create_vms_printer:
+  extends: .cs_create_vms
+  variables:
+    TDP_ENV_NAME: printer
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/printer-assignment-ucs52.cfg"
+    JOB_BASE_NAME: "cs-printer-${CI_COMMIT_REF_SLUG}"
+  environment:
+    name: test/printer/${CI_COMMIT_REF_SLUG}
+    on_stop: terminate_printer
+  rules:
+    - !reference [.cs_create_vms, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *PRINTER_CHANGES
+
+configure_aptly_printer:
+  extends: .cs_configure_aptly
+  variables:
+    TDP_ENV_NAME: printer
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/printer-assignment-ucs52.cfg"
+  environment:
+    name: test/printer/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: setup_aptly_repo
+    - job: create_vms_printer
+  rules:
+    - !reference [.cs_configure_aptly, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *PRINTER_CHANGES
+
+run_playbooks_printer:
+  extends: .cs_run_playbooks
+  variables:
+    TDP_ENV_NAME: printer
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/printer-assignment-ucs52.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-printer.yml"
+  environment:
+    name: test/printer/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: configure_aptly_printer
+      optional: true
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *PRINTER_CHANGES
+
+test_printer:
+  extends: .cs_run_playbooks
+  stage: tests
+  variables:
+    TDP_ENV_NAME: printer
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/printer-assignment-ucs52.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-printer-test.yml"
+  environment:
+    name: test/printer/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: run_playbooks_printer
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *PRINTER_CHANGES
+
+terminate_printer:
+  extends: .cs_terminate
+  variables:
+    TDP_ENV_NAME: printer
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/printer-assignment-ucs52.cfg"
+  environment:
+    name: test/printer/${CI_COMMIT_REF_SLUG}
+  rules:
+    - !reference [.cs_terminate, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *PRINTER_CHANGES
+      when: manual
+    - if: *RUN_VIA_WEB_UI_ON_FEATURE_BRANCH
+      when: manual
+
+# ---------------------
+# usercert
+# ---------------------
+create_vms_usercert:
+  extends: .cs_create_vms
+  variables:
+    TDP_ENV_NAME: usercert
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/usercert-ucs52.cfg"
+    JOB_BASE_NAME: "cs-usercert-${CI_COMMIT_REF_SLUG}"
+  environment:
+    name: test/usercert/${CI_COMMIT_REF_SLUG}
+    on_stop: terminate_usercert
+  rules:
+    - !reference [.cs_create_vms, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *USERCERT_CHANGES
+
+configure_aptly_usercert:
+  extends: .cs_configure_aptly
+  variables:
+    TDP_ENV_NAME: usercert
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/usercert-ucs52.cfg"
+  environment:
+    name: test/usercert/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: setup_aptly_repo
+    - job: create_vms_usercert
+  rules:
+    - !reference [.cs_configure_aptly, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *USERCERT_CHANGES
+
+run_playbooks_usercert:
+  extends: .cs_run_playbooks
+  variables:
+    TDP_ENV_NAME: usercert
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/usercert-ucs52.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-usercert.yml"
+  environment:
+    name: test/usercert/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: configure_aptly_usercert
+      optional: true
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *USERCERT_CHANGES
+
+test_usercert:
+  extends: .cs_run_playbooks
+  stage: tests
+  variables:
+    TDP_ENV_NAME: usercert
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/usercert-ucs52.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-usercert-test.yml"
+  environment:
+    name: test/usercert/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: run_playbooks_usercert
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *USERCERT_CHANGES
+
+terminate_usercert:
+  extends: .cs_terminate
+  variables:
+    TDP_ENV_NAME: usercert
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/usercert-ucs52.cfg"
+  environment:
+    name: test/usercert/${CI_COMMIT_REF_SLUG}
+  rules:
+    - !reference [.cs_terminate, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *USERCERT_CHANGES
+      when: manual
+    - if: *RUN_VIA_WEB_UI_ON_FEATURE_BRANCH
+      when: manual
+
+# ---------------------
+# nextcloud-schema
+# ---------------------
+create_vms_nextcloud_schema:
+  extends: .cs_create_vms
+  variables:
+    TDP_ENV_NAME: nextcloud_schema
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/nextcloud-schema-config-ucs52.cfg"
+    JOB_BASE_NAME: "cs-nc-schema-${CI_COMMIT_REF_SLUG}"
+  environment:
+    name: test/nextcloud-schema/${CI_COMMIT_REF_SLUG}
+    on_stop: terminate_nextcloud_schema
+  rules:
+    - !reference [.cs_create_vms, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *NEXTCLOUD_SCHEMA_CHANGES
+
+configure_aptly_nextcloud_schema:
+  extends: .cs_configure_aptly
+  variables:
+    TDP_ENV_NAME: nextcloud_schema
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/nextcloud-schema-config-ucs52.cfg"
+  environment:
+    name: test/nextcloud-schema/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: setup_aptly_repo
+    - job: create_vms_nextcloud_schema
+  rules:
+    - !reference [.cs_configure_aptly, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *NEXTCLOUD_SCHEMA_CHANGES
+
+run_playbooks_nextcloud_schema:
+  extends: .cs_run_playbooks
+  variables:
+    TDP_ENV_NAME: nextcloud_schema
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/nextcloud-schema-config-ucs52.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-nextcloud_schema.yml"
+  environment:
+    name: test/nextcloud-schema/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: configure_aptly_nextcloud_schema
+      optional: true
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *NEXTCLOUD_SCHEMA_CHANGES
+
+test_nextcloud_schema:
+  extends: .cs_run_playbooks
+  stage: tests
+  variables:
+    TDP_ENV_NAME: nextcloud_schema
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/nextcloud-schema-config-ucs52.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-nextcloud_schema-test.yml"
+  environment:
+    name: test/nextcloud-schema/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: run_playbooks_nextcloud_schema
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *NEXTCLOUD_SCHEMA_CHANGES
+
+terminate_nextcloud_schema:
+  extends: .cs_terminate
+  variables:
+    TDP_ENV_NAME: nextcloud_schema
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/nextcloud-schema-config-ucs52.cfg"
+  environment:
+    name: test/nextcloud-schema/${CI_COMMIT_REF_SLUG}
+  rules:
+    - !reference [.cs_terminate, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *NEXTCLOUD_SCHEMA_CHANGES
+      when: manual
+    - if: *RUN_VIA_WEB_UI_ON_FEATURE_BRANCH
+      when: manual
+
+# ---------------------
+# nextcloud-samba-share-config
+# ---------------------
+create_vms_nextcloud_samba:
+  extends: .cs_create_vms
+  variables:
+    TDP_ENV_NAME: nextcloud_samba
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/nextcloud-samba-share-config-52.cfg"
+    JOB_BASE_NAME: "cs-nc-samba-${CI_COMMIT_REF_SLUG}"
+  environment:
+    name: test/nextcloud-samba/${CI_COMMIT_REF_SLUG}
+    on_stop: terminate_nextcloud_samba
+  rules:
+    - !reference [.cs_create_vms, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *NEXTCLOUD_SAMBA_CHANGES
+
+configure_aptly_nextcloud_samba:
+  extends: .cs_configure_aptly
+  variables:
+    TDP_ENV_NAME: nextcloud_samba
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/nextcloud-samba-share-config-52.cfg"
+  environment:
+    name: test/nextcloud-samba/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: setup_aptly_repo
+    - job: create_vms_nextcloud_samba
+  rules:
+    - !reference [.cs_configure_aptly, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *NEXTCLOUD_SAMBA_CHANGES
+
+run_playbooks_nextcloud_samba:
+  extends: .cs_run_playbooks
+  variables:
+    TDP_ENV_NAME: nextcloud_samba
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/nextcloud-samba-share-config-52.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-nextcloud_samba.yml"
+  environment:
+    name: test/nextcloud-samba/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: configure_aptly_nextcloud_samba
+      optional: true
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *NEXTCLOUD_SAMBA_CHANGES
+
+test_nextcloud_samba:
+  extends: .cs_run_playbooks
+  stage: tests
+  variables:
+    TDP_ENV_NAME: nextcloud_samba
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/nextcloud-samba-share-config-52.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-nextcloud_samba-test.yml"
+  environment:
+    name: test/nextcloud-samba/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: run_playbooks_nextcloud_samba
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *NEXTCLOUD_SAMBA_CHANGES
+
+terminate_nextcloud_samba:
+  extends: .cs_terminate
+  variables:
+    TDP_ENV_NAME: nextcloud_samba
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/nextcloud-samba-share-config-52.cfg"
+  environment:
+    name: test/nextcloud-samba/${CI_COMMIT_REF_SLUG}
+  rules:
+    - !reference [.cs_terminate, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *NEXTCLOUD_SAMBA_CHANGES
+      when: manual
+    - if: *RUN_VIA_WEB_UI_ON_FEATURE_BRANCH
+      when: manual
+
+# ---------------------
+# user-group-sync
+# ---------------------
+create_vms_sync:
+  extends: .cs_create_vms
+  variables:
+    TDP_ENV_NAME: sync
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/sync-users-and-groups-52.cfg"
+    JOB_BASE_NAME: "cs-sync-${CI_COMMIT_REF_SLUG}"
+  environment:
+    name: test/sync/${CI_COMMIT_REF_SLUG}
+    on_stop: terminate_sync
+  rules:
+    - !reference [.cs_create_vms, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *SYNC_CHANGES
+
+configure_aptly_sync:
+  extends: .cs_configure_aptly
+  variables:
+    TDP_ENV_NAME: sync
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/sync-users-and-groups-52.cfg"
+  environment:
+    name: test/sync/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: setup_aptly_repo
+    - job: create_vms_sync
+  rules:
+    - !reference [.cs_configure_aptly, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *SYNC_CHANGES
+
+run_playbooks_sync:
+  extends: .cs_run_playbooks
+  variables:
+    TDP_ENV_NAME: sync
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/sync-users-and-groups-52.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-sync.yml"
+  environment:
+    name: test/sync/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: configure_aptly_sync
+      optional: true
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *SYNC_CHANGES
+
+test_sync:
+  extends: .cs_run_playbooks
+  stage: tests
+  variables:
+    TDP_ENV_NAME: sync
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/sync-users-and-groups-52.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-sync-test.yml"
+  environment:
+    name: test/sync/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: run_playbooks_sync
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *SYNC_CHANGES
+
+terminate_sync:
+  extends: .cs_terminate
+  variables:
+    TDP_ENV_NAME: sync
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/sync-users-and-groups-52.cfg"
+  environment:
+    name: test/sync/${CI_COMMIT_REF_SLUG}
+  rules:
+    - !reference [.cs_terminate, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *SYNC_CHANGES
+      when: manual
+    - if: *RUN_VIA_WEB_UI_ON_FEATURE_BRANCH
+      when: manual
+
+# ---------------------
+# moodle-group
+# ---------------------
+create_vms_moodle:
+  extends: .cs_create_vms
+  variables:
+    TDP_ENV_NAME: moodle
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/moodle-group.cfg"
+    JOB_BASE_NAME: "cs-moodle-${CI_COMMIT_REF_SLUG}"
+  environment:
+    name: test/moodle/${CI_COMMIT_REF_SLUG}
+    on_stop: terminate_moodle
+  rules:
+    - !reference [.cs_create_vms, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *MOODLE_CHANGES
+
+configure_aptly_moodle:
+  extends: .cs_configure_aptly
+  variables:
+    TDP_ENV_NAME: moodle
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/moodle-group.cfg"
+  environment:
+    name: test/moodle/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: setup_aptly_repo
+    - job: create_vms_moodle
+  rules:
+    - !reference [.cs_configure_aptly, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *MOODLE_CHANGES
+
+run_playbooks_moodle:
+  extends: .cs_run_playbooks
+  variables:
+    TDP_ENV_NAME: moodle
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/moodle-group.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-moodle.yml"
+  environment:
+    name: test/moodle/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: configure_aptly_moodle
+      optional: true
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *MOODLE_CHANGES
+
+test_moodle:
+  extends: .cs_run_playbooks
+  stage: tests
+  variables:
+    TDP_ENV_NAME: moodle
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/moodle-group.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-moodle-test.yml"
+  environment:
+    name: test/moodle/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: run_playbooks_moodle
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *MOODLE_CHANGES
+
+terminate_moodle:
+  extends: .cs_terminate
+  variables:
+    TDP_ENV_NAME: moodle
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/moodle-group.cfg"
+  environment:
+    name: test/moodle/${CI_COMMIT_REF_SLUG}
+  rules:
+    - !reference [.cs_terminate, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *MOODLE_CHANGES
+      when: manual
+    - if: *RUN_VIA_WEB_UI_ON_FEATURE_BRANCH
+      when: manual
+
+# ---------------------
+# guacamole
+# ---------------------
+create_vms_guacamole:
+  extends: .cs_create_vms
+  variables:
+    TDP_ENV_NAME: guacamole
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/guacamole.cfg"
+    JOB_BASE_NAME: "cs-guacamole-${CI_COMMIT_REF_SLUG}"
+  environment:
+    name: test/guacamole/${CI_COMMIT_REF_SLUG}
+    on_stop: terminate_guacamole
+  rules:
+    - !reference [.cs_create_vms, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *GUACAMOLE_CHANGES
+
+configure_aptly_guacamole:
+  extends: .cs_configure_aptly
+  variables:
+    TDP_ENV_NAME: guacamole
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/guacamole.cfg"
+  environment:
+    name: test/guacamole/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: setup_aptly_repo
+    - job: create_vms_guacamole
+  rules:
+    - !reference [.cs_configure_aptly, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *GUACAMOLE_CHANGES
+
+run_playbooks_guacamole:
+  extends: .cs_run_playbooks
+  variables:
+    TDP_ENV_NAME: guacamole
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/guacamole.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-guacamole.yml"
+  environment:
+    name: test/guacamole/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: configure_aptly_guacamole
+      optional: true
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *GUACAMOLE_CHANGES
+
+test_guacamole:
+  extends: .cs_run_playbooks
+  stage: tests
+  variables:
+    TDP_ENV_NAME: guacamole
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/guacamole.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-guacamole-test.yml"
+  environment:
+    name: test/guacamole/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: run_playbooks_guacamole
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *GUACAMOLE_CHANGES
+
+terminate_guacamole:
+  extends: .cs_terminate
+  variables:
+    TDP_ENV_NAME: guacamole
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/guacamole.cfg"
+  environment:
+    name: test/guacamole/${CI_COMMIT_REF_SLUG}
+  rules:
+    - !reference [.cs_terminate, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *GUACAMOLE_CHANGES
+      when: manual
+    - if: *RUN_VIA_WEB_UI_ON_FEATURE_BRANCH
+      when: manual
+
+# ---------------------
+# generic (remaining packages without dedicated configs)
+# ---------------------
+create_vms_generic:
+  extends: .cs_create_vms
+  variables:
+    TDP_ENV_NAME: generic
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/generic-5.cfg"
+    JOB_BASE_NAME: "cs-generic-${CI_COMMIT_REF_SLUG}"
+  environment:
+    name: test/generic/${CI_COMMIT_REF_SLUG}
+    on_stop: terminate_generic
+  rules:
+    - !reference [.cs_create_vms, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *GENERIC_CHANGES
+
+configure_aptly_generic:
+  extends: .cs_configure_aptly
+  variables:
+    TDP_ENV_NAME: generic
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/generic-5.cfg"
+  environment:
+    name: test/generic/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: setup_aptly_repo
+    - job: create_vms_generic
+  rules:
+    - !reference [.cs_configure_aptly, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *GENERIC_CHANGES
+
+run_playbooks_generic:
+  extends: .cs_run_playbooks
+  variables:
+    TDP_ENV_NAME: generic
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/generic-5.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-generic.yml"
+  environment:
+    name: test/generic/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: configure_aptly_generic
+      optional: true
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *GENERIC_CHANGES
+
+test_generic:
+  extends: .cs_run_playbooks
+  stage: tests
+  variables:
+    TDP_ENV_NAME: generic
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/generic-5.cfg"
+    ANSIBLE_PLAYBOOK: "${CI_PROJECT_DIR}/_test-environment/ansible/playbook-generic-test.yml"
+  environment:
+    name: test/generic/${CI_COMMIT_REF_SLUG}
+  needs:
+    - job: run_playbooks_generic
+  rules:
+    - !reference [.cs_run_playbooks, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *GENERIC_CHANGES
+
+terminate_generic:
+  extends: .cs_terminate
+  variables:
+    TDP_ENV_NAME: generic
+    ENV_CFG: "${CI_PROJECT_DIR}/_test-environment/configs/generic-5.cfg"
+  environment:
+    name: test/generic/${CI_COMMIT_REF_SLUG}
+  rules:
+    - !reference [.cs_terminate, rules]
+    - if: *MR_PIPELINE_CONDITION
+      changes: *GENERIC_CHANGES
+      when: manual
+    - if: *RUN_VIA_WEB_UI_ON_FEATURE_BRANCH
+      when: manual
+
+# =============================================================================
+# MR SUMMARY
+# =============================================================================
+post_mr_summary:
+  needs:
+    - job: create_vms_sudo_ldap
+      optional: true
+    - job: create_vms_homedir
+      optional: true
+    - job: create_vms_printer
+      optional: true
+    - job: create_vms_usercert
+      optional: true
+    - job: create_vms_nextcloud_schema
+      optional: true
+    - job: create_vms_nextcloud_samba
+      optional: true
+    - job: create_vms_sync
+      optional: true
+    - job: create_vms_moodle
+      optional: true
+    - job: create_vms_guacamole
+      optional: true
+    - job: create_vms_generic
+      optional: true
+  extends: .tdp_post_mr_summary

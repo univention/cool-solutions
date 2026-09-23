@@ -1,0 +1,64 @@
+---
+# Functional test carried over from the old cfg's command7: create a UDM
+# user and a UDM Windows computer object, flip on the createRevokeCertificate*
+# extended attributes the join scripts registered, and confirm
+# manageusercertificate.py's listener module (triggered on the pki option +
+# createRevokeCertificate=1) actually wrote out certificate files.
+
+- name: Test univention-usercert and univention-windowscert
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Determine the domain's LDAP base
+      ansible.builtin.command:
+        cmd: ucr get ldap/base
+      register: ldap_base
+      changed_when: false
+
+    - name: Create test user user1 with the pki option
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user create --ignore_exists
+          --position "cn=users,{{ ldap_base.stdout }}"
+          --set username="user1"
+          --set lastname="user1"
+          --set password="univention"
+      changed_when: true
+
+    - name: Enable certificate creation for user1
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user modify
+          --dn "uid=user1,cn=users,{{ ldap_base.stdout }}"
+          --append-option pki
+          --set createRevokeCertificate=1
+      changed_when: true
+
+    - name: Create test Windows computer object win1 with the pki option
+      ansible.builtin.command:
+        cmd: >-
+          udm computers/windows create --ignore_exists
+          --position "cn=computers,{{ ldap_base.stdout }}"
+          --set name="win1"
+      changed_when: true
+
+    - name: Enable certificate creation for win1
+      ansible.builtin.command:
+        cmd: >-
+          udm computers/windows modify
+          --dn "cn=win1,cn=computers,{{ ldap_base.stdout }}"
+          --append-option pki
+          --set createRevokeCertificateWindows=1
+      changed_when: true
+
+    - name: Wait for the user certificate to be generated
+      ansible.builtin.wait_for:
+        path: /etc/univention/ssl/user/user1/cert.pem
+        timeout: 60
+
+    - name: Wait for the Windows host certificate to be generated
+      ansible.builtin.wait_for:
+        path: "/etc/univention/ssl/windows-hosts/win1$/cert.pem"
+        timeout: 60

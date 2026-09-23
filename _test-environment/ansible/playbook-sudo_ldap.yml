@@ -1,0 +1,49 @@
+---
+# Installs univention-sudo-ldap (+ -host) from the MR's Aptly repository.
+# Runs after configure_aptly_sudo_ldap has wired up the repo server via
+# TDP's provide_aptly_sources.yml.
+#
+# univention-sudo-ldap's own postinst runs its join script
+# (76univention-sudo-ldap.inst, registers the sudo-ldap LDAP schema/UDM
+# module) automatically -- no separate univention-run-join-scripts call
+# needed. Dropped the old cfg's manual
+# repository/online/component/cool-solutions/server + update/secure_apt=no
+# UCR overrides too: configure_aptly_sudo_ldap already points the repo at
+# this MR's actual Aptly server, and the aptly source line is already
+# trusted=yes (see TDP's own skill notes on the NO_PUBKEY warning being
+# cosmetic).
+
+- name: Install univention-sudo-ldap and univention-sudo-ldap-host
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Enable the cool-solutions customer-scope repository component
+      ansible.builtin.command:
+        cmd: >-
+          univention-config-registry set
+          repository/online/component/cool-solutions=yes
+          repository/online/component/cool-solutions/version=current
+          repository/online/component/cool-solutions/unmaintained=yes
+      changed_when: true
+
+    # No license import here: every pre-joined template in the Images pool
+    # (confirmed on template-ucs-joined-5.2-6-primary and
+    # template-ucsschool-5.2-6-singleserver-primary) is fixed at ldap/base
+    # dc=ucs,dc=test, not dc=ucs,dc=example -- they never went through the
+    # profile:-driven system-setup that would have set that. The shared
+    # ucs.example.license.ldif can never match a pre-joined template's
+    # domain, so this step is dropped project-wide for pre-joined cfgs
+    # rather than re-diagnosed per package (see the same fix in
+    # playbook-moodle.yml).
+
+    - name: Install univention-sudo-ldap
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-sudo-ldap
+      changed_when: true
+
+    - name: Install univention-sudo-ldap-host
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-sudo-ldap-host
+      changed_when: true

@@ -1,0 +1,16 @@
+---
+# Runs univention-homedir-autocreate's own test script (ships with the package
+# at /usr/share/univention-homedir-autocreate/homedirautocreate.sh): creates
+# three test users via udm and asserts the listener module created their home
+# directories.
+
+- name: Test univention-homedir-autocreate
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Run homedirautocreate.sh
+      ansible.builtin.command:
+        cmd: bash /usr/share/univention-homedir-autocreate/homedirautocreate.sh
+      changed_when: false
