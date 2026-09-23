@@ -1,0 +1,44 @@
+---
+# TODO: no functional test exists for these packages yet (the old cfg never
+# even installed them, just provisioned two bare VMs and stopped). A real
+# test needs actual Nextcloud (via App Center) + a reachable Samba share +
+# the files_external app enabled, then verifying an actual external-storage
+# mount gets created for a UCS@school class/group/home share -- see the
+# package's own README for the full setup (occ path, nextcloud-samba-share-
+# config UCR variables, etc). That's a substantial follow-up, not something
+# to fake here.
+#
+# Smoke check only for now (see _test-environment/README.md for the smoke-
+# vs-real-test convention): confirm each package's listener module actually
+# registered with univention-directory-listener.
+
+- name: Test univention-nextcloud-samba-share-config packages (smoke only)
+  hosts: primary-samba
+  become: true
+  gather_facts: false
+
+  vars:
+    # univention-nextcloud-samba-common-share-config ships no listener .py of
+    # its own (debian/ has no .install for it, unlike its group/home/enable
+    # siblings) despite its control description implying otherwise -- verified
+    # live, only these 3 modules ever register.
+    expected_listener_modules:
+      - nextcloud-samba-group-share-config
+      - nextcloud-samba-home-share-config
+      - nextcloud-enable-for-classes-and-workgroups
+
+  tasks:
+    - name: List registered directory listener modules
+      ansible.builtin.command:
+        cmd: univention-directory-listener-ctrl modules
+      register: listener_modules
+      changed_when: false
+
+    - name: Assert each package's listener module is registered
+      ansible.builtin.assert:
+        that:
+          - "item in listener_modules.stdout"
+        fail_msg: >-
+          Listener module {{ item }} is not registered -- package install may
+          not have wired it up correctly.
+      loop: "{{ expected_listener_modules }}"

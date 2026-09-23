@@ -1,0 +1,24 @@
+---
+# Installs univention-homedir-autocreate from the MR's Aptly repository.
+# Runs after configure_aptly_homedir has wired up the repo server via TDP's
+# provide_aptly_sources.yml.
+
+- name: Install univention-homedir-autocreate
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Enable the cool-solutions customer-scope repository component
+      ansible.builtin.command:
+        cmd: >-
+          univention-config-registry set
+          repository/online/component/cool-solutions=yes
+          repository/online/component/cool-solutions/version=current
+          repository/online/component/cool-solutions/unmaintained=yes
+      changed_when: true
+
+    - name: Install univention-homedir-autocreate
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-homedir-autocreate
+      changed_when: true

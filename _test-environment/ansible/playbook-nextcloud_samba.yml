@@ -1,0 +1,39 @@
+---
+# Installs the univention-nextcloud-samba-share-config packages from the
+# MR's Aptly repository, on the domain's primary (per the package's own
+# README: univention-nextcloud-enable-for-classes-and-workgroups "must be
+# installed on the domaincontroller master of your domain", and the other
+# listener modules are conventionally installed alongside it). None of
+# these packages ship a join script -- they're plain directory listener
+# modules, no univention-run-join-scripts call needed.
+#
+# The old cfg never installed any of these packages at all (just
+# provisioned two bare VMs and stopped) -- this is genuinely new coverage,
+# not a migration of existing behavior. Real Nextcloud/Samba integration
+# (the actual purpose of these listeners) is out of scope here; see
+# playbook-nextcloud_samba-test.yml for what a full test would need.
+
+- name: Install univention-nextcloud-samba-share-config packages
+  hosts: primary-samba
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Enable the cool-solutions customer-scope repository component
+      ansible.builtin.command:
+        cmd: >-
+          univention-config-registry set
+          repository/online/component/cool-solutions=yes
+          repository/online/component/cool-solutions/version=current
+          repository/online/component/cool-solutions/unmaintained=yes
+      changed_when: true
+
+    - name: Install the nextcloud-samba-share-config packages
+      ansible.builtin.command:
+        cmd: >-
+          univention-install --yes
+          univention-nextcloud-samba-home-share-config
+          univention-nextcloud-samba-group-share-config
+          univention-nextcloud-samba-common-share-config
+          univention-nextcloud-enable-for-classes-and-workgroups
+      changed_when: true

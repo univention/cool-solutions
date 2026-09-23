@@ -1,0 +1,89 @@
+---
+# Functional test: create a user and a group on pdn-source, force both
+# sync legs (source push via the ucs-sync cron script, dest import via
+# univention_user_group_sync_dest.py), then confirm both objects appear on
+# pdn-dest. Covers the same core cases as the package's own interactive
+# test/testsuite.sh (test_new_user / test_new_group) without its
+# interactive root-password SSH prompt, which doesn't fit a CI job.
+
+- name: Create test objects and force-sync from pdn-source
+  hosts: pdn-source
+  become: true
+  gather_facts: false
+
+  vars:
+    sync_test_user: cstest-sync-user
+    sync_test_group: cstest-sync-group
+
+  tasks:
+    - name: Determine the domain's LDAP base
+      ansible.builtin.command:
+        cmd: ucr get ldap/base
+      register: ldap_base
+      changed_when: false
+
+    - name: Create the test user
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user create --ignore_exists
+          --position "cn=users,{{ ldap_base.stdout }}"
+          --set username="{{ sync_test_user }}"
+          --set lastname="{{ sync_test_user }}"
+          --set password="univention123"
+      changed_when: true
+
+    - name: Create the test group
+      ansible.builtin.command:
+        cmd: >-
+          udm groups/group create --ignore_exists
+          --position "cn=groups,{{ ldap_base.stdout }}"
+          --set name="{{ sync_test_group }}"
+      changed_when: true
+
+    - name: Force the source-side sync (push diff files to pdn-dest)
+      ansible.builtin.command:
+        cmd: sudo -u ucs-sync univention_user_group_sync_source_synchronize
+      changed_when: true
+
+    - name: Give the rsync push a moment to land
+      ansible.builtin.pause:
+        seconds: 5
+
+- name: Import on pdn-dest and verify the synced objects
+  hosts: pdn-dest
+  become: true
+  gather_facts: false
+
+  vars:
+    sync_test_user: cstest-sync-user
+    sync_test_group: cstest-sync-group
+
+  tasks:
+    - name: Force the dest-side import
+      ansible.builtin.command:
+        cmd: /usr/bin/univention_user_group_sync_dest.py
+      changed_when: true
+
+    - name: Look up the synced test user
+      ansible.builtin.command:
+        cmd: udm users/user list --filter uid={{ sync_test_user }}
+      register: synced_user
+      changed_when: false
+
+    - name: Look up the synced test group
+      ansible.builtin.command:
+        cmd: udm groups/group list --filter cn={{ sync_test_group }}
+      register: synced_group
+      changed_when: false
+
+    - name: Assert the test user was synced to pdn-dest
+      ansible.builtin.assert:
+        that:
+          - "sync_test_user in synced_user.stdout"
+        fail_msg: "User {{ sync_test_user }} did not appear on pdn-dest after sync"
+
+    - name: Assert the test group was synced to pdn-dest
+      ansible.builtin.assert:
+        that:
+          - "sync_test_group in synced_group.stdout"
+        fail_msg: "Group {{ sync_test_group }} did not appear on pdn-dest after sync"

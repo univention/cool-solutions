@@ -1,0 +1,25 @@
+---
+# Playbook to update/install cool-solutions packages from Aptly repository.
+# This is used after the initial VM setup (done via .cfg commands) to install
+# freshly built packages from the merge request's Aptly repository.
+
+- name: Update cool-solutions packages from Aptly
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 0
+
+    - name: Upgrade all packages from Aptly repository
+      ansible.builtin.apt:
+        upgrade: safe
+      register: apt_upgrade_result
+
+    - name: Show upgraded packages
+      ansible.builtin.debug:
+        var: apt_upgrade_result.stdout_lines
+      when: apt_upgrade_result.stdout_lines is defined

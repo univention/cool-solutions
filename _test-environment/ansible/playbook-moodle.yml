@@ -1,0 +1,55 @@
+---
+# Installs univention-moodle-group from the MR's Aptly repository.
+# Runs after configure_aptly_moodle has wired up the repo server via TDP's
+# provide_aptly_sources.yml.
+#
+# univention-moodle-group's own postinst runs its join script
+# (99MoodleGroupSetter.inst, creates the Student/Teacher extended attributes
+# on the primary) and restarts the listener automatically -- no separate
+# univention-run-join-scripts call needed.
+
+- name: Install univention-moodle-group
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Enable the cool-solutions customer-scope repository component
+      ansible.builtin.command:
+        cmd: >-
+          univention-config-registry set
+          repository/online/component/cool-solutions=yes
+          repository/online/component/cool-solutions/version=current
+          repository/online/component/cool-solutions/unmaintained=yes
+      changed_when: true
+
+    # No license import here: this template's ldap/base is dc=ucs,dc=test
+    # (the ucsschool singleserver template lineage), not dc=ucs,dc=example
+    # like every other cfg's template in this project, so the shared
+    # ucs.example.license.ldif doesn't match and univention-license-import
+    # fails outright. Not needed anyway -- the test only creates a handful
+    # of objects, well under any default/unlicensed object-count limit.
+
+    - name: Install univention-moodle-group
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-moodle-group
+      changed_when: true
+
+    # Folded in per the user's direction (same pattern as nextcloud_groupfolders-sync ->
+    # nextcloud_schema): these 3 packages are UCS@school-specific and structurally need a
+    # UCS@school host, which this environment already has, rather than a second one.
+    # See playbook-moodle-test.yml for why none of the three get a functional test here.
+    - name: Install univention-ro-wo-group-dirs
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-ro-wo-group-dirs
+      changed_when: true
+
+    - name: Install univention-sanis
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-sanis
+      changed_when: true
+
+    - name: Install univention-lusd
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-lusd
+      changed_when: true

@@ -1,0 +1,205 @@
+---
+# pdn-schema hosts univention-nextcloud-schema (repo scope + install; its join script
+# runs automatically on this already-joined domain, registering the nextcloud.schema
+# LDAP schema plus the nextcloudEnabled/nextcloudQuota extended attributes) and the two
+# test users/group that exercise those attributes.
+#
+# pdn-nextcloud-host runs an actual Nextcloud (App Center) and is wired up to
+# authenticate against pdn-schema's LDAP as an *external* directory -- the manual
+# integration scenario nextcloud.schema exists for (see univention-nextcloud-schema's
+# README). It reaches pdn-schema by IP, not hostname: this project's DNS-forwarder fix
+# points every VM's /etc/resolv.conf at the external corporate DNS (needed so command1's
+# errata upgrade can resolve the package repo before local BIND is even confirmed up),
+# which means a brand-new ad-hoc zone that only exists in one VM's own local BIND (as an
+# earlier attempt at "pdn-schema.ucs2.example" was) never resolves anywhere else --
+# confirmed live via SSH. An IP is simpler and doesn't depend on DNS at all, so the old
+# cfg's DNS-zone-plus-memberserver dance is dropped entirely.
+#
+# Also confirmed live: every pre-joined template in this Images pool (including
+# pdn-schema here) is actually on ldap/base dc=ucs,dc=test, not the KVM-era profile's
+# dc=ucs2,dc=example -- read it dynamically rather than hardcoding either domain string.
+# And its Administrator password is whatever was baked into the template, not
+# "univention" -- set it explicitly to a known value so Nextcloud's LDAP bind config can
+# use it.
+#
+# No license import: every pre-joined template in the Images pool is fixed at
+# ldap/base dc=ucs,dc=test, not dc=ucs,dc=example -- see the same note in
+# playbook-sudo_ldap.yml / playbook-moodle.yml. Verified live via SSH that App Center's
+# nextcloud install doesn't require one either (default community license tier covers
+# this test's tiny object count).
+#
+# Dropped the old cfg's "activate login-saml portal entry" step on pdn-schema: unrelated
+# to nextcloud-schema (this integration uses direct LDAP bind, not SAML) and looked like
+# copy-paste noise from an unrelated cfg.
+#
+# Also installs univention-nextcloud-groupfolders-sync on pdn-nextcloud-host, and enables
+# Nextcloud's groupfolders app: per the user's direction, this package shares this job
+# group/environment with nextcloud-schema rather than standing up a second Nextcloud,
+# since both need a live one. See test_nextcloud_schema's playbook for its own checks.
+
+- name: Install univention-nextcloud-schema and provision test users/group on pdn-schema
+  hosts: pdn-schema
+  become: true
+  gather_facts: false
+
+  vars:
+    schema_admin_password: "NcSchemaTest.99"
+
+  tasks:
+    - name: Determine the domain's LDAP base
+      ansible.builtin.command:
+        cmd: ucr get ldap/base
+      register: ldap_base
+      changed_when: false
+
+    - name: Expose the LDAP base and a known Administrator password to the other play
+      ansible.builtin.set_fact:
+        schema_ldap_base: "{{ ldap_base.stdout }}"
+        schema_admin_password: "{{ schema_admin_password }}"
+
+    - name: Enable the cool-solutions customer-scope repository component
+      ansible.builtin.command:
+        cmd: >-
+          univention-config-registry set
+          repository/online/component/cool-solutions=yes
+          repository/online/component/cool-solutions/version=current
+          repository/online/component/cool-solutions/unmaintained=yes
+      changed_when: true
+
+    - name: Install univention-nextcloud-schema
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-nextcloud-schema
+      changed_when: true
+
+    - name: Set a known Administrator password for Nextcloud's LDAP bind
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user modify
+          --dn "uid=Administrator,cn=users,{{ ldap_base.stdout }}"
+          --set password="{{ schema_admin_password }}"
+      changed_when: true
+      register: admin_pw_result
+      failed_when:
+        - admin_pw_result.rc != 0
+        - "'used before' not in admin_pw_result.stderr"
+
+    - name: Create test user nextclouduser
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user create --ignore_exists
+          --position "cn=users,{{ ldap_base.stdout }}"
+          --set username="nextclouduser" --set password="univention" --set lastname="McCloud"
+      changed_when: true
+
+    - name: Create test user nextclouduser2
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user create --ignore_exists
+          --position "cn=users,{{ ldap_base.stdout }}"
+          --set username="nextclouduser2" --set password="univention" --set lastname="McNext"
+      changed_when: true
+
+    - name: Enable nextclouduser for Nextcloud
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user modify --dn "uid=nextclouduser,cn=users,{{ ldap_base.stdout }}"
+          --set nextcloudEnabled=1 --set nextcloudQuota=1GB
+      changed_when: true
+
+    - name: Enable nextclouduser2 for Nextcloud
+      ansible.builtin.command:
+        cmd: >-
+          udm users/user modify --dn "uid=nextclouduser2,cn=users,{{ ldap_base.stdout }}"
+          --set nextcloudEnabled=1 --set nextcloudQuota=4GB
+      changed_when: true
+
+    - name: Create the Nextcloud-Group test group
+      ansible.builtin.command:
+        cmd: >-
+          udm groups/group create --ignore_exists
+          --position "cn=groups,{{ ldap_base.stdout }}"
+          --set name="Nextcloud-Group" --set nextcloudEnabled=1
+      changed_when: true
+
+- name: Install Nextcloud and wire it to pdn-schema's LDAP on pdn-nextcloud-host
+  hosts: pdn-nextcloud-host
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Check whether Nextcloud is already installed
+      ansible.builtin.command:
+        cmd: univention-app status nextcloud
+      register: nextcloud_status
+      failed_when: false
+      changed_when: false
+
+    - name: Install Nextcloud via the App Center
+      ansible.builtin.shell: |
+        set -e
+        echo "univention" > /root/pwdfile
+        univention-app install --noninteractive nextcloud --username Administrator --pwdfile /root/pwdfile
+        rm -f /root/pwdfile
+      changed_when: true
+      when: nextcloud_status.rc != 0
+
+    - name: Render the Nextcloud LDAP configuration for pdn-schema
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../files/nextcloud-schema/nextcloud-config.j2"
+        dest: /root/nextcloud-config
+        mode: "0600"
+      vars:
+        schema_ip: "{{ hostvars['pdn-schema'].ansible_host }}"
+        schema_ldap_base: "{{ hostvars['pdn-schema'].schema_ldap_base }}"
+        schema_admin_password: "{{ hostvars['pdn-schema'].schema_admin_password }}"
+
+    - name: Copy the Nextcloud LDAP configuration helper
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../files/nextcloud-schema/nextcloud-configuration.sh"
+        dest: /root/nextcloud-configuration.sh
+        mode: "0755"
+
+    - name: Wire Nextcloud's LDAP backend to pdn-schema (also self-tests via occ)
+      ansible.builtin.command:
+        cmd: bash /root/nextcloud-configuration.sh s02 /root/nextcloud-config
+      changed_when: true
+
+    - name: Enable the cool-solutions customer-scope repository component
+      ansible.builtin.command:
+        cmd: >-
+          univention-config-registry set
+          repository/online/component/cool-solutions=yes
+          repository/online/component/cool-solutions/version=current
+          repository/online/component/cool-solutions/unmaintained=yes
+      changed_when: true
+
+    # KNOWN BLOCKER: univention-nextcloud-groupfolders-sync's binary package depends on
+    # python2.7 and python-univention-config-registry, neither of which are installable
+    # on UCS 5.2 (Debian 12 dropped Python 2 entirely) -- confirmed live via a real
+    # univention-install attempt ("Depends: python2.7:any but it is not installable").
+    # This is a pre-existing bug in the package itself (its CLI script is
+    # #!/usr/bin/python2.7), not something fixable from this CI/test-environment
+    # migration -- it needs a Python 3 port first. Install is expected to fail; don't let
+    # it fail the whole environment. Real install+functional coverage (see
+    # playbook-nextcloud_schema-test.yml) is blocked until that port happens.
+    - name: Install univention-nextcloud-groupfolders-sync (expected to fail, see above)
+      ansible.builtin.command:
+        cmd: univention-install --yes univention-nextcloud-groupfolders-sync
+      changed_when: true
+      register: groupfolders_sync_install
+      failed_when: false
+
+    - name: Report whether the known Python 2 blocker is still present
+      ansible.builtin.debug:
+        msg: >-
+          univention-nextcloud-groupfolders-sync install {{ 'succeeded -- the Python 2
+          blocker may be resolved, update this playbook and its test' if
+          groupfolders_sync_install.rc == 0 else 'failed as expected (Python 2
+          dependency not installable on UCS 5.2)' }}
+
+    - name: Enable Nextcloud's groupfolders app
+      ansible.builtin.shell: |
+        set -e
+        univention-app shell nextcloud sudo -u www-data php /var/www/html/occ app:enable groupfolders \
+          || univention-app shell nextcloud sudo -u www-data php /var/www/html/occ app:install groupfolders
+      changed_when: true

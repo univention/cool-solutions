@@ -1,0 +1,23 @@
+---
+# Runs univention-sudo-ldap's own test-implementation script (ships with the
+# server package at /usr/share/univention-sudo-ldap/test-implementation):
+# checks both packages are installed, creates sudo rules + test users,
+# verifies sudo access via `sudo -lU`, then cleans up after itself.
+
+- name: Test univention-sudo-ldap / univention-sudo-ldap-host
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Ensure the test-reports directory exists
+      ansible.builtin.file:
+        path: /root/test-reports
+        state: directory
+        mode: "0755"
+
+    - name: Run the package's own test-implementation script
+      ansible.builtin.shell:
+        cmd: /usr/share/univention-sudo-ldap/test-implementation
+        chdir: /root
+      changed_when: true

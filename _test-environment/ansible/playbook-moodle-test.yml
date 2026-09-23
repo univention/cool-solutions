@@ -1,0 +1,84 @@
+---
+# Verifies univention-moodle-group's actual function: the MoodleGroupSetter
+# listener sets univentionFreeAttribute19/20 on a school_class group based on
+# the ucsschoolRole of its student/teacher members (see
+# univention-moodle-group/MoodleGroupSetter.py's ldap_filter).
+#
+# Uses the ucsschool singleserver template's built-in demo data rather than
+# creating new objects: no users/student or users/teacher UDM module exists
+# on this template (only the ucsschool importer *library* packages are
+# installed, not the full UMC/UDM management stack), but DEMOSCHOOL and its
+# DEMOSCHOOL-Democlass class (with demo_student as a member) already exist
+# and are already correctly reflected in univentionFreeAttribute20 --
+# confirmed live via ssh + univention-ldapsearch during development. Adding
+# the also-pre-existing demo_teacher to the same class exercises the
+# teacher/univentionFreeAttribute19 side with a plain groups/group modify.
+#
+# TODO(univention-ro-wo-group-dirs / univention-sanis / univention-lusd): no functional
+# tests here yet, despite being installed by playbook-moodle.yml on this same host.
+# - ro-wo-group-dirs' listener needs a real UCS@school class/workgroup *share* object
+#   (ucsschoolRole=school_class_share:school:*) with a filesystem path it can create
+#   Lernmaterial/Abgabe subdirs under, plus the share's owning lehrer-<ou> group -- this
+#   template only has the pre-existing DEMOSCHOOL-Democlass *group* (no share), and
+#   constructing a real share (Samba/NFS mount, ucsschool UMC "create class" workflow)
+#   is out of scope for this pass.
+# - sanis / lusd are UCS@school import-format readers (moin.schule / Hessen LUSD) that
+#   need a full ucs-school-import config plus a real (or PGP-encrypted, for lusd) sample
+#   import file to exercise meaningfully. sanis ships its own test.py, but it's a
+#   known-broken placeholder (`assert False`) -- don't mistake its presence for coverage.
+# Confirm each package's own `univention-install` exit code is the only signal today;
+# real functional coverage is follow-up work, not part of this CI migration.
+#
+# Does NOT install or test real Moodle -- the listener works independently of
+# Moodle (Moodle is just the consumer of these attributes via its LDAP
+# enrolment plugin). A full end-to-end test with real Moodle + the LDAP
+# enrolment plugin configured is a separate, larger follow-up.
+
+- name: Test univention-moodle-group (LDAP-only)
+  hosts: all
+  become: true
+  gather_facts: false
+
+  vars:
+    demo_class_dn: cn=DEMOSCHOOL-Democlass,cn=klassen,cn=schueler,cn=groups,ou=DEMOSCHOOL,dc=ucs,dc=test
+    demo_teacher_dn: uid=demo_teacher,cn=lehrer,cn=users,ou=DEMOSCHOOL,dc=ucs,dc=test
+
+  tasks:
+    - name: Add the pre-existing demo teacher to the pre-existing demo class
+      ansible.builtin.command:
+        cmd: >-
+          udm groups/group modify
+          --dn "{{ demo_class_dn }}"
+          --append users="{{ demo_teacher_dn }}"
+      register: add_teacher
+      changed_when: "'No modification' not in add_teacher.stdout"
+
+    - name: Give the listener a moment to react
+      ansible.builtin.pause:
+        seconds: 15
+
+    - name: Read the class group's attributes back
+      ansible.builtin.command:
+        cmd: >-
+          univention-ldapsearch -x -LLL "(cn=DEMOSCHOOL-Democlass)"
+          univentionFreeAttribute19 univentionFreeAttribute20
+      register: class_attrs
+      changed_when: false
+
+    - name: Assert the demo student is in univentionFreeAttribute20
+      ansible.builtin.assert:
+        that:
+          - "'univentionFreeAttribute20: demo_student' in class_attrs.stdout"
+        fail_msg: >-
+          MoodleGroupSetter did not keep demo_student in
+          univentionFreeAttribute20 on DEMOSCHOOL-Democlass -- listener
+          output: {{ class_attrs.stdout }}
+
+    - name: Assert the demo teacher landed in univentionFreeAttribute19
+      ansible.builtin.assert:
+        that:
+          - "'univentionFreeAttribute19: demo_teacher' in class_attrs.stdout"
+        fail_msg: >-
+          MoodleGroupSetter did not add demo_teacher to
+          univentionFreeAttribute19 on DEMOSCHOOL-Democlass -- listener
+          output: {{ class_attrs.stdout }}
