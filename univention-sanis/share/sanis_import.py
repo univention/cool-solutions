@@ -39,6 +39,7 @@ import datetime
 import json
 import os
 import re
+import shlex
 import stat
 import subprocess
 from urllib import request
@@ -348,8 +349,8 @@ class SanisImport:
 				# will not be written, and the user should not even think about executing any
 				# import with these partly-damaged data.
 				self.commands.append('   /usr/share/ucs-school-import/scripts/ucs-school-user-import \\')
-				self.commands.append('      --conffile %s \\' % job_config_file)
-				self.commands.append('      2>&1 | tee import_%s_%s.log' % (school, role))
+				self.commands.append('      --conffile %s \\' % shlex.quote(job_config_file))
+				self.commands.append('      2>&1 | tee %s' % shlex.quote('import_%s_%s.log' % (school, role)))
 				self.commands.append('')
 		except BaseException as e:
 			print('FEHLER: Beim Erzeugen der Daten ist ein Fehler aufgetreten:')
@@ -723,11 +724,11 @@ class SanisImport:
 		self.commands.append('   /usr/share/ucs-school-import/scripts/ucs-school-user-import \\')
 		if self.dry_run:
 			self.commands.append('      --dry-run \\')
-		self.commands.append('      --conffile %s \\' % config)
-		self.commands.append('      --user_role %s \\' % u_role)
-		self.commands.append('      --infile %s.csv \\' % u_role)
-		self.commands.append('      --source_uid sanis_%s \\' % u_role)
-		self.commands.append('      2>&1 | tee import_%s.log' % role)
+		self.commands.append('      --conffile %s \\' % shlex.quote(config))
+		self.commands.append('      --user_role %s \\' % shlex.quote(u_role))
+		self.commands.append('      --infile %s \\' % shlex.quote('%s.csv' % u_role))
+		self.commands.append('      --source_uid %s \\' % shlex.quote('sanis_%s' % u_role))
+		self.commands.append('      2>&1 | tee %s' % shlex.quote('import_%s.log' % role))
 		self.commands.append('')
 
 		return True
