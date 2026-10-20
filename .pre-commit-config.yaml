@@ -52,15 +52,15 @@ repos:
       - id: ucr-flake8
         additional_dependencies: ["flake8==5.0.4"]
       - id: ucr-ruff
-        additional_dependencies: ["ruff==0.11.2"]
+        additional_dependencies: ["ruff==0.14.0"]
       - id: ucr-autopep8
         additional_dependencies: ["autopep8<=2.0.2"]
         stages: [manual]
       - id: ucr-ruff-fix
-        additional_dependencies: ["ruff==0.11.2"]
+        additional_dependencies: ["ruff==0.14.0"]
         stages: [manual]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 'v0.11.8'
+    rev: 'v0.14.0'
     hooks:
       - id: ruff
       - id: ruff
