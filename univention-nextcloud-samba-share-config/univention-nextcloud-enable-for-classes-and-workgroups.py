@@ -19,7 +19,7 @@ class NextcloudEnableForClassesAndWorkgroups(ListenerModuleHandler):
     class Configuration:
         name = 'nextcloud-enable-for-classes-and-workgroups'
         description = 'Enable Nextcloud for all classes, workgroups, Domain Users <ou>, lehrer-<ou> and schueler-<ou>'
-        ldap_filter = '(|(cn=Domain Users *)(cn=lehrer-*)(cn=schueler-*)(ucsschoolRole=school_class:school:*)(ucsschoolRole=workgroup:school:*))'
+        ldap_filter = '(&(objectClass=univentionGroup)(|(cn=Domain Users *)(cn=lehrer-*)(cn=schueler-*)(ucsschoolRole=school_class:school:*)(ucsschoolRole=workgroup:school:*)))'
         attributes = []
 
     def ensure_nextcloud_enabled(self, dn: str) -> None:

@@ -118,8 +118,8 @@ for mount in ${mountList}; do echo "Deleting mount ${mount}" ; univention-app sh
 
 To regenerate all mounts, use univention-directory-listener-ctrl to re-initialize the corresponding listener modules:
 
-`univention-directory-listener-ctrl resync nextcloud-samba-group-share-config`
-`univention-directory-listener-ctrl resync nextcloud-samba-home-share-config`,
+`univention-directory-listener-ctrl resync univention-nextcloud-samba-group-share-config`
+`univention-directory-listener-ctrl resync univention-nextcloud-samba-home-share-config`,
 
 You can follow the process in the listener.log:
 
