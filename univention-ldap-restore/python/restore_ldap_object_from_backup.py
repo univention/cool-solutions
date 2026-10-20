@@ -28,20 +28,18 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <https://www.gnu.org/licenses/>.
 
+import argparse
 import gzip
 import pprint
 
-from ldif import LDIFParser
+import univention.admin.config
+import univention.admin.modules
+import univention.admin.objects
+import univention.admin.uldap
+import univention.config_registry
 from ldap.filter import escape_filter_chars
 from ldap.modlist import addModlist, modifyModlist
-
-import univention.admin.uldap
-import univention.admin.objects
-import univention.admin.modules
-import univention.admin.config
-import univention.config_registry
-
-
+from ldif import LDIFParser
 
 
 def my_pretty_print(obj, indent=2):
@@ -60,6 +58,7 @@ def filter_modlist(_input):
 		"entryCSN",
 		"modifiersName",
 		"modifyTimestamp",
+		"memberOf",
 	]
 	for _item in _input:
 		if all(x not in filter_values for x in _item):

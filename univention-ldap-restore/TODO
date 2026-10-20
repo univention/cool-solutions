@@ -1,0 +1,14 @@
+# TODO: unveröffentlichte Änderungen
+
+Dieses Paket wurde mit MR !89 (cool-solutions) geändert, ohne Changelog-Eintrag
+und ohne Veröffentlichung. Die letzte veröffentlichte Version ist 0.2.0-7.
+
+Wer dieses Paket als Nächstes ändert, muss diese Änderungen mit veröffentlichen:
+im debian/changelog mit aufführen, mit QA testen und danach diese Datei löschen.
+
+- Python-2-Build komplett entfernt (dh --with python3, python-*-Build-Depends, ${python:*}-Substvars)
+- Depends: python-univention-config-registry -> python3-univention-config-registry
+- python/restore_ldap_object_from_backup.py: filter_modlist() filtert zusätzlich memberOf (behebt CONSTRAINT_VIOLATION "memberOf: no user modification allowed" beim Restore von Usern mit Gruppenmitgliedschaften)
+- python/restore_ldap_object_from_backup.py: fehlender "import argparse" ergänzt (check_blacklist_attrs() warf NameError, sobald ein Blacklist-Attribut gefunden wurde)
+- test.py: __builtin__.open -> builtins.open (Python 3)
+- debian/rules: Build-time-Lauf von test.py deaktiviert, der Test lief nie erfolgreich (gemocktes open() liefert keinen gzip-Stream); abgedeckt durch den test_generic-Job

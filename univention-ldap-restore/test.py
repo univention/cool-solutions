@@ -1,9 +1,10 @@
 import unittest
-import mock
+
 import ldap
 import ldap.cidict
-import mockldap
 import ldap.modlist
+import mock
+import mockldap
 
 
 class mock_ConfigRegistry(object):
@@ -65,7 +66,7 @@ modules = {
 
 
 @mock.patch.dict('sys.modules', modules)
-@mock.patch('__builtin__.open')
+@mock.patch('builtins.open')
 @mock.patch('univention.admin.uldap', uldap_mock)
 @mock.patch('univention.config_registry', mock.PropertyMock(ConfigRegistry=mock_ConfigRegistry))
 class MyTests(unittest.TestCase):
@@ -90,8 +91,8 @@ class MyTests(unittest.TestCase):
 	# add
 	@mock.patch('argparse._sys.argv', ['python', '-d', 'uid=bob,dc=test', '-b', 'a'])
 	def test_add(self, *args):
-		from python.restore_ldap_object_from_backup import MyRestore
 		from python import main
+		from python.restore_ldap_object_from_backup import MyRestore
 
 		uldap_mock.init()
 
