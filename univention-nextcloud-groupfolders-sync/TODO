@@ -1,0 +1,13 @@
+# TODO: unveröffentlichte Änderungen
+
+Dieses Paket wurde mit MR !89 (cool-solutions) geändert, ohne Changelog-Eintrag
+und ohne Veröffentlichung. Die letzte veröffentlichte Version ist 0.1.0-9.
+
+Wer dieses Paket als Nächstes ändert, muss diese Änderungen mit veröffentlichen:
+im debian/changelog mit aufführen, mit QA testen und danach diese Datei löschen.
+
+- debian/control: Build-Depends ucslint-univention -> ucslint
+- Python 3 Port (UCS 5.2 hat kein Python 2 mehr): Shebang /usr/bin/python3,
+  iteritems() -> items(), six entfernt; debian/control ohne python-all,
+  ${python3:Depends}, python3-univention-config-registry, python3-requests;
+  debian/rules dh --with python3
