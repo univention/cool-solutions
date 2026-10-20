@@ -95,19 +95,14 @@ variables:
     description: "For which UCS release should the packages be released?"
   DEB_PACKAGE_CUSTOMER_ID: "00000"
   DEB_PACKAGE_CUSTOMER_SCOPE: "cool-solutions"
-  # Pinned to hotfix/v9.0.0-downstream-findings@cd08ed48 (TDP MR !61, unreleased) instead of a
-  # tagged release: fixes "export: `_IP_<section>=...`: not a valid identifier" in
-  # .tdp_create_vms's inventory-building step for any hyphenated section name (first hit via this
-  # project's nextcloud-samba-share-config-52.cfg's primary-samba/member-nextcloud, then again via
-  # sync-users-and-groups-52.cfg's pdn-dest/pdn-source). NOTE: an earlier pin to 89c5098f *looked*
-  # green for nextcloud-samba but that was a false negative -- 89c5098f still had the unfixed
-  # "export _IP_<section>=..." line (confirmed by reading jobs-library.yml at that SHA); 5ce4c7ff is
-  # the commit that actually drops the export/source round-trip. Also picks up the rest of that
-  # hotfix branch (nmap in the image, admin-credential defaults, disk-resize/DNS/cache-key skill
-  # notes) plus later hardening bumped past the previous f326cd5f pin: Proxmox VM recovery/
-  # snapshotting, SSH ControlMaster/reachability fixes, WinRM support, and per-CI-job VM
-  # provenance tracking. Re-pin to the next tagged release once MR !61 merges.
-  TDP_VERSION: &TDP_VERSION "cd08ed48"
+  # Pinned to hotfix/v9.1.0-downstream-findings@f6686a9d (unreleased) instead of a tagged release.
+  # Drops the static IP pinning (pin_static_ip) of older TDP versions: a pinned VM kept its address
+  # after its Proxmox DHCP lease expired, so DHCP handed the same IP to other projects' new VMs
+  # (duplicate-IP failures, e.g. zit-sh job 3178187 vs. member-nextcloud). Also releases DHCP
+  # leases on terminate, keeps the hyphenated-section inventory fix (TDP 5ce4c7ff) and labels each
+  # environment's inventory in the MR summary comment by its GitLab environment name.
+  # Re-pin to the next tagged release once the hotfix branch is merged.
+  TDP_VERSION: &TDP_VERSION "f6686a9d"
   UCS_VERSION:
     value: "5.2-6"
     description: "UCS version for VM deployment"
