@@ -33,5 +33,5 @@
 	dh $@
 
 override_dh_auto_test:
-	ucslint
+	#ucslint
 

@@ -1,0 +1,9 @@
+# TODO: unveröffentlichte Änderungen
+
+Dieses Paket wurde mit MR !89 (cool-solutions) geändert, ohne Changelog-Eintrag
+und ohne Veröffentlichung. Die letzte veröffentlichte Version ist 2.1.0-1.
+
+Wer dieses Paket als Nächstes ändert, muss diese Änderungen mit veröffentlichen:
+im debian/changelog mit aufführen, mit QA testen und danach diese Datei löschen.
+
+- debian/rules: build-time ucslint deaktiviert (#ucslint), Findings kommen über den separaten ucslint-CI-Job
