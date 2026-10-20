@@ -2,12 +2,18 @@ Source: univention-set-samba4-profile-path
 Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
-Build-Depends: debhelper (>= 7), ucslint, univention-config-dev
+Build-Depends:
+ debhelper-compat (= 12),
+ ucslint,
+ univention-config-dev,
 Standards-Version: 3.7.3
 Homepage: http://www.univention.de/
 
 Package: univention-set-samba4-profile-path
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, univention-samba4
+Depends:
+ univention-samba4,
+ ${misc:Depends},
+ ${shlibs:Depends},
 Description: Bulk setting of the samba 4 profile path
  Bulk setting of the samba 4 profile path
