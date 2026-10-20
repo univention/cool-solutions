@@ -1,3 +1,11 @@
+univention-nextcloud-samba-share-config (2.0.0-9) unstable; urgency=low
+
+  * Update LDAP filter to support both App Center and Cool Solution schemas (Issue: #47591)
+  * Fix resync command in README.md
+  * Filter univention-nextcloud-enable-for-classes-and-workgroups by objectClass=univentionGroup to avoid unnecessary error messages for shares
+
+ -- Hendrik Fiedler <hendrik.fiedler@univention.de>  Wed, 23 Sep 2026 12:00:00 +0200
+
 univention-nextcloud-samba-share-config (2.0.0-8) unstable; urgency=low
 
   * home-share-config: skip groups whose home share file server cannot be

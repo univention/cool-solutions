@@ -25,7 +25,7 @@ class NextcloudSambaGroupShareConfig(ListenerModuleHandler):
     class Configuration:
         name = "nextcloud-samba-group-share-config"
         description = "Configure access to Samba shares in Nextcloud"
-        ldap_filter = "(&(objectClass=univentionGroup)(objectClass=nextcloudGroup)(nextcloudEnabled=1))"
+        ldap_filter = "(|(&(objectClass=univentionNextcloudGroup)(univentionNextcloudEnabled=1))(&(objectClass=nextcloudGroup)(nextcloudEnabled=1)))"
         attributes = []
 
     def create(self, dn: str, new: Dict[str, List[bytes]]) -> None:
