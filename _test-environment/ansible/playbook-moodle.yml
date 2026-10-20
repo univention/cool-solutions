@@ -30,26 +30,18 @@
     # fails outright. Not needed anyway -- the test only creates a handful
     # of objects, well under any default/unlicensed object-count limit.
 
-    - name: Install univention-moodle-group
-      ansible.builtin.command:
-        cmd: univention-install --yes univention-moodle-group
-      changed_when: true
-
-    # Folded in per the user's direction (same pattern as nextcloud_groupfolders-sync ->
-    # nextcloud_schema): these 3 packages are UCS@school-specific and structurally need a
-    # UCS@school host, which this environment already has, rather than a second one.
-    # See playbook-moodle-test.yml for why none of the three get a functional test here.
-    - name: Install univention-ro-wo-group-dirs
-      ansible.builtin.command:
-        cmd: univention-install --yes univention-ro-wo-group-dirs
-      changed_when: true
-
-    - name: Install univention-sanis
-      ansible.builtin.command:
-        cmd: univention-install --yes univention-sanis
-      changed_when: true
-
-    - name: Install univention-lusd
-      ansible.builtin.command:
-        cmd: univention-install --yes univention-lusd
-      changed_when: true
+    # univention-ro-wo-group-dirs / -sanis / -lusd are folded in per the user's direction
+    # (same pattern as nextcloud_groupfolders-sync -> nextcloud_schema): they are
+    # UCS@school-specific and structurally need a UCS@school host, which this environment
+    # already has, rather than a second one. See playbook-moodle-test.yml for why none of
+    # the three get a functional test here.
+    # Packages neither built in this pipeline nor published for UCS 5.2 are skipped,
+    # see tasks/install-available-packages.yml.
+    - name: Install the moodle environment's packages
+      ansible.builtin.include_tasks: tasks/install-available-packages.yml
+      vars:
+        cs_packages:
+          - univention-moodle-group
+          - univention-ro-wo-group-dirs
+          - univention-sanis
+          - univention-lusd

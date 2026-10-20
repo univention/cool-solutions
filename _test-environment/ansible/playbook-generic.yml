@@ -31,45 +31,25 @@
           repository/online/component/cool-solutions/unmaintained=yes
       changed_when: true
 
-    # univention-demo-data: App Center-style package, join script creates demo
-    # users/computers/groups under a new ou=univention-demo-data container automatically.
-    - name: Install univention-demo-data
-      ansible.builtin.command:
-        cmd: univention-install --yes univention-demo-data
-      changed_when: true
-
-    # univention-ldap-restore: CLI restoring LDAP objects/attributes/memberships from a
-    # gzipped ldif backup. Confirmed Python 3 (both the CLI and its library module).
-    - name: Install univention-ldap-restore
-      ansible.builtin.command:
-        cmd: univention-install --yes univention-ldap-restore
-      changed_when: true
-
-    # univention-munin: -server depends on -node, so installing just -server pulls both in.
-    - name: Install univention-munin-server
-      ansible.builtin.command:
-        cmd: univention-install --yes univention-munin-server
-      changed_when: true
-
-    # univention-set-samba4-profile-path: bulk-sets every user's Windows roaming-profile
-    # path. Hard-depends on univention-samba4 -- NOT baked into this pre-joined template
-    # (confirmed live: "package 'univention-samba4' is not installed"), so install it
-    # first. Its own join script (Samba4 AD DC provisioning) runs automatically and
-    # takes a little while; confirmed live it completes cleanly on this already-joined
-    # domain.
-    - name: Install univention-samba4 (hard dependency, not on this template)
-      ansible.builtin.command:
-        cmd: univention-install --yes univention-samba4
-      changed_when: true
-
-    - name: Install univention-set-samba4-profile-path
-      ansible.builtin.command:
-        cmd: univention-install --yes univention-set-samba4-profile-path
-      changed_when: true
-
-    # univention-ssh-key-sync: join script registers the sshPublicKey extended attribute
-    # automatically on this already-joined domain.
-    - name: Install univention-ssh-key-sync
-      ansible.builtin.command:
-        cmd: univention-install --yes univention-ssh-key-sync
-      changed_when: true
+    # Packages neither built in this pipeline nor published for UCS 5.2 are skipped,
+    # see tasks/install-available-packages.yml.
+    #
+    # - univention-demo-data: App Center-style package, join script creates demo
+    #   users/computers/groups under a new ou=univention-demo-data container.
+    # - univention-ldap-restore: CLI restoring LDAP objects/attributes/memberships from a
+    #   gzipped ldif backup.
+    # - univention-munin-server: depends on -node, so this pulls both in.
+    # - univention-set-samba4-profile-path: bulk-sets every user's Windows roaming-profile
+    #   path. Hard-depends on univention-samba4, which is NOT baked into this pre-joined
+    #   template, so apt pulls it in; its join script (Samba4 AD DC provisioning) runs
+    #   automatically and completes cleanly on this already-joined domain.
+    # - univention-ssh-key-sync: join script registers the sshPublicKey extended attribute.
+    - name: Install the generic packages
+      ansible.builtin.include_tasks: tasks/install-available-packages.yml
+      vars:
+        cs_packages:
+          - univention-demo-data
+          - univention-ldap-restore
+          - univention-munin-server
+          - univention-set-samba4-profile-path
+          - univention-ssh-key-sync
