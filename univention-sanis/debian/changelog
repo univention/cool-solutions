@@ -1,3 +1,13 @@
+univention-sanis (1.0.10) unstable; urgency=medium
+
+  * feat(univention-sanis): export legal guardians with their children (Issue #47465)
+  * fix(univention-sanis): report failures of create_import_files to the caller (Issue #47465)
+  * fix(univention-sanis): abort the generated run_import when a step fails (Issue #47465)
+  * fix(univention-sanis): quote the script path in the generated run_import, which
+    failed in directories with spaces (Issue #47465)
+
+ -- Jonas Einnolf <einnolf@univention.de>  Fri, 30 Oct 2026 12:00:00 +0100
+
 univention-sanis (1.0.9) unstable; urgency=medium
 
   * chore(univention-sanis): validate package works for UCS 5.2 #47016
