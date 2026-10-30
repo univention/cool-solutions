@@ -54,7 +54,7 @@ MAX_LEGAL_GUARDIANS = 4
 MAX_LEGAL_WARDS = 10
 
 
-class NoSchoolException(BaseException):
+class NoSchoolException(Exception):
 	pass
 
 
@@ -105,19 +105,25 @@ class SanisImport:
 	}
 
 	# Start lines for the import script.
+	# Issue 47465: the legal guardian import resolves its children in LDAP, so it must not
+	# run after a failed student import. Without pipefail the trailing '| tee' swallows the
+	# exit code and the script reports success.
 	script_header = [
 		'#!/bin/bash',
 		'',
 		'# Importskript für SANIS Lehrer- und Schülerbestände',
 		'#',
 		'',
-		'cd $(dirname $0)',
+		'set -e',
+		'set -o pipefail',
+		'',
+		'cd "$(dirname "$0")"',
 		'(',
 	]
 
 	script_footer = [
 		'',
-		') 2>&1 | tee $(basename $0).log',
+		') 2>&1 | tee "$(basename "$0").log"',
 	]
 
 	def __init__(self, api_url, token_url, cred_file, dry_run=False, sisopi=False):

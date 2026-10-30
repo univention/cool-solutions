@@ -200,7 +200,7 @@ def print_doc_hint():
 	""" print the full path of the accompanying doc file """
 	print('')
 	print('Die vollständige Dokumentation des Paketes finden Sie in:')
-	print('/usr/share/docs/univention-sanis/sanis-readme.md')
+	print('/usr/share/doc/univention-sanis/sanis-readme.md')
 	print('')
 
 
@@ -238,3 +238,4 @@ if __name__ == '__main__':
 
 	if not main(dry_run=dry_run, sisopi=sisopi):
 		print_doc_hint()
+		sys.exit(1)
