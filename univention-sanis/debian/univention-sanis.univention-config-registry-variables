@@ -41,3 +41,9 @@ Description[de] = Falls aktiviert, wird die schulische E-Mail-Adresse aus SANIS 
 Categories = ucsschool-import
 Type = str
 
+[sanis_import/activate_legal_guardians]
+Description[en] = Export legal guardians (SANIS role "SorgBer") as an additional CSV file. See /usr/share/doc/univention-sanis/sanis-readme.md.
+Description[de] = Exportiert die Sorgeberechtigten (SANIS-Rolle "SorgBer") als zusätzliche CSV-Datei. Siehe /usr/share/doc/univention-sanis/sanis-readme.md.
+Categories = ucsschool-import
+Default = false
+Type = bool

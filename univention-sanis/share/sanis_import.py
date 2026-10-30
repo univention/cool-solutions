@@ -49,8 +49,16 @@ from sanis_models import (Codes, Klassen, Kontext, Mitglieder, Organisation,
 from sanis_tools import iterStore
 from univention.config_registry import ConfigRegistry
 
+# ucs-school-import/modules/ucsschool/importer/utils/constants.py
+MAX_LEGAL_GUARDIANS = 4
+MAX_LEGAL_WARDS = 10
 
-class NoSchoolException(BaseException):
+
+class NoSchoolException(Exception):
+	pass
+
+
+class LegalWardException(Exception):
 	pass
 
 
@@ -97,19 +105,25 @@ class SanisImport:
 	}
 
 	# Start lines for the import script.
+	# Issue 47465: the legal guardian import resolves its children in LDAP, so it must not
+	# run after a failed student import. Without pipefail the trailing '| tee' swallows the
+	# exit code and the script reports success.
 	script_header = [
 		'#!/bin/bash',
 		'',
 		'# Importskript für SANIS Lehrer- und Schülerbestände',
 		'#',
 		'',
-		'cd $(dirname $0)',
+		'set -e',
+		'set -o pipefail',
+		'',
+		'cd "$(dirname "$0")"',
 		'(',
 	]
 
 	script_footer = [
 		'',
-		') 2>&1 | tee $(basename $0).log',
+		') 2>&1 | tee "$(basename "$0").log"',
 	]
 
 	def __init__(self, api_url, token_url, cred_file, dry_run=False, sisopi=False):
@@ -132,6 +146,8 @@ class SanisImport:
 		# Issue 46456: cache for the raw persons JSON, keyed by person id.
 		# Avoids reloading and scanning the file on every get_context_email() call.
 		self._persons_by_id = None
+		# Issue 47465: messages about legal guardian links that were dropped or cut
+		self.ward_warnings = []
 
 		# invent a prefix for temp files. Can be a directory or only a filename prefix.
 		# Will be used here for JSON files as well as in the stores when switching
@@ -156,7 +172,10 @@ class SanisImport:
 		print('Lese Daten von SANIS...')
 
 		# --------------- person -----------------
-		pers_file = self.fetch_data('/personen')
+		# Issue 47465: 'hat_als_beziehungen' makes SANIS deliver the legal guardian
+		# relations inline, which keeps the whole feature at zero extra requests.
+		relations = 'hat_als_beziehungen=ja' if 'SorgBer' in Codes.valid_user_roles() else None
+		pers_file = self.fetch_data('/personen', params=relations)
 		self.pers_store = iterStore(Person, pers_file, temp_base=self.temp_base)
 		print('      gefiltert: %d Benutzer.' % self.pers_store.length())
 		if self.dry_run:
@@ -239,6 +258,12 @@ class SanisImport:
 
 		try:
 			for sanis_role, role in Codes.valid_user_roles().items():
+				# Issue 47465: SiSoPi gives every role the same source_uid and would import a
+				# school's legal guardians before the next school's students. Skip them before
+				# any data is written, see sanis-readme.md.
+				if sanis_role == 'SorgBer':
+					print('   Schule=%s  Rolle=%s ... im SiSoPi-Modus nicht unterstützt' % (school, role))
+					continue
 				print('   Schule=%s  Rolle=%s ... ' % (school, role), end='')
 				out_filename = 'import_%s_%s.csv' % (school, role)
 				records = 0
@@ -358,14 +383,114 @@ class SanisImport:
 			return False
 		return True
 
+	def get_legal_wards(self):
+		""" Issue 47465: build the mapping 'guardian person id' -> list of child person ids.
+
+			SANIS records this relation only at the STUDENT's context, pointing at the
+			guardian's context, so we walk the students and invert the result. The
+			relations arrive inline with the /personen bulk call, see read_input_data().
+
+			Children that validation has already dropped are left out, and the list is
+			capped: the importer aborts the whole run on a single bad row, because
+			'tolerate_errors' defaults to 0.
+		"""
+
+		wards_by_guardian = {}
+		persons = self._get_persons_by_id()
+		# Without the raw JSON every guardian would silently get an empty 'Kinder'
+		# column, and a mapped but empty column REMOVES existing links.
+		if not persons and self.pers_store.length():
+			raise LegalWardException(
+				'FEHLER: Die Rohdaten von /personen konnten nicht gelesen werden. Ohne sie '
+				'würden alle Sorgeberechtigten ohne Kinder exportiert und bestehende '
+				'Verknüpfungen in UCS@school gelöscht.')
+		seen = 0
+		for person_id, person_data in persons.items():
+			for kontext in person_data.get('personenkontexte') or []:
+				if kontext.get('rolle') != 'Lern':
+					continue
+				for relation in (kontext.get('beziehungen') or {}).get('hat_als_beziehungen') or []:
+					if relation.get('beziehung') != 'SorgBer':
+						continue
+					seen += 1
+					guardian = self.cont_store.find(relation.get('ktid'))
+					if not guardian or not self.pers_store.find(guardian['person_id']):
+						self.ward_warnings.append(
+							'Beziehung von [%s] verweist auf den Personenkontext [%s], der nicht '
+							'importiert wird: Verknüpfung entfällt.' % (person_id, relation.get('ktid')))
+						continue
+					# Only link children that are actually exported. The stores decide that,
+					# so we ask them instead of second-guessing via personenstatus.
+					if not self.cont_store.find(kontext.get('id')) or not self.pers_store.find(person_id):
+						self.ward_warnings.append(
+							'Das Kind [%s] wird nicht importiert: Verknüpfung mit dem '
+							'Sorgeberechtigten [%s] entfällt.' % (person_id, guardian['person_id']))
+						continue
+					wards = wards_by_guardian.setdefault(guardian['person_id'], [])
+					if person_id not in wards:
+						wards.append(person_id)
+
+		# The API only adds 'beziehungen' to contexts that have some, so "parameter ignored"
+		# looks exactly like "nothing maintained yet". Both would empty every 'Kinder' column.
+		if not seen and self.cont_store.find_all('rolle', 'SorgBer'):
+			raise LegalWardException(
+				'FEHLER: moin.schule hat keine einzige Sorgeberechtigten-Beziehung geliefert, obwohl '
+				'Sorgeberechtigte vorhanden sind. Ein Import würde alle bestehenden Verknüpfungen in '
+				'UCS@school löschen. Schalten Sie sanis_import/activate_legal_guardians ab, bis in '
+				'moin.schule Beziehungen gepflegt sind.')
+
+		self.cap_legal_wards(wards_by_guardian)
+		print('   %d Sorgeberechtigte mit Kindern.' % len(wards_by_guardian))
+
+		return wards_by_guardian
+
+	def cap_legal_wards(self, wards_by_guardian):
+		""" Issue 47465: ucs-school-import refuses more than MAX_LEGAL_WARDS children per
+			legal guardian and more than MAX_LEGAL_GUARDIANS guardians per child. SANIS does
+			not know these limits, so we cut the lists here and say so, instead of letting
+			one oversized record abort the import.
+		"""
+
+		# Sort before slicing: moin.schule does not guarantee an order, and an unstable
+		# choice tears down and rebuilds a different link in LDAP on every run.
+		guardians_of = {}
+		for guardian_id in sorted(wards_by_guardian):
+			wards = wards_by_guardian[guardian_id]
+			wards.sort()
+			for ward in wards:
+				guardians_of.setdefault(ward, []).append(guardian_id)
+		for ward, guardians in sorted(guardians_of.items()):
+			for guardian_id in guardians[MAX_LEGAL_GUARDIANS:]:
+				wards_by_guardian[guardian_id].remove(ward)
+				self.ward_warnings.append(
+					'Das Kind [%s] hat %d Sorgeberechtigte. UCS@school erlaubt höchstens %d: '
+					'keine Verknüpfung mit [%s].' % (ward, len(guardians), MAX_LEGAL_GUARDIANS, guardian_id))
+
+		for guardian_id, wards in sorted(wards_by_guardian.items()):
+			if len(wards) <= MAX_LEGAL_WARDS:
+				continue
+			guardian = self.pers_store.find(guardian_id)
+			name = '%(familienname)s, %(vorname)s' % guardian if guardian else guardian_id
+			self.ward_warnings.append(
+				'Sorgeberechtigte/r %s hat %d Kinder. UCS@school erlaubt höchstens %d. '
+				'Nicht verknüpft werden: %s'
+				% (name, len(wards), MAX_LEGAL_WARDS, ', '.join(wards[MAX_LEGAL_WARDS:])))
+			wards_by_guardian[guardian_id] = wards[:MAX_LEGAL_WARDS]
+
 	def write_command_script(self, out_filename):
 		""" Write all the collected commands into the script to be executed.
 			Returns True if successful.
 		"""
 
-		if len(self.invalid_messages):
+		if len(self.invalid_messages) or len(self.ward_warnings):
 			with open('korrekturen.txt', 'w') as outhandle:
 				self.print_invalid_messages(outhandle)
+				if self.ward_warnings:
+					# These are not validation failures, so they need their own heading.
+					print('', file=outhandle)
+					print('Sorgeberechtigte: Verknüpfungen, die entfallen oder gekürzt wurden', file=outhandle)
+					for message in self.ward_warnings:
+						print(message, file=outhandle)
 			print('')
 			print('Aus den Eingabedaten von SANIS mußten einige Elemente ignoriert werden, weil sie')
 			print('nicht den Validierungsregeln des Imports genügen. In der Datei')
@@ -429,10 +554,13 @@ class SanisImport:
 			rtxt = resp.read()
 			return json.loads(rtxt)['access_token']
 
-	def fetch_data(self, entrypoint):
+	def fetch_data(self, entrypoint, params=None):
 		""" Fetch a dataset from the SANIS entry point. Will be kept in a cache file while
 			the program is running. (We read these cache files multiple times, therefore
 			fetching directy and passing a stream does not make sense here)
+
+			'params' is appended to the URL as a query string. It deliberately does not
+			influence the cache file name, because other code looks that name up.
 
 			Returns the name of the file.
 		"""
@@ -446,7 +574,10 @@ class SanisImport:
 		# binary mode is correct here: response is expected to be UTF8-encoded, and the
 		# file can hold this data without de-/reencoding
 		with open(resfile, 'wb') as ofile:
-			req = request.Request('%s%s' % (self.api_url, entrypoint))
+			url = '%s%s' % (self.api_url, entrypoint)
+			if params:
+				url = '%s?%s' % (url, params)
+			req = request.Request(url)
 			req.add_header('Authorization', 'Bearer %s' % self.token)
 			with request.urlopen(req) as resp:
 				while True:
@@ -599,7 +730,8 @@ class SanisImport:
 				continue
 			# Now finally corrected: we take the context's ROLE for the user's role, and decide into which CSV it has to be written.
 			# And in the context of THIS context: group memberships with OTHER ROLES must be ignored AND LOGGED.
-			for context in self.cont_store.find_all('person_id', person['id']):
+			contexts = self.cont_store.find_all('person_id', person['id'])
+			for context in contexts:
 				self.print('   context ........ %(rolle)s [%(id)s]' % context)
 				school = self.org_store.find(context['org_id'])
 				if not school:
@@ -638,6 +770,17 @@ class SanisImport:
 						to_remove.setdefault('cont', set()).add(context['id'])
 						continue
 
+			# Issue 47465: legal guardians share the students' source_uid, and the importer cannot
+			# tell two accounts with the same source_uid and record_uid apart. A student context
+			# that only lacks a class this run still counts: its account is still in LDAP.
+			removed = to_remove.get('cont', set())
+			if any(x['rolle'] == 'Lern' and self.ucs_school_name(x['org_id']) for x in contexts):
+				for x in contexts:
+					if x['rolle'] == 'SorgBer' and x['id'] not in removed:
+						self.register_invalid(person, 'Person ist Schüler und Sorgeberechtigte/r. Bei gleicher '
+							'source_uid kann UCS@school nur ein Konto führen: das Sorgeberechtigten-Konto entfällt.')
+						to_remove.setdefault('cont', set()).add(x['id'])
+
 		self.print('')
 		self.close_log()
 
@@ -659,11 +802,14 @@ class SanisImport:
 			if 'EMail' not in self.headers:
 				self.headers['EMail'] = 'schulmail'
 				print(f"Added EMail header for role {u_role}")
+		# Issue 47465: the 'Kinder' column is meaningless for every other role
+		headers = dict(self.headers)
+		if role == 'SorgBer':
+			headers['Kinder'] = 'kinder'
+		wards = self.get_legal_wards() if role == 'SorgBer' else {}
+		childless = 0
 		with open('%s.csv' % u_role, 'w') as out_handle:
-			for context in self.cont_store.find_all('rolle', role):
-				if context['status'] != 'aktiv':
-					continue
-			print(self._data_line(self.headers.keys()), file=out_handle)
+			print(self._data_line(headers.keys()), file=out_handle)
 
 			# better we sort by 'stammorganisation', just to have the records together that
 			# should be corrected by one organization
@@ -706,12 +852,16 @@ class SanisImport:
 				# if person['geburtsdatum'] == '':
 				# person['geburtsdatum'] = '1999-09-09'
 				person['school'] = u_org
-				person['schools'] = ','.join(schools)
-				person['classes'] = ','.join(classes)
+				person['schools'] = ','.join(sorted(schools))
+				person['classes'] = ','.join(sorted(classes))
 				if self.include_school_email:
 					person['schulmail'] = person_email
+				if role == 'SorgBer':
+					person['kinder'] = ','.join(wards.get(person['id'], []))
+					if not person['kinder']:
+						childless += 1
 				record = []
-				for attr, iattr in self.headers.items():
+				for attr, iattr in headers.items():
 					if iattr in person:
 						record.append(person[iattr])
 					else:
@@ -720,6 +870,14 @@ class SanisImport:
 				records += 1
 
 		print('   Rolle=%s ... %d Sätze' % (u_role, records))
+		if childless:
+			# An empty 'Kinder' column is not 'unchanged' for the importer, it DELETES the
+			# existing links. A jump in this number is the only warning anyone gets.
+			subject = '1 Sorgeberechtigte/r wird' if childless == 1 else '%d Sorgeberechtigte werden' % childless
+			message = ('%s ohne Kinder exportiert. Deren bestehende Verknüpfungen in '
+				'UCS@school werden beim Import gelöscht.' % subject)
+			print('   WARNUNG: %s' % message)
+			self.ward_warnings.append(message)
 
 		self.commands.append('   /usr/share/ucs-school-import/scripts/ucs-school-user-import \\')
 		if self.dry_run:
@@ -727,7 +885,10 @@ class SanisImport:
 		self.commands.append('      --conffile %s \\' % shlex.quote(config))
 		self.commands.append('      --user_role %s \\' % shlex.quote(u_role))
 		self.commands.append('      --infile %s \\' % shlex.quote('%s.csv' % u_role))
-		self.commands.append('      --source_uid %s \\' % shlex.quote('sanis_%s' % u_role))
+		# Issue 47465: the record UID hook looks up the children with the source_uid
+		# of the running import, so the legal guardians have to share the students' one.
+		source_role = Codes.valid_user_roles()['Lern'] if role == 'SorgBer' else u_role
+		self.commands.append('      --source_uid %s \\' % shlex.quote('sanis_%s' % source_role))
 		self.commands.append('      2>&1 | tee %s' % shlex.quote('import_%s.log' % role))
 		self.commands.append('')
 

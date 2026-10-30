@@ -44,15 +44,31 @@ class Codes():
 	# Issue 46456: cache the result list to avoid reloading UCR on every
 	# validate_object() call during JSON parsing (thousands of calls per import).
 	_valid_group_types_cache = None
+	_valid_user_roles_cache = None
 
 	@classmethod
 	def valid_user_roles(self):
-		""" return the (SANIS) role names and the mappings to ucs@school roles. """
+		""" return the (SANIS) role names and the mappings to ucs@school roles.
 
-		return({
+			Insertion order matters: it decides the order of the generated CSV files
+			and therefore of the import calls in the generated script. 'SorgBer' has
+			to come last because ucs-school-user-import can only link a legal guardian
+			to children that already exist in LDAP.
+		"""
+
+		if self._valid_user_roles_cache is not None:
+			return self._valid_user_roles_cache
+
+		roles = {
 			'Lehr':		'teacher',
 			'Lern':		'student',
-		})
+		}
+		ucr = ConfigRegistry()
+		ucr.load()
+		if ucr.is_true('sanis_import/activate_legal_guardians'):
+			roles['SorgBer'] = 'legal_guardian'
+		self._valid_user_roles_cache = roles
+		return self._valid_user_roles_cache
 
 	@classmethod
 	def roles_requiring_groups(self):
@@ -352,7 +368,9 @@ class Mitglieder(SanisObject):
 		# be processed at the aggregate level.
 
 		# STEP #1: filter out roles that we're not about to process
-		myroles = [x for x in self.extract_value(obj, 'gruppenzugehoerigkeiten.rollen') if x in Codes.valid_user_roles().keys()]
+		# Issue 47465: legal guardians are no class members, so 'SorgBer' is dropped here as it was
+		# before the feature existed. Otherwise ['Lern', 'SorgBer'] would become a role conflict.
+		myroles = [x for x in self.extract_value(obj, 'gruppenzugehoerigkeiten.rollen') if x in Codes.valid_user_roles().keys() and x != 'SorgBer']
 
 		# STEP #2: reject this membership if there are no roles remaining. (this membership is not relevant to us)
 		if len(myroles) == 0:
