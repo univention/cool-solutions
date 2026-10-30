@@ -809,9 +809,6 @@ class SanisImport:
 		wards = self.get_legal_wards() if role == 'SorgBer' else {}
 		childless = 0
 		with open('%s.csv' % u_role, 'w') as out_handle:
-			for context in self.cont_store.find_all('rolle', role):
-				if context['status'] != 'aktiv':
-					continue
 			print(self._data_line(headers.keys()), file=out_handle)
 
 			# better we sort by 'stammorganisation', just to have the records together that
@@ -855,8 +852,8 @@ class SanisImport:
 				# if person['geburtsdatum'] == '':
 				# person['geburtsdatum'] = '1999-09-09'
 				person['school'] = u_org
-				person['schools'] = ','.join(schools)
-				person['classes'] = ','.join(classes)
+				person['schools'] = ','.join(sorted(schools))
+				person['classes'] = ','.join(sorted(classes))
 				if self.include_school_email:
 					person['schulmail'] = person_email
 				if role == 'SorgBer':
