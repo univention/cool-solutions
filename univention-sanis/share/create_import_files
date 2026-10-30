@@ -37,7 +37,7 @@ import os
 import stat
 import sys
 
-from sanis_import import NoSchoolException, SanisImport
+from sanis_import import LegalWardException, NoSchoolException, SanisImport
 from sanis_models import Codes
 from univention.config_registry import ConfigRegistry
 
@@ -48,6 +48,8 @@ SANIS_API = 'https://api-schulen.stage.niedersachsen-login.schule/v1'
 # Config files
 SISOPI_CONFIG = '/usr/share/ucs-school-import/configs/user_import_sisopi.json'
 SANIS_CONFIG = '/var/lib/ucs-school-import/configs/user_import_sanis.json'
+# Issue 47465: legal guardians need their own mapping and mandatory attributes
+SANIS_GUARDIAN_CONFIG = '/var/lib/ucs-school-import/configs/user_import_sanis_legal_guardian.json'
 
 # local (workdir) files
 CRED_FILE = '/etc/sanis.secret'
@@ -66,6 +68,15 @@ def main(dry_run=False, sisopi=False):
 		print('Bevor Sie den SANIS Import starten können, müssen Sie diese Datei erzeugen, indem Sie')
 		print('')
 		print('   /usr/share/univention-sanis/user_import_sanis_example.json')
+		print('')
+		print('kopieren und eventuell anpassen.')
+		return False
+
+	if not sisopi and 'SorgBer' in Codes.valid_user_roles() and not os.path.exists(SANIS_GUARDIAN_CONFIG):
+		print('FEHLER: Die Datei "%s" existiert nicht.' % SANIS_GUARDIAN_CONFIG)
+		print('Der Export der Sorgeberechtigten ist aktiviert. Erzeugen Sie die Datei, indem Sie')
+		print('')
+		print('   /usr/share/univention-sanis/user_import_sanis_legal_guardian_example.json')
 		print('')
 		print('kopieren und eventuell anpassen.')
 		return False
@@ -155,7 +166,12 @@ def main(dry_run=False, sisopi=False):
 	else:
 		# one output file for each role. all schools in one file.
 		for role in Codes.valid_user_roles().keys():
-			if not sanis_import.print_collected_csv(role, SANIS_CONFIG):
+			try:
+				config = SANIS_GUARDIAN_CONFIG if role == 'SorgBer' else SANIS_CONFIG
+				if not sanis_import.print_collected_csv(role, config):
+					return False
+			except LegalWardException as ex:
+				print(ex.args[0])
 				return False
 
 	# Now: print the commands out. Does not depend on SiSoPi.
