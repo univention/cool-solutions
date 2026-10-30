@@ -1,0 +1,24 @@
+{
+	"csv": {
+		"mapping": {
+			"ID":			"record_uid",
+			"Vorname":		"firstname",
+			"Familienname":	"lastname",
+			"Geburtstag":	"birthday",
+			"Kinder":		"legal_wards",
+			"Schule":		"school",
+			"Schulen":		"schools"
+		}
+	},
+	"scheme": {
+		"username": {
+			"default": "<firstname>[0:3].<lastname>[0:3]<:umlauts,lower>[COUNTER2]"
+		}
+	},
+	"user_role": "legal_guardian",
+	"mandatory_attributes": ["firstname", "lastname", "name", "record_uid", "school", "source_uid"],
+	"deletion_grace_period": {
+		"deletion": 90,
+		"deactivation": 0
+	}
+}

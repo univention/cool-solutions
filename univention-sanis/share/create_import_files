@@ -50,6 +50,8 @@ SISOPI_CONFIG = '/usr/share/ucs-school-import/configs/user_import_sisopi.json'
 SANIS_CONFIG = '/var/lib/ucs-school-import/configs/user_import_sanis.json'
 # Issue 47465: legal guardians need their own mapping and mandatory attributes
 SANIS_GUARDIAN_CONFIG = '/var/lib/ucs-school-import/configs/user_import_sanis_legal_guardian.json'
+# Issue 47465: without this hook the importer cannot resolve the record UIDs in 'Kinder'
+SANIS_GUARDIAN_HOOK = '/usr/share/ucs-school-import/pyhooks/legal_guardian_as_record_uid.py'
 
 # local (workdir) files
 CRED_FILE = '/etc/sanis.secret'
@@ -79,6 +81,19 @@ def main(dry_run=False, sisopi=False):
 		print('   /usr/share/univention-sanis/user_import_sanis_legal_guardian_example.json')
 		print('')
 		print('kopieren und eventuell anpassen.')
+		return False
+
+	# The importer resolves the record UIDs in 'Kinder' only with this hook. Without it every
+	# row fails, and by then the student and teacher imports have already written to LDAP.
+	if not sisopi and 'SorgBer' in Codes.valid_user_roles() and not os.path.exists(SANIS_GUARDIAN_HOOK):
+		print('FEHLER: Der Import-Hook "%s" ist nicht aktiviert.' % SANIS_GUARDIAN_HOOK)
+		print('Ohne ihn kann der Import die recordUIDs in der Spalte "Kinder" nicht auflösen.')
+		print('Aktivieren Sie ihn mit')
+		print('')
+		print('   cp /usr/share/ucs-school-import/pyhooks-available/legal_guardian_as_record_uid.py \\')
+		print('      /usr/share/ucs-school-import/pyhooks/')
+		print('')
+		print('Der Hook kommt mit ucs-school-import 19.2.2, empfohlen ist 19.2.5 oder neuer.')
 		return False
 
 	ucr = ConfigRegistry()
