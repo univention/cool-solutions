@@ -16,6 +16,9 @@ repos:
       - id: check-json
       - id: check-xml
       - id: check-yaml
+        # --unsafe: only check the syntax instead of loading the YAML, so GitLab CI's
+        # custom tags (!reference in .gitlab-ci.yml) don't fail the hook.
+        args: [--unsafe]
       - id: trailing-whitespace
   - repo: https://git.knut.univention.de/univention/dist/pre-commit-ucs.git
     rev: v1.4.0
