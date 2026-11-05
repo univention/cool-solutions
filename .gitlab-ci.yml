@@ -89,11 +89,15 @@
 # Variables
 # -----------------------------------------------------------------------------
 variables:
-  DEB_PIPELINE_VERSION: &DEB_PIPELINE_VERSION "v2.16.0"
+  DEB_PIPELINE_VERSION: &DEB_PIPELINE_VERSION "v2.18.1"
   DEB_PACKAGE_UCS_RELEASE:
     value: "5.2"
     description: "For which UCS release should the packages be released?"
-  DEB_PACKAGE_CUSTOMER_ID: "00000"
+  # "0000" (four zeros) is deb-pipeline's switch for the public cool-solutions component
+  # (announce_ucs_scope.py + update_mirror.sh, see library-deb-package.md). Any 5-6 digit ID,
+  # including "00000", is treated as a real customer and lands in that customer's password-
+  # protected mirror on service.software-univention.de instead of updates.software-univention.de.
+  DEB_PACKAGE_CUSTOMER_ID: "0000"
   DEB_PACKAGE_CUSTOMER_SCOPE: "cool-solutions"
   # Pinned to hotfix/v9.1.0-downstream-findings@f6686a9d (unreleased) instead of a tagged release.
   # Drops the static IP pinning (pin_static_ip) of older TDP versions: a pinned VM kept its address
@@ -159,6 +163,9 @@ include:
     file:
       - library-deb-pipeline.yml
       - library-deb-package.yml
+      # Since v2.17.0 deb-pipeline no longer derives the build/ucslint images from the branch name,
+      # so they have to be included explicitly (forwarded to the generated child pipeline).
+      - vars/ucs-5.2.yml
 
   - project: univention/prof-services/internal/devops/test-dev-pipeline
     ref: *TDP_VERSION
