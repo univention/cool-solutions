@@ -270,7 +270,11 @@ publish_packages:
       when: manual
     - if: *SCHEDULED_PIPELINE
       when: never
+    # Same changes: as generate-deb-pipeline/run-generated-deb-pipeline: on a push that touches no
+    # package (e.g. CI-only changes like !97, !98) run-generated-deb-pipeline does not exist, and the
+    # needs: above would make GitLab reject the whole pipeline. Nothing is built then, so nothing to publish.
     - if: *PUSH_TO_DEFAULT_BRANCH
+      changes: *ALL_CHANGES
       variables:
         DEB_PIPELINE_UPLOAD_PACKAGES: "true"
 
