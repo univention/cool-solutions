@@ -3,19 +3,22 @@ Section: univention
 Priority: optional
 Maintainer: Univention GmbH <packages@univention.de>
 Standards-Version: 3.9.8
-Build-Depends: debhelper (>= 7),
+Build-Depends:
+ debhelper (>= 7),
  dh-python,
- python-all,
  python3-all,
+ ucslint,
  univention-config-dev,
- ucslint-univention,
 
 Package: univention-nextcloud-groupfolders-sync
 Architecture: all
-Depends: ${python:Depends},
+Depends:
+ python3-requests,
+ python3-univention-config-registry,
  ${misc:Depends},
- python-univention-config-registry,
-Provides: ${python:Provides}
+ ${python3:Depends},
+Provides:
+ ${python3:Provides},
 Description: sync UCS groups to nextcloud groupfolders
  This package contains tools to sync UCS groups
  to nextcloud groupfolders.

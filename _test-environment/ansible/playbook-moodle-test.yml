@@ -44,41 +44,53 @@
     demo_teacher_dn: uid=demo_teacher,cn=lehrer,cn=users,ou=DEMOSCHOOL,dc=ucs,dc=test
 
   tasks:
-    - name: Add the pre-existing demo teacher to the pre-existing demo class
+    # Skipped like in playbook-moodle.yml when univention-moodle-group is neither built
+    # in this pipeline nor published for UCS 5.2.
+    - name: Check whether univention-moodle-group is installed
       ansible.builtin.command:
-        cmd: >-
-          udm groups/group modify
-          --dn "{{ demo_class_dn }}"
-          --append users="{{ demo_teacher_dn }}"
-      register: add_teacher
-      changed_when: "'No modification' not in add_teacher.stdout"
-
-    - name: Give the listener a moment to react
-      ansible.builtin.pause:
-        seconds: 15
-
-    - name: Read the class group's attributes back
-      ansible.builtin.command:
-        cmd: >-
-          univention-ldapsearch -x -LLL "(cn=DEMOSCHOOL-Democlass)"
-          univentionFreeAttribute19 univentionFreeAttribute20
-      register: class_attrs
+        cmd: dpkg-query -W -f='${db:Status-Status}' univention-moodle-group
+      register: moodle_group_status
+      failed_when: false
       changed_when: false
 
-    - name: Assert the demo student is in univentionFreeAttribute20
-      ansible.builtin.assert:
-        that:
-          - "'univentionFreeAttribute20: demo_student' in class_attrs.stdout"
-        fail_msg: >-
-          MoodleGroupSetter did not keep demo_student in
-          univentionFreeAttribute20 on DEMOSCHOOL-Democlass -- listener
-          output: {{ class_attrs.stdout }}
+    - name: Verify univention-moodle-group
+      when: moodle_group_status.stdout == "installed"
+      block:
+        - name: Add the pre-existing demo teacher to the pre-existing demo class
+          ansible.builtin.command:
+            cmd: >-
+              udm groups/group modify
+              --dn "{{ demo_class_dn }}"
+              --append users="{{ demo_teacher_dn }}"
+          register: add_teacher
+          changed_when: "'No modification' not in add_teacher.stdout"
 
-    - name: Assert the demo teacher landed in univentionFreeAttribute19
-      ansible.builtin.assert:
-        that:
-          - "'univentionFreeAttribute19: demo_teacher' in class_attrs.stdout"
-        fail_msg: >-
-          MoodleGroupSetter did not add demo_teacher to
-          univentionFreeAttribute19 on DEMOSCHOOL-Democlass -- listener
-          output: {{ class_attrs.stdout }}
+        - name: Give the listener a moment to react
+          ansible.builtin.pause:
+            seconds: 15
+
+        - name: Read the class group's attributes back
+          ansible.builtin.command:
+            cmd: >-
+              univention-ldapsearch -x -LLL "(cn=DEMOSCHOOL-Democlass)"
+              univentionFreeAttribute19 univentionFreeAttribute20
+          register: class_attrs
+          changed_when: false
+
+        - name: Assert the demo student is in univentionFreeAttribute20
+          ansible.builtin.assert:
+            that:
+              - "'univentionFreeAttribute20: demo_student' in class_attrs.stdout"
+            fail_msg: >-
+              MoodleGroupSetter did not keep demo_student in
+              univentionFreeAttribute20 on DEMOSCHOOL-Democlass -- listener
+              output: {{ class_attrs.stdout }}
+
+        - name: Assert the demo teacher landed in univentionFreeAttribute19
+          ansible.builtin.assert:
+            that:
+              - "'univentionFreeAttribute19: demo_teacher' in class_attrs.stdout"
+            fail_msg: >-
+              MoodleGroupSetter did not add demo_teacher to
+              univentionFreeAttribute19 on DEMOSCHOOL-Democlass -- listener
+              output: {{ class_attrs.stdout }}

@@ -1,0 +1,44 @@
+---
+# Installs every package of `cs_packages` that apt can find and skips the others.
+#
+# Environments with several packages only get the packages changed in the MR from the
+# pipeline's Aptly repository. The other ones have to come from the published
+# cool-solutions component, but several packages were never published for UCS 5.2
+# (e.g. univention-munin-server). Those are skipped instead of failing the environment;
+# the matching -test playbooks skip their checks via the same availability probe.
+#
+# Requires the cool-solutions component to be enabled beforehand.
+#
+# Input:  cs_packages            list of binary package names
+# Output: cs_available_packages  the installed subset of cs_packages
+
+- name: Refresh the package lists
+  ansible.builtin.apt:
+    update_cache: true
+  changed_when: false
+
+- name: Look up an install candidate for each package
+  ansible.builtin.command:
+    cmd: apt-cache policy {{ item }}
+  loop: "{{ cs_packages }}"
+  register: cs_package_policy
+  changed_when: false
+
+- name: Collect the installable packages
+  ansible.builtin.set_fact:
+    cs_available_packages: >-
+      {{ cs_package_policy.results
+         | rejectattr('stdout', 'search', 'Candidate: [(]none[)]')
+         | selectattr('stdout', 'search', 'Candidate: ')
+         | map(attribute='item') | list }}
+
+- name: Report packages skipped as neither built in this pipeline nor published
+  ansible.builtin.debug:
+    msg: "SKIPPED (not available): {{ cs_packages | difference(cs_available_packages) | join(', ') }}"
+  when: cs_packages | difference(cs_available_packages) | length > 0
+
+- name: Install the available packages
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ cs_available_packages }}"

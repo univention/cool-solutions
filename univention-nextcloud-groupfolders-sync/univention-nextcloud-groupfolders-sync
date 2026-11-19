@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 # Univention App Center
@@ -31,13 +31,11 @@
 # /usr/share/common-licenses/AGPL-3; if not, see
 # <https://www.gnu.org/licenses/>.
 
-from __future__ import print_function
-from univention.config_registry import ConfigRegistry
-from argparse import ArgumentParser
-import requests
 import logging
-import six
-import sys
+from argparse import ArgumentParser
+
+import requests
+from univention.config_registry import ConfigRegistry
 
 
 class NextCloudGroupFolderSync(object):
@@ -103,7 +101,7 @@ class NextCloudGroupFolderSync(object):
 	def lookup_shareid(self, name):
 		self.logger.info('lookup_shareid: {}'.format(name))
 		folders = self.folders()
-		for fid, folder in folders.iteritems():
+		for fid, folder in folders.items():
 			if folder['mount_point'] == name:
 				return folder['id']
 		return None
@@ -163,7 +161,7 @@ class NextCloudGroupFolderSync(object):
 	def list(self):
 		folders = self.folders()
 		if folders:
-			for folder in folders.iteritems():
+			for folder in folders.items():
 				print(folder)
 
 	def create(self):
@@ -173,14 +171,12 @@ class NextCloudGroupFolderSync(object):
 		self.share_delete(self.args.name)
 
 	def main(self):
-		exc_info = None
 		try:
 			self.args.func()
 		except Exception:
 			self.logger.exception('Error:')
-			exc_info = sys.exc_info()
-		if exc_info and self.args.logfile != '-':
-			six.reraise(*exc_info)
+			if self.args.logfile != '-':
+				raise
 
 
 if __name__ == '__main__':

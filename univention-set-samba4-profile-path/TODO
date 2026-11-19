@@ -1,0 +1,10 @@
+# TODO: unveröffentlichte Änderungen
+
+Dieses Paket wurde mit MR !89 (cool-solutions) geändert, ohne Changelog-Eintrag
+und ohne Veröffentlichung. Die letzte veröffentlichte Version ist 1.0.1-0.
+
+Wer dieses Paket als Nächstes ändert, muss diese Änderungen mit veröffentlichen:
+im debian/changelog mit aufführen, mit QA testen und danach diese Datei löschen.
+
+- debian/control: debhelper (>= 7) -> debhelper-compat (= 12)
+- univention-set-samba4-profile-path.sh: Shebang korrigiert (#/bin/bash -> #!/bin/bash), vorher scheiterte direktes execve() mit "Exec format error"

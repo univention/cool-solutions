@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 #
 # Univention set samba4 profile
 #

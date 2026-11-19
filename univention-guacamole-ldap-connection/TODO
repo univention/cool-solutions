@@ -1,0 +1,11 @@
+# TODO: unveröffentlichte Änderungen
+
+Dieses Paket wurde mit MR !89 (cool-solutions) geändert, ohne Changelog-Eintrag
+und ohne Veröffentlichung. Die letzte veröffentlichte Version ist 2.0.8-27.
+
+Wer dieses Paket als Nächstes ändert, muss diese Änderungen mit veröffentlichen:
+im debian/changelog mit aufführen, mit QA testen und danach diese Datei löschen.
+
+- Build mit python3 (dh --with python2 -> python3, Build-Depends python -> python3, ${python:Depends} -> ${python3:Depends})
+- debian/control: Build-Depends ucslint-univention -> ucslint
+- debian/rules: build-time ucslint deaktiviert (#ucslint), Findings kommen über den separaten ucslint-CI-Job

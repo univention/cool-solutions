@@ -6,9 +6,6 @@ Standards-Version: 3.9.8
 Build-Depends:
  debhelper-compat (= 12),
  dh-python,
- python-all,
- python-mock,
- python-mockldap,
  python3-all,
  python3-mock,
  python3-mockldap,
@@ -18,13 +15,11 @@ Build-Depends:
 Package: univention-ldap-restore
 Architecture: all
 Depends:
- python-univention-config-registry (>= 10.0.0-1),
+ python3-univention-config-registry,
  ${misc:Depends},
  ${python3:Depends},
- ${python:Depends},
 Provides:
  ${python3:Provides},
- ${python:Provides},
 Description: UCS - restore LDAP object from backup
  This package contains tools to restore a LDAP DN
  from a backup (ldif) file.
